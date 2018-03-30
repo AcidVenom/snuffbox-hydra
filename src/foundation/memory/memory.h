@@ -2,6 +2,8 @@
 
 #include "foundation/memory/allocators/malloc_allocator.h"
 
+#include <EASTL/memory.h>
+
 namespace snuffbox
 {
   namespace foundation
@@ -28,30 +30,31 @@ namespace snuffbox
       using DefaultAllocator = MallocAllocator;
 
       /**
-      * @brief Allocates a block of memory with a specified size
+      * @brief Allocates a block of memory with a specified size and alignment
       *
       * This function also allocates a Memory::AllocationHeader,
       * the header is used to store a reference to the allocator that was used
-      * to allocate the memory block. During deallocation using 
+      * to allocate the memory block. During deallocation using
       * Memory::Deallocate this allocator will be used.
       *
       * @param[in] size The size to allocate
+      * @param[in] align The alignment to use
       * @param[in] allocator The allocator to use for the allocation
       *
       * @return The pointer to the address of the allocated memory block
       */
       static void* Allocate(
         size_t size, 
+        size_t align, 
         Allocator* allocator = &default_allocator());
-      
+
       /**
       * @see Memory::Allocate
       *
-      * @param[in] align The alignment to allocate with
+      * Uses the default alignment specified in Memory::kDefaultAlignment_
       */
       static void* Allocate(
-        size_t size, 
-        size_t align, 
+        size_t size,
         Allocator* allocator = &default_allocator());
 
       /**
@@ -62,6 +65,40 @@ namespace snuffbox
       * @param[in] ptr The pointer to the memory block to deallocate
       */
       static void Deallocate(void* ptr);
+
+      /**
+      * @brief Constructs a class using and calls its constructor
+      *
+      * The equivalent of "new" to use instead
+      *
+      * @tparam T The type to construct
+      * @tparam Args... The arguments to pass into the constructor
+      *
+      * @param[in] allocator The allocator to use
+      * @param[in] args The arguments to pass into the constructor
+      *
+      * @return The constructed object pointer
+      */
+      template <typename T, typename ... Args>
+      static T* Construct(Allocator* allocator, Args&&... args);
+
+      /**
+      * @see Memory::Construct
+      *
+      * @brief The default allocator version for construction
+      */
+      template <typename T, typename ... Args>
+      static T* Construct(Args&&... args);
+
+      /**
+      * @brief Destructs a class and calls its destructor
+      *
+      * @tparam T The type to destruct
+      *
+      * @param[in] ptr The pointer to the constructed object
+      */
+      template <typename T>
+      static void Destruct(T* ptr);
 
       /**
       * @return The default allocator
@@ -93,5 +130,32 @@ namespace snuffbox
       */
       static DefaultAllocator default_allocator_;
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename ... Args>
+    inline T* Memory::Construct(Allocator* allocator, Args&&... args)
+    {
+      T* allocated = reinterpret_cast<T*>(Allocate(sizeof(T), allocator));
+      new (allocated) T(eastl::forward<Args>(args)...);
+
+      return allocated;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename ... Args>
+    inline T* Memory::Construct(Args&&... args)
+    {
+      return Construct<T, Args...>(
+        &default_allocator(),
+        eastl::forward<Args>(args)...);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void Memory::Destruct(T* ptr)
+    {
+      ptr->~T();
+      Deallocate(ptr);
+    }
   }
 }

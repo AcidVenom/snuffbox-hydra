@@ -14,12 +14,6 @@ namespace snuffbox
     Memory::DefaultAllocator Memory::default_allocator_(kDefaultHeapSize_);
 
     //--------------------------------------------------------------------------
-    void* Memory::Allocate(size_t size, Allocator* allocator)
-    {
-      return Allocate(size, kDefaultAlignment_, allocator);
-    }
-
-    //--------------------------------------------------------------------------
     void* Memory::Allocate(size_t size, size_t align, Allocator* allocator)
     {
       if (allocator == nullptr)
@@ -45,6 +39,12 @@ namespace snuffbox
       header->align = a;
 
       return ptr;
+    }
+
+    //--------------------------------------------------------------------------
+    void* Memory::Allocate(size_t size, Allocator* allocator)
+    {
+      return Allocate(size, kDefaultAlignment_, allocator);
     }
 
     //--------------------------------------------------------------------------
