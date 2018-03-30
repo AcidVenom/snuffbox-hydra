@@ -1,0 +1,6 @@
+[submodule "deps/eastl"]
+	path = deps/eastl
+	url = https://github.com/electronicarts/EASTL
+[submodule "deps/glfw"]
+	path = deps/glfw
+	url = https://github.com/glfw/glfw
