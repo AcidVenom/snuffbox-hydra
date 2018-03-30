@@ -85,6 +85,7 @@ namespace snuffbox
     private:
 
       static const size_t kDefaultHeapSize_; //!< The default heap size
+      static const size_t kDefaultAlignment_; //!< The default alignment
 
       /**
       * @brief The default allocator, 

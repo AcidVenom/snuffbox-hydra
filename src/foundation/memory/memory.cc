@@ -9,12 +9,14 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const size_t Memory::kDefaultHeapSize_ = 1024ul * 1024ul * 2ul;
+    const size_t Memory::kDefaultAlignment_ = 16ul;
+
     Memory::DefaultAllocator Memory::default_allocator_(kDefaultHeapSize_);
 
     //--------------------------------------------------------------------------
     void* Memory::Allocate(size_t size, Allocator* allocator)
     {
-      return Allocate(size, 16ul, allocator);
+      return Allocate(size, kDefaultAlignment_, allocator);
     }
 
     //--------------------------------------------------------------------------
