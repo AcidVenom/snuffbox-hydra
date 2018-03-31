@@ -29,3 +29,20 @@ ADD_SUBDIRECTORY("glfw")
 
 ADD_LIBRARY(glm INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(glm INTERFACE "glm")
+
+SET_SOLUTION_FOLDER(
+  "deps/eastl"
+  EABase_ide
+  EASTL
+  EAAssert_ide
+  EAMain_ide
+  EAStdC
+  EATest
+  EAThread_ide
+)
+
+SET_SOLUTION_FOLDER(
+  "deps/glfw3"
+  glfw
+  uninstall
+)

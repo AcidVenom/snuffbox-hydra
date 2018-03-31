@@ -3,6 +3,19 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}")
 ADD_SUBDIRECTORY("foundation")
 ADD_SUBDIRECTORY("engine")
 
+SET_SOLUTION_FOLDER("snuffbox-hydra"
+  snuffbox-foundation
+  snuffbox-engine
+)
+
 IF (SNUFF_BUILD_TEST)
   ADD_SUBDIRECTORY("test")
+  
+  SET_SOLUTION_FOLDER("snuffbox-hydra"
+    snuffbox-test
+  )
 ENDIF (SNUFF_BUILD_TEST)
+
+IF (SNUFF_BUILD_TOOLS)
+  ADD_SUBDIRECTORY("tools")
+ENDIF (SNUFF_BUILD_TOOLS)

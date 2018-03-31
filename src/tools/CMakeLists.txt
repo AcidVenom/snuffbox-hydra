@@ -1,4 +1,6 @@
-IF (SNUFF_BUILD_TOOLS)
-  ADD_SUBDIRECTORY("builder")
-  ADD_SUBDIRECTORY("editor")
-ENDIF (SNUFF_BUILD_TOOLS)
+ADD_SUBDIRECTORY("builder")
+ADD_SUBDIRECTORY("editor")
+
+SET_SOLUTION_FOLDER("snuffbox-hydra/tools"
+  snuffbox-editor
+)
