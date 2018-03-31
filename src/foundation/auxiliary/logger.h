@@ -46,9 +46,11 @@ namespace snuffbox
       */
       enum struct Channel
       {
+        kUnspecified,
         kEngine,
         kEditor,
         kPlayer,
+        kScript,
         kBuilder
       };
 
@@ -72,6 +74,15 @@ namespace snuffbox
         Verbosity verbosity, 
         const char* format, 
         Args... args);
+
+      /**
+      * @see Logger::Log
+      *
+      * @brief This log function simply logs to an unspecified channel
+      *        with Logger::Verbosity::kDebug verbosity
+      */
+      template <typename ... Args>
+      static void Log(const char* format, Args... args);
 
     protected:
 
@@ -145,6 +156,11 @@ namespace snuffbox
       */
       template <typename T>
       static String ToString(const T& value);
+
+      /**
+      * @return A timestamp string based on the current system time
+      */
+      static String GetTimeStamp();
     };
 
     //--------------------------------------------------------------------------
@@ -159,11 +175,24 @@ namespace snuffbox
       GetArguments(args, eastl::forward<Args>(args)...);
 
       String message = 
-        String(VerbosityToString(verbosity)) + 
-        " " +
+        "[" +
+        GetTimeStamp() +
+        "] " +
+        String(VerbosityToString(verbosity)) + " " +
         FormatString(format, args);
       
       std::cout << message.c_str() << std::endl;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline void Logger::Log(const char* format, Args... args)
+    {
+      Log(
+        Channel::kUnspecified,
+        Verbosity::kDebug,
+        format,
+        eastl::forward<Args>(args)...);
     }
 
     //--------------------------------------------------------------------------

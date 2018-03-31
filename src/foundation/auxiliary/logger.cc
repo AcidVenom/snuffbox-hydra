@@ -1,5 +1,18 @@
 #include "foundation/auxiliary/logger.h"
 
+#include <chrono>
+#include <ctime>
+
+#ifdef _WIN32
+#define localtime(x, y)   \
+tm x;                     \
+localtime_s(&x, &y);
+#else
+#define localtime(x, y)   \
+tm* temp = localtime(&y); \
+tm x = *temp;
+#endif
+
 namespace snuffbox
 {
   namespace foundation
@@ -72,6 +85,29 @@ namespace snuffbox
       }
 
       return formatted;
+    }
+
+    //--------------------------------------------------------------------------
+    String Logger::GetTimeStamp()
+    {
+      std::chrono::time_point<std::chrono::system_clock> tp = 
+        std::chrono::system_clock::now();
+
+      std::time_t now = std::chrono::system_clock::to_time_t(tp);
+      localtime(time, now);
+
+      auto FormatTime = [](int time)
+      {
+        String formatted = std::to_string(time).c_str();
+        formatted = formatted.size() == 1 ? "0" + formatted : formatted;
+
+        return formatted;
+      };
+
+      return 
+        FormatTime(time.tm_hour) + ":" + 
+        FormatTime(time.tm_min) + ":" + 
+        FormatTime(time.tm_sec);
     }
   }
 }
