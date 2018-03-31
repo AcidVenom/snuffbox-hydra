@@ -30,9 +30,6 @@ IF (SNUFF_BUILD_TOOLS)
   IF (NOT Qt5_FOUND)
     MESSAGE(FATAL_ERROR "In order to build the tools projects, Qt5 needs to be installed on the system")
   ENDIF ()
-  
-  SET(CMAKE_AUTOUIC ON)
-  SET(CMAKE_AUTOMOC ON)
 ENDIF (SNUFF_BUILD_TOOLS)
 
 ADD_SUBDIRECTORY("cmake")

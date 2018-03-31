@@ -36,6 +36,24 @@ namespace snuffbox
       steamPalette.setColor(QPalette::HighlightedText, Qt::black);
 
       app->setPalette(steamPalette);
+
+      QString dock_col = "rgb(111, 134, 102)";
+
+      app->setStyleSheet("                      \
+        QMainWindow::separator                  \
+        {                                       \
+          background-color: " + dock_col + ";   \
+        }                                       \
+        QDockWidget::title                      \
+        {                                       \
+          background-color: " + dock_col + ";   \
+          border: 1px solid rgb(88, 106, 80);   \
+        }                                       \
+        QDockWidget                             \
+        {                                       \
+          color: white;                         \
+        }"
+      );
     }
   }
 }
