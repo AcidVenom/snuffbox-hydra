@@ -12,7 +12,7 @@ int main(int argc, char** argv)
   QApplication app(argc, argv);
 
   UniquePtr<MainWindow> window = 
-    Memory::ConstructUnique<MainWindow>(&Memory::default_allocator());
+    Memory::ConstructUnique<MainWindow>(&Memory::default_allocator(), &app);
 
   window->show();
 

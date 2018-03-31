@@ -24,15 +24,28 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Default constructor
+      * @brief Construct through the application
       *
       * Sets up the internal UI to this window
+      *
+      * @param[in] app The main Qt application
       */
-      MainWindow();
+      MainWindow(QApplication* app);
+
+      /**
+      * @brief Applies the style I've used in "snuffbox", which are
+      *        basically Steam's older colors.
+      *
+      * @see https://github.com/AcidVenom/snuffbox/blob/master/snuffbox/console/console.cc
+      *
+      * @param[in] app The main Qt application
+      */
+      void ApplyStyle(QApplication* app);
 
     private:
 
       Ui::MainWindow ui_; //!< The user interface definition made in Designer
+      QApplication* app_; //!< A reference to the main Qt application
     };
   }
 }
