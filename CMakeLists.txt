@@ -12,6 +12,7 @@ ELSEIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 ENDIF ()
 
 SET(SNUFF_BUILD_TEST ON CACHE BOOL "Should the snuffbox-test project be built?")
+SET(SNUFF_BUILD_TOOLS ON CACHE BOOL "Should the tool projects be built?")
 
 ADD_SUBDIRECTORY("cmake")
 ADD_SUBDIRECTORY("deps")
