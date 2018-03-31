@@ -1,13 +1,73 @@
 #pragma once
 
 #include "foundation/memory/allocators/malloc_allocator.h"
+#include "foundation/memory/allocators/eastl_allocator.h"
 
 #include <EASTL/memory.h>
+
+#include <EASTL/shared_ptr.h>
+#include <EASTL/unique_ptr.h>
 
 namespace snuffbox
 {
   namespace foundation
   {
+    template <typename T>
+    struct MemoryDeleter
+    {
+      /**
+      * @brief Default constructor
+      */
+      MemoryDeleter();
+
+      /**
+      * @brief Used to check if a class pointer is convertible to another class
+      *
+      * @tparam T The class to convert to
+      * @tparam U The class to convert from
+      */
+      template <typename U>
+      using is_convertible = 
+        typename eastl::enable_if<eastl::is_convertible<U*, T*>::value>::type;
+
+      /**
+      * @brief Allowing conversion between derived and base classes
+      *
+      * @param[in] other The deleter of the U class
+      * @param[in] test SFINAE for checking if the U class is 
+                        actually convertible
+      */
+      template <typename U>
+      MemoryDeleter(
+        const MemoryDeleter<U>& other,
+        is_convertible<U>* test = nullptr);
+
+      /**
+      * @brief Destructs the passed pointer
+      *
+      * @param[in] ptr The pointer to be destructed
+      */
+      void operator()(T* ptr);
+    };
+
+    /**
+    * @brief An EASTL unique_ptr with a custom allocator
+    *
+    * @tparam T The type stored underneath this pointer
+    *
+    * @see MemoryDeleter<T>
+    */
+    template <typename T>
+    using UniquePtr = eastl::unique_ptr<T, MemoryDeleter<T>>;
+
+    /**
+    * @brief An EASTL shared_ptr with a custom allocator
+    *
+    * @tparam T The type stored underneath this pointer
+    */
+    template <typename T>
+    using SharedPtr = eastl::shared_ptr<T>;
+
     /**
     * @brief The memory interface to be used throughout the engine
     * 
@@ -83,14 +143,6 @@ namespace snuffbox
       static T* Construct(Allocator* allocator, Args&&... args);
 
       /**
-      * @see Memory::Construct
-      *
-      * @brief The default allocator version for construction
-      */
-      template <typename T, typename ... Args>
-      static T* Construct(Args&&... args);
-
-      /**
       * @brief Destructs a class and calls its destructor
       *
       * @tparam T The type to destruct
@@ -99,6 +151,38 @@ namespace snuffbox
       */
       template <typename T>
       static void Destruct(T* ptr);
+
+      /**
+      * @brief Creates a shared pointer for a provided pointer
+      *
+      * @tparam T The type of the pointer to make a shared pointer of
+      * 
+      * @param[in] ptr The pointer to create a shared pointer of
+      *
+      * @return The created shared pointer
+      */
+      template <typename T>
+      static SharedPtr<T> MakeShared(T* ptr);
+
+      /**
+      * @see Memory::Construct
+      *
+      * @brief This constructs and object and makes it a shared pointer
+      *
+      * @return The constructed shared pointer
+      */
+      template <typename T, typename ... Args>
+      static SharedPtr<T> ConstructShared(Allocator* alloc, Args&&... args);
+
+      /**
+      * @see Memory::Construct
+      *
+      * @brief This constructs an object and makes it a unique pointer
+      *
+      * @return The constructed unique pointer
+      */
+      template <typename T, typename ... Args>
+      static UniquePtr<T> ConstructUnique(Allocator* alloc, Args&&... args);
 
       /**
       * @return The default allocator
@@ -132,6 +216,29 @@ namespace snuffbox
     };
 
     //--------------------------------------------------------------------------
+    template <typename T>
+    MemoryDeleter<T>::MemoryDeleter()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T> template <typename U>
+    inline MemoryDeleter<T>::MemoryDeleter(
+      const MemoryDeleter<U>&,
+      is_convertible<U>* = nullptr)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void MemoryDeleter<T>::operator()(T* ptr)
+    {
+      Memory::Destruct(ptr);
+    }
+
+    //--------------------------------------------------------------------------
     template <typename T, typename ... Args>
     inline T* Memory::Construct(Allocator* allocator, Args&&... args)
     {
@@ -142,20 +249,41 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <typename T, typename ... Args>
-    inline T* Memory::Construct(Args&&... args)
-    {
-      return Construct<T, Args...>(
-        &default_allocator(),
-        eastl::forward<Args>(args)...);
-    }
-
-    //--------------------------------------------------------------------------
     template <typename T>
     inline void Memory::Destruct(T* ptr)
     {
       ptr->~T();
       Deallocate(ptr);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline SharedPtr<T> Memory::MakeShared(T* ptr)
+    {
+      return SharedPtr<T>(ptr, MemoryDeleter<T>(), EASTLAllocator());
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename ... Args>
+    inline SharedPtr<T> Memory::ConstructShared(
+      Allocator* alloc, 
+      Args&&... args)
+    {
+      return MakeShared<T>(
+        Construct<T, Args...>(alloc, eastl::forward<Args>(args)...));
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename ... Args>
+    inline UniquePtr<T> Memory::ConstructUnique(
+      Allocator* alloc, 
+      Args&&... args)
+    {
+      return UniquePtr<T>(
+        Construct<T, Args...>(
+          alloc, 
+          eastl::forward<Args>(args)...), 
+        MemoryDeleter<T>());
     }
   }
 }
