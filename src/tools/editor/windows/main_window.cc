@@ -1,4 +1,5 @@
 #include "tools/editor/windows/main_window.h"
+#include "tools/editor/windows/console.h"
 
 #include <qstylefactory.h>
 
@@ -8,10 +9,15 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     MainWindow::MainWindow(QApplication* app) :
-      app_(app)
+      app_(app),
+      console_(nullptr)
     {
       ui_.setupUi(this);
       ApplyStyle(app);
+
+      console_ = foundation::Memory::ConstructUnique<Console>(
+        &foundation::Memory::default_allocator(),
+        ui_.consoleOutput);
     }
 
     //--------------------------------------------------------------------------

@@ -252,6 +252,11 @@ namespace snuffbox
     template <typename T>
     inline void Memory::Destruct(T* ptr)
     {
+      if (ptr == nullptr)
+      {
+        return;
+      }
+
       ptr->~T();
       Deallocate(ptr);
     }

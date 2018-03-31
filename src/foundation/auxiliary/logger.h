@@ -55,6 +55,11 @@ namespace snuffbox
       };
 
       /**
+      * @brief An output stream function pointer to redirect the log output with
+      */
+      using OutputStream = void(*)(void*, Channel, Verbosity, const String&);
+
+      /**
       * @brief Logs a message to a specified logging stream with a 
       *        specified verbosity
       *
@@ -83,6 +88,17 @@ namespace snuffbox
       */
       template <typename ... Args>
       static void Log(const char* format, Args... args);
+
+      /**
+      * @brief Redirects the output of the logger to a specified function
+      *
+      * The forwarded message is already formatted using the variadic arguments
+      * specified in the log function.
+      *
+      * @param[in] func The function to redirect the output to
+      * @parma[in] ud The user data to send with the logging function
+      */
+      static void RedirectOutput(OutputStream func, void* ud);
 
     protected:
 
@@ -161,6 +177,11 @@ namespace snuffbox
       * @return A timestamp string based on the current system time
       */
       static String GetTimeStamp();
+
+    private:
+
+      static OutputStream stream_; //!< The output stream
+      static void* stream_ud_; //!< The user data to pass into the output stream
     };
 
     //--------------------------------------------------------------------------
@@ -182,6 +203,11 @@ namespace snuffbox
         FormatString(format, args);
       
       std::cout << message.c_str() << std::endl;
+
+      if (stream_ != nullptr)
+      {
+        stream_(stream_ud_, channel, verbosity, message);
+      }
     }
 
     //--------------------------------------------------------------------------

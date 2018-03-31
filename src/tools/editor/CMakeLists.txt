@@ -6,6 +6,8 @@ SET(WindowsSources
   "windows/main_window.ui"
   "windows/main_window.h"
   "windows/main_window.cc"
+  "windows/console.h"
+  "windows/console.cc"
 )
 
 SOURCE_GROUP("\\"       FILES ${RootSources})

@@ -1,12 +1,17 @@
 #pragma once
 
 #include "ui_main_window.h"
+
+#include <foundation/memory/memory.h>
+
 #include <qmainwindow.h>
 
 namespace snuffbox
 {
   namespace editor
   {
+    class Console;
+
     /**
     * @brief The main window of the editor application
     *
@@ -46,6 +51,8 @@ namespace snuffbox
 
       Ui::MainWindow ui_; //!< The user interface definition made in Designer
       QApplication* app_; //!< A reference to the main Qt application
+
+      foundation::UniquePtr<Console> console_; //!< The console
     };
   }
 }

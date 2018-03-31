@@ -18,6 +18,17 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
+    Logger::OutputStream Logger::stream_ = nullptr;
+    void* Logger::stream_ud_ = nullptr;
+
+    //--------------------------------------------------------------------------
+    void Logger::RedirectOutput(OutputStream func, void* ud)
+    {
+      stream_ = func;
+      stream_ud_ = ud;
+    }
+
+    //--------------------------------------------------------------------------
     const char* Logger::VerbosityToString(Verbosity verbosity)
     {
       switch (verbosity)
@@ -38,7 +49,7 @@ namespace snuffbox
         return "!";
 
       case Verbosity::kFatal:
-        return "FATAL";
+        return "[FATAL]";
       }
 
       return "<unknown>";
