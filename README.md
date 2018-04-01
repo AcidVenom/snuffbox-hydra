@@ -23,4 +23,4 @@ supported.
 # MSVC Version
 
 The current working version has only been tested with MSVC 2015, 64-bit. The engine is being developed
-in Visual Studio 2015 under platform tool set *v140*.
+in Visual Studio 2015 under platform tool set **v140**.
