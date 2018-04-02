@@ -17,5 +17,5 @@ int main(int argc, char** argv)
 
   window->show();
 
-  return 0;
+  return app.exec();
 }
