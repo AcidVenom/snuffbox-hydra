@@ -13,11 +13,23 @@ namespace snuffbox
       console_(nullptr)
     {
       ui_.setupUi(this);
-      ApplyStyle(app);
+
+      QTextBrowser* output_windows[] =
+      {
+        ui_.allOutput,
+        ui_.engineOutput,
+        ui_.editorOutput,
+        ui_.playerOutput,
+        ui_.scriptOutput,
+        ui_.builderOutput
+      };
 
       console_ = foundation::Memory::ConstructUnique<Console>(
         &foundation::Memory::default_allocator(),
-        ui_.consoleOutput);
+        ui_.outputTabs,
+        output_windows);
+
+      ApplyStyle(app);
     }
 
     //--------------------------------------------------------------------------
@@ -33,6 +45,9 @@ namespace snuffbox
       steamPalette.setColor(QPalette::ToolTipBase, Qt::white);
       steamPalette.setColor(QPalette::ToolTipText, Qt::white);
       steamPalette.setColor(QPalette::Text, Qt::white);
+      steamPalette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
+      steamPalette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+      steamPalette.setColor(QPalette::Disabled, QPalette::Light, QColor(64, 70, 60));
       steamPalette.setColor(QPalette::Button, QColor(88, 106, 80));
       steamPalette.setColor(QPalette::ButtonText, Qt::white);
       steamPalette.setColor(QPalette::BrightText, Qt::red);

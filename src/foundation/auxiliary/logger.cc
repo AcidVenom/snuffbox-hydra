@@ -37,19 +37,19 @@ namespace snuffbox
         return "-";
 
       case Verbosity::kInfo:
-        return "?";
+        return "Info";
 
       case Verbosity::kWarning:
-        return "~";
+        return "Warning";
 
       case Verbosity::kSuccess:
-        return "$";
+        return "Success";
 
       case Verbosity::kError:
-        return "!";
+        return "Error";
 
       case Verbosity::kFatal:
-        return "[FATAL]";
+        return "FATAL";
       }
 
       return "<unknown>";

@@ -2,6 +2,7 @@
 
 #include <qtextbrowser.h>
 #include <qscrollbar.h>
+#include <qtabwidget.h>
 
 namespace snuffbox
 {
@@ -64,11 +65,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Console::Console(QTextBrowser* output_window) :
-      output_window_(output_window)
+    Console::Console(QTabWidget* tab, QTextBrowser** output_windows)
     {
       foundation::Logger::RedirectOutput(OnReceivedMessage, this);
-      ApplyFont(output_window);
+
+      SetupOutputWindows(tab, output_windows);
+
+      foundation::Logger::Log(
+        foundation::Logger::Channel::kEditor,
+        foundation::Logger::Verbosity::kInfo,
+        "Welcome!");
     }
 
     //--------------------------------------------------------------------------
@@ -82,6 +88,41 @@ namespace snuffbox
       Console* console = reinterpret_cast<Console*>(ud);
 
       console->WriteLine(channel, verbosity, message.c_str());
+    }
+
+    //--------------------------------------------------------------------------
+    void Console::SetupOutputWindows(QTabWidget* tab, QTextBrowser** outputs)
+    {
+      QTextBrowser* output_window;
+
+      for (
+        int i = 0;
+        i < static_cast<int>(foundation::Logger::Channel::kNumChannels);
+        ++i)
+      {
+        output_window = outputs[i];
+        ApplyFont(output_window);
+
+        output_windows_[i] = OutputWindow 
+        {
+          output_window,
+          tab,
+          i,
+          tab->tabText(i),
+          0
+        };
+
+        SetLogCount(static_cast<foundation::Logger::Channel>(i), 0);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void Console::SetLogCount(foundation::Logger::Channel channel, int count)
+    {
+      OutputWindow& window = output_windows_[static_cast<int>(channel)];
+      window.log_count = count;
+      window.tab->setTabText(window.tab_index, 
+        window.original_name + " (" + std::to_string(count).c_str() + ")");
     }
 
     //--------------------------------------------------------------------------
@@ -105,9 +146,14 @@ namespace snuffbox
       foundation::Logger::Verbosity verbosity,
       const char* message)
     {
+      OutputWindow& window = output_windows_[static_cast<int>(channel)];
+      QTextBrowser* output_window = window.window;
+
+      SetLogCount(channel, ++window.log_count);
+
       LogColor color = LogColor::VerbosityToColor(verbosity);
 
-      QTextCursor cursor = output_window_->textCursor();
+      QTextCursor cursor = output_window->textCursor();
 
       QTextBlockFormat format;
       format.setBackground(color.background);
@@ -121,12 +167,24 @@ namespace snuffbox
       }
 
       cursor.movePosition(QTextCursor::End);
-      cursor.insertBlock(format, text_format);
+      cursor.setBlockFormat(format);
+      cursor.setCharFormat(text_format);
+      cursor.insertText(QString(message) + '\n');
+      format.setBackground(QColor(0, 0, 0, 0));
+      cursor.setBlockFormat(format);
 
-      cursor.insertText(QString(message));
+      output_window->setTextCursor(cursor);
 
-      QScrollBar* scroll_bar = output_window_->verticalScrollBar();
+      QScrollBar* scroll_bar = output_window->verticalScrollBar();
       scroll_bar->setSliderPosition(scroll_bar->maximum());
+
+      if (channel != foundation::Logger::Channel::kUnspecified)
+      {
+        WriteLine(
+          foundation::Logger::Channel::kUnspecified,
+          verbosity,
+          message);
+      }
     }
   }
 }

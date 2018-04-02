@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1095</width>
-    <height>699</height>
+    <width>1129</width>
+    <height>865</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1095</width>
+     <width>1129</width>
      <height>21</height>
     </rect>
    </property>
@@ -173,12 +173,76 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QTextBrowser" name="consoleOutput"/>
+       <widget class="QTabWidget" name="outputTabs">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="allOutputTab">
+         <attribute name="title">
+          <string>All</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QTextBrowser" name="allOutput"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="engineOutputTab">
+         <attribute name="title">
+          <string>Engine</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QTextBrowser" name="engineOutput"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="editorOutputTab">
+         <attribute name="title">
+          <string>Editor</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QTextBrowser" name="editorOutput"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="playerOutputTab">
+         <attribute name="title">
+          <string>Player</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QTextBrowser" name="playerOutput"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="scriptOutputTab">
+         <attribute name="title">
+          <string>Script</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <item>
+           <widget class="QTextBrowser" name="scriptOutput"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="builderOutputTab">
+         <attribute name="title">
+          <string>Builder</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <widget class="QTextBrowser" name="builderOutput"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
        <widget class="QTextEdit" name="consoleInput">
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>36</height>
+          <height>40</height>
          </size>
         </property>
         <property name="maximumSize">
@@ -191,7 +255,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="consoleButtonLayout">
        <item>
         <widget class="QComboBox" name="commandSelector">
          <property name="maximumSize">

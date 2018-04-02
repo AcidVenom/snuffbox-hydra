@@ -51,7 +51,8 @@ namespace snuffbox
         kEditor,
         kPlayer,
         kScript,
-        kBuilder
+        kBuilder,
+        kNumChannels
       };
 
       /**
@@ -197,9 +198,9 @@ namespace snuffbox
 
       String message = 
         "[" +
-        GetTimeStamp() +
+        GetTimeStamp() + "|" +
+        String(VerbosityToString(verbosity)) +
         "] " +
-        String(VerbosityToString(verbosity)) + " " +
         FormatString(format, args);
       
       std::cout << message.c_str() << std::endl;

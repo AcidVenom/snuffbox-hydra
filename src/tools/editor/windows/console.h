@@ -4,6 +4,7 @@
 #include <qcolor.h>
 
 class QTextBrowser;
+class QTabWidget;
 
 namespace snuffbox
 {
@@ -56,12 +57,14 @@ namespace snuffbox
       *        correlates to
       *
       * This constructor will set the redirection of the Logger class in
-      * foundation as well.
+      * foundation as well. The output_windows parameter size should match
+      * the number of logging channels that exist, @see Logger::Channels
       *
-      * @param[in] output_window A reference to the output window in the Qt
-      *                          interface
+      * @param[in] tab The tabs the output windows reside in
+      * @param[in] output_windows A reference to the output windows in the Qt
+      *                           interface
       */
-      Console(QTextBrowser* output_window);
+      Console(QTabWidget* tab, QTextBrowser** output_windows);
 
       /**
       * @see Logger::OutputStream
@@ -76,6 +79,22 @@ namespace snuffbox
         const foundation::String& message);
 
     protected:
+
+      /**
+      * @brief Sets up all output windows for use
+      *
+      * @param[in] tab The tabs the output windows reside in
+      * @param[in] outputs The output windows passed from the MainWindow
+      */
+      void SetupOutputWindows(QTabWidget* tab, QTextBrowser** outputs);
+
+      /**
+      * @brief Sets the log count for a specified channel
+      *
+      * @param[in] channel The channel to set the log count of
+      * @param[in] count The count to set
+      */
+      void SetLogCount(foundation::Logger::Channel channel, int count);
 
       /**
       * @brief Apply the console font to the console's windows
@@ -99,7 +118,27 @@ namespace snuffbox
 
     private:
 
-      QTextBrowser* output_window_; //!< A reference to the output window
+      /**
+      * @brief Used to store information about an output window
+      *
+      * The original name is used to add a log count to the name in the tab
+      *
+      * @author Daniel Konings
+      */
+      struct OutputWindow
+      {
+        QTextBrowser* window; //!< The window pointer
+        QTabWidget* tab; //!< The tab widget this output window is a child of
+        int tab_index; //!< The tab index this output window exists in
+        QString original_name; //!< The original name of the window
+        int log_count; //!< The count for the number of logs in this window
+      };
+
+      /**
+      * @brief A reference to the output window for each respective channel
+      */
+      OutputWindow output_windows_[
+        static_cast<int>(foundation::Logger::Channel::kNumChannels) + 1];
 
       static QString kFontFamily_; //!< The font family used in the console
       static qreal kFontSize_; //!< The font size in points

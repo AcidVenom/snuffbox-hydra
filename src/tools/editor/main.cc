@@ -1,7 +1,8 @@
+#include "tools/editor/windows/main_window.h"
+
 #include <foundation/memory/memory.h>
 
 #include <QtWidgets/qapplication.h>
-#include "tools/editor/windows/main_window.h"
 
 using namespace snuffbox;
 using namespace foundation;
@@ -16,6 +17,5 @@ int main(int argc, char** argv)
 
   window->show();
 
-  int exec = app.exec();
-  return exec;
+  return 0;
 }
