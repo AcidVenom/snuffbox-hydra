@@ -12,7 +12,7 @@ int main(int argc, char** argv)
   Application::Configuration cfg;
   cfg.application_name = "snuffbox-hydra-test";
   cfg.version_string = "0.0";
-  cfg.verbosity = 0;
+  cfg.verbosity = 1;
 
   Application app = Application(argc, argv, cfg);
   ErrorCodes err = app.Run();
