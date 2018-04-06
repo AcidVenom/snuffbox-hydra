@@ -1,5 +1,7 @@
 #pragma once
 
+#include "foundation/definitions/logging.h"
+
 #include "foundation/containers/string.h"
 #include "foundation/containers/vector.h"
 
@@ -29,40 +31,13 @@ namespace snuffbox
     public:
 
       /**
-      * @brief The different verbosity levels that exist
-      */
-      enum struct Verbosity
-      {
-        kDebug,
-        kInfo,
-        kWarning,
-        kSuccess,
-        kError,
-        kFatal
-      };
-
-      /**
-      * @brief The different logging channels that exist
-      */
-      enum struct Channel
-      {
-        kUnspecified,
-        kEngine,
-        kEditor,
-        kPlayer,
-        kScript,
-        kBuilder,
-        kNumChannels
-      };
-
-      /**
       * @brief An output stream function pointer to redirect the log output with
       */
-      using OutputStream = void(*)(void*, Channel, Verbosity, const String&);
+      using OutputStream = void(*)(void*, LogChannel, LogSeverity, const String&);
 
       /**
       * @brief Logs a message to a specified logging stream with a 
-      *        specified verbosity
+      *        specified severity
       *
       * The arguments can be denoted with {n}, where n is the argument number
       * passed into the function. "n" starts at 0.
@@ -70,14 +45,14 @@ namespace snuffbox
       * @tparam Args... The arguments to format the message with
       *
       * @param[in] channel The channel to log in
-      * @param[in] verbosity The verbosity to log with
+      * @param[in] severity The severity to log with
       * @param[in] format The string to format
       * @param[in] args The arguments to be formatted into the string
       */
       template <typename ... Args>
       static void Log(
-        Channel channel, 
-        Verbosity verbosity, 
+        LogChannel channel, 
+        LogSeverity severity,
         const char* format, 
         Args... args);
 
@@ -85,10 +60,44 @@ namespace snuffbox
       * @see Logger::Log
       *
       * @brief This log function simply logs to an unspecified channel
-      *        with Logger::Verbosity::kDebug verbosity
+      *        with LogSeverity::kDebug severity
       */
       template <typename ... Args>
       static void Log(const char* format, Args... args);
+
+      /**
+      * @see Logger::Log
+      *
+      * @brief Used to log with a specific verbosity
+      *
+      * The log only gets redirected to the output if the verbosity level
+      * is above or equal to the currently set verbosity in Logger::verbosity_
+      */
+      template <uint32_t V, typename ... Args>
+      static void LogVerbosity(
+        LogChannel channel,
+        LogSeverity severity,
+        const char* format,
+        Args... args);
+
+      /**
+      * @see Logger::LogVerbosity
+      * 
+      * @brief This log function simply logs to an unspecified channel,
+      *        but with a verbosity level, using LogSeverity::kDebug severity
+      */
+      template <uint32_t V, typename ... Args>
+      static void LogVerbosity(const char* format, Args... args);
+
+      /**
+      * @brief Sets the verbosity level of the logger
+      *
+      * Logs will not be redirected if the current verbosity level is lower
+      * or equal to the log's verbosity level.
+      *
+      * @param[in] verbosity The verbosity level to set
+      */
+      static void SetVerbosity(uint32_t verbosity);
 
       /**
       * @brief Redirects the output of the logger to a specified function
@@ -144,6 +153,18 @@ namespace snuffbox
       static uint32_t GetArguments(Vector<String>& args);
 
       /**
+      * @brief Converts a value to a string
+      *
+      * @tparam T The value type to convert
+      *
+      * @param[in] value The value to convert
+      *
+      * @return The converted value
+      */
+      template <typename T>
+      static String ToString(const T& value);
+
+      /**
       * @brief Formats a string C#-style with given string arguments
       *
       * @param[in] format The format to format the arguments into
@@ -154,25 +175,13 @@ namespace snuffbox
         const Vector<String>& args);
 
       /**
-      * @brief Converts a verbosity to a string value
+      * @brief Converts a severity to a string value
       *
-      * @param[in] verbosity The verbosity to convert
-      *
-      * @return The converted value
-      */
-      static const char* VerbosityToString(Verbosity verbosity);
-
-      /**
-      * @brief Converts a value to a string
-      * 
-      * @tparam T The value type to convert
-      * 
-      * @param[in] value The value to convert
+      * @param[in] severity The severity to convert
       *
       * @return The converted value
       */
-      template <typename T>
-      static String ToString(const T& value);
+      static const char* SeverityToString(LogSeverity verbosity);
 
       /**
       * @return A timestamp string based on the current system time
@@ -183,13 +192,16 @@ namespace snuffbox
 
       static OutputStream stream_; //!< The output stream
       static void* stream_ud_; //!< The user data to pass into the output stream
+
+      static const uint32_t kDefaultVerbosity_; //!< The default verbosity
+      static uint32_t verbosity_; //!< The currently set verbosity
     };
 
     //--------------------------------------------------------------------------
     template <typename ... Args>
     inline void Logger::Log(
-      Channel channel,
-      Verbosity verbosity,
+      LogChannel channel,
+      LogSeverity severity,
       const char* format,
       Args... args)
     {
@@ -199,7 +211,7 @@ namespace snuffbox
       String message = 
         "[" +
         GetTimeStamp() + "|" +
-        String(VerbosityToString(verbosity)) +
+        String(SeverityToString(severity)) +
         "] " +
         FormatString(format, args);
       
@@ -207,7 +219,7 @@ namespace snuffbox
 
       if (stream_ != nullptr)
       {
-        stream_(stream_ud_, channel, verbosity, message);
+        stream_(stream_ud_, channel, severity, message);
       }
     }
 
@@ -216,8 +228,35 @@ namespace snuffbox
     inline void Logger::Log(const char* format, Args... args)
     {
       Log(
-        Channel::kUnspecified,
-        Verbosity::kDebug,
+        LogChannel::kUnspecified,
+        LogSeverity::kDebug,
+        format,
+        eastl::forward<Args>(args)...);
+    }
+
+    //--------------------------------------------------------------------------
+    template <uint32_t V, typename ... Args>
+    inline void Logger::LogVerbosity(
+      LogChannel channel,
+      LogSeverity severity,
+      const char* format,
+      Args... args)
+    {
+      static_assert(V != 0, "Logging with a verbosity of 0 is redundant");
+
+      if (V <= verbosity_)
+      {
+        Log(channel, severity, format, eastl::forward<Args>(args)...);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <uint32_t V, typename ... Args>
+    inline void Logger::LogVerbosity(const char* format, Args... args)
+    {
+      LogVerbosity<V, Args...>(
+        LogChannel::kUnspecified,
+        LogSeverity::kDebug,
         format,
         eastl::forward<Args>(args)...);
     }

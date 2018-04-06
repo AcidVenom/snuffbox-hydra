@@ -1,5 +1,7 @@
 #include "tools/editor/windows/console.h"
 
+#include <foundation/auxiliary/logger.h>
+
 #include <qtextbrowser.h>
 #include <qscrollbar.h>
 #include <qtabwidget.h>
@@ -19,42 +21,42 @@ namespace snuffbox
     qreal Console::kFatalFontWeight_ = 99;
 
     //--------------------------------------------------------------------------
-    Console::LogColor Console::LogColor::VerbosityToColor(
-      foundation::Logger::Verbosity verbosity)
+    Console::LogColor Console::LogColor::SeverityToColor(
+      foundation::LogSeverity severity)
     {
       LogColor color;
       color.foreground = kDefaultForeground;
       color.background = kDefaultBackground;
 
-      switch (verbosity)
+      switch (severity)
       {
 
-      case foundation::Logger::Verbosity::kDebug:
+      case foundation::LogSeverity::kDebug:
         color.foreground = QColor(128, 128, 128);
         color.background = QColor(0, 0, 0, 0);
         break;
 
-      case foundation::Logger::Verbosity::kInfo:
+      case foundation::LogSeverity::kInfo:
         color.foreground = QColor(255, 255, 255);
         color.background = QColor(30, 30, 30, 30);
         break;
 
-      case foundation::Logger::Verbosity::kWarning:
+      case foundation::LogSeverity::kWarning:
         color.foreground = QColor(255, 185, 0);
         color.background = QColor(70, 65, 15);
         break;
 
-      case foundation::Logger::Verbosity::kSuccess:
+      case foundation::LogSeverity::kSuccess:
         color.foreground = QColor(35, 255, 0);
         color.background = QColor(70, 120, 55);
         break;
 
-      case foundation::Logger::Verbosity::kError:
+      case foundation::LogSeverity::kError:
         color.foreground = QColor(255, 0, 0);
         color.background = QColor(60, 0, 0);
         break;
 
-      case foundation::Logger::Verbosity::kFatal:
+      case foundation::LogSeverity::kFatal:
         color.foreground = QColor(255, 255, 255);
         color.background = QColor(255, 0, 0);
         break;
@@ -72,16 +74,16 @@ namespace snuffbox
       SetupOutputWindows(tab, output_windows);
 
       foundation::Logger::Log(
-        foundation::Logger::Channel::kEditor,
-        foundation::Logger::Verbosity::kInfo,
+        foundation::LogChannel::kEditor,
+        foundation::LogSeverity::kInfo,
         "Welcome!");
     }
 
     //--------------------------------------------------------------------------
     void Console::OnReceivedMessage(
       void* ud,
-      foundation::Logger::Channel channel,
-      foundation::Logger::Verbosity verbosity,
+      foundation::LogChannel channel,
+      foundation::LogSeverity verbosity,
       const foundation::String& message
       )
     {
@@ -97,7 +99,7 @@ namespace snuffbox
 
       for (
         int i = 0;
-        i < static_cast<int>(foundation::Logger::Channel::kNumChannels);
+        i < static_cast<int>(foundation::LogChannel::kNumChannels);
         ++i)
       {
         output_window = outputs[i];
@@ -112,12 +114,12 @@ namespace snuffbox
           0
         };
 
-        SetLogCount(static_cast<foundation::Logger::Channel>(i), 0);
+        SetLogCount(static_cast<foundation::LogChannel>(i), 0);
       }
     }
 
     //--------------------------------------------------------------------------
-    void Console::SetLogCount(foundation::Logger::Channel channel, int count)
+    void Console::SetLogCount(foundation::LogChannel channel, int count)
     {
       OutputWindow& window = output_windows_[static_cast<int>(channel)];
       window.log_count = count;
@@ -142,8 +144,8 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void Console::WriteLine(
-      foundation::Logger::Channel channel,
-      foundation::Logger::Verbosity verbosity,
+      foundation::LogChannel channel,
+      foundation::LogSeverity severity,
       const char* message)
     {
       OutputWindow& window = output_windows_[static_cast<int>(channel)];
@@ -151,7 +153,7 @@ namespace snuffbox
 
       SetLogCount(channel, ++window.log_count);
 
-      LogColor color = LogColor::VerbosityToColor(verbosity);
+      LogColor color = LogColor::SeverityToColor(severity);
 
       QTextCursor cursor = output_window->textCursor();
 
@@ -161,7 +163,7 @@ namespace snuffbox
       QTextCharFormat text_format;
       text_format.setForeground(color.foreground);
 
-      if (verbosity == foundation::Logger::Verbosity::kFatal)
+      if (severity == foundation::LogSeverity::kFatal)
       {
         text_format.setFontWeight(kFatalFontWeight_);
       }
@@ -178,11 +180,11 @@ namespace snuffbox
       QScrollBar* scroll_bar = output_window->verticalScrollBar();
       scroll_bar->setSliderPosition(scroll_bar->maximum());
 
-      if (channel != foundation::Logger::Channel::kUnspecified)
+      if (channel != foundation::LogChannel::kUnspecified)
       {
         WriteLine(
-          foundation::Logger::Channel::kUnspecified,
-          verbosity,
+          foundation::LogChannel::kUnspecified,
+          severity,
           message);
       }
     }

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <foundation/auxiliary/logger.h>
+#include <foundation/definitions/logging.h>
+#include <foundation/containers/string.h>
+
 #include <qcolor.h>
 
 class QTextBrowser;
@@ -34,19 +36,19 @@ namespace snuffbox
         QColor background; //!< The background color
 
         /**
-        * @brief Converts a verbosity to a corresponding log color
+        * @brief Converts a severity to a corresponding log color
         *
         * These colors are based on what I used in the oldest version of
         * snuffbox.
         *
         * @see https://github.com/AcidVenom/snuffbox/blob/master/snuffbox/console/console_widget.cc
         *
-        * @param[in] verbosity The verbosity to convert
+        * @param[in] severity The severity to convert
         *
         * @return The converted color
         */
-        static LogColor VerbosityToColor(
-          foundation::Logger::Verbosity verbosity);
+        static LogColor SeverityToColor(
+          foundation::LogSeverity severity);
 
         static QColor kDefaultForeground; //!< The default foreground color
         static QColor kDefaultBackground; //!< The default background color
@@ -74,8 +76,8 @@ namespace snuffbox
       */
       static void OnReceivedMessage(
         void* ud,
-        foundation::Logger::Channel channel,
-        foundation::Logger::Verbosity verbosity,
+        foundation::LogChannel channel,
+        foundation::LogSeverity severity,
         const foundation::String& message);
 
     protected:
@@ -94,7 +96,7 @@ namespace snuffbox
       * @param[in] channel The channel to set the log count of
       * @param[in] count The count to set
       */
-      void SetLogCount(foundation::Logger::Channel channel, int count);
+      void SetLogCount(foundation::LogChannel channel, int count);
 
       /**
       * @brief Apply the console font to the console's windows
@@ -112,8 +114,8 @@ namespace snuffbox
       * @see Console::OnReceivedMessage
       */
       void WriteLine(
-        foundation::Logger::Channel channel, 
-        foundation::Logger::Verbosity verbosity,
+        foundation::LogChannel channel, 
+        foundation::LogSeverity severity,
         const char* message);
 
     private:
@@ -138,7 +140,7 @@ namespace snuffbox
       * @brief A reference to the output window for each respective channel
       */
       OutputWindow output_windows_[
-        static_cast<int>(foundation::Logger::Channel::kNumChannels) + 1];
+        static_cast<int>(foundation::LogChannel::kNumChannels) + 1];
 
       static QString kFontFamily_; //!< The font family used in the console
       static qreal kFontSize_; //!< The font size in points

@@ -1,3 +1,8 @@
+SET(DefinitionsSources
+  "definitions/error_codes.h"
+  "definitions/logging.h"
+)
+
 SET(MemorySources
   "memory/memory.h"
   "memory/memory.cc"
@@ -25,12 +30,14 @@ SET(AuxiliarySources
 )
 
 SET(FoundationSources
+  ${DefinitionsSources}
   ${MemorySources}
   ${MemoryAllocatorSources}
   ${ContainerSources}
   ${AuxiliarySources}
 )
 
+SOURCE_GROUP("definitions"        FILES ${DefinitionsSources})
 SOURCE_GROUP("memory"             FILES ${MemorySources})
 SOURCE_GROUP("memory\\allocator"  FILES ${MemoryAllocatorSources})
 SOURCE_GROUP("containers"         FILES ${ContainerSources})

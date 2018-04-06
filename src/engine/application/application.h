@@ -1,0 +1,243 @@
+#pragma once
+
+#include <foundation/definitions/error_codes.h>
+#include <foundation/auxiliary/logger.h>
+
+namespace snuffbox
+{
+  namespace engine
+  {
+    /**
+    * @brief The application class to use as entry point for Snuffbox
+    *
+    * This class can be inherited from to implement the functions that are
+    * executed during certain events. These functions include the following:
+    *
+    * - Application::OnInitialize
+    * - Application::OnUpdate
+    * - Application::OnFixedUpdate
+    * - Application::OnRender
+    * - Application::OnShutdown
+    *
+    * @remarks The application should release all its allocated memory before
+    *          the destructor is called, to guarantee that leaks are checked
+    *          properly and no memory is floating around.
+    *
+    * @author Daniel Konings
+    */
+    class Application
+    {
+
+    public:
+
+      /**
+      * @brief Used to set different properties for application execution
+      *
+      * @author Daniel Konings
+      */
+      struct Configuration
+      {
+        const char* application_name; //!< The name of the application
+        const char* version_string; //!< The version string
+
+        /**
+        * @brief The verbosity level of the application
+        *
+        * This determines which logs will be output throughout the execution
+        * of the application.
+        */
+        uint32_t verbosity;
+
+        /**
+        * @brief The default configuration
+        */
+        static Configuration kDefaultConfiguration;
+      };
+
+      /**
+      * @brief Construct by providing the command line arguments
+      *
+      * The command line arguments are automatically parsed into the CVar
+      * interface for use.
+      *
+      * Supported types are:
+      * - Booleans
+      * - Strings
+      * - Numbers
+      *
+      * @param[in] argc The number of arguments passed
+      * @param[in] argv The actual argument list
+      * @param[in] config The configuration for the application to use
+      */
+      Application(
+        int argc = 0, 
+        char** argv = nullptr,
+        const Configuration& config = Configuration::kDefaultConfiguration);
+
+      /**
+      * @see Logger::Log
+      *
+      * @brief Short hand for logging to the engine channel with a severity
+      *
+      * @remarks This uses a log verbosity of 1
+      */
+      template <typename ... Args>
+      static void Log(
+        foundation::LogSeverity severity, 
+        const char* format, 
+        Args... args);
+
+      /**
+      * @see Application::Log
+      *
+      * @brief Short hand for logging to the engine channel with a severity
+      *        and verbosity
+      */
+      template <uint32_t V, typename ... Args>
+      static void LogVerbosity(
+        foundation::LogSeverity severity,
+        const char* format,
+        Args... args);
+
+      /**
+      * @brief Executes the application and starts the main loop
+      *
+      * @return The error code, succesful with ErrorCodes::kSuccess
+      */
+      foundation::ErrorCodes Run();
+
+    protected:
+
+      /**
+      * @brief Applies the current configuration from Application::config_
+      */
+      void ApplyConfiguration();
+
+      /**
+      * @brief Initializes the application
+      *
+      * Calls Application::OnInitialize
+      */
+      void Initialize();
+
+      /**
+      * @brief Calls the update functions, to update data real-time
+      *
+      * @param[in] dt The current delta-time of the application
+      *
+      * Calls Application::OnUpdate
+      */
+      void Update(float dt);
+
+      /**
+      * @brief Calls the fixed update functions, to update data in a fixed
+      *        interval/with fixed iterations.
+      *
+      * @param[in] time_step The fixed time step
+      *
+      * Calls Application::OnFixedUpdate
+      */
+      void FixedUpdate(float time_step);
+
+      /**
+      * @brief Renders the data within the renderer of this current frame
+      *
+      * @param[in] dt The current delta-time of the application
+      *
+      * Calls Application::OnRender
+      */
+      void Render(float dt);
+
+      /**
+      * @brief Called when the application is shut down, before the destructor
+      *
+      * Calls Application::OnShutdown
+      *
+      * @remarks Memory leaks will not be checked here, but after the
+      *          the main entry point execution has returned. Make sure all
+      *          internal memory is properly deallocated before that.
+      */
+      void Shutdown();
+
+      /**
+      * @brief The initialize function to override if you want custom behavior
+      *        in a derived version of the application
+      *
+      * @remarks The base implementation does nothing
+      *
+      * @see Application::Initialize
+      */
+      virtual void OnInitialize();
+
+      /**
+      * @brief The update function to override if you want custom behavior
+      *        in a derived version of the application
+      *
+      * @remarks The base implementation does nothing
+      *
+      * @see Application::Update
+      */
+      virtual void OnUpdate(float dt);
+
+      /**
+      * @brief The fixed update function to override if you want custom behavior
+      *        in a derived version of the application
+      *
+      * @remarks The base implementation does nothing
+      *
+      * @see Application::FixedUpdate
+      */
+      virtual void OnFixedUpdate(float time_step);
+
+      /**
+      * @brief The render function to override if you want custom behavior
+      *        in a derived version of the application
+      *
+      * @remarks The base implementation does nothing
+      *
+      * @see Application::Render
+      */
+      virtual void OnRender(float dt);
+
+      /**
+      * @brief The shutdown function to override if you want custom behavior
+      *        in a derived version of the application
+      *
+      * @remarks The base implementation does nothing
+      *
+      * @see Application::Shutdown
+      */
+      virtual void OnShutdown();
+
+    private:
+
+      Configuration config_; //!< The configuration of the application
+
+      static Application* instance_; //!< The current application instance
+    };
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline void Application::Log(
+      foundation::LogSeverity severity,
+      const char* format,
+      Args... args)
+    {
+      LogVerbosity<1>(severity, format, eastl::forward<Args>(args)...);
+    }
+
+    //--------------------------------------------------------------------------
+    template <uint32_t V, typename ... Args>
+    inline void Application::LogVerbosity(
+      foundation::LogSeverity severity,
+      const char* format,
+      Args... args)
+    {
+      foundation::Logger::LogVerbosity<V>(
+        foundation::LogChannel::kEngine,
+        severity, 
+        format, 
+        eastl::forward<Args>(args)...);
+    }
+  }
+}

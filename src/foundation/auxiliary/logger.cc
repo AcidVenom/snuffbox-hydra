@@ -21,38 +21,20 @@ namespace snuffbox
     Logger::OutputStream Logger::stream_ = nullptr;
     void* Logger::stream_ud_ = nullptr;
 
+    const uint32_t Logger::kDefaultVerbosity_ = 1;
+    uint32_t Logger::verbosity_ = Logger::kDefaultVerbosity_;
+
+    //--------------------------------------------------------------------------
+    void Logger::SetVerbosity(uint32_t verbosity)
+    {
+      verbosity_ = verbosity;
+    }
+
     //--------------------------------------------------------------------------
     void Logger::RedirectOutput(OutputStream func, void* ud)
     {
       stream_ = func;
       stream_ud_ = ud;
-    }
-
-    //--------------------------------------------------------------------------
-    const char* Logger::VerbosityToString(Verbosity verbosity)
-    {
-      switch (verbosity)
-      {
-      case Verbosity::kDebug:
-        return "-";
-
-      case Verbosity::kInfo:
-        return "Info";
-
-      case Verbosity::kWarning:
-        return "Warning";
-
-      case Verbosity::kSuccess:
-        return "Success";
-
-      case Verbosity::kError:
-        return "Error";
-
-      case Verbosity::kFatal:
-        return "FATAL";
-      }
-
-      return "<unknown>";
     }
 
     //--------------------------------------------------------------------------
@@ -96,6 +78,33 @@ namespace snuffbox
       }
 
       return formatted;
+    }
+
+    //--------------------------------------------------------------------------
+    const char* Logger::SeverityToString(LogSeverity verbosity)
+    {
+      switch (verbosity)
+      {
+      case LogSeverity::kDebug:
+        return "-";
+
+      case LogSeverity::kInfo:
+        return "Info";
+
+      case LogSeverity::kWarning:
+        return "Warning";
+
+      case LogSeverity::kSuccess:
+        return "Success";
+
+      case LogSeverity::kError:
+        return "Error";
+
+      case LogSeverity::kFatal:
+        return "FATAL";
+      }
+
+      return "<unknown>";
     }
 
     //--------------------------------------------------------------------------
