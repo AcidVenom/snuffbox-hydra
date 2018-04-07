@@ -26,7 +26,7 @@ Google's V8 is used as the primary scripting engine for JavaScript support. V8 i
 submodule, but **depot_tools** is added instead. depot_tools can be used to fetch and compile V8 using gclient
 and the Ninja compiler.
 
-There is a batch script in **deps** named **build_v8.<platform>**, which automatically does all the fetching, syncing and
+There is a batch script in **deps** named **build_v8.\<platform\>**, which automatically does all the fetching, syncing and
 compilation for you. This is experimental and I'm not sure if this always works; but it's probably the easiest
 way to guarantee a V8 build for Snuffbox.
 
