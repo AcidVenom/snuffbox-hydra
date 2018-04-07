@@ -1,3 +1,12 @@
+SET(AuxiliarySources
+  "auxiliary/debug.h"
+)
+
+SET(ServicesSources
+  "services/service.h"
+  "services/service.cc"
+)
+
 SET(ApplicationSources
   "application/application.h"
   "application/application.cc"
@@ -5,10 +14,25 @@ SET(ApplicationSources
   "application/window.cc"
 )
 
-SOURCE_GROUP("application" FILES ${ApplicationSources})
+SET(CVarSources
+  "cvar/cvar.h"
+  "cvar/cvar.cc"
+  "cvar/command_line_parser.h"
+  "cvar/command_line_parser.cc"
+  "cvar/cvar_service.h"
+  "cvar/cvar_service.cc"
+)
+
+SOURCE_GROUP("auxiliary"    FILES ${AuxiliarySources})
+SOURCE_GROUP("services"     FILES ${ServicesSources})
+SOURCE_GROUP("application"  FILES ${ApplicationSources})
+SOURCE_GROUP("cvar"         FILES ${CVarSources})
 
 SET(EngineSources
+  ${AuxiliarySources}
+  ${ServicesSources}
   ${ApplicationSources}
+  ${CVarSources}
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})

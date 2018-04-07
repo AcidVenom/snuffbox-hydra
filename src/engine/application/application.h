@@ -1,7 +1,13 @@
 #pragma once
 
+#include "engine/services/service.h"
+#include "engine/cvar/command_line_parser.h"
+
 #include <foundation/definitions/error_codes.h>
-#include <foundation/auxiliary/logger.h>
+#include <foundation/memory/memory.h>
+#include <foundation/containers/vector.h>
+
+#include <cinttypes>
 
 namespace snuffbox
 {
@@ -75,36 +81,22 @@ namespace snuffbox
         const Configuration& config = Configuration::kDefaultConfiguration);
 
       /**
-      * @see Logger::Log
-      *
-      * @brief Short hand for logging to the engine channel with a severity
-      *
-      * @remarks This uses a log verbosity of 1
-      */
-      template <typename ... Args>
-      static void Log(
-        foundation::LogSeverity severity, 
-        const char* format, 
-        Args... args);
-
-      /**
-      * @see Application::Log
-      *
-      * @brief Short hand for logging to the engine channel with a severity
-      *        and verbosity
-      */
-      template <uint32_t V, typename ... Args>
-      static void LogVerbosity(
-        foundation::LogSeverity severity,
-        const char* format,
-        Args... args);
-
-      /**
       * @brief Executes the application and starts the main loop
       *
       * @return The error code, succesful with ErrorCodes::kSuccess
       */
       foundation::ErrorCodes Run();
+
+      /**
+      * @brief Retrieves a service in the application
+      *
+      * @tparam T The service to retrieve
+      *
+      * @return The service, or nullptr if it was never created or assigned
+      *         a type ID
+      */
+      template <typename T>
+      T* GetService();
 
     protected:
 
@@ -209,35 +201,80 @@ namespace snuffbox
       */
       virtual void OnShutdown();
 
+      /**
+      * @brief Creates a service contained by the application
+      *
+      * @tparam T A service derived from IService
+      * @tparam Args... The arguments to pass into the constructor of the
+      *                 service
+      *
+      * @param[in] args The arguments to pass
+      *
+      * @return The created service
+      */
+      template <typename T, typename ... Args>
+      T* CreateService(Args&&... args);
+
+      /**
+      * @brief Initializes all services
+      */
+      void InitializeServices();
+
+      /**
+      * @brief Shuts down all services
+      *
+      * @remarks All memory should be deallocated appropriately here
+      */
+      void ShutdownServices();
+
     private:
 
+      /**
+      * @brief A vector of services to contain all services in by type ID
+      */
+      using Services = foundation::Vector<foundation::UniquePtr<IService>>;
+
       Configuration config_; //!< The configuration of the application
+      CommandLineParser::CLI cli_; //!< The parsed command line
+
+      Services services_; //!< The list of services that are available
 
       static Application* instance_; //!< The current application instance
     };
 
     //--------------------------------------------------------------------------
-    template <typename ... Args>
-    inline void Application::Log(
-      foundation::LogSeverity severity,
-      const char* format,
-      Args... args)
+    template <typename T>
+    inline T* Application::GetService()
     {
-      LogVerbosity<1>(severity, format, eastl::forward<Args>(args)...);
+      static_assert(eastl::is_base_of<IService, T>::value,
+        "Only services that derive from IService can be retrieved as a service from the application");
+
+      uint32_t id = T::type_id();
+      if (id >= static_cast<uint32_t>(services_.size()))
+      {
+        return nullptr;
+      }
+
+      return static_cast<T*>(services_.at(id).get());
     }
 
     //--------------------------------------------------------------------------
-    template <uint32_t V, typename ... Args>
-    inline void Application::LogVerbosity(
-      foundation::LogSeverity severity,
-      const char* format,
-      Args... args)
+    template <typename T, typename ... Args>
+    inline T* Application::CreateService(Args&&... args)
     {
-      foundation::Logger::LogVerbosity<V>(
-        foundation::LogChannel::kEngine,
-        severity, 
-        format, 
-        eastl::forward<Args>(args)...);
+      static_assert(eastl::is_base_of<IService, T>::value, 
+        "Only services that derive from IService can be added as a service to the application");
+
+      foundation::UniquePtr<T> ptr = 
+        foundation::Memory::ConstructUnique<T>(
+          &foundation::Memory::default_allocator(),
+          eastl::forward<Args>(args)...);
+
+      T* pptr = ptr.get();
+
+      services_.push_back(eastl::move(ptr));
+
+      return pptr;
     }
   }
 }

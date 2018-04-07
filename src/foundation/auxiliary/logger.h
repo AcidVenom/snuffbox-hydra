@@ -68,6 +68,9 @@ namespace snuffbox
       /**
       * @see Logger::Log
       *
+      * @tparam V The verbosity to log with; this value is checked for being
+      *           non-null
+      *
       * @brief Used to log with a specific verbosity
       *
       * The log only gets redirected to the output if the verbosity level

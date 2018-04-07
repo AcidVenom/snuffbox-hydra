@@ -20,6 +20,7 @@ SET(MemoryAllocatorSources
 SET(ContainerSources
   "containers/string.h"
   "containers/vector.h"
+  "containers/map.h"
 )
 
 SET(AuxiliarySources

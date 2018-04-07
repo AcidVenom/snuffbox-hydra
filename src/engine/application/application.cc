@@ -1,4 +1,7 @@
 #include "engine/application/application.h"
+#include "engine/auxiliary/debug.h"
+
+#include "engine/cvar/cvar_service.h"
 
 #include <cassert>
 #include <iostream>
@@ -32,6 +35,11 @@ namespace snuffbox
         "There can only be one instance of a Snuffbox application");
 
       instance_ = this;
+
+      if (argc > 1 && argv != nullptr)
+      {
+        cli_ = CommandLineParser::Parse(argc, argv);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -39,7 +47,7 @@ namespace snuffbox
     {
       foundation::Logger::SetVerbosity(config_.verbosity);
 
-      LogVerbosity<1>(
+      Debug::LogVerbosity<1>(
         foundation::LogSeverity::kInfo,
         "Configuration:\n\
         \n\
@@ -57,7 +65,7 @@ namespace snuffbox
     {
       ApplyConfiguration();
 
-      LogVerbosity<2>(
+      Debug::LogVerbosity<2>(
         foundation::LogSeverity::kDebug,
         "Initializing the application"
         );
@@ -66,13 +74,20 @@ namespace snuffbox
 
       std::cin.get();
 
+      Shutdown();
+
       return foundation::ErrorCodes::kSuccess;
     }
 
     //--------------------------------------------------------------------------
     void Application::Initialize()
     {
+      CVarService* cvar = CreateService<CVarService>();
+
+      InitializeServices();
+
       OnInitialize();
+      cvar->RegisterFromCLI(cli_);
     }
 
     //--------------------------------------------------------------------------
@@ -96,12 +111,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Application::Shutdown()
     {
-      LogVerbosity<2>(
+      Debug::LogVerbosity<2>(
         foundation::LogSeverity::kDebug,
-        "Shutting down  the application"
+        "Shutting down the application"
         );
 
       OnShutdown();
+
+      ShutdownServices();
 
       instance_ = nullptr;
     }
@@ -134,6 +151,26 @@ namespace snuffbox
     void Application::OnShutdown()
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::InitializeServices()
+    {
+      for (size_t i = 0; i < services_.size(); ++i)
+      {
+        services_.at(i)->OnInitialize(*this);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::ShutdownServices()
+    {
+      for (size_t i = 0; i < services_.size(); ++i)
+      {
+        services_.at(i)->OnShutdown(*this);
+      }
+
+      services_.clear();
     }
   }
 }
