@@ -20,7 +20,21 @@ One of the primary reasons this is the case is because Qt5 is licensed under LGP
 a way to relink the actual libraries used. Aside from that, statically linking Qt5 using CMake is not fully
 supported.
 
+# V8
+
+Google's V8 is used as the primary scripting engine for JavaScript support. V8 is not distributed as a
+submodule, but **depot_tools** is added instead. depot_tools can be used to fetch and compile V8 using gclient
+and the Ninja compiler.
+
+There is a batch script in **deps** named **build_v8.<platform>**, which automatically does all the fetching, syncing and
+compilation for you. This is experimental and I'm not sure if this always works; but it's probably the easiest
+way to guarantee a V8 build for Snuffbox.
+
+As of current **Windows 10 SDK (ver. 10.0.15063.468)** is required to build V8 under MSVC.
+The download archive for the SDKs can be found [here](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive).
+
 # MSVC Version
 
-The current working version has only been tested with MSVC 2015, 64-bit. The engine is being developed
-in Visual Studio 2015 under platform tool set **v140**.
+The current working version has only been tested with MSVC 2017, 64-bit. The engine is being developed
+in Visual Studio 2017 under platform tool set **v141**. Google's V8 has deprecated 2015 by now,
+so it's highly advised to simply use 2017 when building the scripting environment as well.

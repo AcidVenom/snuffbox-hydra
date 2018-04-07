@@ -1,0 +1,6 @@
+is_debug = false
+target_cpu = "x64"
+is_component_build = false
+v8_use_snapshot = false
+v8_static_library = true
+symbol_level = 0
