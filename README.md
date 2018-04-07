@@ -14,7 +14,7 @@ to build these corresponding projects. Deployment of the shared libraries also h
 The current working version has been tested with **Qt 5.10.1**.
 
 **CMAKE_PREFIX_PATH** has to contain the Qt5 installation path. For instance (for 5.10.1)
-the prefix path should contain **DriveLetter:/QtInstallationDir/5.10.1/msvc2015_64** on Windows.
+the prefix path should contain **DriveLetter:/QtInstallationDir/5.10.1/msvc2017_64** on Windows.
 
 One of the primary reasons this is the case is because Qt5 is licensed under LGPL and require me to provide
 a way to relink the actual libraries used. Aside from that, statically linking Qt5 using CMake is not fully
