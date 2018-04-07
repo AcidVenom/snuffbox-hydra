@@ -72,7 +72,17 @@ namespace snuffbox
 
       Initialize();
 
-      std::cin.get();
+      std::string input;
+      while (input != "exit")
+      {
+        std::getline(std::cin, input);
+
+        CommandLineParser::Command cmd;
+        if (CommandLineParser::ParseInput(input.c_str(), &cmd) == true)
+        {
+          GetService<CVarService>()->ExecuteCommand(cmd);
+        }
+      }
 
       Shutdown();
 
@@ -88,6 +98,7 @@ namespace snuffbox
 
       OnInitialize();
       cvar->RegisterFromCLI(cli_);
+
     }
 
     //--------------------------------------------------------------------------

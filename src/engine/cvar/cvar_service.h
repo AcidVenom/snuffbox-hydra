@@ -59,6 +59,50 @@ namespace snuffbox
       void RegisterFromCLI(const CommandLineParser::CLI& cli);
 
       /**
+      * @brief Executes a parsed command of the CommandLineParser
+      *
+      * @param[in] cmd The command to execute
+      */
+      void ExecuteCommand(const CommandLineParser::Command& cmd);
+
+      /**
+      * @brief Logs a value of a CVar
+      *
+      * @param[in] value The CVar to log the value of
+      */
+      void LogValue(const CVarValue* value) const;
+
+      /**
+      * @see CVarService::LogValue
+      *
+      * @remarks This will log <undefined> if the CVar is not registered
+      *
+      * @param[in] name The name of the CVar to log the value of
+      */
+      void LogValue(const foundation::String& name) const;
+
+      /**
+      * @brief Logs the description of a CVar
+      *
+      * @param[in] value The CVar to log the description of
+      */
+      void LogDescription(const CVarValue* value) const;
+
+      /**
+      * @see CVarService::LogDescription
+      *
+      * @remarks This will log <undefined> if the CVar is not registered
+      *
+      * @param[in] name The name of the CVar to log the description of
+      */
+      void LogDescription(const foundation::String& name) const;
+
+      /**
+      * @brief Log all components of each CVar that is currently registered
+      */
+      void LogAll() const;
+
+      /**
       * @brief The registry implementation for non-double CVar values
       *
       * @see CVarService::RegisterImpl
@@ -126,6 +170,8 @@ namespace snuffbox
       void OnShutdown(Application& app) override;
 
     private:
+
+      static const size_t kLogPadding_; //!< The amount of padding for logging
 
       /**
       * @brief The CVar map, which consists of a string to value relationship

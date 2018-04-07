@@ -5,6 +5,9 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
+    const size_t CVarService::kLogPadding_ = 20;
+
+    //--------------------------------------------------------------------------
     CVarService::CVarService() :
       ServiceBase<CVarService>("CVarService")
     {
@@ -51,6 +54,113 @@ namespace snuffbox
 
         v->Set(it->second.c_str());
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::ExecuteCommand(const CommandLineParser::Command& cmd)
+    {
+      if (cmd.type == CommandLineParser::CommandType::kHelp)
+      {
+        return;
+      }
+
+      CommandLineParser::CLI cli;
+
+      switch (cmd.type)
+      {
+      case CommandLineParser::CommandType::kSet:
+        cli.emplace(eastl::pair<foundation::String, foundation::String>
+        { 
+          cmd.data[0], 
+          cmd.data[1]
+        });
+        RegisterFromCLI(cli);
+        break;
+
+      case CommandLineParser::CommandType::kGet:
+        LogValue(cmd.data[0]);
+        break;
+
+      case CommandLineParser::CommandType::kDesc:
+        LogDescription(cmd.data[0]);
+        break;
+
+      case CommandLineParser::CommandType::kShowAll:
+        LogAll();
+        break;
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::LogValue(const CVarValue* value) const
+    {
+      Debug::LogVerbosity<1>(
+        foundation::LogSeverity::kDebug,
+        value->ToString().c_str()
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::LogValue(const foundation::String& name) const
+    {
+      CVarValue* v;
+      if ((v = Get(name)) == nullptr)
+      {
+        Debug::LogVerbosity<1>(foundation::LogSeverity::kDebug, "<undefined>");
+        return;
+      }
+
+      LogValue(v);
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::LogDescription(const CVarValue* value) const
+    {
+      Debug::LogVerbosity<1>(
+        foundation::LogSeverity::kDebug,
+        value->description().c_str()
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::LogDescription(const foundation::String& name) const
+    {
+      CVarValue* v;
+      if ((v = Get(name)) == nullptr)
+      {
+        Debug::LogVerbosity<1>(foundation::LogSeverity::kDebug, "<undefined>");
+        return;
+      }
+
+      LogDescription(v);
+    }
+
+    //--------------------------------------------------------------------------
+    void CVarService::LogAll() const
+    {
+      foundation::String values = "\n\n";
+
+      for (
+        CVarMap::const_iterator it = registered_.begin();
+        it != registered_.end();
+        ++it)
+      {
+        values += it->first;
+
+        size_t len = it->first.size();
+
+        for (size_t i = 0; i < kLogPadding_ - len; ++i)
+        {
+          values += " ";
+        }
+
+        values += 
+          " = " +
+          it->second->ToString() + " " +
+          '\"' + it->second->description() + "\"\n";
+      }
+
+      Debug::LogVerbosity<1>(foundation::LogSeverity::kDebug, values.c_str());
     }
 
     //--------------------------------------------------------------------------

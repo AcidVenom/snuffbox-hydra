@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/auxiliary/debug.h"
+
 #include <foundation/containers/string.h>
 
 #include <EASTL/type_traits.h>
@@ -7,6 +9,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
+
+#include <sstream>
 
 namespace snuffbox
 {
@@ -72,6 +76,11 @@ namespace snuffbox
       */
       CVarValue(const char* name, const char* description);
 
+      /**
+      * @return The stringified value of this CVar
+      */
+      virtual foundation::String ToString() const = 0;
+
     protected:
 
       /**
@@ -90,7 +99,7 @@ namespace snuffbox
       * @brief Logs the usage with error severity if the CVar string value 
       *        assigned was not able to be parsed
       */
-      virtual const char* Usage() = 0;
+      virtual const char* Usage() const = 0;
 
       /**
       * @brief Sets the CVar value based on a string value
@@ -243,6 +252,11 @@ namespace snuffbox
       */
       CVar(const char* name, const char* description, const T& def);
 
+      /**
+      * @see CVarValue::ToString
+      */
+      foundation::String ToString() const override;
+
     protected:
 
       /**
@@ -253,7 +267,7 @@ namespace snuffbox
       /**
       * @see CVarValue::Usage 
       */
-      const char* Usage() override;
+      const char* Usage() const override;
 
     public:
 
@@ -285,6 +299,23 @@ namespace snuffbox
       value_(def)
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline foundation::String CVar<T>::ToString() const
+    {
+      std::ostringstream stream;
+      stream << value_;
+
+      return stream.str().c_str();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline foundation::String CVar<foundation::String>::ToString() const
+    {
+      return value_;
     }
 
     //--------------------------------------------------------------------------
@@ -324,7 +355,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline const char* CVar<bool>::Usage()
+    inline const char* CVar<bool>::Usage() const
     {
       return "Boolean (case insensitive): true | false";
     }
@@ -341,13 +372,29 @@ namespace snuffbox
         return false;
       }
 
+      bool in_range = true;
+
       if (range_.has_min == true && v < value_)
       {
-        return false;
+        in_range = false;
       }
-
+      
       if (range_.has_max == true && v > value_)
       {
+        in_range = false;
+      }
+
+      if (in_range == false)
+      {
+        Debug::LogVerbosity<1>(
+          foundation::LogSeverity::kWarning,
+          "The specified value was not in the range for CVar '{0}'\n\
+          \n\
+          \tThe valid range is: {1} .. {2}",
+          name(),
+          range_.has_min == true ? "x" : std::to_string(range_.min).c_str(),
+          range_.has_max == true ? "x" : std::to_string(range_.max).c_str());
+
         return false;
       }
 
@@ -358,7 +405,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline const char* CVar<double>::Usage()
+    inline const char* CVar<double>::Usage() const
     {
       return 
         "Number: 0x* | * | *.** | *e* | *e-*";
@@ -374,7 +421,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline const char* CVar<foundation::String>::Usage()
+    inline const char* CVar<foundation::String>::Usage() const
     {
       return "String: This should always work";
     }

@@ -19,9 +19,32 @@ namespace snuffbox
     public:
 
       /**
+      * @brief The different command types that exist
+      */
+      enum struct CommandType
+      {
+        kHelp, //!< "help"
+        kSet, //!< "set <name> <value>"
+        kGet, //!< "get <name>"
+        kDesc, //!< "desc <name>"
+        kShowAll //!< "show_all"
+      };
+
+      /**
       * @brief A container to store the CLI definitions
       */
       using CLI = foundation::Map<foundation::String, foundation::String>;
+
+      /**
+      * @brief Used to store command input from the console
+      *
+      * @author Daniel Konings
+      */
+      struct Command
+      {
+        CommandType type; //!< The type of the command
+        foundation::String data[2]; //!< The data
+      };
 
       /**
       * @brief Parses the command line and stores the respective string
@@ -36,6 +59,35 @@ namespace snuffbox
       * @param[in] argv The arguments passed into the application
       */
       static CLI Parse(int argc, char** argv);
+
+      /**
+      * @brief Parses a command that was input from the console
+      *
+      * @param[in] input The command string to parse
+      * @param[out] command The parse command
+      *
+      * @return Was the input command parsed succesfully?
+      */
+      static bool ParseInput(const char* input, Command* command);
+
+    protected:
+
+      /**
+      * @brief Throws an error when the command line was not properly parsed
+      *
+      * @param[in] message The message to show
+      *
+      * @remarks This prints the CommandLineParser::Usage as well
+      */
+      static void Error(const char* message);
+
+      /**
+      * @return The usage text for the console input
+      *
+      * @remarks This text is shown whenever there is a parsing error or
+      *          when the user requests "help"
+      */
+      static const char* Usage();
     };
   }
 }
