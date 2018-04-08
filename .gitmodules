@@ -7,6 +7,3 @@
 [submodule "deps/glm"]
 	path = deps/glm
 	url = https://github.com/g-truc/glm
-[submodule "deps/dukglue"]
-	path = deps/dukglue
-	url = https://github.com/Aloshi/dukglue
