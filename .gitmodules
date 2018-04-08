@@ -7,6 +7,3 @@
 [submodule "deps/glm"]
 	path = deps/glm
 	url = https://github.com/g-truc/glm
-[submodule "deps/depot_tools"]
-	path = deps/depot_tools
-	url = https://chromium.googlesource.com/chromium/tools/depot_tools
