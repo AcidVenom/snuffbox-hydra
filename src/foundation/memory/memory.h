@@ -226,7 +226,7 @@ namespace snuffbox
     template <typename T> template <typename U>
     inline MemoryDeleter<T>::MemoryDeleter(
       const MemoryDeleter<U>&,
-      is_convertible<U>* = nullptr)
+      is_convertible<U>*)
     {
 
     }

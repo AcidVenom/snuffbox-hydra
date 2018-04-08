@@ -30,6 +30,8 @@ ADD_SUBDIRECTORY("glfw")
 ADD_LIBRARY(glm INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(glm INTERFACE "glm")
 
+ADD_SUBDIRECTORY("dukglue")
+
 SET_SOLUTION_FOLDER(
   "deps/eastl"
   EABase_ide
@@ -45,4 +47,10 @@ SET_SOLUTION_FOLDER(
   "deps/glfw3"
   glfw
   uninstall
+)
+
+SET_SOLUTION_FOLDER(
+  "deps/dukglue"
+  dukglue_ide
+  dukglue_test
 )

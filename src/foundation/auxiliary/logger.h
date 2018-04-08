@@ -208,15 +208,15 @@ namespace snuffbox
       const char* format,
       Args... args)
     {
-      Vector<String> args;
-      GetArguments(args, eastl::forward<Args>(args)...);
+      Vector<String> stringified;
+      GetArguments(stringified, eastl::forward<Args>(args)...);
 
       String message = 
         "[" +
         GetTimeStamp() + "|" +
         String(SeverityToString(severity)) +
         "] " +
-        FormatString(format, args);
+        FormatString(format, stringified);
       
       std::cout << message.c_str() << std::endl;
 
