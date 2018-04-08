@@ -36,4 +36,4 @@ SET(EngineSources
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})
-TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation)
+TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation duktape)

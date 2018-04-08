@@ -3,6 +3,8 @@
 
 #include "engine/cvar/cvar_service.h"
 
+#include <dukglue/dukglue.h>
+
 #include <cassert>
 #include <iostream>
 

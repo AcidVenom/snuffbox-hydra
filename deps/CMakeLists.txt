@@ -30,7 +30,7 @@ ADD_SUBDIRECTORY("glfw")
 ADD_LIBRARY(glm INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(glm INTERFACE "glm")
 
-ADD_SUBDIRECTORY("dukglue")
+ADD_SUBDIRECTORY("duktape-2.2.0")
 
 SET_SOLUTION_FOLDER(
   "deps/eastl"
@@ -50,7 +50,6 @@ SET_SOLUTION_FOLDER(
 )
 
 SET_SOLUTION_FOLDER(
-  "deps/dukglue"
-  dukglue_ide
-  dukglue_test
+  "deps/duktape"
+  duktape
 )
