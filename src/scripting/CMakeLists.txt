@@ -22,7 +22,7 @@ IF (SNUFF_DUKTAPE)
     "duk/duk_callback.cc"
   )
   
-  SOURCE_GROUP("js" FILES ${DuktapeSources})
+  SOURCE_GROUP("duk" FILES ${DuktapeSources})
   SET(NativeSources ${NativeSources} ${DuktapeSources})
 ENDIF (SNUFF_DUKTAPE)
 
