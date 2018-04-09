@@ -32,6 +32,10 @@ TARGET_INCLUDE_DIRECTORIES(glm INTERFACE "glm")
 
 IF (SNUFF_DUKTAPE)
   ADD_SUBDIRECTORY("duktape-2.2.0")
+  SET_SOLUTION_FOLDER(
+    "deps/duktape"
+    duktape
+  )
 ENDIF (SNUFF_DUKTAPE)
 
 SET_SOLUTION_FOLDER(
@@ -49,9 +53,4 @@ SET_SOLUTION_FOLDER(
   "deps/glfw3"
   glfw
   uninstall
-)
-
-SET_SOLUTION_FOLDER(
-  "deps/duktape"
-  duktape
 )
