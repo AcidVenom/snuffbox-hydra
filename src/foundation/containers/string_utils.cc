@@ -16,7 +16,7 @@ namespace snuffbox
       {
         c = str.at(i);
 
-        if (c == '\n')
+        if (c == delim)
         {
           split.push_back(current);
           current = "";
@@ -24,6 +24,11 @@ namespace snuffbox
         }
 
         current += c;
+      }
+
+      if (split.size() == 0)
+      {
+        split.push_back(str);
       }
 
       return split;
