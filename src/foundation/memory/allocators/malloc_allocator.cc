@@ -44,5 +44,23 @@ namespace snuffbox
 
       return size;
     }
+
+    //--------------------------------------------------------------------------
+    size_t MallocAllocator::GetSize(void* ptr)
+    {
+      if (ptr == nullptr)
+      {
+        return 0;
+      }
+
+      int64_t header_size = sizeof(AllocationHeader);
+
+      AllocationHeader* header = reinterpret_cast<AllocationHeader*>(
+        PointerMath::Offset(ptr, -header_size));
+
+      size_t size = header->size;
+
+      return size;
+    }
   }
 }

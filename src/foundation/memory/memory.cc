@@ -50,6 +50,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Memory::Deallocate(void* ptr)
     {
+      if (ptr == nullptr)
+      {
+        return;
+      }
+
       AllocationHeader* header = reinterpret_cast<AllocationHeader*>(
         PointerMath::Offset(ptr, -static_cast<int>(sizeof(AllocationHeader))));
 

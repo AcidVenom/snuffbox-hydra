@@ -6,6 +6,8 @@
 #include <cassert>
 #include <iostream>
 
+#include <scripting/duk/duk_state.h>
+
 namespace snuffbox
 {
   namespace engine
@@ -72,19 +74,22 @@ namespace snuffbox
 
       Initialize();
 
+      scripting::DukState state;
+      state.Initialize();
+
       std::string input;
       while (input != "exit")
       {
         std::getline(std::cin, input);
 
-        CommandLineParser::Command cmd;
-        if (CommandLineParser::ParseInput(input.c_str(), &cmd) == true)
+        if (input.size() > 0 && input != "exit")
         {
-          GetService<CVarService>()->ExecuteCommand(cmd);
+          state.CompileFromSource("console", input.c_str(), true);
         }
       }
 
       Shutdown();
+      state.Shutdown();
 
       return foundation::ErrorCodes::kSuccess;
     }
@@ -98,7 +103,6 @@ namespace snuffbox
 
       OnInitialize();
       cvar->RegisterFromCLI(cli_);
-
     }
 
     //--------------------------------------------------------------------------

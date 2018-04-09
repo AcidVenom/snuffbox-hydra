@@ -49,6 +49,16 @@ namespace snuffbox
       * @see Allocator::Deallocate
       */
       size_t DeallocateImpl(void* ptr) override;
+
+      /**
+      * @brief Retrieves the size of the memory block at a pointer from
+      *        the allocation header
+      *
+      * @param[in] ptr The pointer to the memory block
+      *
+      * @return The size of the memory block
+      */
+      size_t GetSize(void* ptr);
     };
   }
 }
