@@ -3,6 +3,7 @@ SET(RootSources
   "script_value.h"
   "script_function.h"
   "script_callback.h"
+  "scripting.h"
 )
 
 SET(NativeSources "")

@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-#include <scripting/duk/duk_state.h>
+#include <scripting/scripting.h>
 
 namespace snuffbox
 {
@@ -74,7 +74,7 @@ namespace snuffbox
 
       Initialize();
 
-      scripting::DukState state;
+      scripting::ScriptState state;
       state.Initialize();
 
       std::string input;

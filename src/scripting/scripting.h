@@ -1,13 +1,14 @@
 #pragma once
 
+#include "scripting/script_callback.h"
+
 #ifdef SNUFF_DUKTAPE
-#include "scripting/duk/duk_callback.h"
 namespace snuffbox
 {
   namespace scripting
   {
-    template <typename ... Args>
-    using ScriptCallback = DukCallback<Args...>;
+#include "scripting/duk/duk_state.h"
+    using ScriptState = DukState;
   }
 }
 #elif not defined(SNUFF_NSCRIPTING)

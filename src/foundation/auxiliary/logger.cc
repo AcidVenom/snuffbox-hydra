@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <cassert>
 
 #ifdef _WIN32
 #define localtime(x, y)   \
@@ -23,6 +24,18 @@ namespace snuffbox
 
     const uint32_t Logger::kDefaultVerbosity_ = 1;
     uint32_t Logger::verbosity_ = Logger::kDefaultVerbosity_;
+
+    //--------------------------------------------------------------------------
+    void Logger::Assert(bool expr, const char* msg)
+    {
+      if (expr == false)
+      {
+        Log(LogChannel::kUnspecified, LogSeverity::kFatal, 
+          "\nAssertion failure\n================================\n\n{0}", msg);
+      }
+
+      assert(expr && "Assertion failure");
+    }
 
     //--------------------------------------------------------------------------
     void Logger::SetVerbosity(uint32_t verbosity)

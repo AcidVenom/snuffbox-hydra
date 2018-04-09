@@ -66,6 +66,15 @@ namespace snuffbox
       static void Log(const char* format, Args... args);
 
       /**
+      * @brief An assert that logs a message to the console as well
+      *
+      * @param[in] expr The expression to evaluate
+      * @param[in] msg The message to log with fatal severity if
+      *                expr didn't evaluate to true
+      */
+      static void Assert(bool expr, const char* msg);
+
+      /**
       * @see Logger::Log
       *
       * @tparam V The verbosity to log with; this value is checked for being

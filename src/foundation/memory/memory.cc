@@ -1,7 +1,6 @@
 #include "foundation/memory/memory.h"
 #include "foundation/auxiliary/pointer_math.h"
-
-#include <assert.h>
+#include "foundation/auxiliary/logger.h"
 
 namespace snuffbox
 {
@@ -18,7 +17,8 @@ namespace snuffbox
     {
       if (allocator == nullptr)
       {
-        assert(false && "Attempted to allocate memory with a null allocator");
+        Logger::Assert(false, 
+          "Attempted to allocate memory with a null allocator");
         allocator = &default_allocator_;
       }
 

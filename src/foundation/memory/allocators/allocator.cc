@@ -1,6 +1,5 @@
 #include "foundation/memory/allocators/allocator.h"
-
-#include <assert.h>
+#include "foundation/auxiliary/logger.h"
 
 namespace snuffbox
 {
@@ -30,7 +29,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Allocator::~Allocator()
     {
-      assert(open_allocations_ == 0 && allocated_ == 0 &&
+      Logger::Assert(open_allocations_ == 0 && allocated_ == 0,
         "Memory leak detected in an allocator");
     }
 
@@ -39,7 +38,7 @@ namespace snuffbox
     {
       if (allocated_ + size > max_size_)
       {
-        assert(false && "Buffer overflow in allocator");
+        Logger::Assert(false, "Buffer overflow in allocator");
         return nullptr;
       }
 
@@ -56,7 +55,8 @@ namespace snuffbox
 
       if (max_size_ < deallocated)
       {
-        assert(false && "Attempted to deallocate more than was ever allocated");
+        Logger::Assert(false, 
+          "Attempted to deallocate more than was ever allocated");
         return 0;
       }
 

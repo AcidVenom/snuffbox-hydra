@@ -13,6 +13,10 @@ namespace snuffbox
     * however the system should be designed so that more scripting
     * languages could be added (e.g. Mono, LuaJIT, etc.)
     *
+    * Most of the scripting implementations don't have a proper interface,
+    * as they're all templated in some shape or form. The base scripting
+    * state should not have this issue, however.
+    *
     * @author Daniel Konings
     */
     class IScriptState
@@ -40,7 +44,10 @@ namespace snuffbox
       *
       * @return Was the execution succesful?
       */
-      virtual bool CompileFromSource(const char* ctx, const char* src, bool print) = 0;
+      virtual bool CompileFromSource(
+        const char* ctx, 
+        const char* src, 
+        bool print) = 0;
 
       /**
       * @brief Shuts down the native scripting API after usage

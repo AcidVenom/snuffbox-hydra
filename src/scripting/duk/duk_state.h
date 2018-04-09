@@ -25,6 +25,15 @@ namespace snuffbox
       */
       DukState();
 
+    protected:
+
+      /**
+      * @brief Used to redirect fatal errors that duktape throws
+      */
+      static void FatalErrorHandler(void* udata, const char* msg);
+
+    public:
+
       /**
       * @see IScriptState::Initialize
       */
@@ -54,13 +63,10 @@ namespace snuffbox
       */
       void Shutdown() override;
 
-
-    protected:
-
       /**
-      * @brief Used to redirect fatal errors that duktape throws
+      * @return The duktape context
       */
-      static void FatalErrorHandler(void* udata, const char* msg);
+      duk_hthread* context() const;
 
     private:
 

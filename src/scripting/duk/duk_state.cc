@@ -19,6 +19,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void DukState::FatalErrorHandler(void* udata, const char* msg)
+    {
+      foundation::Logger::Assert(false, msg);
+    }
+
+    //--------------------------------------------------------------------------
+    duk_ret_t print(duk_context* ctx)
+    {
+      const char* value = duk_safe_to_string(ctx, -1);
+      printf("%s\n", value);
+
+      return 0;
+    }
+
+    //--------------------------------------------------------------------------
     bool DukState::Initialize()
     {
       context_ = duk_create_heap(
@@ -32,6 +47,13 @@ namespace snuffbox
       {
         return false;
       }
+
+      duk_push_global_object(context_);
+      duk_push_c_function(context_, print, 1);
+
+      duk_put_prop_string(context_, -2, "print");
+
+      duk_pop(context_);
 
       return true;
     }
@@ -122,15 +144,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DukState::FatalErrorHandler(void* udata, const char* msg)
+    duk_hthread* DukState::context() const
     {
-      foundation::Logger::LogVerbosity<1>(
-        foundation::LogChannel::kScript,
-        foundation::LogSeverity::kFatal,
-        msg
-        );
-
-      assert(false);
+      return context_;
     }
   }
 }
