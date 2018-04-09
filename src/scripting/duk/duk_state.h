@@ -28,7 +28,7 @@ namespace snuffbox
       /**
       * @see IScriptState::Initialize
       */
-      void Initialize() override;
+      bool Initialize() override;
 
       /**
       * @see IScriptState::CompileFromSource

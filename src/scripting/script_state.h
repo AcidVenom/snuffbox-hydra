@@ -22,8 +22,10 @@ namespace snuffbox
 
       /**
       * @brief Initializes the native scripting API
+      *
+      * @return Was the initialization a success?
       */
-      virtual void Initialize() = 0;
+      virtual bool Initialize() = 0;
 
       /**
       * @brief Compiles a piece of scripting code from a string value

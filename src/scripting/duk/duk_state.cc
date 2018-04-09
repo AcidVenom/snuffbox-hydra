@@ -18,7 +18,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DukState::Initialize()
+    bool DukState::Initialize()
     {
       context_ = duk_create_heap(
         DukAllocator::DukAllocate, 
@@ -26,6 +26,13 @@ namespace snuffbox
         DukAllocator::DukDeallocate, 
         &allocator_, 
         FatalErrorHandler);
+
+      if (context_ == nullptr)
+      {
+        return false;
+      }
+
+      return true;
     }
 
     //--------------------------------------------------------------------------
