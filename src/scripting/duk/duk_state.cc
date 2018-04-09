@@ -1,6 +1,7 @@
 #include "scripting/duk/duk_state.h"
 
 #include <foundation/auxiliary/logger.h>
+#include <foundation/containers/string_utils.h>
 
 #include <duktape.h>
 
@@ -84,58 +85,14 @@ namespace snuffbox
       const char* line = duk_safe_to_string(context_, -2);
       const char* message = duk_safe_to_string(context_, -1);
 
-      foundation::String stack = message;
-      foundation::String current = "";
-      foundation::Vector<foundation::String> split;
+      foundation::StringUtils::StringList split = 
+        foundation::StringUtils::Split(message, '\n');
 
-      char c = '\0';
-
-      for (int i = 0; i < stack.size(); ++i)
-      {
-        c = stack.at(i);
-
-        if (c == '\n')
-        {
-          split.push_back(current);
-          current = "";
-          continue;
-        }
-
-        current += c;
-      }
-
-      auto Contains = [=](const foundation::String& str, const char* token)
-      {
-        size_t tl = strlen(token);
-        size_t counter = 0;
-
-        for (size_t i = 0; i < str.size(); ++i)
-        {
-          while (
-            counter < tl &&
-            i < str.size() &&
-            str.at(i) == token[counter])
-          {
-            ++i;
-            ++counter;
-          }
-
-          if (counter == tl)
-          {
-            return true;
-          }
-
-          counter = 0;
-        }
-
-        return false;
-      };
-
-      stack = "";
+      foundation::String stack = "";
 
       for (size_t i = 0; i < split.size(); ++i)
       {
-        if (Contains(split.at(i), "duk_") == true)
+        if (foundation::StringUtils::Contains(split.at(i), "duk_") >= 0)
         {
           continue;
         }

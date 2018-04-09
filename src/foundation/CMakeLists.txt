@@ -19,6 +19,8 @@ SET(MemoryAllocatorSources
 
 SET(ContainerSources
   "containers/string.h"
+  "containers/string_utils.h"
+  "containers/string_utils.cc"
   "containers/vector.h"
   "containers/map.h"
 )
