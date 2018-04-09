@@ -1,10 +1,11 @@
 #pragma once
 
 #include "scripting/duk/duk_state.h"
+#include "scripting/duk/duk_wrapper.h"
 
 #include <foundation/containers/string.h>
 
-#include <duktape.h>
+#include <cinttypes>
 
 namespace snuffbox
 {
@@ -12,6 +13,8 @@ namespace snuffbox
   {
     /**
     * @brief Used to call scripting functions from the C++ environment
+    *
+    * @tparam Args... The arguments to call the callback with
     *
     * The callback doesn't have an interface, as it is fully templated. The
     * functions of one callback implementation should match the other.
@@ -29,33 +32,6 @@ namespace snuffbox
       */
       DukCallback();
 
-      /**
-      * @brief Creates a callback from a global function
-      *
-      * @param[in] state The duktape state
-      * @param[in] name The name of the function in the global scope
-      * @param[out] func The created callback, if not nullptr
-      *
-      * @return Could we find the function in the global scope?
-      */
-      static bool FromGlobal(
-        DukState* state, 
-        const foundation::String& name,
-        DukCallback<Args...>* func);
-
-      /**
-      * @brief Call the callback with specified C++ arguments
-      *
-      * The arguments will be converted to their script values by the native
-      * implementation and then call the corresponding scripting variant that
-      * was registered.
-      *
-      * @param[in] args The arguments to call the callback with
-      *
-      * @return Was the call a success?
-      */
-      bool Call(Args&&... args);
-
     protected:
 
       /**
@@ -72,6 +48,73 @@ namespace snuffbox
       * @param[in] state The current duktape state
       */
       DukCallback(const foundation::String& name, DukState* state);
+
+    public:
+
+      /**
+      * @brief Creates a callback from a global function
+      *
+      * @param[in] state The duktape state
+      * @param[in] name The name of the function in the global scope
+      * @param[out] func The created callback, if not nullptr
+      *
+      * @return Could we find the function in the global scope?
+      */
+      static bool FromGlobal(
+        DukState* state, 
+        const foundation::String& name,
+        DukCallback<Args...>* func);
+
+    protected:
+
+      /**
+      * @brief Variadic unroll of the input arguments for the DukWrapper
+      *        to push them as scripting values onto the stack
+      *
+      * @tparam T The type of the current value
+      * @tparam Others The other arguments left to unroll
+      *
+      * @remarks Called when there is still more than 1 argument left
+      *
+      * @param[in] wrapper The wrapper object
+      * @param[in] current The current value
+      * @param[in] args The other arguments
+      *
+      * @return The number of unrolled arguments
+      */
+      template <typename T, typename ... Others>
+      uint8_t PushArg(DukWrapper& wrapper, T current, Others&&... args);
+
+
+      /**
+      * @see DukCallback::PushArg
+      *
+      * @remarks The last function call of the unroll
+      */
+      template <typename T>
+      uint8_t PushArg(DukWrapper& wrapper, T last);
+
+      /**
+      * @see DukCallback::PushArg
+      *
+      * @remarks Called when there are no arguments initially
+      */
+      uint8_t PushArg(DukWrapper& wrapper);
+
+    public:
+
+      /**
+      * @brief Call the callback with specified C++ arguments
+      *
+      * The arguments will be converted to their script values by the native
+      * implementation and then call the corresponding scripting variant that
+      * was registered.
+      *
+      * @param[in] args The arguments to call the callback with
+      *
+      * @return Was the call a success?
+      */
+      bool Call(Args&&... args);
 
     private:
 
@@ -149,6 +192,32 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <typename ... Args> template <typename T, typename ... Others>
+    inline uint8_t DukCallback<Args...>::PushArg(
+      DukWrapper& wrapper, 
+      T current, 
+      Others&&... args)
+    {
+      wrapper.PushValue<T>(current);
+      return PushArg(wrapper, eastl::forward<Others>(args)...) + 1;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args> template <typename T>
+    inline uint8_t DukCallback<Args...>::PushArg(DukWrapper& wrapper, T last)
+    {
+      wrapper.PushValue<T>(last);
+      return 1;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline uint8_t DukCallback<Args...>::PushArg(DukWrapper& wrapper)
+    {
+      return 0;
+    }
+
+    //--------------------------------------------------------------------------
     template <typename ... Args>
     inline bool DukCallback<Args...>::Call(Args&&... args)
     {
@@ -166,8 +235,12 @@ namespace snuffbox
         return false;
       }
 
+      DukWrapper wrapper = DukWrapper(ctx);
+
+      uint8_t nargs = PushArg(wrapper, eastl::forward<Args>(args)...);
+
       bool has_error = false;
-      if ((has_error = duk_pcall(ctx, 0)) != 0)
+      if ((has_error = duk_pcall(ctx, nargs)) != 0)
       {
         state_->LogLastError("Callback error in ({0}:{1}):\n\n{2}");
       }

@@ -1,6 +1,7 @@
 SET(RootSources
   "script_state.h"
   "script_value.h"
+  "script_value.cc"
   "script_function.h"
   "script_callback.h"
   "scripting.h"
@@ -15,12 +16,11 @@ IF (SNUFF_DUKTAPE)
     "duk/duk_allocator.cc"
     "duk/duk_state.h"
     "duk/duk_state.cc"
-    "duk/duk_value.h"
-    "duk/duk_value.cc"
+    "duk/duk_wrapper.h"
+    "duk/duk_wrapper.cc"
     "duk/duk_function.h"
     "duk/duk_function.cc"
     "duk/duk_callback.h"
-    "duk/duk_callback.cc"
   )
   
   SOURCE_GROUP("duk" FILES ${DuktapeSources})
