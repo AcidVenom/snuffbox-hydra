@@ -102,6 +102,7 @@ namespace snuffbox
         stack_idx,
         DUK_ENUM_INCLUDE_NONENUMERABLE
       );
+
       ScriptObject* obj =
         foundation::Memory::Construct<ScriptObject>(
           &foundation::Memory::default_allocator());
