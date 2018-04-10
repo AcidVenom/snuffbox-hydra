@@ -1,11 +1,13 @@
 #pragma once
 
+#include "scripting/script_type_traits.h"
 #include "scripting/script_value.h"
 
 #include <foundation/containers/vector.h>
 
-#include <EASTL/type_traits.h>
 #include <duktape.h>
+
+#include <string>
 
 namespace snuffbox
 {
@@ -28,39 +30,6 @@ namespace snuffbox
       * @param[in] ctx The context to use for all function calls
       */
       DukWrapper(duk_context* ctx);
-      
-      /**
-      * @brief Used to only enable a function if the template parameter is a
-      *        number
-      *
-      * @tparam T The type to check
-      */
-      template <typename T>
-      using is_number = 
-        typename eastl::enable_if<eastl::is_arithmetic<T>::value, T>::type;
-
-      /**
-      * @brief Used to only enable a function if the template parameter is an
-      *        enumerator
-      *
-      * @tparam T The type to check
-      */
-      template <typename T>
-      using is_enum = 
-        typename eastl::enable_if<eastl::is_enum<T>::value, T>::type;
-
-      /**
-      * @brief Used to only enable a function if the template parameter is both
-      *        not a number and not an enumerator
-      *
-      * @tparam T The type to check
-      */
-      template <typename T>
-      using is_n_number_and_enum =
-        typename eastl::enable_if<
-        eastl::is_arithmetic<T>::value == false &&
-        eastl::is_enum<T>::value == false,
-        T>::type;
 
       /**
       * @brief Used to push numerical values
@@ -70,7 +39,7 @@ namespace snuffbox
       template <typename T>
       void PushValue(
         T value, 
-        is_number<T>* = nullptr)
+        if_number<T>* = nullptr) const
       {
         PushValueImpl<double>(static_cast<double>(value));
       }
@@ -83,7 +52,7 @@ namespace snuffbox
       template <typename T>
       void PushValue( 
         T value, 
-        is_enum<T>* = nullptr)
+        if_enum<T>* = nullptr) const
       {
         PushValueImpl<double>(static_cast<double>(value));
       }
@@ -97,7 +66,7 @@ namespace snuffbox
       template <typename T>
       void PushValue(
         T value,
-        is_n_number_and_enum<T>* = nullptr)
+        if_n_number_and_enum<T>* = nullptr) const
       {
         PushValueImpl<T>(value);
       }
@@ -115,14 +84,24 @@ namespace snuffbox
       * @param[in] value The value to push
       */
       template <typename T>
-      void PushValueImpl(T value);
+      void PushValueImpl(T value) const;
 
       /**
       * @brief Retrieves a value from the duktape stack as a ScriptHandle
       *
       * @param[in] stack_idx The index of the value to retrieve
       */
-      ScriptHandle GetValueAt(int stack_idx);
+      ScriptHandle GetValueAt(duk_idx_t stack_idx) const;
+
+      /**
+      * @brief Retieves an object from the duktape stack as a ScriptObject
+      *
+      * If the object is indexed by contiguous indices, the object is treated
+      * as an array.
+      *
+      * @see DukWrapper::GetValueAt
+      */
+      ScriptHandle GetObjectAt(duk_idx_t stack_idx) const;
 
     private:
 
@@ -131,35 +110,74 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(bool value)
+    inline void DukWrapper::PushValueImpl(bool value) const
     {
       duk_push_boolean(context_, value);
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(double value)
+    inline void DukWrapper::PushValueImpl(double value) const
     {
       duk_push_number(context_, value);
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(const char* value)
+    inline void DukWrapper::PushValueImpl(const char* value) const
     {
       duk_push_string(context_, value);
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(foundation::String value)
+    inline void DukWrapper::PushValueImpl(foundation::String value) const
     {
       PushValueImpl<const char*>(value.c_str());
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(ScriptHandle value)
+    inline void DukWrapper::PushValueImpl(ScriptHandle value) const;
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void DukWrapper::PushValueImpl(
+      foundation::SharedPtr<ScriptObject> value) const
+    {
+      duk_push_object(context_);
+
+      ScriptObject* obj = value.get();
+
+      for (
+        ScriptObject::iterator it = obj->begin();
+        it != obj->end();
+        ++it)
+      {
+        PushValueImpl(it->second);
+        duk_put_prop_string(context_, -1, it->first.c_str());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void DukWrapper::PushValueImpl(
+      foundation::SharedPtr<ScriptArray> value) const
+    {
+      duk_push_array(context_);
+
+      ScriptArray* arr = value.get();
+
+      for (size_t i = 0; i < arr->size(); ++i)
+      {
+        PushValueImpl(arr->at(i));
+        duk_put_prop_string(context_, -1, std::to_string(i).c_str());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void DukWrapper::PushValueImpl(ScriptHandle value) const
     {
       switch (value->type())
       {

@@ -1,4 +1,5 @@
 SET(RootSources
+  "script_type_traits.h"
   "script_state.h"
   "script_value.h"
   "script_value.cc"
