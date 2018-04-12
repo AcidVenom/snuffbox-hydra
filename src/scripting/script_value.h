@@ -1,5 +1,7 @@
 #pragma once
 
+#include "scripting/script_type_traits.h"
+
 #include <foundation/containers/string.h>
 #include <foundation/containers/vector.h>
 #include <foundation/containers/map.h>
@@ -10,6 +12,15 @@ namespace snuffbox
 {
   namespace scripting
   {
+    class ScriptValue;
+    class ScriptObject;
+    class ScriptArray;
+
+    /**
+    * @brief A short-hand for all the values stored in a SharedPtr
+    */
+    using ScriptHandle = foundation::SharedPtr<ScriptValue>;
+
     /**
     * @brief Used to store values from the scripting environment as C++
     *        data types
@@ -47,19 +58,59 @@ namespace snuffbox
       ScriptValue(Types type);
 
       /**
+      * @brief Used to cast any number or enumerator value
+      *
+      * @see ScriptValue::FromImpl
+      */
+      template <typename T>
+      static ScriptHandle From(T value, if_number_or_enum<T>* = nullptr);
+
+      /**
+      * @brief Used to cast any other value
+      *
+      * @see ScriptValue::FromImpl
+      */
+      template <typename T>
+      static ScriptHandle From(T value, if_n_number_and_enum<T>* = nullptr);
+
+      /**
+      * @brief Creates a scriptable object
+      *
+      * @return The created object
+      */
+      static foundation::SharedPtr<ScriptObject> CreateObject();
+
+      /**
+      * @brief Creates a scriptable array
+      *
+      * @return The created array
+      */
+      static foundation::SharedPtr<ScriptArray> CreateArray();
+
+      /**
       * @return The type of this value
       */
       Types type() const;
+
+
+    protected:
+
+      /**
+      * @brief Constructs a script value from a type
+      *
+      * @tparam T The type to convert
+      *
+      * @param[in] value The value to store in the converted value
+      *
+      * @return The converted value
+      */
+      template <typename T>
+      static ScriptHandle FromImpl(T value);
 
     private:
 
       Types type_; //!< The type of this value
     };
-
-    /**
-    * @brief A short-hand for all the values stored in a SharedPtr
-    */
-    using ScriptHandle = foundation::SharedPtr<ScriptValue>;
 
     /**
     * @brief A "null", "nil" or "undefined" data type
@@ -266,6 +317,60 @@ namespace snuffbox
       */
       foundation::SharedPtr<ScriptObject> object_;
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ScriptHandle ScriptValue::From(T value, if_number_or_enum<T>*)
+    {
+      return static_cast<T>(FromImpl<double>(value));
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ScriptHandle ScriptValue::From(T value, if_n_number_and_enum<T>*)
+    {
+      return static_cast<T>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline ScriptHandle ScriptValue::FromImpl(double value)
+    {
+      return foundation::Memory::ConstructShared<ScriptNumber>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline ScriptHandle ScriptValue::FromImpl(bool value)
+    {
+      return foundation::Memory::ConstructShared<ScriptBoolean>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline ScriptHandle ScriptValue::FromImpl(const char* value)
+    {
+      return foundation::Memory::ConstructShared<ScriptString>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline ScriptHandle ScriptValue::FromImpl(foundation::String value)
+    {
+      return foundation::Memory::ConstructShared<ScriptString>(
+        &foundation::Memory::default_allocator(),
+        value.c_str()
+        );
+    }
 
     //--------------------------------------------------------------------------
     template <typename T>

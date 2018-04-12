@@ -42,7 +42,10 @@ namespace snuffbox
       /**
       * @see IScriptState::CompileFromSource
       */
-      bool CompileFromSource(const char* ctx, const char* src, bool print);
+      bool CompileFromSource(
+        const char* ctx, 
+        const char* src, 
+        bool print) override;
 
       /**
       * @brief Logs the last error that is on the stack

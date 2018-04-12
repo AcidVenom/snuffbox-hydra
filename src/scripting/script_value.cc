@@ -12,6 +12,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    foundation::SharedPtr<ScriptObject> ScriptValue::CreateObject()
+    {
+      return foundation::Memory::ConstructShared<ScriptObject>(
+        &foundation::Memory::default_allocator()
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    foundation::SharedPtr<ScriptArray> ScriptValue::CreateArray()
+    {
+      return foundation::Memory::ConstructShared<ScriptArray>(
+          &foundation::Memory::default_allocator()
+        );
+    }
+
+    //--------------------------------------------------------------------------
     ScriptValue::Types ScriptValue::type() const
     {
       return type_;

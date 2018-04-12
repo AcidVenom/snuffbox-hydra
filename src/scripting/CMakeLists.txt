@@ -3,6 +3,8 @@ SET(RootSources
   "script_state.h"
   "script_value.h"
   "script_value.cc"
+  "script_args.h"
+  "script_args.cc"
   "script_function.h"
   "script_callback.h"
   "scripting.h"

@@ -32,30 +32,14 @@ namespace snuffbox
       DukWrapper(duk_context* ctx);
 
       /**
-      * @brief Used to push numerical values
+      * @brief Used to push numerical and enumerator values
       *
       * @see DukWrapper::PushValueImpl
       */
       template <typename T>
       void PushValue(
         T value, 
-        if_number<T>* = nullptr) const
-      {
-        PushValueImpl<double>(static_cast<double>(value));
-      }
-
-      /**
-      * @brief Used to push enumerator values
-      *
-      * @see DukWrapper::PushValueImpl
-      */
-      template <typename T>
-      void PushValue( 
-        T value, 
-        if_enum<T>* = nullptr) const
-      {
-        PushValueImpl<double>(static_cast<double>(value));
-      }
+        if_number_or_enum<T>* = nullptr) const;
 
       /**
       * @brief Used to push any value that is both not an enumeration,
@@ -66,10 +50,7 @@ namespace snuffbox
       template <typename T>
       void PushValue(
         T value,
-        if_n_number_and_enum<T>* = nullptr) const
-      {
-        PushValueImpl<T>(value);
-      }
+        if_n_number_and_enum<T>* = nullptr) const;
 
     protected:
 
@@ -107,6 +88,20 @@ namespace snuffbox
 
       duk_context* context_; //!< The context for this wrapper
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void DukWrapper::PushValue(T value, if_number_or_enum<T>*) const
+    {
+      PushValueImpl<double>(static_cast<double>(value));
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void DukWrapper::PushValue(T value, if_n_number_and_enum<T>*) const
+    {
+      PushValueImpl<T>(value);
+    }
 
     //--------------------------------------------------------------------------
     template <>

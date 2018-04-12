@@ -27,6 +27,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     duk_ret_t print(duk_context* ctx)
     {
+      duk_int_t argc = duk_get_top(ctx);
       const char* value = duk_safe_to_string(ctx, -1);
       printf("%s\n", value);
 
@@ -49,7 +50,7 @@ namespace snuffbox
       }
 
       duk_push_global_object(context_);
-      duk_push_c_function(context_, print, 1);
+      duk_push_c_function(context_, print, DUK_VARARGS);
 
       duk_put_prop_string(context_, -2, "print");
 
