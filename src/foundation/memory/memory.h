@@ -12,6 +12,12 @@ namespace snuffbox
 {
   namespace foundation
   {
+    /**
+    * @brief Used with EASTL shared and unique pointers to delete underlying
+    *        memory
+    *
+    * @author Daniel Konings
+    */
     template <typename T>
     struct MemoryDeleter
     {
