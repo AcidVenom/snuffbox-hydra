@@ -1,7 +1,9 @@
 #include "scripting/duk/duk_state.h"
+#include "scripting/duk/duk_function.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/containers/string_utils.h>
+#include "scripting/script_args.h"
 
 #include <duktape.h>
 
@@ -35,6 +37,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void print(ScriptArgs& args)
+    {
+      if (args.Check("S") == false)
+      {
+        return;
+      }
+
+      foundation::Logger::Log(
+        args.Get<foundation::String>(0, "undefined").c_str());
+    }
+
+    //--------------------------------------------------------------------------
     bool DukState::Initialize()
     {
       context_ = duk_create_heap(
@@ -49,10 +63,10 @@ namespace snuffbox
         return false;
       }
 
-      duk_push_global_object(context_);
-      duk_push_c_function(context_, print, DUK_VARARGS);
+      ScriptFunction funcs = print;
 
-      duk_put_prop_string(context_, -2, "print");
+      duk_push_global_object(context_);
+      DukFunction::Bind(context_, -1, print, "print");
 
       duk_pop(context_);
 

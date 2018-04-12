@@ -9,6 +9,6 @@ namespace snuffbox
     /**
     * @brief A type definition for a scripting free-function pointer
     */
-    using ScriptFunction = void(*)(const ScriptArgs&);
+    using ScriptFunction = void(*)(ScriptArgs&);
   }
 }

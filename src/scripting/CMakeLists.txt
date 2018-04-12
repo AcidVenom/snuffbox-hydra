@@ -15,6 +15,7 @@ SET(NativeSources "")
 IF (SNUFF_DUKTAPE)
   MESSAGE(STATUS "Building the duktape version of the native scripting library")
   SET(DuktapeSources
+    "duk/duk_definitions.h"
     "duk/duk_allocator.h"
     "duk/duk_allocator.cc"
     "duk/duk_state.h"

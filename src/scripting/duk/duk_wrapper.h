@@ -67,6 +67,8 @@ namespace snuffbox
       template <typename T>
       void PushValueImpl(T value) const;
 
+    public:
+
       /**
       * @brief Retrieves a value from the duktape stack as a ScriptHandle
       *
@@ -137,16 +139,13 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(
-      foundation::SharedPtr<ScriptObject> value) const
+    inline void DukWrapper::PushValueImpl(ScriptObject* value) const
     {
       duk_push_object(context_);
 
-      ScriptObject* obj = value.get();
-
       for (
-        ScriptObject::iterator it = obj->begin();
-        it != obj->end();
+        ScriptObject::iterator it = value->begin();
+        it != value->end();
         ++it)
       {
         PushValueImpl(it->second);
@@ -156,23 +155,20 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(
-      foundation::SharedPtr<ScriptArray> value) const
+    inline void DukWrapper::PushValueImpl(ScriptArray* value) const
     {
       duk_push_array(context_);
 
-      ScriptArray* arr = value.get();
-
-      for (size_t i = 0; i < arr->size(); ++i)
+      for (size_t i = 0; i < value->size(); ++i)
       {
-        PushValueImpl(arr->at(i));
+        PushValueImpl(value->at(i));
         duk_put_prop_string(context_, -1, std::to_string(i).c_str());
       }
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline void DukWrapper::PushValueImpl(ScriptHandle value) const
+    inline void DukWrapper::PushValueImpl(ScriptValue* value) const
     {
       switch (value->type())
       {
@@ -182,33 +178,40 @@ namespace snuffbox
 
       case ScriptValue::Types::kNumber:
         PushValueImpl(
-          eastl::static_pointer_cast<ScriptNumber>(value)->value());
+          static_cast<ScriptNumber*>(value)->value());
         break;
 
       case ScriptValue::Types::kBoolean:
         PushValueImpl(
-          eastl::static_pointer_cast<ScriptBoolean>(value)->value());
+          static_cast<ScriptBoolean*>(value)->value());
         break;
 
       case ScriptValue::Types::kString:
         PushValueImpl(
-          eastl::static_pointer_cast<ScriptString>(value)->value());
+          static_cast<ScriptString*>(value)->value());
         break;
 
       case ScriptValue::Types::kObject:
         PushValueImpl(
-          eastl::static_pointer_cast<ScriptObject>(value));
+          static_cast<ScriptObject*>(value));
         break;
 
       case ScriptValue::Types::kArray:
         PushValueImpl(
-          eastl::static_pointer_cast<ScriptArray>(value));
+          static_cast<ScriptArray*>(value));
         break;
 
       default:
         duk_push_undefined(context_);
         break;
       }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void DukWrapper::PushValueImpl(ScriptHandle value) const
+    {
+      return PushValueImpl<ScriptValue*>(value.get());
     }
   }
 }

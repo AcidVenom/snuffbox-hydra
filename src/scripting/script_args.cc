@@ -10,6 +10,14 @@ namespace snuffbox
   namespace scripting
   {
     //--------------------------------------------------------------------------
+    ScriptArgs::ScriptArgs() :
+      callee_(nullptr),
+      return_value_(nullptr)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     ScriptArgs::ScriptArgs(
       const foundation::Vector<ScriptHandle>& args,
       void* callee)
@@ -22,7 +30,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ScriptArgs::Check(const char* format)
+    bool ScriptArgs::Check(const char* format) const
     {
       size_t len = strlen(format);
 

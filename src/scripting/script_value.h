@@ -322,7 +322,7 @@ namespace snuffbox
     template <typename T>
     inline ScriptHandle ScriptValue::From(T value, if_number_or_enum<T>*)
     {
-      return static_cast<T>(FromImpl<double>(value));
+      return FromImpl<double>(static_cast<double>(value));
     }
 
     //--------------------------------------------------------------------------

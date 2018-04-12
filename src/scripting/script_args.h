@@ -25,6 +25,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Default constructor
+      */
+      ScriptArgs();
+
+      /**
       * @brief Construct from a list of arguments
       *
       * The arguments should be created by the native scripting API and put
@@ -61,7 +66,7 @@ namespace snuffbox
       *
       * @param[in] format The format to check
       */
-      bool Check(const char* format);
+      bool Check(const char* format) const;
 
       /**
       * @return The number of arguments contained in this class
@@ -163,7 +168,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    T ScriptArgs::Get(uint8_t idx, T def, if_number_or_enum<T>*) const
+    inline T ScriptArgs::Get(uint8_t idx, T def, if_number_or_enum<T>*) const
     {
       return static_cast<T>(
         GetImpl<double, ScriptNumber, ScriptValue::Types::kNumber>(idx, def));
@@ -171,7 +176,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    bool ScriptArgs::Get(
+    inline bool ScriptArgs::Get(
       uint8_t idx, 
       bool def, 
       if_n_number_and_enum<bool>*) const
@@ -182,21 +187,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    const char* ScriptArgs::Get(
-      uint8_t idx, 
-      const char* def, 
-      if_n_number_and_enum<const char*>*) const
-    {
-      return 
-        GetImpl<
-        foundation::String, 
-        ScriptString, 
-        ScriptValue::Types::kString>(idx, def).c_str();
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    foundation::String ScriptArgs::Get(
+    inline foundation::String ScriptArgs::Get(
       uint8_t idx, 
       foundation::String def, 
       if_n_number_and_enum<foundation::String>*) const
@@ -210,14 +201,14 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    void ScriptArgs::AddReturnValue(T value)
+    inline void ScriptArgs::AddReturnValue(T value)
     {
       return_value_ = ScriptValue::From<T>(value);
     }
 
     //--------------------------------------------------------------------------
     template <typename T, typename Y, ScriptValue::Types U>
-    T ScriptArgs::GetImpl(uint8_t idx, T def) const
+    inline T ScriptArgs::GetImpl(uint8_t idx, T def) const
     {
       ScriptValue* val = GetArgument(idx);
 
