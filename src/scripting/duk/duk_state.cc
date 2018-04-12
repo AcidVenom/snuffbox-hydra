@@ -74,7 +74,10 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool DukState::CompileFromSource(const char* ctx, const char* src, bool print)
+    bool DukState::CompileFromSource(
+      const char* ctx, 
+      const char* src, 
+      bool print)
     {
       duk_push_string(context_, src);
       duk_push_string(context_, ctx);
