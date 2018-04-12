@@ -51,6 +51,15 @@ namespace snuffbox
       };
 
       /**
+      * @brief Converts a type enumerator value to a string
+      *
+      * @param[in] type The type to convert
+      *
+      * @return The converted string
+      */
+      static const char* TypeToString(ScriptValue::Types type);
+
+      /**
       * @brief Construct by specifying the type
       *
       * @param[in] type The type of this value
@@ -105,7 +114,15 @@ namespace snuffbox
       * @return The converted value
       */
       template <typename T>
-      static ScriptHandle FromImpl(T value);
+      static ScriptHandle FromImpl(T value, if_script_handle<T>* = nullptr);
+
+      /**
+      * @brief Constructs a script value by another script value
+      *
+      * @see ScriptValue::FromImpl
+      */
+      template <typename T>
+      static ScriptHandle FromImpl(T value, if_n_script_handle<T>* = nullptr);
 
     private:
 
@@ -239,6 +256,38 @@ namespace snuffbox
       * @brief Default constructor, simply assigns the type
       */
       ScriptObject();
+
+      /**
+      * @brief Checks if a key exists in this object
+      *
+      * @param[in] key The key to check for
+      *
+      * @return Does the key exist in this object?
+      */
+      bool Contains(const char* key) const;
+
+      /**
+      * @brief Retrieves a value from this object
+      *
+      * @param[in] key The key to retrieve the value from
+      *
+      * @return The found value, or nullptr if it doesn't exist
+      */
+      ScriptValue* Get(const char* key) const;
+
+      /**
+      * @brief Inserts a value at a provided key
+      *
+      * This converts the type to its respective handle using ScriptValue::From.
+      * If the value is a ScriptHandle, it will just be inserted into the map.
+      *
+      * @tparam T The type of the value to insert
+      *
+      * @param[in] key The key to insert the value at
+      * @param[in] value The value to insert
+      */
+      template <typename T>
+      void Insert(const char* key, T value);
     };
 
     /**
@@ -268,6 +317,19 @@ namespace snuffbox
       * @brief Default constructor, simply assigns the type
       */
       ScriptArray();
+
+      /**
+      * @brief Adds a value to the array
+      *
+      * This converts the type to its respective handle using ScriptValue::From.
+      * If the value is a ScriptHandle, it will just be inserted into the list.
+      *
+      * @tparam T The type of the value to insert
+      *
+      * @param[in] value The value to insert
+      */
+      template <typename T>
+      void Add(T value);
     };
 
     /**
@@ -329,12 +391,14 @@ namespace snuffbox
     template <typename T>
     inline ScriptHandle ScriptValue::From(T value, if_n_number_and_enum<T>*)
     {
-      return static_cast<T>(value);
+      return FromImpl<T>(value);
     }
 
     //--------------------------------------------------------------------------
     template <>
-    inline ScriptHandle ScriptValue::FromImpl(double value)
+    inline ScriptHandle ScriptValue::FromImpl(
+      double value, 
+      if_n_script_handle<double>*)
     {
       return foundation::Memory::ConstructShared<ScriptNumber>(
         &foundation::Memory::default_allocator(),
@@ -344,7 +408,9 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline ScriptHandle ScriptValue::FromImpl(bool value)
+    inline ScriptHandle ScriptValue::FromImpl(
+      bool value, 
+      if_n_script_handle<bool>*)
     {
       return foundation::Memory::ConstructShared<ScriptBoolean>(
         &foundation::Memory::default_allocator(),
@@ -354,7 +420,9 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline ScriptHandle ScriptValue::FromImpl(const char* value)
+    inline ScriptHandle ScriptValue::FromImpl(
+      const char* value,
+      if_n_script_handle<const char*>*)
     {
       return foundation::Memory::ConstructShared<ScriptString>(
         &foundation::Memory::default_allocator(),
@@ -364,12 +432,56 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <>
-    inline ScriptHandle ScriptValue::FromImpl(foundation::String value)
+    inline ScriptHandle ScriptValue::FromImpl(
+      foundation::String value,
+      if_n_script_handle<foundation::String>*)
     {
       return foundation::Memory::ConstructShared<ScriptString>(
         &foundation::Memory::default_allocator(),
         value.c_str()
         );
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ScriptHandle ScriptValue::FromImpl(
+      T value,
+      if_script_handle<T>*)
+    {
+      return eastl::static_pointer_cast<ScriptValue>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void ScriptObject::Insert(const char* key, ScriptHandle value)
+    {
+      emplace(eastl::pair<foundation::String, ScriptHandle>
+      {
+        foundation::String(key), value
+      });
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void ScriptObject::Insert(const char* key, T value)
+    {
+      ScriptHandle handle = ScriptValue::From<T>(value);
+      Insert(key, handle);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void ScriptArray::Add(ScriptHandle value)
+    {
+      push_back(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void ScriptArray::Add(T value)
+    {
+      ScriptHandle handle = ScriptValue::From<T>(value);
+      Add(handle);
     }
 
     //--------------------------------------------------------------------------

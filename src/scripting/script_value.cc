@@ -5,6 +5,37 @@ namespace snuffbox
   namespace scripting
   {
     //--------------------------------------------------------------------------
+    const char* ScriptValue::TypeToString(ScriptValue::Types type)
+    {
+      switch (type)
+      {
+      case Types::kNull:
+        return "Null";
+
+      case Types::kNumber:
+        return "Number";
+
+      case Types::kBoolean:
+        return "Boolean";
+
+      case Types::kString:
+        return "String";
+        
+      case Types::kObject:
+        return "Object";
+
+      case Types::kArray:
+        return "Array";
+
+      case Types::kUserdata:
+        return "Userdata";
+
+      default:
+        return "Unknown";
+      }
+    }
+
+    //--------------------------------------------------------------------------
     ScriptValue::ScriptValue(Types type) :
       type_(type)
     {
@@ -87,6 +118,23 @@ namespace snuffbox
       ScriptValue(ScriptValue::Types::kObject)
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    bool ScriptObject::Contains(const char* key) const
+    {
+      return find(key) != end();
+    }
+
+    //--------------------------------------------------------------------------
+    ScriptValue* ScriptObject::Get(const char* key) const
+    {
+      if (Contains(key) == false)
+      {
+        return nullptr;
+      }
+
+      return find(key)->second.get();
     }
 
     //--------------------------------------------------------------------------

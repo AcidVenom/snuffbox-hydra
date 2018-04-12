@@ -149,7 +149,7 @@ namespace snuffbox
         ++it)
       {
         PushValueImpl(it->second);
-        duk_put_prop_string(context_, -1, it->first.c_str());
+        duk_put_prop_string(context_, -2, it->first.c_str());
       }
     }
 
@@ -162,7 +162,7 @@ namespace snuffbox
       for (size_t i = 0; i < value->size(); ++i)
       {
         PushValueImpl(value->at(i));
-        duk_put_prop_string(context_, -1, std::to_string(i).c_str());
+        duk_put_prop_string(context_, -2, std::to_string(i).c_str());
       }
     }
 

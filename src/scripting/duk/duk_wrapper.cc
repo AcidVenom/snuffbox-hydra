@@ -56,14 +56,19 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptHandle DukWrapper::GetObjectAt(duk_idx_t stack_idx) const
     {
-      duk_enum(
-        context_, 
-        stack_idx, 
-        DUK_ENUM_ARRAY_INDICES_ONLY | DUK_ENUM_SORT_ARRAY_INDICES);
+      auto EnumerateArray = [=]()
+      {
+        duk_enum(
+          context_, 
+          stack_idx, 
+          DUK_ENUM_ARRAY_INDICES_ONLY | DUK_ENUM_SORT_ARRAY_INDICES);
+      };
+      
+      EnumerateArray();
 
       size_t array_count = 0;
 
-      while (duk_next(context_, -1, false) == 1)
+      while (duk_next(context_, -1, 0) > 0)
       {
         ++array_count;
         duk_pop(context_);
@@ -81,9 +86,10 @@ namespace snuffbox
 
         array_count = 0;
 
-        while (duk_next(context_, -1, false) == 1)
+        EnumerateArray();
+
+        while (duk_next(context_, -1, 1) > 0)
         {
-          duk_get_prop_string(context_, -1, duk_get_string(context_, -1));
           arr->at(array_count) = GetValueAt(-1);
 
           duk_pop_2(context_);
@@ -95,13 +101,7 @@ namespace snuffbox
         return foundation::Memory::MakeShared<ScriptArray>(arr);
       }
 
-      duk_pop(context_);
-
-      duk_enum(
-        context_,
-        stack_idx,
-        DUK_ENUM_INCLUDE_NONENUMERABLE
-      );
+      duk_enum(context_, stack_idx, 0);
 
       ScriptObject* obj =
         foundation::Memory::Construct<ScriptObject>(
@@ -109,10 +109,9 @@ namespace snuffbox
 
       const char* key;
 
-      while (duk_next(context_, -1, false) == 1)
+      while (duk_next(context_, -1, 1) > 0)
       {
-        key = duk_get_string(context_, -1);
-        duk_get_prop_string(context_, -1, key);
+        key = duk_get_string(context_, -2);
 
         obj->emplace(
           eastl::pair<foundation::String, ScriptHandle>

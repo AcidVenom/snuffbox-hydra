@@ -37,15 +37,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void print(ScriptArgs& args)
+    bool print(ScriptArgs& args)
     {
       if (args.Check("S") == false)
       {
-        return;
+        return false;
       }
 
       foundation::Logger::Log(
         args.Get<foundation::String>(0, "undefined").c_str());
+
+      return true;
     }
 
     //--------------------------------------------------------------------------
@@ -62,8 +64,6 @@ namespace snuffbox
       {
         return false;
       }
-
-      ScriptFunction funcs = print;
 
       duk_push_global_object(context_);
       DukFunction::Bind(context_, -1, print, "print");
@@ -129,7 +129,9 @@ namespace snuffbox
 
       for (size_t i = 0; i < split.size(); ++i)
       {
-        if (foundation::StringUtils::Contains(split.at(i), "duk_") >= 0)
+        if (
+          foundation::StringUtils::Contains(split.at(i), "duk_") >= 0 ||
+          foundation::StringUtils::Contains(split.at(i), "anon") >= 0)
         {
           continue;
         }

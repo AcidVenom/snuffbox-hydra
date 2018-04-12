@@ -45,32 +45,38 @@ namespace snuffbox
       };
 
       char c;
-      ScriptValue::Types expected;
+      ScriptValue::Types expected, type;
 
       for (size_t i = 0; i < len; ++i)
       {
         c = static_cast<char>(toupper(format[i]));
-        expected = GetArgumentType(i);
+        type = GetArgumentType(i);
 
         switch (c)
         {
         case 'N':
-          return expected == ScriptValue::Types::kNumber;
+          expected = ScriptValue::Types::kNumber;
+          break;
 
         case 'B':
-          return expected == ScriptValue::Types::kBoolean;
+          expected = ScriptValue::Types::kBoolean;
+          break;
 
         case 'S':
-          return expected == ScriptValue::Types::kString;
+          expected = ScriptValue::Types::kString;
+          break;
 
         case 'O':
-          return expected == ScriptValue::Types::kObject;
+          expected = ScriptValue::Types::kObject;
+          break;
 
         case 'A':
-          return expected == ScriptValue::Types::kArray;
+          expected = ScriptValue::Types::kArray;
+          break;
 
         case 'U':
-          return expected == ScriptValue::Types::kUserdata;
+          expected = ScriptValue::Types::kUserdata;
+          break;
 
         default:
           foundation::Logger::LogVerbosity<2>(
@@ -81,9 +87,14 @@ namespace snuffbox
 
           return false;
         }
+
+        if (CheckArg(expected, type, static_cast<uint8_t>(i)) == false)
+        {
+          return false;
+        }
       }
 
-      return false;
+      return true;
     }
 
     //--------------------------------------------------------------------------
@@ -124,6 +135,28 @@ namespace snuffbox
       }
 
       return arguments_.at(idx).get();
+    }
+
+    //--------------------------------------------------------------------------
+    bool ScriptArgs::CheckArg(
+      ScriptValue::Types expected, 
+      ScriptValue::Types type,
+      uint8_t idx)
+    {
+      if (expected != type)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kScript,
+          foundation::LogSeverity::kError,
+          "Expected argument of type '{0}', but got '{1}', for argument {2}",
+          ScriptValue::TypeToString(expected),
+          ScriptValue::TypeToString(type),
+          static_cast<uint32_t>(idx)
+          );
+        return false;
+      }
+
+      return true;
     }
   }
 }

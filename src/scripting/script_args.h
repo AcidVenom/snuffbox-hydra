@@ -137,6 +137,21 @@ namespace snuffbox
       ScriptValue* GetArgument(uint8_t idx) const;
 
       /**
+      * @brief Checks an argument and logs an error if the expected argument
+      *        type was not found
+      *
+      * @param[in] expected The expected type
+      * @param[in] type The argument type
+      * @param[in] idx The argument index
+      *
+      * @return Was the argument of a valid type?
+      */
+      static bool CheckArg(
+        ScriptValue::Types expected, 
+        ScriptValue::Types type,
+        uint8_t idx);
+
+      /**
       * @brief Retrieves a certain argument as a certain type, but only if
       *        the argument retrieved is of the same type as the template
       *        parameter (or castable).

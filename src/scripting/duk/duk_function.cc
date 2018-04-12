@@ -63,7 +63,12 @@ namespace snuffbox
       ScriptArgs args;
       GetArguments(wrapper, argc, &args);
 
-      func(args);
+      bool res = func(args);
+
+      if (res == false)
+      {
+        return DUK_RET_TYPE_ERROR;
+      }
 
       ScriptValue* ret = args.return_value();
 
@@ -73,7 +78,6 @@ namespace snuffbox
       }
 
       wrapper.PushValue<ScriptValue*>(ret);
-
       return 1;
     }
   }
