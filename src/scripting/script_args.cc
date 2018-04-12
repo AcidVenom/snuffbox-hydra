@@ -74,10 +74,6 @@ namespace snuffbox
           expected = ScriptValue::Types::kArray;
           break;
 
-        case 'U':
-          expected = ScriptValue::Types::kUserdata;
-          break;
-
         default:
           foundation::Logger::LogVerbosity<2>(
             foundation::LogChannel::kScript,
