@@ -13,6 +13,8 @@ namespace snuffbox
 {
   namespace scripting
   {
+    class ScriptArgs;
+
     /**
     * @brief Used to wrap the stack of duktape and automatically do value
     *        retrieving and casting without having to check types
@@ -85,6 +87,14 @@ namespace snuffbox
       * @see DukWrapper::GetValueAt
       */
       ScriptHandle GetObjectAt(duk_idx_t stack_idx) const;
+
+
+      /**
+      * @brief Retrieves the current arguments from a duktape context
+      *
+      * @param[out] args The converted arguments
+      */
+      void GetArguments(ScriptArgs* args) const;
 
     private:
 

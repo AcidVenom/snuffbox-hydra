@@ -50,11 +50,10 @@ namespace snuffbox
     *        and stored in a SharedPtr
     *
     * @tparam T The type to check
-    * @tparam Y The second type to use with ScriptUserdata
     *
     * @author Daniel Konings
     */
-    template <typename T, typename Y = T>
+    template <typename T>
     struct is_script_handle : eastl::false_type {};
 
     /**
@@ -118,17 +117,6 @@ namespace snuffbox
     */
     template <>
     struct is_script_handle<foundation::SharedPtr<ScriptArray>> 
-      : eastl::true_type {};
-    
-    /**
-    * @see is_script_handle
-    *
-    * @tparam Y The type of the userdata
-    *
-    * @brief Specialization for ScriptUserdata
-    */
-    template <typename Y>
-    struct is_script_handle<foundation::SharedPtr<ScriptUserdata<Y>>> 
       : eastl::true_type {};
 
     /**

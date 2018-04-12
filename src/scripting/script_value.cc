@@ -27,9 +27,6 @@ namespace snuffbox
       case Types::kArray:
         return "Array";
 
-      case Types::kUserdata:
-        return "Userdata";
-
       default:
         return "Unknown";
       }

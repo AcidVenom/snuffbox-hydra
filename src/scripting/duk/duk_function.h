@@ -48,22 +48,6 @@ namespace snuffbox
         ScriptFunction func,
         const char* name);
 
-    protected:
-
-      /**
-      * @brief Retrieves the current arguments from a duktape context
-      *
-      * @param[in] wrapper The DukWrapper constructed from the current duktape
-      *                    context
-      * @param[in] argc The number of arguments at the top of the current
-      *                 duktape stack
-      * @param[out] args The converted arguments
-      */
-      static void GetArguments(
-        const DukWrapper& wrapper, 
-        uint8_t argc, 
-        ScriptArgs* args);
-
       /**
       * @brief The actual duktape call, which is to be wrapped with
       *        the public function callback

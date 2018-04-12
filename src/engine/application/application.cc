@@ -1,7 +1,7 @@
 #include "engine/application/application.h"
 #include "engine/auxiliary/debug.h"
 
-#include "engine/cvar/cvar_service.h"
+#include "engine/services/cvar_service.h"
 
 #include <cassert>
 #include <iostream>

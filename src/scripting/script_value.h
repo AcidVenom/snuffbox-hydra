@@ -46,8 +46,7 @@ namespace snuffbox
         kNumber, //!< Numerical values, they are always double
         kString, //!< String values stored as an EASTL string
         kObject, //!< Object values by key/value pairs
-        kArray, //!< Array values by indices,
-        kUserdata //!< A userdata value
+        kArray, //!< Array values by indices
       };
 
       /**
@@ -332,54 +331,6 @@ namespace snuffbox
       void Add(T value);
     };
 
-    /**
-    * @brief A userdata pointer
-    *
-    * @tparam T The expected pointer type
-    *
-    * This data type should also contain a reference to its corresponding object
-    *
-    * The userdata should be checked by the native scripting API, to make sure
-    * that the pointer stored is of the actual type the user expects
-    *
-    * @see ScriptObject
-    *
-    * @author Daniel Konings
-    */
-    template <typename T>
-    class ScriptUserdata : public ScriptValue
-    {
-
-    public:
-
-      /**
-      * @brief Construct from both the pointer and the corresponding object
-      *
-      * @param[in] ptr The pointer to store in this userdata
-      * @param[in] object The object handle to store
-      */
-      ScriptUserdata(T* ptr, foundation::SharedPtr<ScriptObject> object);
-
-      /**
-      * @return The stored pointer
-      */
-      T* ptr() const;
-
-      /**
-      * @return The object this userdata corresponds to
-      */
-      foundation::SharedPtr<ScriptObject> object() const;
-
-    private:
-
-      T* ptr_; //!< The stored pointer
-
-      /**
-      * @brief The object this userdata corresponds to
-      */
-      foundation::SharedPtr<ScriptObject> object_;
-    };
-
     //--------------------------------------------------------------------------
     template <typename T>
     inline ScriptHandle ScriptValue::From(T value, if_number_or_enum<T>*)
@@ -482,33 +433,6 @@ namespace snuffbox
     {
       ScriptHandle handle = ScriptValue::From<T>(value);
       Add(handle);
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline ScriptUserdata<T>::ScriptUserdata(
-      T* ptr,
-      foundation::SharedPtr<ScriptObject> object)
-      :
-      ScriptValue(ScriptValue::Types::kUserdata)
-      ptr_(ptr),
-      object_(object)
-    {
-
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline T* ScriptUserdata<T>::ptr() const
-    {
-      return ptr_;
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline foundation::SharedPtr<ScriptObject> ScriptUserdata<T>::object() const
-    {
-      return object_;
     }
   }
 }

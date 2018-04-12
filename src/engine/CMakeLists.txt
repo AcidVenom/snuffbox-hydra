@@ -5,6 +5,8 @@ SET(AuxiliarySources
 SET(ServicesSources
   "services/service.h"
   "services/service.cc"
+  "services/cvar_service.h"
+  "services/cvar_service.cc"
 )
 
 SET(ApplicationSources
@@ -19,8 +21,6 @@ SET(CVarSources
   "cvar/cvar.cc"
   "cvar/command_line_parser.h"
   "cvar/command_line_parser.cc"
-  "cvar/cvar_service.h"
-  "cvar/cvar_service.cc"
 )
 
 SOURCE_GROUP("auxiliary"    FILES ${AuxiliarySources})

@@ -24,29 +24,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DukFunction::GetArguments(
-      const DukWrapper& wrapper, 
-      uint8_t argc, 
-      ScriptArgs* args)
-    {
-      if (args == nullptr)
-      {
-        return;
-      }
-
-      foundation::Vector<ScriptHandle> argv;
-
-      argv.resize(argc);
-
-      for (uint8_t i = 0; i < argc; ++i)
-      {
-        argv.at(i) = wrapper.GetValueAt(i);
-      }
-
-      *args = ScriptArgs(argv, nullptr);
-    }
-
-    //--------------------------------------------------------------------------
     int DukFunction::DukCall(duk_hthread* ctx)
     {
       duk_push_current_function(ctx);
@@ -58,10 +35,8 @@ namespace snuffbox
 
       DukWrapper wrapper = DukWrapper(ctx);
 
-      uint8_t argc = static_cast<uint8_t>(duk_get_top(ctx));
-
       ScriptArgs args;
-      GetArguments(wrapper, argc, &args);
+      wrapper.GetArguments(&args);
 
       bool res = func(args);
 
