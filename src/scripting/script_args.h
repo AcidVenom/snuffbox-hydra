@@ -58,7 +58,6 @@ namespace snuffbox
       * S = String
       * O = Object
       * A = Array
-      * U = Userdata
       *
       * e.g. If a function only accepts a string as first argument and a
       * number as second argument, the format would be "SN". The format is
