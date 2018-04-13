@@ -68,7 +68,7 @@ IF (NOT SNUFF_NSCRIPTING)
         DEPENDS ${InputFile}
         MAIN_DEPENDENCY ${InputFile}
         WORKING_DIRECTORY "${WorkingDir}"
-        COMMENT "[sparse] Generating script bindings for ${InputFile}"
+        COMMENT "------ sparse: Generating script bindings for ${InputFile}"
         VERBATIM
       )
     ENDIF ()

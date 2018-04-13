@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 #include <rapidjson/document.h>
 
 namespace snuffbox
@@ -39,6 +41,27 @@ namespace snuffbox
       bool Parse(const std::string& input, const std::string& output);
 
     protected:
+
+      /**
+      * @brief Used to store class information of the current class
+      *        being parsed
+      *
+      * This struct is created every time the parser reaches a "ParseClass"
+      * function call. The ClassDefinition will be stored in 
+      * Parser::definitions_ for later use.
+      *
+      * @author Daniel Konings
+      */
+      struct ClassDefinition
+      {
+        /**
+        * @brief Default constructor
+        */
+        ClassDefinition();
+
+        const char* c_name; //!< The C++ class name
+        const char* s_name; //!< The script name
+      };
 
       /**
       * @brief Parses the .json document after it has been parsed by
@@ -102,10 +125,23 @@ namespace snuffbox
       */
       bool DerivesFrom(const char* name, const rapidjson::Value& cl);
 
+      /**
+      * @brief Retrieves the script name from a class's SCRIPT_NAME value
+      *
+      * @param[in] m The macro value
+      *
+      * @return The script name, or nullptr if it doesn't exist
+      */
+      const char* GetScriptName(const rapidjson::Value& m);
+
     private:
 
       std::string current_namespace_; //!< The current namespace
       unsigned int num_namespaces_; //!< The number of namespaces entered
+
+      ClassDefinition current_; //!< The current class definition being parsed
+      bool in_class_; //!< Are we currently parsing a class?
+      std::vector<ClassDefinition> definitions_; //!< All parsed definitions
     };
   }
 }

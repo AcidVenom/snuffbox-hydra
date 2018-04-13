@@ -1,6 +1,7 @@
 #include "tools/sparse/parser.h"
 
 #include <string>
+#include <iostream>
 
 int main(int argc, char** argv)
 {
@@ -20,10 +21,8 @@ int main(int argc, char** argv)
   }
 
   snuffbox::sparse::Parser p;
-  if (p.Parse(input, output) == false)
-  {
-    return 1;
-  }
+  int result = p.Parse(input, output) == false ? 1 : 0;
 
-  return 0;
+  std::cout << "sparse -> " << output << std::endl;
+  return result;
 }

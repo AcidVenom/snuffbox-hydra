@@ -10,7 +10,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Parser::Parser() :
       current_namespace_(""),
-      num_namespaces_(0)
+      num_namespaces_(0),
+      in_class_(false)
     {
 
     }
@@ -63,6 +64,14 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Parser::ClassDefinition::ClassDefinition() :
+      c_name(nullptr),
+      s_name(nullptr)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     bool Parser::ParseDocument(const rapidjson::Document& doc)
     {
       if (doc.IsArray() == false)
@@ -71,7 +80,19 @@ namespace snuffbox
       }
 
       rapidjson::GenericArray<true, rapidjson::Value> arr = doc.GetArray();
-      return ParseArray(arr);
+      bool success = ParseArray(arr);
+
+      for (size_t i = 0; i < definitions_.size(); ++i)
+      {
+        const ClassDefinition& cl = definitions_.at(i);
+
+        std::cout << "Parsed definition for " <<
+          "[Class: " << cl.c_name << ", " 
+          "ScriptName: " << cl.s_name << "].." 
+          << std::endl;
+      }
+
+      return success;
     }
 
     //--------------------------------------------------------------------------
@@ -79,6 +100,7 @@ namespace snuffbox
       const rapidjson::GenericArray<true, rapidjson::Value>& arr)
     {
       const char* type = nullptr;
+      bool found_name = in_class_ == false;
 
       for (rapidjson::SizeType i = 0; i < arr.Size(); ++i)
       {
@@ -104,7 +126,33 @@ namespace snuffbox
               return false;
             }
           }
+          else if (strcmp(type, "macro") == 0)
+          {
+            found_name = true;
+
+            const char* s_name = GetScriptName(v);
+
+            if (s_name == nullptr)
+            {
+              std::cerr << "Attempted to parse class '" <<
+                current_.c_name << "' with an invalid SCRIPT_NAME"
+                << std::endl;
+
+              return false;
+            }
+
+            current_.s_name = s_name;
+          }
         }
+      }
+
+      if (found_name == false)
+      {
+        std::cerr << "Attempted to parse class '" <<
+          current_.c_name << "' without a SCRIPT_NAME"
+          << std::endl;
+
+        return false;
       }
 
       return true;
@@ -166,25 +214,53 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Parser::ParseClass(const rapidjson::Value& cl)
     {
+      in_class_ = true;
+      current_ = ClassDefinition();
+
       if (cl.HasMember("name") == false)
       {
         std::cerr << "Attempted to parse a class without a name" << std::endl;
         return false;
       }
 
-      const char* cname = cl["name"].GetString();
+      const char* c_name = cl["name"].GetString();
 
       if (DerivesFrom("ScriptClass", cl) == false)
       {
         std::cerr << "Could not parse class '" 
-          << cname 
+          << c_name 
           << "', it does not derive from snuffbox::scripting::ScriptClass"
           << std::endl;
 
         return false;
       }
 
-      return true;
+      if (
+        cl.HasMember("members") == false ||
+        cl["members"].IsArray() == false)
+      {
+        std::cerr << "Could not parse class '"
+          << c_name
+          << "', it does not have a 'members' field"
+          << std::endl;
+
+        return false;
+      }
+
+      const rapidjson::GenericArray<true, rapidjson::Value> members = 
+        cl["members"].GetArray();
+
+      current_.c_name = c_name;
+
+      bool success = ParseArray(members);
+
+      if (success == true)
+      {
+        definitions_.push_back(current_);
+      }
+
+      in_class_ = false;
+      return success;
     }
 
     //--------------------------------------------------------------------------
@@ -232,6 +308,31 @@ namespace snuffbox
       }
 
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    const char* Parser::GetScriptName(const rapidjson::Value& m)
+    {
+      if (
+        m.HasMember("meta") == false ||
+        m["meta"].IsObject() == false)
+      {
+        return nullptr;
+      }
+
+      const rapidjson::GenericObject<true, rapidjson::Value>& meta = 
+        m["meta"].GetObject();
+
+      for (
+        rapidjson::GenericObject<true, rapidjson::Value>::MemberIterator it =
+        meta.MemberBegin();
+        it != meta.MemberEnd();
+        ++it)
+      {
+        return it->name.IsString() == false ? nullptr : it->name.GetString();
+      }
+
+      return nullptr;
     }
   }
 }
