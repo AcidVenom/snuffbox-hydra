@@ -1,3 +1,6 @@
+SET(CMAKE_AUTOUIC ON)
+SET(CMAKE_AUTOMOC ON)
+
 SET(RootSources
   "main.cc"
 )
