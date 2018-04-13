@@ -187,6 +187,7 @@ namespace snuffbox
       return true;
     }
 
+    //--------------------------------------------------------------------------
     bool Parser::DerivesFrom(const char* name, const rapidjson::Value& cl)
     {
       if (cl.HasMember("parents") == true)

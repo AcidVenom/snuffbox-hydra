@@ -89,6 +89,17 @@ namespace snuffbox
       */
       bool ParseClass(const rapidjson::Value& cl);
 
+      /**
+      * @brief Checks if a class value is derived from a specified class
+      *        name
+      *
+      * The name is check without namespaces, there is no need to specify them
+      *
+      * @param[in] name The name of the base class
+      * @param[in] cl The class value
+      *
+      * @return Is the class derived from the specified base class?
+      */
       bool DerivesFrom(const char* name, const rapidjson::Value& cl);
 
     private:
