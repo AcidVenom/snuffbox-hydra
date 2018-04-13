@@ -7,3 +7,9 @@
 [submodule "deps/glm"]
 	path = deps/glm
 	url = https://github.com/g-truc/glm
+[submodule "deps/header-parser"]
+	path = deps/header-parser
+	url = https://github.com/baszalmstra/header-parser
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/Tencent/rapidjson
