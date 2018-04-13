@@ -1,5 +1,7 @@
 SET(RootSources
   "main.cc"
+  "parser.h"
+  "parser.cc"
 )
 
 SOURCE_GROUP("\\"     FILES ${RootSources})

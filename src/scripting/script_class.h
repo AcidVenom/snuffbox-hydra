@@ -7,16 +7,12 @@
 #define SCRIPT_ENUM(...)
 
 #ifndef SNUFF_NSCRIPTING
-#define SCRIPT_OBJECT : public snuffbox::scripting::ScriptObject
-#define SCRIPT_OBJECT_MULTI , public snuffbox::scripting::ScriptObject
-#define SCRIPT_CONSTRUCTOR(x) x(ScriptArgs&)
-#define SCRIPT_NAME(x)                                      \
-static const char* ScriptName() { return #x; }              \
-static void RegisterScriptFunctions(ScriptRegister*);       \
-static void RegisterScriptEnums(ScriptRegister*)                  
+#define SCRIPT_CONSTRUCTOR(x) x(snuffbox::scripting::ScriptArgs&)
+#define SCRIPT_NAME(x)                                                        \
+static const char* ScriptName() { return #x; }                                \
+static void RegisterScriptFunctions(snuffbox::scripting::ScriptRegister*);    \
+static void RegisterScriptEnums(snuffbox::scripting::ScriptRegister*)                  
 #else
-#define SCRIPT_OBJECT
-#define SCRIPT_OBJECT_MULTI
 #define SCRIPT_CONSTRUCTOR(x)
 #define SCRIPT_NAME(x)
 #endif

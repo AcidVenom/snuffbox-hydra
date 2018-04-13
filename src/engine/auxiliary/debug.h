@@ -2,6 +2,8 @@
 
 #include <foundation/auxiliary/logger.h>
 
+#include <scripting/script_class.h>
+
 namespace snuffbox
 {
   namespace engine
@@ -11,10 +13,12 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class Debug
+    SCRIPT_CLASS() class Debug : public scripting::ScriptClass
     {
 
     public:
+
+      SCRIPT_NAME(Debug);
 
       /**
       * @see Logger::Log
@@ -40,6 +44,16 @@ namespace snuffbox
         foundation::LogSeverity severity,
         const char* format,
         Args... args);
+
+#ifndef SNUFF_NSCRIPTING
+      SCRIPT_FUNC() static void Log(const foundation::String& str);
+      SCRIPT_FUNC() static void LogInfo(const foundation::String& str);
+      SCRIPT_FUNC() static void LogWarning(const foundation::String& str);
+      SCRIPT_FUNC() static void LogSuccess(const foundation::String& str);
+      SCRIPT_FUNC() static void LogError(const foundation::String& str);
+      SCRIPT_FUNC() static void LogFatal(const foundation::String& str);
+      SCRIPT_FUNC() static void Assert(bool exp, const foundation::String& str);
+#endif
     };
 
     //--------------------------------------------------------------------------

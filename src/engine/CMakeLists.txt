@@ -1,5 +1,6 @@
 SET(AuxiliarySources
   "auxiliary/debug.h"
+  "auxiliary/debug.cc"
 )
 
 SET(ServicesSources
@@ -40,5 +41,36 @@ TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation)
 
 IF (NOT SNUFF_NSCRIPTING)
   TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-scripting)
+  ADD_DEPENDENCIES(snuffbox-engine snuffbox-sparse)
   
+  SET(ScriptingBinds
+    "auxiliary/debug.h"
+  )
+  
+  FOREACH (Relative ${ScriptingBinds})
+    IF(${Relative} MATCHES "\\.h")
+      SET(InputFile "${CMAKE_CURRENT_SOURCE_DIR}/${Relative}")
+      
+      MESSAGE(STATUS "Adding custom compilation step for ${InputFile}")
+      
+      STRING(REGEX REPLACE ".*\\/" "" RelativePath ${InputFile})
+      STRING(REGEX REPLACE "\\.h" "" NoExtension ${RelativePath})
+      
+      SET(WorkingDir "${PROJECT_BINARY_DIR}/generated/sparsed")
+      SET(OutputFile "${WorkingDir}/${NoExtension}.gen.c")
+      
+      SET(ParseArgs "${InputFile}" -c SCRIPT_CLASS -e SCRIPT_ENUM -f SCRIPT_FUNC)
+      SET(ParseTo "${NoExtension}.json")
+      
+      ADD_CUSTOM_COMMAND(
+        OUTPUT ${OutputFile}
+        COMMAND "$<TARGET_FILE:header-parser>" ${ParseArgs} > ${ParseTo} && "$<TARGET_FILE:snuffbox-sparse>" -i ${ParseTo} -o ${OutputFile}
+        DEPENDS ${InputFile}
+        MAIN_DEPENDENCY ${InputFile}
+        WORKING_DIRECTORY "${WorkingDir}"
+        COMMENT "Generating Lua bindings for ${InputFile}"
+        VERBATIM
+      )
+    ENDIF ()
+  ENDFOREACH ()
 ENDIF (NOT SNUFF_NSCRIPTING)
