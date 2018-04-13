@@ -38,6 +38,13 @@ IF (SNUFF_DUKTAPE)
   )
 ENDIF (SNUFF_DUKTAPE)
 
+IF (NOT SNUFF_NSCRIPTING)
+  ADD_SUBDIRECTORY("header-parser")
+  
+  ADD_LIBRARY(rapidjson INTERFACE)
+  TARGET_INCLUDE_DIRECTORIES(rapidjson INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include")
+ENDIF (NOT SNUFF_NSCRIPTING)
+
 SET_SOLUTION_FOLDER(
   "deps/eastl"
   EABase_ide
@@ -53,4 +60,9 @@ SET_SOLUTION_FOLDER(
   "deps/glfw3"
   glfw
   uninstall
+)
+
+SET_SOLUTION_FOLDER(
+  "deps/header-parser"
+  header-parser
 )

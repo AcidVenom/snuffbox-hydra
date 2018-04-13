@@ -7,7 +7,7 @@ namespace snuffbox
     /**
     * @brief The different logging severity levels that exist
     */
-    enum struct LogSeverity
+    enum class LogSeverity
     {
       kDebug,
       kInfo,
@@ -20,7 +20,7 @@ namespace snuffbox
     /**
     * @brief The different logging channels that exist
     */
-    enum struct LogChannel
+    enum class LogChannel
     {
       kUnspecified,
       kEngine,

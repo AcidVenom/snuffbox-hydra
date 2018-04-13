@@ -7,7 +7,7 @@ namespace snuffbox
     /**
     * @brief The different error codes that exist
     */
-    enum struct ErrorCodes
+    enum class ErrorCodes
     {
       kSuccess,
       kUnknown

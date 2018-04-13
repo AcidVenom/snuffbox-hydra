@@ -39,7 +39,7 @@ namespace snuffbox
       /**
       * @brief The different type of values that exist
       */
-      enum struct Types
+      enum class Types
       {
         kNull, //!< Null/undefined value
         kBoolean, //!< Boolean values

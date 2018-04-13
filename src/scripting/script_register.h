@@ -24,9 +24,9 @@ namespace snuffbox
     * @brief Used to register enumerator values to the script state by name
     *
     * This is used in conjuction with the ScriptRegister to expose C++ enums
-    * to the scripting environment. Please note enumerators cannot be declared
-    * as "enum struct" or "enum class" when ran through the script parsing
-    * utility.
+    * to the scripting environment. Please note enumerators can only be declared
+    * as "enum class MyEnum" or "enum MyEnum" when ran through the script
+    * parsing utility.
     *
     * @author Daniel Konings
     */

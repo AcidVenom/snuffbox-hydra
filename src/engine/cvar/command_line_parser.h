@@ -21,7 +21,7 @@ namespace snuffbox
       /**
       * @brief The different command types that exist
       */
-      enum struct CommandType
+      enum class CommandType
       {
         kHelp, //!< "help"
         kSet, //!< "set <name> <value>"
