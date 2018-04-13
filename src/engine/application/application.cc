@@ -74,8 +74,10 @@ namespace snuffbox
 
       Initialize();
 
+#ifndef SNUFF_NSCRIPTING
       scripting::ScriptState state;
       state.Initialize();
+#endif
 
       std::string input;
       while (input != "exit")
@@ -84,12 +86,18 @@ namespace snuffbox
 
         if (input.size() > 0 && input != "exit")
         {
+#ifndef SNUFF_NSCRIPTING
           state.CompileFromSource("console", input.c_str(), true);
+#endif
         }
       }
 
       Shutdown();
+
+
+#ifndef SNUFF_NSCRIPTING
       state.Shutdown();
+#endif
 
       return foundation::ErrorCodes::kSuccess;
     }

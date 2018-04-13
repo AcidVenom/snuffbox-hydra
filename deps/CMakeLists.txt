@@ -43,6 +43,11 @@ IF (NOT SNUFF_NSCRIPTING)
   
   ADD_LIBRARY(rapidjson INTERFACE)
   TARGET_INCLUDE_DIRECTORIES(rapidjson INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include")
+  
+  SET_SOLUTION_FOLDER(
+    "deps/header-parser"
+    header-parser
+  )
 ENDIF (NOT SNUFF_NSCRIPTING)
 
 SET_SOLUTION_FOLDER(
@@ -60,9 +65,4 @@ SET_SOLUTION_FOLDER(
   "deps/glfw3"
   glfw
   uninstall
-)
-
-SET_SOLUTION_FOLDER(
-  "deps/header-parser"
-  header-parser
 )

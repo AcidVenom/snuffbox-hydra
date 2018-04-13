@@ -10,6 +10,6 @@ namespace snuffbox
     using ScriptCallback = DukCallback<Args...>;
   }
 }
-#elif not defined(SNUFF_NSCRIPTING)
+#elif !defined SNUFF_NSCRIPTING 
 #error "Unsupported scripting implementation"
 #endif

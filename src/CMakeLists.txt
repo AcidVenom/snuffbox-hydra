@@ -4,14 +4,16 @@ ADD_SUBDIRECTORY("foundation")
 
 IF (NOT SNUFF_NSCRIPTING)
   ADD_SUBDIRECTORY("scripting")
-ENDIF ()
+  SET_SOLUTION_FOLDER("snuffbox-hydra"
+    snuffbox-scripting
+  )
+ENDIF (NOT SNUFF_NSCRIPTING)
 
 ADD_SUBDIRECTORY("engine")
 
 SET_SOLUTION_FOLDER("snuffbox-hydra"
   snuffbox-foundation
   snuffbox-engine
-  snuffbox-scripting
 )
 
 IF (SNUFF_BUILD_TEST)

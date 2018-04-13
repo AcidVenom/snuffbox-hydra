@@ -36,4 +36,9 @@ SET(EngineSources
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})
-TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation snuffbox-scripting)
+TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation)
+
+IF (NOT SNUFF_NSCRIPTING)
+  TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-scripting)
+  
+ENDIF (NOT SNUFF_NSCRIPTING)
