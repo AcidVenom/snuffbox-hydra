@@ -59,7 +59,7 @@ IF (NOT SNUFF_NSCRIPTING)
       SET(WorkingDir "${PROJECT_BINARY_DIR}/generated/sparsed")
       SET(OutputFile "${WorkingDir}/${NoExtension}.gen.c")
       
-      SET(ParseArgs "${InputFile}" -c SCRIPT_CLASS -e SCRIPT_ENUM -f SCRIPT_FUNC)
+      SET(ParseArgs "${InputFile}" -c SCRIPT_CLASS -e SCRIPT_ENUM -f SCRIPT_FUNC -m SCRIPT_NAME)
       SET(ParseTo "${NoExtension}.json")
       
       ADD_CUSTOM_COMMAND(
@@ -68,7 +68,7 @@ IF (NOT SNUFF_NSCRIPTING)
         DEPENDS ${InputFile}
         MAIN_DEPENDENCY ${InputFile}
         WORKING_DIRECTORY "${WorkingDir}"
-        COMMENT "Generating Lua bindings for ${InputFile}"
+        COMMENT "[sparse] Generating script bindings for ${InputFile}"
         VERBATIM
       )
     ENDIF ()

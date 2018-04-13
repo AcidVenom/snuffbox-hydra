@@ -19,7 +19,8 @@ int main(int argc, char** argv)
     }
   }
 
-  if (snuffbox::sparse::Parser::Parse(input, output) == false)
+  snuffbox::sparse::Parser p;
+  if (p.Parse(input, output) == false)
   {
     return 1;
   }
