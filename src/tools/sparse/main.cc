@@ -1,4 +1,4 @@
-#include "tools/sparse/parser.h"
+#include "tools/sparse/json_header_parser.h"
 
 #include <string>
 #include <iostream>
@@ -20,9 +20,13 @@ int main(int argc, char** argv)
     }
   }
 
-  snuffbox::sparse::Parser p;
+  snuffbox::sparse::JsonHeaderParser p;
   int result = p.Parse(input, output) == false ? 1 : 0;
 
-  std::cout << "sparse -> " << output << std::endl;
+  if (result == 0)
+  {
+    std::cout << "sparse -> " << output << std::endl;
+  }
+
   return result;
 }

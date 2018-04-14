@@ -1,7 +1,8 @@
 SET(RootSources
   "main.cc"
-  "parser.h"
-  "parser.cc"
+  "definitions.h"
+  "json_header_parser.h"
+  "json_header_parser.cc"
 )
 
 SOURCE_GROUP("\\"     FILES ${RootSources})
