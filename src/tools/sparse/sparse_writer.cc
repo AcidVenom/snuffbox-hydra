@@ -8,7 +8,8 @@ namespace snuffbox
   namespace sparse
   {
     //--------------------------------------------------------------------------
-    SparseWriter::SparseWriter()
+    SparseWriter::SparseWriter() :
+      indent_(0)
     {
 
     }
@@ -35,34 +36,43 @@ namespace snuffbox
         return false;
       }
 
-      bool success;
-
-      if ((success = WriteAll(header, parser->definitions())) == false)
-      {
-        std::cerr << "Could not write destination file: " 
-          << output << std::endl;
-      }
+      WriteAll(header, parser->definitions());
       
       output_.flush();
       output_.close();
 
-      return success;
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteLine(const char* line)
+    {
+      for (unsigned int i = 0; i < indent_; ++i)
+      {
+        output_ << '\t';
+      }
+
+      output_ << line << std::endl;
     }
 
     //--------------------------------------------------------------------------
     void SparseWriter::WriteComment(const std::vector<ClassDefinition>& defs)
     {
-      output_
-        << "/**" << std::endl
-        << "* == DO NOT MODIFY FILE CONTENTS ==" << std::endl
-        << "* This file was generated using Snuffbox's 'sparse'" << std::endl
-        << "* The contents of this file should not be modified as" << std::endl
-        << "* changes are discarded during the next compilation" << std::endl
-        << "* ---------------------------------------------------" << std::endl
-        << "* Meta data:" << std::endl
-        << "* - Number of classes: " << defs.size() << std::endl
-        << "* ---------------------------------------------------" << std::endl
-        << "* Class information: " << std::endl;
+      auto Splitter = [=]()
+      {
+        WriteLine("* ---------------------------------------------------");
+      };
+
+      WriteLine("/**");
+      WriteLine("* == DO NOT MODIFY FILE CONTENTS ==");
+      WriteLine("* This file was generated using Snuffbox's 'sparse'");
+      WriteLine("* The contents of this file should not be modified as");
+      WriteLine("* changes are discarded during the next compilation");
+      Splitter();
+      WriteLine("* Meta data:");
+      output_ << "* - Number of classes: " << defs.size() << std::endl;
+      Splitter();
+      WriteLine("* Class information: ");
 
       for (size_t i = 0; i < defs.size(); ++i)
       {
@@ -74,11 +84,11 @@ namespace snuffbox
           "* -- Functions: " << d.functions.size() << std::endl;
       }
 
-      output_ << "*/" << std::endl << std::endl;
+     WriteLine("*/");
     }
 
     //--------------------------------------------------------------------------
-    bool SparseWriter::WriteAll(
+    void SparseWriter::WriteAll(
       const std::string& header,
       const std::vector<ClassDefinition>& defs)
     {
@@ -86,7 +96,16 @@ namespace snuffbox
 
       output_ << "#include \"" << header << "\"" << std::endl << std::endl;
 
-      return true;
+      for (size_t i = 0; i < defs.size(); ++i)
+      {
+        WriteClass(defs.at(i));
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteClass(const ClassDefinition& d)
+    {
+      
     }
   }
 }
