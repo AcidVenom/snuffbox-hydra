@@ -8,6 +8,22 @@ namespace snuffbox
   namespace sparse
   {
     //--------------------------------------------------------------------------
+    std::unordered_map<std::string, char> SparseWriter::kFormats_ =
+    {
+      { "int", 'N' },
+      { "float", 'N' },
+      { "double", 'N' },
+      { "char", 'N' },
+      { "bool", 'B' },
+      { "String", 'S' },
+      { "Object", 'O' },
+      { "Array", 'A' },
+      { "vec", 'V' },
+      { "quat", 'Q' },
+      { "mat", 'M' }
+    };
+
+    //--------------------------------------------------------------------------
     SparseWriter::SparseWriter() :
       indent_(0),
       namespaces_(0)
@@ -115,6 +131,15 @@ namespace snuffbox
       {
         WriteClass(defs.classes.at(i));
       }
+
+      WriteLine("");
+
+      EnterNamespaces("snuffbox::scripting");
+      for (size_t i = 0; i < defs.enums.size(); ++i)
+      {
+        WriteEnum(defs.enums.at(i));
+      }
+      ExitNamespaces();
     }
 
     //--------------------------------------------------------------------------
@@ -122,7 +147,100 @@ namespace snuffbox
     {
       EnterNamespaces(d.ns);
 
+      for (size_t i = 0; i < d.functions.size(); ++i)
+      {
+        WriteFunction(d.functions.at(i), d.c_name);
+      }
+
+      WriteFunctionRegister(d);
+
       ExitNamespaces();
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteFunctionRegister(const ClassDefinition& d)
+    {
+      std::string decl =
+        "RegisterScriptFunctions(snuffbox::scripting::ScriptRegister* reg)";
+
+      WriteLine(("void " + d.c_name + "::" + decl).c_str());
+      WriteLine("{");
+      ++indent_;
+
+      WriteLine("snuffbox::scripting::ScriptFunctionRegister funcs[] =");
+      WriteLine("{");
+
+      ++indent_;
+
+      std::string name = "";
+      std::string fname = "";
+
+      for (size_t i = 0; i < d.functions.size(); ++i)
+      {
+        name = d.functions.at(i).name;
+        fname = FormatFunctionName(name, d.c_name);
+
+        WriteLine(("{ \"" + name + "\" , " + fname + " },").c_str());
+      }
+
+      WriteLine("{ nullptr, nullptr }");
+      --indent_;
+      WriteLine("};");
+
+      WriteLine("");
+      WriteLine(("reg->RegisterFunctions<" + d.c_name + ">(funcs);").c_str());
+
+      --indent_;
+      WriteLine("}");
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteEnum(const EnumDefinition& d)
+    {
+      std::string type = d.nested + "::" + d.name;
+
+      WriteLine("template <>");
+      WriteLine(
+        ("void ScriptClass::RegisterScriptEnum<" + type + 
+          ">(ScriptRegister* reg)").c_str()
+      );
+      WriteLine("{");
+      ++indent_;
+
+      WriteLine("ScriptEnumRegister values[] =");
+      WriteLine("{");
+      ++indent_;
+
+      for (
+        std::unordered_map<std::string, int>::const_iterator it =
+        d.values.begin();
+        it != d.values.end();
+        ++it)
+      {
+        WriteLine(
+          ("{ \"" + it->first + "\" , " + std::to_string(it->second) + " },")
+          .c_str());
+      }
+
+      WriteLine("{ nullptr , -1 }");
+
+      --indent_;
+
+      WriteLine("};");
+
+      WriteLine("");
+
+      WriteLine("ScriptEnum e");
+      WriteLine("{");
+      ++indent_;
+      WriteLine(("\"" + d.name + "\"" + ",").c_str());
+      WriteLine("values");
+      --indent_;
+      WriteLine("};");
+      WriteLine("");
+      WriteLine("reg->RegisterEnum(e);");
+      --indent_;
+      WriteLine("}");
     }
 
     //--------------------------------------------------------------------------
@@ -171,6 +289,182 @@ namespace snuffbox
       }
 
       namespaces_ = 0;
+    }
+
+    //--------------------------------------------------------------------------
+    std::string SparseWriter::FormatFunctionName(
+      const std::string& func,
+      const std::string& cl)
+    {
+      return "sparse_" + cl + "_" + func;
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteArgumentCheck(
+      const std::vector<ArgumentDefinition>& args)
+    {
+      if (args.size() == 0)
+      {
+        return;
+      }
+
+      std::string format = "";
+      std::string type = "";
+
+      for (size_t i = 0; i < args.size(); ++i)
+      {
+        const ArgumentDefinition& a = args.at(i);
+        type = a.type.name;
+        
+        for (
+          ArgFormats::const_iterator it = kFormats_.begin();
+          it != kFormats_.end();
+          ++it)
+        {
+          if (type.find(it->first, 0) != std::string::npos)
+          {
+            format += it->second;
+            break;
+          }
+        }
+      }
+
+      WriteLine(("if (args.Check(\"" + format + "\") == false)").c_str());
+      WriteLine("{");
+      ++indent_;
+      WriteLine("return false;");
+      --indent_;
+      WriteLine("}");
+      WriteLine("");
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteSelf(
+      const FunctionDefinition& d, 
+      const std::string& cl)
+    {
+      if (d.is_static == true)
+      {
+        return;
+      }
+
+      WriteLine((cl + "* self = args.GetSelf<" + cl + ">();").c_str());
+      WriteLine("");
+      WriteLine("if (self == nullptr)");
+      WriteLine("{");
+      ++indent_;
+      WriteLine("return false;");
+      --indent_;
+      WriteLine("}");
+      WriteLine("");
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteArgumentList(const FunctionDefinition& d)
+    {
+      std::string get_func = "";
+      std::string get = "";
+      std::string type = "";
+      std::string aidx = "";
+
+      for (size_t i = 0; i < d.arguments.size(); ++i)
+      {
+        const ArgumentDefinition& a = d.arguments.at(i);
+
+        if (a.type.ref_type == RefType::kPointer)
+        {
+          get_func = "GetPointer";
+        }
+        else
+        {
+          get_func = "Get";
+        }
+
+        type = a.type.name;
+
+        get = "args." + get_func + "<" + type + ">(" + std::to_string(i) + ");";
+
+        WriteLine((type + " " + a.name + " = " + get).c_str());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteFunctionCall(
+      const FunctionDefinition& d, 
+      const std::string& cl)
+    {
+      std::string call = "";
+
+      if (d.is_static == false)
+      {
+        call += "self->";
+      }
+      else
+      {
+        call += cl + "::";
+      }
+
+      std::string args = "";
+
+      size_t len = d.arguments.size();
+
+      for (size_t i = 0; i < len; ++i)
+      {
+        args += d.arguments.at(i).name;
+
+        if (i == len - 1)
+        {
+          continue;
+        }
+
+        args += ',';
+      }
+
+      call += d.name + "(" + args + ");";
+
+      WriteLine(call.c_str());
+    }
+
+    //--------------------------------------------------------------------------
+    void SparseWriter::WriteFunction(
+      const FunctionDefinition& d,
+      const std::string& cl)
+    {
+      std::string func_name = FormatFunctionName(d.name, cl);
+      std::string def = 
+        ("bool " + func_name + "(snuffbox::scripting::ScriptArgs& args)");
+
+      if (d.is_custom == true)
+      {
+        def += ";";
+        WriteLine("// Provide a custom implementation for this function");
+      }
+
+      WriteLine(def.c_str());
+
+      if (d.is_custom == true)
+      {
+        WriteLine("");
+        return;
+      }
+
+      WriteLine("{");
+      ++indent_;
+
+      WriteArgumentCheck(d.arguments);
+      WriteSelf(d, cl);
+      WriteArgumentList(d);
+
+      WriteLine("");
+
+      WriteFunctionCall(d, cl);
+
+      WriteLine("");
+      WriteLine("return true;");
+
+      --indent_;
+      WriteLine("}");
+      WriteLine("");
     }
   }
 }

@@ -20,10 +20,15 @@ namespace snuffbox                                                            \
   namespace scripting                                                         \
   {                                                                           \
     template <>                                                               \
-    inline void ScriptClass::RegisterScriptEnum< ## x>();                     \
+    void ScriptClass::RegisterScriptEnum<##x>(                                \
+      snuffbox::scripting::ScriptRegister*);                                  \
   }                                                                           \
 }
 
+#define SPARSE_CUSTOM(cl, func) bool sparse_##cl##_##func                     \
+(snuffbox::scripting::ScriptArgs& args)
+
+#include "scripting/script_args.h"
 #else
 #define SCRIPT_CONSTRUCTOR(x)
 #define SCRIPT_NAME(x)
@@ -72,21 +77,30 @@ namespace snuffbox
     */
     class ScriptClass
     {
+
+#ifndef SNUFF_NSCRIPTING
+    public:
+
       /**
       * @brief This function should be specialized with an enumerator
       *        as T parameter, to register enums using ScriptEnumRegister
       *
       * @tparam T The enumerator to register
+      *
+      * @param[in] reg The register to register the enumerator in
       */
       template <typename T>
-      static void RegisterScriptEnum();
+      static void RegisterScriptEnum(ScriptRegister* reg);
+#endif
     };
 
+#ifndef SNUFF_NSCRIPTING
     //--------------------------------------------------------------------------
     template <typename T>
-    inline void ScriptClass::RegisterScriptEnum()
+    inline void ScriptClass::RegisterScriptEnum(ScriptRegister* reg)
     {
       static_assert(false, "Unspecialized implementation of a SCRIPT_ENUM");
     }
+#endif
   }
 }

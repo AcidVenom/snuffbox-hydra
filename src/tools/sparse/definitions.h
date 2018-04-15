@@ -59,6 +59,7 @@ namespace snuffbox
     {
       std::string name; //!< The function name
       bool is_static; //!< Is this function static?
+      bool is_custom; //!< Is there a custom implementation specified?
 
       TypeDefinition ret_val; //!< The type of the return value
 

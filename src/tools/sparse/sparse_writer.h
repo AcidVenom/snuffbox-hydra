@@ -85,6 +85,20 @@ namespace snuffbox
       void WriteClass(const ClassDefinition& d);
 
       /**
+      * @brief Writes the function register for a class
+      *
+      * @param[in] d The class definition
+      */
+      void WriteFunctionRegister(const ClassDefinition& d);
+
+      /**
+      * @brief Writes an enum's function bodies to the output file
+      *
+      * @param[in] d The enum definition to write the key/value pairs of
+      */
+      void WriteEnum(const EnumDefinition& d);
+
+      /**
       * @brief Enters the current namespaces before writing
       *
       * This makes sure we're at the right indentation and that the
@@ -102,11 +116,78 @@ namespace snuffbox
       */
       void ExitNamespaces();
 
+      /**
+      * @brief Formats a function name to be a C-style free function
+      *
+      * @param[in] func The function name
+      * @param[in] cl The class this function is nested in
+      */
+      std::string FormatFunctionName(
+        const std::string& func, 
+        const std::string& cl);
+
+      /**
+      * @brief Writes the argument check
+      *
+      * @param[in] args The arguments of the current function
+      */
+      void WriteArgumentCheck(const std::vector<ArgumentDefinition>& args);
+
+      /**
+      * @brief Write the "self" declaration and check if the function is
+      *        non-static
+      *
+      * @param[in] d The function definition
+      * @param[in] cl The class name of the "self" pointer
+      */
+      void WriteSelf(const FunctionDefinition& d, const std::string& cl);
+      
+      /**
+      * @brief Writes the list of arguments and their value retrieval to the
+      *        function body after the check and self-retrieval
+      *
+      * @param[in] d The function definition
+      */
+      void WriteArgumentList(const FunctionDefinition& d);
+
+      /**
+      * @brief Writes the actual function call with the retrieved arguments
+      *
+      * @param[in] d The function definition
+      * @param[in] cl The class name for static function calls
+      */
+      void WriteFunctionCall(
+        const FunctionDefinition& d, 
+        const std::string& cl);
+
+      /**
+      * @brief Writes the static function to be registered by the script state
+      *
+      * @param[in] d The function definition
+      * @param[in] cl The class name
+      */
+      void WriteFunction(const FunctionDefinition& d, const std::string& cl);
+
     private:
 
       std::ofstream output_; //!< The output stream
       unsigned int indent_; //!< How much are we currently indented?
       unsigned int namespaces_; //!< How much namespaces have we entered?
+
+      /**
+      * @brief Shorthand for a map of argument formats based on a supported
+      *        type
+      */
+      using ArgFormats = std::unordered_map<std::string, char>;
+
+      /**
+      * @brief The different format characters that exist per supported type
+      *
+      * @remarks Argument formats are only checked for containment, so that
+      *          they don't clash with namespaces when checking for a fully
+      *          qualified string
+      */
+      static ArgFormats kFormats_;
     };
   }
 }

@@ -1,6 +1,5 @@
 #include "scripting/duk/duk_register.h"
 #include "scripting/duk/duk_state.h"
-#include "scripting/duk/duk_function.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -19,26 +18,6 @@ namespace snuffbox
 
       foundation::Logger::Assert(context_ != nullptr, 
         "Attempted to create a DukRegister with an context");
-    }
-
-    //--------------------------------------------------------------------------
-    void DukRegister::RegisterFunctions(ScriptFunctionRegister* reg)
-    {
-      if (reg == nullptr || reg[0].func == nullptr || reg[0].name == nullptr)
-      {
-        return;
-      }
-
-      duk_context* ctx = context_;
-
-      size_t i = 0;
-      ScriptFunctionRegister& f = reg[i];
-
-      while (f.func != nullptr && f.name != nullptr)
-      {
-        DukFunction::Bind(ctx, -1, f.func, f.name);
-        f = reg[++i];
-      }
     }
 
     //--------------------------------------------------------------------------

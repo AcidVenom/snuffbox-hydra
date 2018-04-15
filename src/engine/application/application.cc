@@ -78,6 +78,10 @@ namespace snuffbox
 #ifndef SNUFF_NSCRIPTING
       scripting::ScriptState state;
       state.Initialize();
+
+      scripting::ScriptRegister reg = scripting::ScriptRegister(&state);
+      reg.RegisterClass<Debug>();
+      
 #endif
 
       std::string input;

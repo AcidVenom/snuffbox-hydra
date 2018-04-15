@@ -411,6 +411,24 @@ namespace snuffbox
 
       f.name = v["name"].GetString();
       f.ret_val = ParseTypeValue(v["returnType"]);
+      f.is_static = v.HasMember("static") == true;
+
+      if (v.HasMember("meta") == true)
+      {
+        RapidObject o = v["meta"].GetObject();
+
+        for (
+          RapidObject::MemberIterator it = o.MemberBegin();
+          it != o.end();
+          ++it)
+        {
+          if (strcmp(it->name.GetString(), "custom") == 0)
+          {
+            f.is_custom = true;
+            break;
+          }
+        }
+      }
 
       if (
         v.HasMember("arguments") == false ||

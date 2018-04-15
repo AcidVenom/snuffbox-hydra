@@ -53,6 +53,10 @@ IF (NOT SNUFF_NSCRIPTING)
     "auxiliary/debug.h"
   )
   
+  SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
+  TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PRIVATE ${WorkingDir})
+  SET(WorkingDir "${WorkingDir}/sparsed")
+  
   FOREACH (Relative ${ScriptingBinds})
     IF(${Relative} MATCHES "\\.h")
       SET(InputFile "${CMAKE_CURRENT_SOURCE_DIR}/${Relative}")
@@ -62,8 +66,7 @@ IF (NOT SNUFF_NSCRIPTING)
       STRING(REGEX REPLACE ".*\\/" "" RelativePath ${InputFile})
       STRING(REGEX REPLACE "\\.h" "" NoExtension ${RelativePath})
       
-      SET(WorkingDir "${PROJECT_BINARY_DIR}/generated/sparsed")
-      SET(OutputFile "${WorkingDir}/${NoExtension}.gen.c")
+      SET(OutputFile "${WorkingDir}/${NoExtension}.gen.cc")
       
       SET(ParseArgs "${InputFile}" -c SCRIPT_CLASS -e SCRIPT_ENUM -f SCRIPT_FUNC -m SCRIPT_NAME)
       SET(ParseTo "${NoExtension}.json")

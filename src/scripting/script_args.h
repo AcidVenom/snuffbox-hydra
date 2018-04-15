@@ -78,7 +78,7 @@ namespace snuffbox
       * @see ScriptArgs::GetImpl
       */
       template <typename T>
-      T Get(uint8_t idx, T def, if_number_or_enum<T>* = nullptr) const;
+      T Get(uint8_t idx, T def = T(), if_number_or_enum<T>* = nullptr) const;
       
       /**
       * @brief Retrieves any other value
@@ -86,7 +86,7 @@ namespace snuffbox
       * @see ScriptArgs::GetImpl
       */
       template <typename T>
-      T Get(uint8_t idx, T def, if_n_number_and_enum<T>* = nullptr) const;
+      T Get(uint8_t idx, T def = T(), if_n_number_and_enum<T>* = nullptr) const;
 
       /**
       * @brief Returns a value to the script state
@@ -99,6 +99,16 @@ namespace snuffbox
       */
       template <typename T>
       void AddReturnValue(T value);
+
+      /**
+      * @brief Retrieves the callee as a typed pointer
+      *
+      * @tparam T The type to cast the pointer to
+      *
+      * @return The callee, or nullptr if it was not of the specified type
+      */
+      template <typename T>
+      T* GetSelf() const;
 
       /**
       * @return The callee that called this function from scripting
@@ -218,6 +228,13 @@ namespace snuffbox
     inline void ScriptArgs::AddReturnValue(T value)
     {
       return_value_ = ScriptValue::From<T>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T* ScriptArgs::GetSelf() const
+    {
+      return reinterpret_cast<T*>(callee_);
     }
 
     //--------------------------------------------------------------------------

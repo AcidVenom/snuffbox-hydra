@@ -3,6 +3,8 @@
 #include "scripting/script_type_traits.h"
 #include "scripting/script_value.h"
 
+#include "scripting/duk/duk_definitions.h"
+
 #include <foundation/containers/vector.h>
 
 #include <duktape.h>
@@ -92,8 +94,14 @@ namespace snuffbox
       /**
       * @brief Retrieves the current arguments from a duktape context
       *
+      * @tparam T The callee's type, used for member functions
+      *
+      * If the callee's type doesn't match the DUK_HIDDEN_NAME property and
+      * the function is a member function, the callee will be set to nullptr
+      *
       * @param[out] args The converted arguments
       */
+      template <typename T>
       void GetArguments(ScriptArgs* args) const;
 
     private:
@@ -222,6 +230,46 @@ namespace snuffbox
     inline void DukWrapper::PushValueImpl(ScriptHandle value) const
     {
       return PushValueImpl<ScriptValue*>(value.get());
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    void DukWrapper::GetArguments(ScriptArgs* args) const
+    {
+      if (args == nullptr)
+      {
+        return;
+      }
+
+      duk_context* ctx = context_;
+
+      void* callee = nullptr;
+
+      duk_push_this(ctx);
+      if (duk_get_prop_string(ctx, -1, DUK_HIDDEN_NAME) != 0)
+      {
+        bool is_same = strcmp(duk_get_string(ctx, -1), T::ScriptName()) == 0;
+
+        if (is_same && duk_get_prop_string(ctx, -1, DUK_HIDDEN_PTR) != 0)
+        {
+          callee = duk_get_pointer(ctx, -1);
+          duk_pop(ctx);
+        }
+      }
+
+      duk_pop_2(ctx);
+
+      duk_idx_t argc = duk_get_top(ctx);
+
+      foundation::Vector<ScriptHandle> argv;
+      argv.resize(argc);
+
+      for (duk_idx_t i = 0; i < argc; ++i)
+      {
+        argv.at(i) = GetValueAt(i);
+      }
+
+      *args = ScriptArgs(argv, callee);
     }
   }
 }

@@ -29,7 +29,6 @@ IF (SNUFF_DUKTAPE)
     "duk/duk_wrapper.h"
     "duk/duk_wrapper.cc"
     "duk/duk_function.h"
-    "duk/duk_function.cc"
     "duk/duk_callback.h"
     "duk/duk_register.h"
     "duk/duk_register.cc"

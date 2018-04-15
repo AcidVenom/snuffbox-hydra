@@ -1,10 +1,13 @@
 #include "engine/auxiliary/debug.h"
 
+#ifndef SNUFF_NSCRIPTING
+#include <sparsed/debug.gen.cc>
+#endif
+
 namespace snuffbox
 {
   namespace engine
   {
-#ifndef SNUFF_NSCRIPTING
     //--------------------------------------------------------------------------
     void Debug::Log(const foundation::String& str)
     {
@@ -58,6 +61,5 @@ namespace snuffbox
     {
       foundation::Logger::Assert(exp, str.c_str());
     }
-#endif
   }
 }

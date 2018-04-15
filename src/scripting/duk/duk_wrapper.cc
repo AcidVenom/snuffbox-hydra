@@ -1,5 +1,4 @@
 #include "scripting/duk/duk_wrapper.h"
-#include "scripting/duk/duk_definitions.h"
 
 #include "scripting/script_args.h"
 
@@ -126,37 +125,6 @@ namespace snuffbox
       }
 
       return foundation::Memory::MakeShared<ScriptObject>(obj);
-    }
-
-    //--------------------------------------------------------------------------
-    void DukWrapper::GetArguments(ScriptArgs* args) const
-    {
-      if (args == nullptr)
-      {
-        return;
-      }
-
-      void* callee = nullptr;
-
-      duk_push_this(context_);
-      if (duk_get_prop_string(context_, -1, DUK_HIDDEN_PTR) != 0)
-      {
-        callee = duk_get_pointer(context_, -1);
-      }
-
-      duk_pop_2(context_);
-
-      duk_idx_t argc = duk_get_top(context_);
-
-      foundation::Vector<ScriptHandle> argv;
-      argv.resize(argc);
-
-      for (duk_idx_t i = 0; i < argc; ++i)
-      {
-        argv.at(i) = GetValueAt(i);
-      }
-
-      *args = ScriptArgs(argv, callee);
     }
   }
 }

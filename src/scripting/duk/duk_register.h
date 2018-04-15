@@ -3,6 +3,7 @@
 #include "scripting/script_register.h"
 #include "scripting/duk/duk_definitions.h"
 #include "scripting/duk/duk_wrapper.h"
+#include "scripting/duk/duk_function.h"
 
 #include <foundation/memory/memory.h>
 
@@ -49,11 +50,14 @@ namespace snuffbox
       /**
       * @brief Registers a ScriptFunctionRegister list into the script state
       *
+      * @tparam T The callee's type
+      *
       * @remarks This register will continue until "nullptr" is found for the
       *          next function name or function pointer
       *
       * @param[in] reg The function register to register
       */
+      template <typename T>
       void RegisterFunctions(ScriptFunctionRegister* reg);
 
       /**
@@ -65,6 +69,22 @@ namespace snuffbox
       * @param[in] reg The enum to register
       */
       void RegisterEnum(const ScriptEnum& reg);
+
+      /**
+      * @brief Registers an enumerator into the script state
+      *
+      * @tparam T The enum to register
+      *
+      * The enumerator has to be parsed by 'sparse'. The enumerator needs its
+      * meta data defined for it to actually be usuable here. You cannot simply
+      * expect an enumerator to register properly when not ran through sparse.
+      *
+      * If you want to specify a custom enumerator that is not in C++ code, or
+      * not parsable through sparse, look at the RegisterEnum overloads to
+      * register an enumerator by ScriptEnum.
+      */
+      template <typename T>
+      void RegisterEnum();
 
     protected:
 
@@ -157,6 +177,37 @@ namespace snuffbox
       Constructable<C>::StartClass<T>(ctx);
       T::RegisterScriptFunctions(this);
       Constructable<C>::EndClass<T>(ctx);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    void DukRegister::RegisterFunctions(ScriptFunctionRegister* reg)
+    {
+      if (reg == nullptr || reg[0].func == nullptr || reg[0].name == nullptr)
+      {
+        return;
+      }
+
+      duk_context* ctx = context_;
+
+      size_t i = 0;
+      ScriptFunctionRegister& f = reg[i];
+
+      while (f.func != nullptr && f.name != nullptr)
+      {
+        DukFunction::Bind<T>(ctx, -1, f.func, f.name);
+        f = reg[++i];
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    void DukRegister::RegisterEnum()
+    {
+      static_assert(eastl::is_enum<T>::value == true,
+        "Attempted to register a script enum of a non-enum value type");
+
+      ScriptClass::RegisterScriptEnum<T>(this);
     }
 
     //--------------------------------------------------------------------------
