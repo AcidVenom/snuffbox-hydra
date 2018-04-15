@@ -14,9 +14,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool JsonHeaderParser::Parse(
-      const std::string& input, 
-      const std::string& output)
+    bool JsonHeaderParser::Parse(const std::string& input)
     {
       definitions_.clear();
 
@@ -55,13 +53,28 @@ namespace snuffbox
         if (success == false)
         {
           std::cerr << "Could not parse file: " << input;
+          definitions_.clear();
         }
 
         return success;
       }
       
       std::cerr << "Could not open file: " << input << std::endl;
+      definitions_.clear();
+
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    bool JsonHeaderParser::HasDocument() const
+    {
+      return has_error_ == true ? false : definitions_.size() > 0;
+    }
+
+    //--------------------------------------------------------------------------
+    const std::vector<ClassDefinition> JsonHeaderParser::definitions() const
+    {
+      return definitions_;
     }
 
     //--------------------------------------------------------------------------
@@ -224,6 +237,8 @@ namespace snuffbox
         return false;
       }
 
+      std::cout << "-- Functions: " << d.functions.size() << std::endl;
+
       definitions_.push_back(d);
 
       return true;
@@ -333,9 +348,14 @@ namespace snuffbox
 
       ForEach(arr, [&](RapidValue val, RapidIdx i)
       {
-        f.arguments.push_back(ParseTypeValue(val));
+        std::string name = val["name"].GetString();
+        TypeDefinition type = ParseTypeValue(val["type"]);
+
+        f.arguments.push_back(ArgumentDefinition{ name, type });
         return true;
       });
+
+      d->functions.push_back(f);
 
       return true;
     }
@@ -343,7 +363,29 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     TypeDefinition JsonHeaderParser::ParseTypeValue(RapidValue v)
     {
-      return TypeDefinition();
+      const char* type = v["type"].GetString();
+
+      RefType ref = RefType::kLiteral;
+
+      if (strcmp(type, "pointer") == 0)
+      { 
+        ref = RefType::kPointer;
+      }
+      else if (strcmp(type, "reference") == 0)
+      {
+        ref = RefType::kReference;
+      }
+      else
+      {
+        type = v["name"].GetString();
+      }
+
+      if (ref != RefType::kLiteral)
+      {
+        type = v["baseType"]["name"].GetString();
+      }
+
+      return TypeDefinition{ type, ref };
     }
   }
 }

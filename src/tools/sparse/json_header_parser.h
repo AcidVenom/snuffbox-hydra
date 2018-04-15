@@ -29,19 +29,29 @@ namespace snuffbox
       JsonHeaderParser();
 
       /**
-      * @brief Parse the contents of a .json and output the parse result
-      *        to a specific directory
+      * @brief Parse the contents of a .json and stores it as a C++ structure
       *
       * The parser automatically logs errors to std::cerr, so that they can be
       * viewed during compilation.
       *
       * @param[in] input The path to the .json from the current 
       *                  working directory
-      * @param[in] output The path to the file to output in the binary directory
       *
       * @return Was the parsing a success?
       */
-      bool Parse(const std::string& input, const std::string& output);
+      bool Parse(const std::string& input);
+
+      /**
+      * @return Does the parser have a document ready?
+      *
+      * @remarks If the parser has any errors, this evaluates to false
+      */
+      bool HasDocument() const;
+
+      /**
+      * @return The parsed class definitions from the input header
+      */
+      const std::vector<ClassDefinition> definitions() const;
 
     protected:
 
@@ -184,6 +194,8 @@ namespace snuffbox
       * @brief All parsed class definitions
       */
       std::vector<ClassDefinition> definitions_;
+
+      bool has_error_; //!< Are there any errors?
     };
   }
 }

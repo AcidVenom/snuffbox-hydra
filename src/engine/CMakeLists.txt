@@ -70,7 +70,7 @@ IF (NOT SNUFF_NSCRIPTING)
       
       ADD_CUSTOM_COMMAND(
         OUTPUT ${OutputFile}
-        COMMAND "$<TARGET_FILE:header-parser>" ${ParseArgs} > ${ParseTo} && "$<TARGET_FILE:snuffbox-sparse>" -i ${ParseTo} -o ${OutputFile}
+        COMMAND "$<TARGET_FILE:header-parser>" ${ParseArgs} > ${ParseTo} && "$<TARGET_FILE:snuffbox-sparse>" -i ${ParseTo} -o ${OutputFile} -h ${InputFile}
         DEPENDS ${InputFile}
         MAIN_DEPENDENCY ${InputFile}
         WORKING_DIRECTORY "${WorkingDir}"

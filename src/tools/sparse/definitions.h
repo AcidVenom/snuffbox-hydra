@@ -32,6 +32,17 @@ namespace snuffbox
     };
 
     /**
+    * @brief Used to store argument information for a function definition
+    *
+    * @author Daniel Konings
+    */
+    struct ArgumentDefinition
+    {
+      std::string name; //!< The name of the argument
+      TypeDefinition type; //!< The type of the argument
+    };
+
+    /**
     * @brief Used to store function information of each member function
     *        a class contains
     *
@@ -49,7 +60,11 @@ namespace snuffbox
       bool is_static; //!< Is this function static?
 
       TypeDefinition ret_val; //!< The type of the return value
-      std::vector<TypeDefinition> arguments; //!< The arguments of the function
+
+      /**
+      * @brief The arguments of the function
+      */
+      std::vector<ArgumentDefinition> arguments;
     };
 
     /**
