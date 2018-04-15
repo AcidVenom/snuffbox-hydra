@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripting/script_type_traits.h"
+#include "scripting/definitions/script_types.h"
 
 #include <foundation/containers/string.h>
 #include <foundation/containers/vector.h>
@@ -37,33 +38,20 @@ namespace snuffbox
     public:
 
       /**
-      * @brief The different type of values that exist
-      */
-      enum class Types
-      {
-        kNull, //!< Null/undefined value
-        kBoolean, //!< Boolean values
-        kNumber, //!< Numerical values, they are always double
-        kString, //!< String values stored as an EASTL string
-        kObject, //!< Object values by key/value pairs
-        kArray, //!< Array values by indices
-      };
-
-      /**
       * @brief Converts a type enumerator value to a string
       *
       * @param[in] type The type to convert
       *
       * @return The converted string
       */
-      static const char* TypeToString(ScriptValue::Types type);
+      static const char* TypeToString(ScriptValueTypes type);
 
       /**
       * @brief Construct by specifying the type
       *
       * @param[in] type The type of this value
       */
-      ScriptValue(Types type);
+      ScriptValue(ScriptValueTypes type);
 
       /**
       * @brief Used to cast any number or enumerator value
@@ -98,7 +86,7 @@ namespace snuffbox
       /**
       * @return The type of this value
       */
-      Types type() const;
+      ScriptValueTypes type() const;
 
 
     protected:
@@ -125,7 +113,7 @@ namespace snuffbox
 
     private:
 
-      Types type_; //!< The type of this value
+      ScriptValueTypes type_; //!< The type of this value
     };
 
     /**

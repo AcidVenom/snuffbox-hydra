@@ -8,6 +8,16 @@ namespace snuffbox
   namespace sparse
   {
     /**
+    * @brief The different reference types that exist
+    */
+    enum class RefType
+    {
+      kReference, //!< e.g. int& MyFunction(float& c)
+      kPointer, //!< e.g. int* MyFunction(float* c)
+      kLiteral //!< e.g. int MyFunction(float c)
+    };
+
+    /**
     * @brief Used to store type information of argument types and return
     *        types of function definitions
     *
@@ -17,16 +27,6 @@ namespace snuffbox
     */
     struct TypeDefinition
     {
-      /**
-      * @brief The different reference types that exist
-      */
-      enum class RefType
-      {
-        kReference, //!< e.g. int& MyFunction(float& c)
-        kPointer, //!< e.g. int* MyFunction(float* c)
-        kLiteral //!< e.g. int MyFunction(float c)
-      };
-
       std::string name; //!< The full C++ typename, including any namespaces
       RefType ref_type; //!< The reference type of the type
     };

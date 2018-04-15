@@ -38,14 +38,14 @@ namespace snuffbox
       {
         if (idx >= arguments_.size())
         {
-          return ScriptValue::Types::kNull;
+          return ScriptValueTypes::kNull;
         }
 
         return arguments_.at(idx)->type();
       };
 
       char c;
-      ScriptValue::Types expected, type;
+      ScriptValueTypes expected, type;
 
       for (size_t i = 0; i < len; ++i)
       {
@@ -55,23 +55,23 @@ namespace snuffbox
         switch (c)
         {
         case 'N':
-          expected = ScriptValue::Types::kNumber;
+          expected = ScriptValueTypes::kNumber;
           break;
 
         case 'B':
-          expected = ScriptValue::Types::kBoolean;
+          expected = ScriptValueTypes::kBoolean;
           break;
 
         case 'S':
-          expected = ScriptValue::Types::kString;
+          expected = ScriptValueTypes::kString;
           break;
 
         case 'O':
-          expected = ScriptValue::Types::kObject;
+          expected = ScriptValueTypes::kObject;
           break;
 
         case 'A':
-          expected = ScriptValue::Types::kArray;
+          expected = ScriptValueTypes::kArray;
           break;
 
         default:
@@ -135,8 +135,8 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     bool ScriptArgs::CheckArg(
-      ScriptValue::Types expected, 
-      ScriptValue::Types type,
+      ScriptValueTypes expected, 
+      ScriptValueTypes type,
       uint8_t idx)
     {
       if (expected != type)

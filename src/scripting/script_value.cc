@@ -5,26 +5,26 @@ namespace snuffbox
   namespace scripting
   {
     //--------------------------------------------------------------------------
-    const char* ScriptValue::TypeToString(ScriptValue::Types type)
+    const char* ScriptValue::TypeToString(ScriptValueTypes type)
     {
       switch (type)
       {
-      case Types::kNull:
+      case ScriptValueTypes::kNull:
         return "Null";
 
-      case Types::kNumber:
+      case ScriptValueTypes::kNumber:
         return "Number";
 
-      case Types::kBoolean:
+      case ScriptValueTypes::kBoolean:
         return "Boolean";
 
-      case Types::kString:
+      case ScriptValueTypes::kString:
         return "String";
         
-      case Types::kObject:
+      case ScriptValueTypes::kObject:
         return "Object";
 
-      case Types::kArray:
+      case ScriptValueTypes::kArray:
         return "Array";
 
       default:
@@ -33,7 +33,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    ScriptValue::ScriptValue(Types type) :
+    ScriptValue::ScriptValue(ScriptValueTypes type) :
       type_(type)
     {
 
@@ -56,21 +56,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    ScriptValue::Types ScriptValue::type() const
+    ScriptValueTypes ScriptValue::type() const
     {
       return type_;
     }
 
     //--------------------------------------------------------------------------
     ScriptNull::ScriptNull() :
-      ScriptValue(ScriptValue::Types::kNull)
+      ScriptValue(ScriptValueTypes::kNull)
     {
 
     }
 
     //--------------------------------------------------------------------------
     ScriptBoolean::ScriptBoolean(bool value) :
-      ScriptValue(ScriptValue::Types::kBoolean),
+      ScriptValue(ScriptValueTypes::kBoolean),
       value_(value)
     {
       
@@ -84,7 +84,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     ScriptNumber::ScriptNumber(double value) :
-      ScriptValue(ScriptValue::Types::kNumber),
+      ScriptValue(ScriptValueTypes::kNumber),
       value_(value)
     {
 
@@ -98,7 +98,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     ScriptString::ScriptString(const char* value) :
-      ScriptValue(ScriptValue::Types::kString),
+      ScriptValue(ScriptValueTypes::kString),
       value_(value)
     {
 
@@ -112,7 +112,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     ScriptObject::ScriptObject() :
-      ScriptValue(ScriptValue::Types::kObject)
+      ScriptValue(ScriptValueTypes::kObject)
     {
 
     }
@@ -136,7 +136,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     ScriptArray::ScriptArray() :
-      ScriptValue(ScriptValue::Types::kArray)
+      ScriptValue(ScriptValueTypes::kArray)
     {
 
     }

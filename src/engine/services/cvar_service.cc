@@ -15,7 +15,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void CVarService::RegisterFromCLI(const CommandLineParser::CLI& cli)
+    void CVarService::RegisterFromCLI(const CLI& cli)
     {
       static const char* default_description = "<Set from CLI>";
       static CVar<bool> test_bool = CVar<bool>("test_bool", "", false);
@@ -25,7 +25,7 @@ namespace snuffbox
       const char* value, *cname;
 
       for (
-        CommandLineParser::CLI::const_iterator it = cli.begin();
+        CLI::const_iterator it = cli.begin();
         it != cli.end();
         ++it)
       {
@@ -57,18 +57,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void CVarService::ExecuteCommand(const CommandLineParser::Command& cmd)
+    void CVarService::ExecuteCommand(const CLICommand& cmd)
     {
-      if (cmd.type == CommandLineParser::CommandType::kHelp)
+      if (cmd.type == CLICommandType::kHelp)
       {
         return;
       }
 
-      CommandLineParser::CLI cli;
+      CLI cli;
 
       switch (cmd.type)
       {
-      case CommandLineParser::CommandType::kSet:
+      case CLICommandType::kSet:
         cli.emplace(eastl::pair<foundation::String, foundation::String>
         { 
           cmd.data[0], 
@@ -77,15 +77,15 @@ namespace snuffbox
         RegisterFromCLI(cli);
         break;
 
-      case CommandLineParser::CommandType::kGet:
+      case CLICommandType::kGet:
         LogValue(cmd.data[0]);
         break;
 
-      case CommandLineParser::CommandType::kDesc:
+      case CLICommandType::kDesc:
         LogDescription(cmd.data[0]);
         break;
 
-      case CommandLineParser::CommandType::kShowAll:
+      case CLICommandType::kShowAll:
         LogAll();
         break;
       }

@@ -12,6 +12,10 @@ SET(RootSources
   "scripting.h"
 )
 
+SET(DefinitionsSources
+  "definitions/script_types.h"
+)
+
 SET(NativeSources "")
 
 IF (SNUFF_DUKTAPE)
@@ -35,10 +39,12 @@ IF (SNUFF_DUKTAPE)
   SET(NativeSources ${NativeSources} ${DuktapeSources})
 ENDIF (SNUFF_DUKTAPE)
 
-SOURCE_GROUP("\\"   FILES ${RootSources})
+SOURCE_GROUP("\\"             FILES ${RootSources})
+SOURCE_GROUP("definitions"    FILES ${DefinitionsSources})
 
 SET(ScriptingSources
   ${RootSources}
+  ${DefinitionsSources}
   ${NativeSources}
 )
 

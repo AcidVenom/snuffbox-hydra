@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/services/service.h"
-#include "engine/cvar/command_line_parser.h"
+#include "engine/definitions/cli.h"
 
 #include <foundation/definitions/error_codes.h>
 #include <foundation/memory/memory.h>
@@ -235,7 +235,7 @@ namespace snuffbox
       using Services = foundation::Vector<foundation::UniquePtr<IService>>;
 
       Configuration config_; //!< The configuration of the application
-      CommandLineParser::CLI cli_; //!< The parsed command line
+      CLI cli_; //!< The parsed command line
 
       Services services_; //!< The list of services that are available
 
@@ -247,7 +247,8 @@ namespace snuffbox
     inline T* Application::GetService()
     {
       static_assert(eastl::is_base_of<IService, T>::value,
-        "Only services that derive from IService can be retrieved as a service from the application");
+        "Only services that derive from IService \
+        can be retrieved as a service from the application");
 
       uint32_t id = T::type_id();
       if (id >= static_cast<uint32_t>(services_.size()))
@@ -263,7 +264,8 @@ namespace snuffbox
     inline T* Application::CreateService(Args&&... args)
     {
       static_assert(eastl::is_base_of<IService, T>::value, 
-        "Only services that derive from IService can be added as a service to the application");
+        "Only services that derive from IService \
+        can be added as a service to the application");
 
       foundation::UniquePtr<T> ptr = 
         foundation::Memory::ConstructUnique<T>(

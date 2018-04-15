@@ -146,8 +146,8 @@ namespace snuffbox
       * @return Was the argument of a valid type?
       */
       static bool CheckArg(
-        ScriptValue::Types expected, 
-        ScriptValue::Types type,
+        ScriptValueTypes expected, 
+        ScriptValueTypes type,
         uint8_t idx);
 
       /**
@@ -162,7 +162,7 @@ namespace snuffbox
       * @param[in] idx The argument index to retrieve the value from
       * @param[in] def The default value if the argument is invalid
       */
-      template <typename T, typename Y, ScriptValue::Types U>
+      template <typename T, typename Y, ScriptValueTypes U>
       T GetImpl(uint8_t idx, T def) const;
 
     private:
@@ -185,7 +185,7 @@ namespace snuffbox
     inline T ScriptArgs::Get(uint8_t idx, T def, if_number_or_enum<T>*) const
     {
       return static_cast<T>(
-        GetImpl<double, ScriptNumber, ScriptValue::Types::kNumber>(idx, def));
+        GetImpl<double, ScriptNumber, ScriptValueTypes::kNumber>(idx, def));
     }
 
     //--------------------------------------------------------------------------
@@ -196,7 +196,7 @@ namespace snuffbox
       if_n_number_and_enum<bool>*) const
     {
       return 
-        GetImpl<bool, ScriptBoolean, ScriptValue::Types::kBoolean>(idx, def);
+        GetImpl<bool, ScriptBoolean, ScriptValueTypes::kBoolean>(idx, def);
     }
 
     //--------------------------------------------------------------------------
@@ -210,7 +210,7 @@ namespace snuffbox
         GetImpl<
         foundation::String, 
         ScriptString, 
-        ScriptValue::Types::kString>(idx, def);
+        ScriptValueTypes::kString>(idx, def);
     }
 
     //--------------------------------------------------------------------------
@@ -221,7 +221,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <typename T, typename Y, ScriptValue::Types U>
+    template <typename T, typename Y, ScriptValueTypes U>
     inline T ScriptArgs::GetImpl(uint8_t idx, T def) const
     {
       ScriptValue* val = GetArgument(idx);

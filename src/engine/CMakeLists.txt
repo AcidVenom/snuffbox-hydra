@@ -1,3 +1,7 @@
+SET(DefinitionsSources
+  "definitions/cli.h"
+)
+
 SET(AuxiliarySources
   "auxiliary/debug.h"
   "auxiliary/debug.cc"
@@ -24,12 +28,14 @@ SET(CVarSources
   "cvar/command_line_parser.cc"
 )
 
+SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
 SOURCE_GROUP("auxiliary"    FILES ${AuxiliarySources})
 SOURCE_GROUP("services"     FILES ${ServicesSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
 SOURCE_GROUP("cvar"         FILES ${CVarSources})
 
 SET(EngineSources
+  ${DefinitionsSources}
   ${AuxiliarySources}
   ${ServicesSources}
   ${ApplicationSources}

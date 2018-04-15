@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/cvar/cvar.h"
-#include "engine/cvar/command_line_parser.h"
+#include "engine/definitions/cli.h"
 #include "engine/services/service.h"
 
 #include <foundation/memory/memory.h>
@@ -56,14 +56,14 @@ namespace snuffbox
       *
       * @param[in] cli The parsed command line from the application
       */
-      void RegisterFromCLI(const CommandLineParser::CLI& cli);
+      void RegisterFromCLI(const CLI& cli);
 
       /**
       * @brief Executes a parsed command of the CommandLineParser
       *
       * @param[in] cmd The command to execute
       */
-      void ExecuteCommand(const CommandLineParser::Command& cmd);
+      void ExecuteCommand(const CLICommand& cmd);
 
       /**
       * @brief Logs a value of a CVar
@@ -108,7 +108,10 @@ namespace snuffbox
       * @see CVarService::RegisterImpl
       */
       template <typename T, typename = CVarValue::is_double<T, false>>
-      CVarValue* Register(const char* name, const char* description, const T& def)
+      CVarValue* Register(
+        const char* name, 
+        const char* description, 
+        const T& def)
       {
         return RegisterImpl(name, description, def);
       }

@@ -8,7 +8,7 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    CommandLineParser::CLI CommandLineParser::Parse(int argc, char** argv)
+    CLI CommandLineParser::Parse(int argc, char** argv)
     {
       CLI parsed;
 
@@ -50,7 +50,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool CommandLineParser::ParseInput(const char* input, Command* command)
+    bool CommandLineParser::ParseInput(const char* input, CLICommand* command)
     {
       foundation::String argv[3];
 
@@ -123,7 +123,7 @@ namespace snuffbox
         return false;
       }
 
-      Command cmd;
+      CLICommand cmd;
 
       if (argv[0] == "help" && argc == 1)
       {
@@ -132,27 +132,27 @@ namespace snuffbox
           "Usage:\n{0}\n",
           Usage());
 
-        cmd.type = CommandType::kHelp;
+        cmd.type = CLICommandType::kHelp;
       }
       else if (argv[0] == "set" && argc == 3)
       {
-        cmd.type = CommandType::kSet;
+        cmd.type = CLICommandType::kSet;
         cmd.data[0] = argv[1];
         cmd.data[1] = argv[2];
       }
       else if (argv[0] == "get" && argc == 2)
       {
-        cmd.type = CommandType::kGet;
+        cmd.type = CLICommandType::kGet;
         cmd.data[0] = argv[1];
       }
       else if (argv[0] == "desc" && argc == 2)
       {
-        cmd.type = CommandType::kDesc;
+        cmd.type = CLICommandType::kDesc;
         cmd.data[0] = argv[1];
       }
       else if (argv[0] == "show_all" && argc == 1)
       {
-        cmd.type = CommandType::kShowAll;
+        cmd.type = CLICommandType::kShowAll;
       }
       else
       {

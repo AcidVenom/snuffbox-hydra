@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/definitions/cli.h"
+
 #include <foundation/containers/map.h>
 #include <foundation/containers/string.h>
 
@@ -17,34 +19,6 @@ namespace snuffbox
     {
 
     public:
-
-      /**
-      * @brief The different command types that exist
-      */
-      enum class CommandType
-      {
-        kHelp, //!< "help"
-        kSet, //!< "set <name> <value>"
-        kGet, //!< "get <name>"
-        kDesc, //!< "desc <name>"
-        kShowAll //!< "show_all"
-      };
-
-      /**
-      * @brief A container to store the CLI definitions
-      */
-      using CLI = foundation::Map<foundation::String, foundation::String>;
-
-      /**
-      * @brief Used to store command input from the console
-      *
-      * @author Daniel Konings
-      */
-      struct Command
-      {
-        CommandType type; //!< The type of the command
-        foundation::String data[2]; //!< The data
-      };
 
       /**
       * @brief Parses the command line and stores the respective string
@@ -68,7 +42,7 @@ namespace snuffbox
       *
       * @return Was the input command parsed succesfully?
       */
-      static bool ParseInput(const char* input, Command* command);
+      static bool ParseInput(const char* input, CLICommand* command);
 
     protected:
 

@@ -182,31 +182,31 @@ namespace snuffbox
     {
       switch (value->type())
       {
-      case ScriptValue::Types::kNull:
+      case ScriptValueTypes::kNull:
         duk_push_undefined(context_);
         break;
 
-      case ScriptValue::Types::kNumber:
+      case ScriptValueTypes::kNumber:
         PushValueImpl(
           static_cast<ScriptNumber*>(value)->value());
         break;
 
-      case ScriptValue::Types::kBoolean:
+      case ScriptValueTypes::kBoolean:
         PushValueImpl(
           static_cast<ScriptBoolean*>(value)->value());
         break;
 
-      case ScriptValue::Types::kString:
+      case ScriptValueTypes::kString:
         PushValueImpl(
           static_cast<ScriptString*>(value)->value());
         break;
 
-      case ScriptValue::Types::kObject:
+      case ScriptValueTypes::kObject:
         PushValueImpl(
           static_cast<ScriptObject*>(value));
         break;
 
-      case ScriptValue::Types::kArray:
+      case ScriptValueTypes::kArray:
         PushValueImpl(
           static_cast<ScriptArray*>(value));
         break;
