@@ -59,12 +59,12 @@ namespace snuffbox
       * @brief Writes a comment on that the file was generated and should
       *        not be modified manually, on top of some meta information
       *
-      * @param[in] defs The class definition data, used for the meta section
+      * @param[in] defs The definition data, used for the meta section
       */
-      void WriteComment(const std::vector<ClassDefinition>& defs);
+      void WriteComment(const ScriptDefinitions& defs);
 
       /**
-      * @brief Write all class definitions into the source file in the
+      * @brief Write all class and enum definitions into the source file in the
       *        required format so the engine can use it
       *
       * The header can be an absolute path, as the file is regenerated on
@@ -75,7 +75,7 @@ namespace snuffbox
       */
       void WriteAll(
         const std::string& header, 
-        const std::vector<ClassDefinition>& defs);
+        const ScriptDefinitions& defs);
 
       /**
       * @brief Writes a class's function bodies to the output file
@@ -84,10 +84,29 @@ namespace snuffbox
       */
       void WriteClass(const ClassDefinition& d);
 
+      /**
+      * @brief Enters the current namespaces before writing
+      *
+      * This makes sure we're at the right indentation and that the
+      * function bodies are wrapped in the corresponding namespace.
+      *
+      * @param[in] ns The namespace to enter
+      */
+      void EnterNamespaces(const std::string& ns);
+
+      /**
+      * @brief Close off the current namespaces
+      *
+      * This resets the current indentation and writes the closing brackets
+      * of each namespace entered in SparseWriter::EnterNamespaces
+      */
+      void ExitNamespaces();
+
     private:
 
       std::ofstream output_; //!< The output stream
       unsigned int indent_; //!< How much are we currently indented?
+      unsigned int namespaces_; //!< How much namespaces have we entered?
     };
   }
 }

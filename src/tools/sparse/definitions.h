@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace snuffbox
 {
@@ -73,7 +74,7 @@ namespace snuffbox
     *
     * This struct is created every time the parser finds a class in "ParseRoot"
     * and "ParseClass" is called. The ClassDefinition will be stored in 
-    * JsonHeaderParser::definitions_ for later use.
+    * JsonHeaderParser::class_definitions_ for later use.
     *
     * @author Daniel Konings
     */
@@ -84,6 +85,39 @@ namespace snuffbox
       std::string ns; //!< The namespace string including '::'
 
       std::vector<FunctionDefinition> functions; //!< The functions of the class
+    };
+
+    /**
+    * @brief Used to store enumerator information for the current .json being
+    *        parsed
+    *
+    * This struct is created every time the parser finds an enum in "ParseEnum"
+    * and "ParseEnum" is called. It is noteworthy enumerators can be explicitly
+    * specified like you'd expect in C++, but cannot be any values other than
+    * integer values. 
+    * The enumerators are stored in JsonHeaderParser::enum_definitions_ 
+    * for later use.
+    *
+    * @author Daniel Konings
+    */
+    struct EnumDefinition
+    {
+      std::string name; //!< The name of the enum
+      std::unordered_map<std::string, int> values; //!< The values of the enum
+      std::string nested; //!< The namespace and class string, including '::'
+      std::string ns; //!< The namespace string including '::'
+    };
+
+    /**
+    * @brief A structure to hold both class and enumerator defintions
+    *        for a parsed .json document
+    *
+    * @author Daniel Konings
+    */
+    struct ScriptDefinitions
+    {
+      std::vector<ClassDefinition> classes; //!< All class definitions
+      std::vector<EnumDefinition> enums; //!< All enum definitions
     };
   }
 }

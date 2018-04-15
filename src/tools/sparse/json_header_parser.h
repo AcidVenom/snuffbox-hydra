@@ -51,7 +51,7 @@ namespace snuffbox
       /**
       * @return The parsed class definitions from the input header
       */
-      const std::vector<ClassDefinition> definitions() const;
+      const ScriptDefinitions& definitions() const;
 
     protected:
 
@@ -150,6 +150,18 @@ namespace snuffbox
       bool ParseClass(RapidValue v, const std::string& ns);
 
       /**
+      * @brief Parses a .json enum value from a given namespace, optionally
+      *        nested in a class
+      *
+      * @param[in] v The enum value
+      * @param[in] ns The current namespace
+      * @param[in] cl The nested class, or nullptr if it's globally accessible
+      *
+      * @return Was the parsing a success?
+      */
+      bool ParseEnum(RapidValue v, const std::string& ns, ClassDefinition* cl);
+
+      /**
       * @brief Parses a .json class value's members
       *
       * @param[out] d The class definition to modify
@@ -188,12 +200,14 @@ namespace snuffbox
       */
       TypeDefinition ParseTypeValue(RapidValue v);
 
+      /**
+      * @brief Clears the current list of definitions
+      */
+      void Clear();
+
     private:
 
-      /**
-      * @brief All parsed class definitions
-      */
-      std::vector<ClassDefinition> definitions_;
+      ScriptDefinitions definitions_; //!< All contained definitions
 
       bool has_error_; //!< Are there any errors?
     };

@@ -57,14 +57,14 @@ namespace snuffbox
       void RegisterFunctions(ScriptFunctionRegister* reg);
 
       /**
-      * @brief Registers a ScriptEnum list into the script state
+      * @brief Registers a ScriptEnum into the script state
       *
-      * @remarks This register will continue until "nullptr" is found for the
-      *          next enumerator name
+      * @remarks The key/value pairs will be registered until a key with
+      *          a name value of nullptr is found
       *
-      * @param[in] reg The enum register to register
+      * @param[in] reg The enum to register
       */
-      void RegisterEnums(ScriptEnum* reg);
+      void RegisterEnum(const ScriptEnum& reg);
 
     protected:
 
@@ -157,8 +157,6 @@ namespace snuffbox
       Constructable<C>::StartClass<T>(ctx);
       T::RegisterScriptFunctions(this);
       Constructable<C>::EndClass<T>(ctx);
-
-      T::RegisterScriptEnums(this);
     }
 
     //--------------------------------------------------------------------------

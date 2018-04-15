@@ -7,14 +7,27 @@
 #define SCRIPT_ENUM(...)
 
 #ifndef SNUFF_NSCRIPTING
+
 #define SCRIPT_CONSTRUCTOR(x) x(snuffbox::scripting::ScriptArgs&)
+
 #define SCRIPT_NAME(x)                                                        \
 static const char* ScriptName() { return #x; }                                \
-static void RegisterScriptFunctions(snuffbox::scripting::ScriptRegister*);    \
-static void RegisterScriptEnums(snuffbox::scripting::ScriptRegister*)                  
+static void RegisterScriptFunctions(snuffbox::scripting::ScriptRegister*);
+
+#define SCRIPT_ENUM_DECL(x)                                                   \
+namespace snuffbox                                                            \
+{                                                                             \
+  namespace scripting                                                         \
+  {                                                                           \
+    template <>                                                               \
+    inline void ScriptClass::RegisterScriptEnum< ## x>();                     \
+  }                                                                           \
+}
+
 #else
 #define SCRIPT_CONSTRUCTOR(x)
 #define SCRIPT_NAME(x)
+#define SCRIPT_ENUM_DECL(x)
 #endif
 
 #ifdef SNUFF_DUKTAPE
@@ -59,7 +72,21 @@ namespace snuffbox
     */
     class ScriptClass
     {
-      
+      /**
+      * @brief This function should be specialized with an enumerator
+      *        as T parameter, to register enums using ScriptEnumRegister
+      *
+      * @tparam T The enumerator to register
+      */
+      template <typename T>
+      static void RegisterScriptEnum();
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void ScriptClass::RegisterScriptEnum()
+    {
+      static_assert(false, "Unspecialized implementation of a SCRIPT_ENUM");
+    }
   }
 }

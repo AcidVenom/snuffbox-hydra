@@ -16,7 +16,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool JsonHeaderParser::Parse(const std::string& input)
     {
-      definitions_.clear();
+      Clear();
 
       rapidjson::Document d;
 
@@ -53,14 +53,16 @@ namespace snuffbox
         if (success == false)
         {
           std::cerr << "Could not parse file: " << input;
-          definitions_.clear();
+
+          Clear();
         }
 
         return success;
       }
       
       std::cerr << "Could not open file: " << input << std::endl;
-      definitions_.clear();
+
+      Clear();
 
       return false;
     }
@@ -68,11 +70,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool JsonHeaderParser::HasDocument() const
     {
-      return has_error_ == true ? false : definitions_.size() > 0;
+      return has_error_ == true ? false : 
+        (definitions_.classes.size() > 0 || definitions_.enums.size() > 0);
     }
 
     //--------------------------------------------------------------------------
-    const std::vector<ClassDefinition> JsonHeaderParser::definitions() const
+    const ScriptDefinitions& JsonHeaderParser::definitions() const
     {
       return definitions_;
     }
@@ -140,6 +143,14 @@ namespace snuffbox
           else if (strcmp(type, "class") == 0)
           {
             if (ParseClass(v, current_ns) == false)
+            {
+              success = false;
+              return false;
+            }
+          }
+          else if (strcmp(type, "enum") == 0)
+          {
+            if (ParseEnum(v, current_ns, nullptr) == false)
             {
               success = false;
               return false;
@@ -237,9 +248,66 @@ namespace snuffbox
         return false;
       }
 
-      std::cout << "-- Functions: " << d.functions.size() << std::endl;
+      definitions_.classes.push_back(d);
 
-      definitions_.push_back(d);
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    bool JsonHeaderParser::ParseEnum(
+      RapidValue v,
+      const std::string& ns,
+      ClassDefinition* cl)
+    {
+      if (v.HasMember("name") == false)
+      {
+        std::cerr << "Enumerator doesn't have a 'name' field" << std::endl;
+        return false;
+      }
+
+      std::string nested_in = ns;
+
+      if (cl != nullptr)
+      {
+        nested_in += nested_in.size() == 0 ? cl->c_name : "::" + cl->c_name;
+      }
+
+      EnumDefinition d;
+      d.name = v["name"].GetString();
+      d.nested = nested_in;
+      d.ns = ns;
+
+      std::cout << "sparse: " << d.nested << "::" << d.name << std::endl;
+
+      if (v.HasMember("members") == false || v["members"].IsArray() == false)
+      {
+        definitions_.enums.push_back(d);
+        return true;
+      }
+
+      RapidArray members = v["members"].GetArray();
+
+      int current = 0;
+      ForEach(members, [&](RapidValue val, RapidIdx i)
+      {
+        const char* key = val["key"].GetString();
+
+        if (val.HasMember("value") == true)
+        {
+          current = atoi(val["value"].GetString());
+        }
+
+        d.values.emplace(std::pair<std::string, int>
+        {
+          key, current
+        });
+
+        ++current;
+
+        return true;
+      });
+
+      definitions_.enums.push_back(d);
 
       return true;
     }
@@ -272,6 +340,14 @@ namespace snuffbox
           else if (strcmp(type, "function") == 0)
           {
             if (ParseFunction(d, val) == false)
+            {
+              success = false;
+              return false;
+            }
+          }
+          else if (strcmp(type, "enum") == 0)
+          {
+            if (ParseEnum(val, d->ns, d) == false)
             {
               success = false;
               return false;
@@ -386,6 +462,13 @@ namespace snuffbox
       }
 
       return TypeDefinition{ type, ref };
+    }
+
+    //--------------------------------------------------------------------------
+    void JsonHeaderParser::Clear()
+    {
+      definitions_.classes.clear();
+      definitions_.enums.clear();
     }
   }
 }

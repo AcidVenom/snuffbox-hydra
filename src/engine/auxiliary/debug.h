@@ -8,6 +8,13 @@ namespace snuffbox
 {
   namespace engine
   {
+    SCRIPT_ENUM() enum class TestEnum
+    {
+      kA,
+      kB = 10,
+      kC
+    };
+
     /**
     * @brief Provides debug functionalities throughout the engine project
     *
@@ -81,3 +88,5 @@ namespace snuffbox
     }
   }
 }
+
+SCRIPT_ENUM_DECL(snuffbox::engine::TestEnum);

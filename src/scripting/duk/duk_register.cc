@@ -32,24 +32,37 @@ namespace snuffbox
       duk_context* ctx = context_;
 
       size_t i = 0;
+      ScriptFunctionRegister& f = reg[i];
 
-      while (reg[i].func != nullptr && reg[i].name != nullptr)
+      while (f.func != nullptr && f.name != nullptr)
       {
-        const ScriptFunctionRegister& f = reg[i];
         DukFunction::Bind(ctx, -1, f.func, f.name);
-        ++i;
+        f = reg[++i];
       }
     }
 
     //--------------------------------------------------------------------------
-    void DukRegister::RegisterEnums(ScriptEnum* reg)
+    void DukRegister::RegisterEnum(const ScriptEnum& reg)
     {
       duk_context* ctx = context_;
 
-      for (size_t i = 0; i < 0; ++i)
-      {
+      size_t i = 0;
 
+      duk_push_global_object(ctx);
+      duk_push_object(ctx);
+
+      ScriptEnumRegister& e = reg.keys[i];
+
+      while(e.key != nullptr)
+      {
+        duk_push_number(ctx, static_cast<double>(e.value));
+        duk_put_prop_string(ctx, -2, e.key);
+
+        e = reg.keys[++i];
       }
+
+      duk_put_prop_string(ctx, -2, reg.name);
+      duk_pop(ctx);
     }
   }
 }
