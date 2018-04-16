@@ -20,7 +20,7 @@ namespace snuffbox                                                            \
   namespace scripting                                                         \
   {                                                                           \
     template <>                                                               \
-    void ScriptClass::RegisterScriptEnum<##x>(                                \
+    void ScriptClass::RegisterScriptEnum<x>(                                  \
       snuffbox::scripting::ScriptRegister*);                                  \
   }                                                                           \
 }

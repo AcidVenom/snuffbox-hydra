@@ -2,6 +2,7 @@
 
 #include "engine/services/service.h"
 #include "engine/definitions/cli.h"
+#include "engine/auxiliary/debug.h"
 
 #include <foundation/definitions/error_codes.h>
 #include <foundation/memory/memory.h>
