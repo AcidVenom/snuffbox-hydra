@@ -225,7 +225,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Application::ShutdownServices()
     {
-      for (size_t i = 0; i < services_.size(); ++i)
+      for (int i = static_cast<int>(services_.size()) - 1; i >= 0; --i)
       {
         services_.at(i)->OnShutdown(*this);
       }
