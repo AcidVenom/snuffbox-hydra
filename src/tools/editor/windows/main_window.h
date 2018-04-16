@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ui_main_window.h"
+#include "tools/editor/windows/console.h"
 
 #include <foundation/memory/memory.h>
 
@@ -10,8 +11,6 @@ namespace snuffbox
 {
   namespace editor
   {
-    class Console;
-
     /**
     * @brief The main window of the editor application
     *

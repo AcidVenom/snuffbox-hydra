@@ -412,6 +412,7 @@ namespace snuffbox
       f.name = v["name"].GetString();
       f.ret_val = ParseTypeValue(v["returnType"]);
       f.is_static = v.HasMember("static") == true;
+      f.is_custom = false;
 
       if (v.HasMember("meta") == true)
       {

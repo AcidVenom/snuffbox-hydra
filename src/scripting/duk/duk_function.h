@@ -1,6 +1,6 @@
 #pragma once
 
-#include "scripting/script_function.h"
+#include "scripting/definitions/script_types.h"
 
 #include "scripting/duk/duk_definitions.h"
 #include "scripting/duk/duk_function.h"
@@ -76,7 +76,7 @@ namespace snuffbox
       const char* name)
     {
       duk_push_c_function(ctx, &DukCall<T>, DUK_VARARGS);
-      duk_push_pointer(ctx, func);
+      duk_push_pointer(ctx, reinterpret_cast<void*>(func));
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_CALLBACK);
       duk_put_prop_string(ctx, stack_idx - 1, name);
     }

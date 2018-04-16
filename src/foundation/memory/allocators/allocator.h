@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cinttypes>
+#include <cstddef>
 
 namespace snuffbox
 {
@@ -24,7 +25,7 @@ namespace snuffbox
     class Allocator
     {
 
-      friend Memory;
+      friend class Memory;
 
     public:
 

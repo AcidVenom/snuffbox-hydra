@@ -2,6 +2,7 @@
 
 #include "scripting/script_type_traits.h"
 #include "scripting/script_value.h"
+#include "scripting/script_args.h"
 
 #include "scripting/duk/duk_definitions.h"
 
@@ -15,8 +16,6 @@ namespace snuffbox
 {
   namespace scripting
   {
-    class ScriptArgs;
-
     /**
     * @brief Used to wrap the stack of duktape and automatically do value
     *        retrieving and casting without having to check types

@@ -92,7 +92,7 @@ namespace snuffbox
 
         if (std::isspace(c) != 0 || at_end == true)
         {
-          if (at_end == true && (c != '\'' && c != '\"') || in_quotes != '\0')
+          if ((at_end == true && (c != '\'' && c != '\"')) || in_quotes != '\0')
           {
             argv[argc] += c;
           }

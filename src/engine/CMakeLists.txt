@@ -54,6 +54,9 @@ IF (NOT SNUFF_NSCRIPTING)
   )
   
   SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
+  FILE(MAKE_DIRECTORY ${WorkingDir})
+  FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)
+
   TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PRIVATE ${WorkingDir})
   SET(WorkingDir "${WorkingDir}/sparsed")
   

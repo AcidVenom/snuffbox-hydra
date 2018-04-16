@@ -39,11 +39,11 @@ namespace snuffbox                                                            \
 #endif
 
 #ifdef SNUFF_DUKTAPE
-#include "duk/duk_register.h"
 namespace snuffbox
 {
   namespace scripting
   {
+    class DukRegister;
     using ScriptRegister = DukRegister;
   }
 }
@@ -60,7 +60,6 @@ namespace snuffbox
     *
     * static const char* ScriptName()
     * static void RegisterScriptFunctions(ScriptRegister*)
-    * static void RegisterScriptEnums(ScriptRegister*)
     *
     * If constructable; ClassName(ScriptArgs&)
     *
@@ -96,14 +95,5 @@ namespace snuffbox
       static void RegisterScriptEnum(ScriptRegister* reg);
 #endif
     };
-
-#ifndef SNUFF_NSCRIPTING
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline void ScriptClass::RegisterScriptEnum(ScriptRegister* reg)
-    {
-      static_assert(false, "Unspecialized implementation of a SCRIPT_ENUM");
-    }
-#endif
   }
 }

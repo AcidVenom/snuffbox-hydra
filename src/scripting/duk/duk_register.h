@@ -1,9 +1,10 @@
 #pragma once
 
-#include "scripting/script_register.h"
+#include "scripting/definitions/script_types.h"
 #include "scripting/duk/duk_definitions.h"
 #include "scripting/duk/duk_wrapper.h"
 #include "scripting/duk/duk_function.h"
+#include "scripting/script_class.h"
 
 #include <foundation/memory/memory.h>
 
@@ -174,7 +175,7 @@ namespace snuffbox
 
       duk_context* ctx = context_;
 
-      Constructable<C>::StartClass<T>(ctx);
+      Constructable<C>::template StartClass<T>(ctx);
 
       auto ToString = [](duk_context* ctx) -> duk_ret_t
       {
@@ -190,7 +191,7 @@ namespace snuffbox
 
       T::RegisterScriptFunctions(this);
 
-      Constructable<C>::EndClass<T>(ctx);
+      Constructable<C>::template EndClass<T>(ctx);
     }
 
     //--------------------------------------------------------------------------

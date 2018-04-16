@@ -2,6 +2,7 @@
 #include "foundation/auxiliary/pointer_math.h"
 
 #include <memory>
+#include <cstring>
 
 namespace snuffbox
 {

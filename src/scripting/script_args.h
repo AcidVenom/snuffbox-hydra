@@ -2,6 +2,7 @@
 
 #include <foundation/containers/vector.h>
 #include <foundation/memory/memory.h>
+#include <foundation/auxiliary/logger.h>
 
 #include "scripting/script_value.h"
 

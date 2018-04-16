@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scripting/script_callback.h"
+#include "scripting/script_register.h"
 
 #ifdef SNUFF_DUKTAPE
 namespace snuffbox

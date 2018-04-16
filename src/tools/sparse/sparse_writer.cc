@@ -125,7 +125,8 @@ namespace snuffbox
     {
       WriteComment(defs);
 
-      output_ << "#include \"" << header << "\"" << std::endl << std::endl;
+      output_ << "#include \"" << header << "\"" << std::endl;
+      output_ << "#include <scripting/script_register.h>" << std::endl << std::endl;
 
       for (size_t i = 0; i < defs.classes.size(); ++i)
       {

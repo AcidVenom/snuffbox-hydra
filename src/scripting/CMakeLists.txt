@@ -5,7 +5,6 @@ SET(RootSources
   "script_value.cc"
   "script_args.h"
   "script_args.cc"
-  "script_function.h"
   "script_callback.h"
   "script_class.h"
   "script_register.h"

@@ -59,15 +59,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void CVarService::ExecuteCommand(const CLICommand& cmd)
     {
-      if (cmd.type == CLICommandType::kHelp)
-      {
-        return;
-      }
-
       CLI cli;
 
       switch (cmd.type)
       {
+      case CLICommandType::kHelp:
+        return;
+
       case CLICommandType::kSet:
         cli.emplace(eastl::pair<foundation::String, foundation::String>
         { 
