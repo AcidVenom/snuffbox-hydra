@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/services/service.h"
+#include "engine/application/window.h"
 
 #include <foundation/memory/memory.h>
 
@@ -8,8 +9,6 @@ namespace snuffbox
 {
   namespace engine
   {
-    class Window;
-
     /**
     * @brief The window service, which creates the main window if the engine
     *        is ran outside of the editor
