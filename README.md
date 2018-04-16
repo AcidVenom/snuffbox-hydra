@@ -24,3 +24,10 @@ supported.
 
 The current working version has only been tested with MSVC 2017, 64-bit. The engine is being developed
 in Visual Studio 2017 under platform tool set **v141**.
+
+# Clang
+
+Snuffbox currently builds on Linux succesfully. The engine on Linux is developed in QtCreator using
+**clang version 3.8.0-2ubuntu4 - x86_64-pc-linux-gnu** as compiler. The primary reason to use Clang
+over GCC is because EASTL throws a *-Wliteral-suffix* under GCC, but *-w* is enabled for treating
+warnings as errors. It doesn't happen when compiling EASTL, but when *\<EASTL/string.h\>* is included.
