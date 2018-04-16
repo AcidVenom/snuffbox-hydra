@@ -36,6 +36,14 @@ namespace snuffbox
       */
       void OnShutdown(Application& app) override;
 
+      /**
+      * @brief Processes the window events fired by GLFW in the underlying
+      *        window
+      *
+      * @return Should the application exit?
+      */
+      bool ProcessEvents();
+
     private:
 
       foundation::UniquePtr<Window> window_; //!< The current window

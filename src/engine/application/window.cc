@@ -51,6 +51,14 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Window::ProcessEvents()
+    {
+      glfwPollEvents();
+
+      return glfwWindowShouldClose(window_) == GL_TRUE;
+    }
+
+    //--------------------------------------------------------------------------
     bool Window::InitializeGLFW()
     {
       if (glfw_initialized_ == true)

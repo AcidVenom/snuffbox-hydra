@@ -48,6 +48,13 @@ namespace snuffbox
       bool Initialize();
 
       /**
+      * @brief Processes the GLFW window events
+      *
+      * @return Should the application exit?
+      */
+      bool ProcessEvents();
+
+      /**
       * @brief Initializes GLFW for use
       *
       * @return Was the initialization a success?

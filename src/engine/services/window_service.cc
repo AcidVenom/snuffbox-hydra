@@ -45,5 +45,11 @@ namespace snuffbox
       window_.reset();
       Window::ShutdownGLFW();
     }
+
+    //--------------------------------------------------------------------------
+    bool WindowService::ProcessEvents()
+    {
+      return window_ == nullptr ? true : window_->ProcessEvents();
+    }
   }
 }

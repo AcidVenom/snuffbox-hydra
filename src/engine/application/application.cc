@@ -9,12 +9,13 @@
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
+#include <scripting/scripting.h>
 #endif
 
+#include <thread>
+#include <chrono>
 #include <cassert>
 #include <iostream>
-
-#include <scripting/scripting.h>
 
 namespace snuffbox
 {
@@ -94,17 +95,11 @@ namespace snuffbox
         return err;
       }
 
-      std::string input;
-      while (input != "exit")
-      {
-        std::getline(std::cin, input);
+      WindowService* window = GetService<WindowService>();
 
-        if (input.size() > 0 && input != "exit")
-        {
-#ifndef SNUFF_NSCRIPTING
-          GetService<ScriptService>()->CompileAndRun(input.c_str());
-#endif
-        }
+      while (window->ProcessEvents() == false)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
       }
 
       Shutdown();
