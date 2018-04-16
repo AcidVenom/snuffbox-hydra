@@ -19,6 +19,40 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void DukWrapper::PushPointer(
+      void* callee, 
+      void* ptr, 
+      const char* type) const
+    {
+      if (callee == ptr)
+      {
+        duk_push_this(context_);
+        return;
+      }
+
+      duk_push_object(context_);
+
+      duk_get_global_string(context_, type);
+      duk_get_prop_string(context_, -1, "prototype");
+
+      duk_enum(context_, -1, DUK_ENUM_INCLUDE_HIDDEN);
+
+      while (duk_next(context_, -1, 1) > 0)
+      {
+        duk_put_prop_string(context_, -5, duk_get_string(context_, -2));
+        duk_pop(context_);
+      }
+
+      duk_pop(context_);
+
+      duk_push_pointer(context_, ptr);
+      duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);
+
+      duk_push_string(context_, type);
+      duk_put_prop_string(context_, -2, DUK_HIDDEN_NAME);
+    }
+
+    //--------------------------------------------------------------------------
     ScriptHandle DukWrapper::GetValueAt(duk_idx_t stack_idx) const
     {
       duk_int_t type = duk_get_type(context_, stack_idx);
@@ -62,7 +96,7 @@ namespace snuffbox
       {
         duk_enum(
           context_, 
-          stack_idx, 
+          -1, 
           DUK_ENUM_ARRAY_INDICES_ONLY | DUK_ENUM_SORT_ARRAY_INDICES);
       };
       
@@ -75,6 +109,8 @@ namespace snuffbox
         ++array_count;
         duk_pop(context_);
       }
+
+      duk_pop(context_);
 
       bool is_array = array_count > 0;
 
@@ -103,11 +139,24 @@ namespace snuffbox
         return foundation::Memory::MakeShared<ScriptArray>(arr);
       }
 
-      duk_enum(context_, stack_idx, 0);
-
       ScriptObject* obj =
         foundation::Memory::Construct<ScriptObject>(
           &foundation::Memory::default_allocator());
+
+      if (duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_PTR) == 1)
+      {
+        duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_NAME);
+
+        obj->SetPointer(
+          duk_get_pointer(context_, -2),
+          duk_get_string(context_, -1));
+
+        duk_pop(context_);
+      }
+
+      duk_pop(context_);
+
+      duk_enum(context_, stack_idx, 0);
 
       const char* key;
 
@@ -123,6 +172,8 @@ namespace snuffbox
 
         duk_pop_2(context_);
       }
+
+      duk_pop(context_);
 
       return foundation::Memory::MakeShared<ScriptObject>(obj);
     }

@@ -56,6 +56,20 @@ namespace snuffbox
         T value,
         if_n_number_and_enum<T>* = nullptr) const;
 
+      /**
+      * @brief Pushes a pointer by type, by retrieving its meta information
+      *        from the global object
+      *
+      * If the callee's pointer is the same as the pointer requested,
+      * the object is simply duplicated. This keeps reference counting intact
+      * and makes sure there are no double deletions of objects.
+      *
+      * @param[in] callee The callee
+      * @param[in] ptr The pointer to push
+      * @param[in] type The type name of the pointer
+      */
+      void PushPointer(void* callee, void* ptr, const char* type) const;
+
     protected:
 
       /**
@@ -246,11 +260,12 @@ namespace snuffbox
       void* callee = nullptr;
 
       duk_push_this(ctx);
+
       if (duk_get_prop_string(ctx, -1, DUK_HIDDEN_NAME) != 0)
       {
         bool is_same = strcmp(duk_get_string(ctx, -1), T::ScriptName()) == 0;
 
-        if (is_same && duk_get_prop_string(ctx, -1, DUK_HIDDEN_PTR) != 0)
+        if (is_same && duk_get_prop_string(ctx, -2, DUK_HIDDEN_PTR) != 0)
         {
           callee = duk_get_pointer(ctx, -1);
           duk_pop(ctx);

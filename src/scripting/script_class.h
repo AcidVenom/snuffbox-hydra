@@ -28,11 +28,14 @@ namespace snuffbox                                                            \
 #define SPARSE_CUSTOM(cl, func) bool sparse_##cl##_##func                     \
 (snuffbox::scripting::ScriptArgs& args)
 
+#define SCRIPT_CONSTRUCTOR(x) x(snuffbox::scripting::ScriptArgs&)
+
 #include "scripting/script_args.h"
 #else
 #define SCRIPT_CONSTRUCTOR(x)
 #define SCRIPT_NAME(x)
 #define SCRIPT_ENUM_DECL(x)
+#define SCRIPT_CONSTRUCTOR(x)
 #endif
 
 #ifdef SNUFF_DUKTAPE

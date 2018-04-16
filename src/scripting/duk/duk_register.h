@@ -175,7 +175,21 @@ namespace snuffbox
       duk_context* ctx = context_;
 
       Constructable<C>::StartClass<T>(ctx);
+
+      auto ToString = [](duk_context* ctx) -> duk_ret_t
+      {
+        foundation::String str = 
+          foundation::String("[Snuffbox ") + T::ScriptName() + "]";
+
+        duk_push_string(ctx, str.c_str());
+        return 1;
+      };
+
+      duk_push_c_function(ctx, ToString, DUK_VARARGS);
+      duk_put_prop_string(ctx, -2, "toString");
+
       T::RegisterScriptFunctions(this);
+
       Constructable<C>::EndClass<T>(ctx);
     }
 
@@ -224,12 +238,9 @@ namespace snuffbox
       DukWrapper wrapper = DukWrapper(ctx);
 
       ScriptArgs args;
-      wrapper.GetArguments(&args);
+      wrapper.GetArguments<T>(&args);
 
       duk_push_this(ctx);
-
-      duk_dup(ctx, 0);
-      duk_put_prop_string(ctx, -2, name);
 
       T* ptr = foundation::Memory::Construct<T>(
         &foundation::Memory::default_allocator(),
@@ -244,18 +255,6 @@ namespace snuffbox
 
       duk_push_string(ctx, name);
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_NAME);
-
-      auto ToString = [](duk_context* ctx) -> duk_ret_t
-      {
-        foundation::String str = 
-          foundation::String("[Snuffbox ") + T::ScriptName() + "]";
-
-        duk_push_string(ctx, str.c_str());
-        return 1;
-      };
-
-      duk_push_c_function(ctx, ToString, DUK_VARARGS);
-      duk_put_prop_string(ctx, -2, "toString");
 
       return 0;
     }

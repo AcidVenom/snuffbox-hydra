@@ -24,6 +24,12 @@ namespace snuffbox
       
     public:
 
+      struct ReturnPtr
+      {
+        void* ptr;
+        foundation::String type;
+      };
+
       /**
       * @brief Default constructor
       */
@@ -89,7 +95,19 @@ namespace snuffbox
       T Get(uint8_t idx, T def = T(), if_n_number_and_enum<T>* = nullptr) const;
 
       /**
+      * @brief Retrieves a pointer from a ScriptObject
+      *
+      * @param[in] idx The argument index to retrieve the pointer from
+      *
+      * @return The retrieved pointer, or nullptr if there was a type mismatch
+      */
+      template <typename T>
+      T* GetPointer(uint8_t idx) const;
+
+      /**
       * @brief Returns a value to the script state
+      *
+      * @tparam T The convertible value type
       *
       * @param[in] value The value to return, which will be converted to
       *                  a ScriptValue
@@ -99,6 +117,17 @@ namespace snuffbox
       */
       template <typename T>
       void AddReturnValue(T value);
+
+      /**
+      * @brief Returns a pointer, derived from ScriptClass
+      *
+      * @param[in] ptr The pointer to return
+      *
+      * @remarks If a new return value is specified, the other is lost
+      *          implicitly
+      */
+      template <typename T>
+      void AddReturnPointer(T* ptr);
 
       /**
       * @brief Retrieves the callee as a typed pointer
@@ -121,9 +150,17 @@ namespace snuffbox
       * @return The return value that was set in the function call
       *
       * @remarks This is nullptr if it was never set, thus there will be no
-      *          return value
+      *          return value, unless ScriptArgs::return_ptr_ is set
       */
       ScriptValue* return_value() const;
+
+      /**
+      * @return The return pointer that was set in the function call
+      *
+      * @remarks The .ptr field is nullptr if it was never set, thus there will
+      *          be no return value, unless ScriptArgs::return_value_ is set
+      */
+      ReturnPtr return_ptr() const;
 
     protected:
 
@@ -188,6 +225,11 @@ namespace snuffbox
       * @brief The return value that was set in the function call
       */
       ScriptHandle return_value_;
+
+      /**
+      * @brief The return pointer that was set in the function call
+      */
+      ReturnPtr return_ptr_;
     };
 
     //--------------------------------------------------------------------------
@@ -225,15 +267,69 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
+    inline T* ScriptArgs::GetPointer(uint8_t idx) const
+    {
+      ScriptValue* v = arguments_.at(idx).get();
+
+      if (v->type() != ScriptValueTypes::kObject)
+      {
+        return nullptr;
+      }
+
+      ScriptObject* o = static_cast<ScriptObject*>(v);
+
+      void* ptr = nullptr;
+      if ((ptr = o->GetPointer(T::ScriptName())) == nullptr)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kScript,
+          foundation::LogSeverity::kError,
+          "Type mismatch for pointer at argument index '{0}'",
+          static_cast<uint32_t>(idx)
+          );
+
+        return nullptr;
+      }
+
+      return reinterpret_cast<T*>(ptr);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
     inline void ScriptArgs::AddReturnValue(T value)
     {
+      if (return_ptr_.ptr != nullptr)
+      {
+        return_ptr_ = ReturnPtr{ nullptr, "" };
+      }
+
       return_value_ = ScriptValue::From<T>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    void ScriptArgs::AddReturnPointer(T* ptr)
+    {
+      if (return_value_ != nullptr)
+      {
+        return_value_.reset();
+      }
+
+      return_ptr_ = ReturnPtr{ ptr, T::ScriptName() };
     }
 
     //--------------------------------------------------------------------------
     template <typename T>
     inline T* ScriptArgs::GetSelf() const
     {
+      if (callee_ == nullptr)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kScript,
+          foundation::LogSeverity::kError,
+          "Invalid 'self' for a script function, callee was nullptr"
+          );
+      }
       return reinterpret_cast<T*>(callee_);
     }
 

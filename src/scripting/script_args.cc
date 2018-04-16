@@ -12,7 +12,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptArgs::ScriptArgs() :
       callee_(nullptr),
-      return_value_(nullptr)
+      return_value_(nullptr),
+      return_ptr_({nullptr, ""})
     {
 
     }
@@ -24,7 +25,8 @@ namespace snuffbox
       :
       arguments_(args),
       callee_(callee),
-      return_value_(nullptr)
+      return_value_(nullptr),
+      return_ptr_({nullptr, ""})
     {
 
     }
@@ -114,6 +116,12 @@ namespace snuffbox
       }
 
       return return_value_.get();
+    }
+
+    //--------------------------------------------------------------------------
+    ScriptArgs::ReturnPtr ScriptArgs::return_ptr() const
+    {
+      return return_ptr_;
     }
 
     //--------------------------------------------------------------------------

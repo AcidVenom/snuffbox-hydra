@@ -275,6 +275,34 @@ namespace snuffbox
       */
       template <typename T>
       void Insert(const char* key, T value);
+
+      /**
+      * @brief Sets the underlying pointer of this object
+      *
+      * This pointer is to be set by the ScriptState when a ScriptObject
+      * is requested that has a hidden pointer field
+      *
+      * The type should be set accordingly as well, so that we can check
+      * whether a pointer is actually valid for a requested type.
+      *
+      * @param[in] ptr The pointer to set
+      * @param[in] type The type name to set
+      */
+      void SetPointer(void* ptr, const char* type);
+
+      /**
+      * @brief Retrieves the underlying pointer
+      *
+      * @param[in] type The type that we expect as a named string
+      *
+      * @return The pointer, or nullptr if there was a type mismatch
+      */
+      void* GetPointer(const char* type) const;
+
+    private:
+
+      void* ptr_; //!< An underlying pointer for userdata objects
+      foundation::String type_; //!< The type of the underlying pointer
     };
 
     /**

@@ -16,8 +16,8 @@ namespace snuffbox
       { "char", 'N' },
       { "bool", 'B' },
       { "String", 'S' },
-      { "Object", 'O' },
-      { "Array", 'A' },
+      { "ScriptObject", 'O' },
+      { "ScriptArray", 'A' },
       { "vec", 'V' },
       { "quat", 'Q' },
       { "mat", 'M' }
@@ -314,6 +314,13 @@ namespace snuffbox
       for (size_t i = 0; i < args.size(); ++i)
       {
         const ArgumentDefinition& a = args.at(i);
+
+        if (a.type.ref_type == RefType::kPointer)
+        {
+          format += 'O';
+          continue;
+        }
+
         type = a.type.name;
         
         for (
@@ -384,7 +391,8 @@ namespace snuffbox
 
         get = "args." + get_func + "<" + type + ">(" + std::to_string(i) + ");";
 
-        WriteLine((type + " " + a.name + " = " + get).c_str());
+        WriteLine((type + (a.type.ref_type == RefType::kPointer ? "*" : "") +
+          " " + a.name + " = " + get).c_str());
       }
     }
 
@@ -394,6 +402,20 @@ namespace snuffbox
       const std::string& cl)
     {
       std::string call = "";
+
+      bool has_return = false;
+      if (d.ret_val.name != "void")
+      {
+        call += d.ret_val.name;
+
+        if (d.ret_val.ref_type == RefType::kPointer)
+        {
+          call += "*";
+        }
+
+        call += " return_value = ";
+        has_return = true;
+      }
 
       if (d.is_static == false)
       {
@@ -423,6 +445,15 @@ namespace snuffbox
       call += d.name + "(" + args + ");";
 
       WriteLine(call.c_str());
+
+      if (has_return == true)
+      {
+        call = d.ret_val.ref_type != RefType::kPointer ?
+          "AddReturnValue" :
+          "AddReturnPointer";
+
+        WriteLine(("args." + call + "(return_value);").c_str());
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -455,7 +486,10 @@ namespace snuffbox
       WriteSelf(d, cl);
       WriteArgumentList(d);
 
-      WriteLine("");
+      if (d.arguments.size() > 0)
+      {
+        WriteLine("");
+      }
 
       WriteFunctionCall(d, cl);
 

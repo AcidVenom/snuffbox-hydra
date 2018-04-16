@@ -435,6 +435,7 @@ namespace snuffbox
         v["arguments"].IsArray() == false ||
         v["arguments"].GetArray().Size() == 0)
       {
+        d->functions.push_back(f);
         return true;
       }
 
