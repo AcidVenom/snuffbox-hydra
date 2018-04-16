@@ -54,6 +54,9 @@ namespace snuffbox
         */
         uint32_t verbosity;
 
+        uint16_t window_width; //!< The window width
+        uint16_t window_height; //!< The window height
+
         /**
         * @brief The default configuration
         */
@@ -98,6 +101,11 @@ namespace snuffbox
       template <typename T>
       T* GetService();
 
+      /**
+      * @return The configuration of the application
+      */
+      const Configuration& config() const;
+
     protected:
 
       /**
@@ -109,8 +117,11 @@ namespace snuffbox
       * @brief Initializes the application
       *
       * Calls Application::OnInitialize
+      *
+      * @return The error code, or ErrorCodes::kSuccess if everything
+      *         was initialized succesfully
       */
-      void Initialize();
+      foundation::ErrorCodes Initialize();
 
       /**
       * @brief Calls the update functions, to update data real-time
@@ -217,8 +228,11 @@ namespace snuffbox
 
       /**
       * @brief Initializes all services
+      *
+      * @return The error code, or ErrorCodes::kSuccess if every service
+      *         was initialized succesfully
       */
-      void InitializeServices();
+      foundation::ErrorCodes InitializeServices();
 
       /**
       * @brief Shuts down all services

@@ -1,5 +1,9 @@
 #include "engine/services/script_service.h"
+
 #include "engine/auxiliary/debug.h"
+#include "engine/definitions/keycodes.h"
+
+#include <sparsed/keycodes.gen.cc>
 
 namespace snuffbox
 {
@@ -25,9 +29,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ScriptService::OnInitialize(Application& app)
+    foundation::ErrorCodes ScriptService::OnInitialize(Application& app)
     {
-      return Initialize();
+      return Initialize() == true ? 
+        foundation::ErrorCodes::kSuccess : 
+        foundation::ErrorCodes::kScriptInitializationFailed;
     }
 
     //--------------------------------------------------------------------------
@@ -47,6 +53,11 @@ namespace snuffbox
         return false;
       }
 
+      register_ = 
+        foundation::Memory::ConstructUnique<scripting::ScriptRegister>(
+          &foundation::Memory::default_allocator(),
+          state_.get());
+
       RegisterClasses();
       InitializeCallbacks();
 
@@ -56,12 +67,10 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptService::RegisterClasses()
     {
-      register_ = 
-        foundation::Memory::ConstructUnique<scripting::ScriptRegister>(
-          &foundation::Memory::default_allocator(),
-          state_.get());
-
       register_->RegisterClass<Debug>();
+
+      register_->RegisterEnum<Keys>();
+      register_->RegisterEnum<MouseButtons>();
     }
 
     //--------------------------------------------------------------------------

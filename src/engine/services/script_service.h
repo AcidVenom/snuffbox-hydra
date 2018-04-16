@@ -42,7 +42,7 @@ namespace snuffbox
       /**
       * @see IService::OnInitialize
       */
-      bool OnInitialize(Application& app) override;
+      foundation::ErrorCodes OnInitialize(Application& app) override;
 
       /**
       * @see IService::OnShutdown

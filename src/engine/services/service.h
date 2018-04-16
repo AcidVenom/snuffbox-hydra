@@ -1,6 +1,7 @@
 #pragma once
 
 #include <foundation/containers/string.h>
+#include <foundation/definitions/error_codes.h>
 
 #include <cinttypes>
 
@@ -61,9 +62,10 @@ namespace snuffbox
       *
       * @param[in] app The application the service was created from
       *
-      * @return Was the initialization a success?
+      * @return The error code, should be ErrorCodes::kSuccess if initialized
+      *         succesfully
       */
-      virtual bool OnInitialize(Application& app) = 0;
+      virtual foundation::ErrorCodes OnInitialize(Application& app) = 0;
 
       /**
       * @brief Called on every service when the Application class is shutdown 

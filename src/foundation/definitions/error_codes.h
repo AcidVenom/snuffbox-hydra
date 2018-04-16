@@ -9,7 +9,10 @@ namespace snuffbox
     */
     enum class ErrorCodes
     {
-      kSuccess,
+      kSuccess = 0,
+      kGLFWInitializationFailed,
+      kCreateWindowError,
+      kScriptInitializationFailed,
       kUnknown
     };
   }

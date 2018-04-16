@@ -1,9 +1,11 @@
 #include "engine/application/application.h"
+
 #include "engine/auxiliary/debug.h"
 
 #include "engine/cvar/command_line_parser.h"
 
 #include "engine/services/cvar_service.h"
+#include "engine/services/window_service.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
@@ -24,7 +26,9 @@ namespace snuffbox
     {
       "Snuffbox",
       "0.0",
-      1
+      1,
+      1280,
+      720
     };
 
     //--------------------------------------------------------------------------
@@ -62,10 +66,14 @@ namespace snuffbox
         \tApplication name: {0}\n\
         \tVersion string: {1}\n\
         \tVerbosity: {2}\n\
+        \tWindow width: {3}\n\
+        \tWindow height: {4}\n\
         ",
         config_.application_name,
         config_.version_string,
-        config_.verbosity);
+        config_.verbosity,
+        config_.window_width,
+        config_.window_height);
     }
 
     //--------------------------------------------------------------------------
@@ -78,7 +86,13 @@ namespace snuffbox
         "Initializing the application"
         );
 
-      Initialize();
+      foundation::ErrorCodes err = Initialize();
+
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        Shutdown();
+        return err;
+      }
 
       std::string input;
       while (input != "exit")
@@ -99,18 +113,32 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Application::Initialize()
+    const Application::Configuration& Application::config() const
+    {
+      return config_;
+    }
+
+    //--------------------------------------------------------------------------
+    foundation::ErrorCodes Application::Initialize()
     {
       CVarService* cvar = CreateService<CVarService>();
 
+      CreateService<WindowService>();
+
 #ifndef SNUFF_NSCRIPTING
-      ScriptService* script = CreateService<ScriptService>();
+      CreateService<ScriptService>();
 #endif
 
-      InitializeServices();
+      foundation::ErrorCodes err = InitializeServices();
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
 
       OnInitialize();
       cvar->RegisterFromCLI(cli_);
+
+      return foundation::ErrorCodes::kSuccess;
     }
 
     //--------------------------------------------------------------------------
@@ -177,19 +205,26 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Application::InitializeServices()
+    foundation::ErrorCodes Application::InitializeServices()
     {
+      foundation::ErrorCodes err;
+
       for (size_t i = 0; i < services_.size(); ++i)
       {
-        if (services_.at(i)->OnInitialize(*this) == false)
+        if ((err = services_.at(i)->OnInitialize(*this)) 
+          != foundation::ErrorCodes::kSuccess)
         {
           Debug::LogVerbosity<1>(
             foundation::LogSeverity::kFatal,
-            "Could not initalize service '{0}'",
+            "Could not initialize service '{0}'",
             services_.at(i)->name()
             );
+
+          return err;
         }
       }
+
+      return foundation::ErrorCodes::kSuccess;
     }
 
     //--------------------------------------------------------------------------

@@ -181,9 +181,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool CVarService::OnInitialize(Application& app)
+    foundation::ErrorCodes CVarService::OnInitialize(Application& app)
     {
-      return true;
+      return foundation::ErrorCodes::kSuccess;
     }
 
     //--------------------------------------------------------------------------

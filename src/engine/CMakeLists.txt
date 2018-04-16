@@ -1,5 +1,6 @@
 SET(DefinitionsSources
   "definitions/cli.h"
+  "definitions/keycodes.h"
 )
 
 SET(AuxiliarySources
@@ -12,6 +13,10 @@ SET(ServicesSources
   "services/service.cc"
   "services/cvar_service.h"
   "services/cvar_service.cc"
+  "services/window_service.h"
+  "services/window_service.cc"
+  "services/input_service.h"
+  "services/input_service.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)
@@ -35,11 +40,23 @@ SET(CVarSources
   "cvar/command_line_parser.cc"
 )
 
+SET(InputSources
+  "input/input_filter.h"
+  "input/input_filter.cc"
+  "input/keyboard.h"
+  "input/keyboard.cc"
+  "input/mouse.h"
+  "input/mouse.cc"
+  "input/controller.h"
+  "input/controller.cc"
+)
+
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
 SOURCE_GROUP("auxiliary"    FILES ${AuxiliarySources})
 SOURCE_GROUP("services"     FILES ${ServicesSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
 SOURCE_GROUP("cvar"         FILES ${CVarSources})
+SOURCE_GROUP("input"        FILES ${InputSources})
 
 SET(EngineSources
   ${DefinitionsSources}
@@ -47,10 +64,11 @@ SET(EngineSources
   ${ServicesSources}
   ${ApplicationSources}
   ${CVarSources}
+  ${InputSources}
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})
-TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation)
+TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation glfw)
 
 IF (NOT SNUFF_NSCRIPTING)
   TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-scripting)
@@ -58,6 +76,7 @@ IF (NOT SNUFF_NSCRIPTING)
   
   SET(ScriptingBinds
     "auxiliary/debug.h"
+    "definitions/keycodes.h"
   )
   
   SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
