@@ -32,6 +32,11 @@ namespace snuffbox
         return false;
       }
 
+      glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+      glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
+      glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
+
       window_ = glfwCreateWindow(
         width_, 
         height_, 
@@ -46,6 +51,8 @@ namespace snuffbox
 
         return false;
       }
+
+      glfwShowWindow(window_);
 
       return true;
     }
