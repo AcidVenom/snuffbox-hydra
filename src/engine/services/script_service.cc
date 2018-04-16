@@ -71,6 +71,8 @@ namespace snuffbox
 
       register_->RegisterEnum<Keys>();
       register_->RegisterEnum<MouseButtons>();
+      register_->RegisterEnum<ControllerButtons>();
+      register_->RegisterEnum<ControllerAxes>();
     }
 
     //--------------------------------------------------------------------------

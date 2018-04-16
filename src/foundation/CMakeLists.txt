@@ -23,6 +23,7 @@ SET(ContainerSources
   "containers/string_utils.cc"
   "containers/vector.h"
   "containers/map.h"
+  "containers/queue.h"
 )
 
 SET(AuxiliarySources

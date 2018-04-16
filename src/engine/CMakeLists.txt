@@ -1,6 +1,7 @@
 SET(DefinitionsSources
   "definitions/cli.h"
   "definitions/keycodes.h"
+  "definitions/input.h"
 )
 
 SET(AuxiliarySources
@@ -43,6 +44,10 @@ SET(CVarSources
 SET(InputSources
   "input/input_filter.h"
   "input/input_filter.cc"
+  "input/input_queue.h"
+  "input/input_queue.cc"
+  "input/input_event.h"
+  "input/input_event.cc"
   "input/keyboard.h"
   "input/keyboard.cc"
   "input/mouse.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/definitions/keycodes.h"
+
 namespace snuffbox
 {
   namespace engine
@@ -13,6 +15,9 @@ namespace snuffbox
     class IInputFilter
     {
 
+    public:
+
+      
     };
   }
 }

@@ -161,8 +161,45 @@ namespace snuffbox
       kRight = 1,
       kMiddle = 2
     };
+
+    /**
+    * @brief Controller input buttons, based on the layout of an Xbox controller
+    */
+    SCRIPT_ENUM() enum class ControllerButtons
+    {
+      kA = 0,
+      kB = 1,
+      kX = 2,
+      kY = 3,
+      kLeftBumper = 4,
+      kRightBumper = 5,
+      kBack = 6,
+      kStart = 7,
+      kLeftStick = 8,
+      kRightStick = 9,
+      kUp = 10,
+      kRight = 11,
+      kDown = 12,
+      kLeft = 13
+    };
+
+    /**
+    * @brief The different controller axes that exist, to retrieve a value
+    *        between -1 and 1 for each available axis
+    */
+    SCRIPT_ENUM() enum class ControllerAxes
+    {
+      kLeftStickX,
+      kLeftStickY,
+      kRightStickX,
+      kRightStickY,
+      kLeftTrigger,
+      kRightTrigger
+    };
   }
 }
 
 SCRIPT_ENUM_DECL(snuffbox::engine::Keys);
 SCRIPT_ENUM_DECL(snuffbox::engine::MouseButtons);
+SCRIPT_ENUM_DECL(snuffbox::engine::ControllerButtons);
+SCRIPT_ENUM_DECL(snuffbox::engine::ControllerAxes);
