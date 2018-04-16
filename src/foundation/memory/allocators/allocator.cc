@@ -29,7 +29,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Allocator::~Allocator()
     {
-      Logger::Assert(open_allocations_ == 0 && allocated_ == 0,
+      assert(open_allocations_ == 0 && allocated_ == 0 &&
         "Memory leak detected in an allocator");
     }
 

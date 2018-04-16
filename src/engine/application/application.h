@@ -253,6 +253,10 @@ namespace snuffbox
       uint32_t id = T::type_id();
       if (id >= static_cast<uint32_t>(services_.size()))
       {
+        Debug::LogVerbosity<1>(
+          foundation::LogSeverity::kFatal,
+          "Requested an invalid service"
+          );
         return nullptr;
       }
 

@@ -12,10 +12,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const foundation::String& IService::name() const
+    {
+      return name_;
+    }
+
+    //--------------------------------------------------------------------------
     uint32_t IService::get_next_type()
     {
       static uint32_t uuid = 0;
       return uuid++;
+    }
+
+    //--------------------------------------------------------------------------
+    IService::~IService()
+    {
+
     }
   }
 }

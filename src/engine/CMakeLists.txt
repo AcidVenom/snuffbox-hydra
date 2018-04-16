@@ -14,6 +14,13 @@ SET(ServicesSources
   "services/cvar_service.cc"
 )
 
+IF (NOT SNUFF_NSCRIPTING)
+  SET(ServicesSources ${ServicesSources}
+    "services/script_service.h"
+    "services/script_service.cc"
+  )
+ENDIF ()
+
 SET(ApplicationSources
   "application/application.h"
   "application/application.cc"

@@ -1,8 +1,13 @@
 #include "engine/application/application.h"
 #include "engine/auxiliary/debug.h"
 
-#include "engine/services/cvar_service.h"
 #include "engine/cvar/command_line_parser.h"
+
+#include "engine/services/cvar_service.h"
+
+#ifndef SNUFF_NSCRIPTING
+#include "engine/services/script_service.h"
+#endif
 
 #include <cassert>
 #include <iostream>
@@ -75,15 +80,6 @@ namespace snuffbox
 
       Initialize();
 
-#ifndef SNUFF_NSCRIPTING
-      scripting::ScriptState state;
-      state.Initialize();
-
-      scripting::ScriptRegister reg = scripting::ScriptRegister(&state);
-      reg.RegisterClass<Debug>();
-      
-#endif
-
       std::string input;
       while (input != "exit")
       {
@@ -92,17 +88,12 @@ namespace snuffbox
         if (input.size() > 0 && input != "exit")
         {
 #ifndef SNUFF_NSCRIPTING
-          state.CompileFromSource("console", input.c_str(), true);
+          GetService<ScriptService>()->CompileAndRun(input.c_str());
 #endif
         }
       }
 
       Shutdown();
-
-
-#ifndef SNUFF_NSCRIPTING
-      state.Shutdown();
-#endif
 
       return foundation::ErrorCodes::kSuccess;
     }
@@ -111,6 +102,10 @@ namespace snuffbox
     void Application::Initialize()
     {
       CVarService* cvar = CreateService<CVarService>();
+
+#ifndef SNUFF_NSCRIPTING
+      ScriptService* script = CreateService<ScriptService>();
+#endif
 
       InitializeServices();
 
@@ -186,7 +181,14 @@ namespace snuffbox
     {
       for (size_t i = 0; i < services_.size(); ++i)
       {
-        services_.at(i)->OnInitialize(*this);
+        if (services_.at(i)->OnInitialize(*this) == false)
+        {
+          Debug::LogVerbosity<1>(
+            foundation::LogSeverity::kFatal,
+            "Could not initalize service '{0}'",
+            services_.at(i)->name()
+            );
+        }
       }
     }
 

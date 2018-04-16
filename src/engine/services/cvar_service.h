@@ -165,7 +165,7 @@ namespace snuffbox
       /**
       * @see IService::OnInitialize
       */
-      void OnInitialize(Application& app) override;
+      bool OnInitialize(Application& app) override;
 
       /**
       * @see IService::OnShutdown

@@ -181,15 +181,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void CVarService::OnInitialize(Application& app)
+    bool CVarService::OnInitialize(Application& app)
     {
-    
+      return true;
     }
 
     //--------------------------------------------------------------------------
     void CVarService::OnShutdown(Application& app)
     {
-      registered_.clear();
+      
     }
   }
 }

@@ -60,8 +60,10 @@ namespace snuffbox
       * @brief Called on every service when the Application class is initialized
       *
       * @param[in] app The application the service was created from
+      *
+      * @return Was the initialization a success?
       */
-      virtual void OnInitialize(Application& app) = 0;
+      virtual bool OnInitialize(Application& app) = 0;
 
       /**
       * @brief Called on every service when the Application class is shutdown 
@@ -82,6 +84,13 @@ namespace snuffbox
       * @return The created unique ID
       */
       static uint32_t get_next_type();
+
+    public:
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~IService();
 
     private:
 
@@ -117,12 +126,24 @@ namespace snuffbox
       * @brief Assigns a unique ID to this service
       */
       static uint32_t type_id();
+
+    public:
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~ServiceBase();
+
+    private:
+
+      uint32_t id_; //!< The ID of this service
     };
 
     //--------------------------------------------------------------------------
     template <typename T>
     inline ServiceBase<T>::ServiceBase(const char* name) :
-      IService(name)
+      IService(name),
+      id_(type_id())
     {
 
     }
@@ -133,6 +154,13 @@ namespace snuffbox
     {
       static uint32_t id = IService::get_next_type();
       return id;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ServiceBase<T>::~ServiceBase()
+    {
+
     }
   }
 }
