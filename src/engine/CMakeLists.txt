@@ -52,8 +52,8 @@ SET(InputSources
   "input/keyboard.cc"
   "input/mouse.h"
   "input/mouse.cc"
-  "input/controller.h"
-  "input/controller.cc"
+  "input/joystick.h"
+  "input/joystick.cc"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})

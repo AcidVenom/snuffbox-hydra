@@ -164,9 +164,9 @@ namespace snuffbox
     };
 
     /**
-    * @brief Controller input buttons, based on the layout of an Xbox controller
+    * @brief Joystick input buttons, based on the layout of an Xbox controller
     */
-    SCRIPT_ENUM() enum class ControllerButtons
+    SCRIPT_ENUM() enum class JoystickButtons
     {
       kUnknown = -1,
       kA = 0,
@@ -187,10 +187,10 @@ namespace snuffbox
     };
 
     /**
-    * @brief The different controller axes that exist, to retrieve a value
+    * @brief The different joystick axes that exist, to retrieve a value
     *        between -1 and 1 for each available axis
     */
-    SCRIPT_ENUM() enum class ControllerAxes
+    SCRIPT_ENUM() enum class JoystickAxes
     {
       kUnknown = -1,
       kLeftStickX = 0,
@@ -206,5 +206,5 @@ namespace snuffbox
 
 SCRIPT_ENUM_DECL(snuffbox::engine::Keys);
 SCRIPT_ENUM_DECL(snuffbox::engine::MouseButtons);
-SCRIPT_ENUM_DECL(snuffbox::engine::ControllerButtons);
-SCRIPT_ENUM_DECL(snuffbox::engine::ControllerAxes);
+SCRIPT_ENUM_DECL(snuffbox::engine::JoystickButtons);
+SCRIPT_ENUM_DECL(snuffbox::engine::JoystickAxes);

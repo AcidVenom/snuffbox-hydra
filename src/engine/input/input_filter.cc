@@ -66,8 +66,8 @@ namespace snuffbox
         size = sizeof(InputMouseButtonEvent);
         break;
 
-      case InputEventType::kControllerButton:
-        size = sizeof(InputControllerButtonEvent);
+      case InputEventType::kJoystickButton:
+        size = sizeof(InputJoystickButtonEvent);
         break;
 
       case InputEventType::kMouseMove:
@@ -78,8 +78,8 @@ namespace snuffbox
         size = sizeof(InputMouseScrollEvent);
         break;
 
-      case InputEventType::kControllerAxis:
-        size = sizeof(InputControllerAxisEvent);
+      case InputEventType::kJoystickAxis:
+        size = sizeof(InputJoystickAxisEvent);
         break;
 
       default:

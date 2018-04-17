@@ -57,19 +57,19 @@ namespace snuffbox
     };
 
     /**
-    * @brief An event to be created when a controller button is pressed
+    * @brief An event to be created when a joystick button is pressed
     *
     * @author Daniel Konings
     */
-    struct InputControllerButtonEvent : public InputEvent
+    struct InputJoystickButtonEvent : public InputEvent
     {
       /**
       * @see InputEvent::InputEvent
       */
-      InputControllerButtonEvent();
+      InputJoystickButtonEvent();
 
       KeyButtonEvent evt; //!< The event that was fired for the button
-      ControllerButtons button; //!< The affected button code
+      JoystickButtons button; //!< The affected button code
     };
 
     /**
@@ -104,19 +104,19 @@ namespace snuffbox
     };
 
     /**
-    * @brief An event to be created when any of the controller's axes have
+    * @brief An event to be created when any of the joystick's axes have
     *        changed
     *
     * @author Daniel Konings
     */
-    struct InputControllerAxisEvent : public InputEvent
+    struct InputJoystickAxisEvent : public InputEvent
     {
       /**
       * @see InputEvent::InputEvent
       */
-      InputControllerAxisEvent();
+      InputJoystickAxisEvent();
 
-      ControllerAxes axis; //!< The affected axis
+      JoystickAxes axis; //!< The affected axis
       float value; //!< A value in the -1.0 to 1.0 range
     };
   }

@@ -28,9 +28,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    InputControllerButtonEvent::InputControllerButtonEvent() :
-      InputEvent(InputEventType::kControllerButton),
-      button(ControllerButtons::kUnknown)
+    InputJoystickButtonEvent::InputJoystickButtonEvent() :
+      InputEvent(InputEventType::kJoystickButton),
+      button(JoystickButtons::kUnknown)
     {
 
     }
@@ -53,9 +53,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    InputControllerAxisEvent::InputControllerAxisEvent() :
-      InputEvent(InputEventType::kControllerAxis),
-      axis(ControllerAxes::kUnknown)
+    InputJoystickAxisEvent::InputJoystickAxisEvent() :
+      InputEvent(InputEventType::kJoystickAxis),
+      axis(JoystickAxes::kUnknown)
     {
 
     }

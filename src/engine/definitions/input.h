@@ -11,10 +11,10 @@ namespace snuffbox
     {
       kKeyboardKey,
       kMouseButton,
-      kControllerButton,
+      kJoystickButton,
       kMouseMove,
       kMouseScroll,
-      kControllerAxis
+      kJoystickAxis
     };
 
     /**
