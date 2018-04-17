@@ -66,6 +66,16 @@ namespace snuffbox
       */
       static void ShutdownGLFW();
 
+      /**
+      * @see http://www.glfw.org/docs/latest/input_guide.html
+      */
+      static void GLFWKeyCallback(
+        GLFWwindow* window, 
+        int key_code,
+        int scan_code,
+        int action,
+        int mods);
+
     public:
 
       /**
@@ -82,6 +92,11 @@ namespace snuffbox
       GLFWwindow* window_; //!< The window handle
 
       static bool glfw_initialized_; //!< Is GLFW initialized?
+
+      /**
+      * @brief The maximum number of input events that can be buffered
+      */
+      static const size_t kMaxInputEvents_;
     };
   }
 }

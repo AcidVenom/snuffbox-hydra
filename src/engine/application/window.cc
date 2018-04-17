@@ -1,6 +1,7 @@
 #include "engine/application/window.h"
 
 #include "engine/auxiliary/debug.h"
+#include "engine/input/input_event.h"
 
 #include <GLFW/glfw3.h>
 
@@ -10,9 +11,11 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     bool Window::glfw_initialized_ = false;
+    const size_t Window::kMaxInputEvents_ = 128;
 
     //--------------------------------------------------------------------------
     Window::Window(const char* title, uint16_t width, uint16_t height) :
+      IInputFilter(kMaxInputEvents_),
       title_(title),
       width_(width),
       height_(height),
@@ -51,6 +54,10 @@ namespace snuffbox
 
         return false;
       }
+
+      glfwSetWindowUserPointer(window_, this);
+
+      glfwSetKeyCallback(window_, GLFWKeyCallback);
 
       glfwShowWindow(window_);
 
@@ -93,6 +100,42 @@ namespace snuffbox
       }
 
       glfwTerminate();
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::GLFWKeyCallback(
+      GLFWwindow* window, 
+      int key_code,
+      int scan_code,
+      int action,
+      int mods)
+    {
+      if (action != GLFW_PRESS && action != GLFW_RELEASE)
+      {
+        return;
+      }
+
+      Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      InputKeyboardKeyEvent e;
+      e.key_code = static_cast<Keys>(key_code);
+      
+      switch (action)
+      {
+      case GLFW_PRESS:
+        e.state = KeyButtonState::kPressed;
+        break;
+
+      case GLFW_RELEASE:
+        e.state = KeyButtonState::kReleased;
+        break;
+
+      default:
+        e.state = KeyButtonState::kPressed;
+        break;
+      }
+
+      ud->BufferEvent(&e);
     }
 
     //--------------------------------------------------------------------------

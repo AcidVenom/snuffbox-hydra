@@ -43,6 +43,11 @@ namespace snuffbox
       */
       bool ProcessEvents();
 
+      /**
+      * @return The window pointer
+      */
+      Window* GetWindow() const;
+
     private:
 
       foundation::UniquePtr<Window> window_; //!< The current window

@@ -6,10 +6,15 @@
 
 #include "engine/services/cvar_service.h"
 #include "engine/services/window_service.h"
+#include "engine/services/input_service.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
 #include <scripting/scripting.h>
+
+#define CREATE_SCRIPT_SERVICE() CreateService<ScriptService>();
+#else
+#define CREATE_SCRIPT_SERVICE()
 #endif
 
 #include <thread>
@@ -116,13 +121,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes Application::Initialize()
     {
-      CVarService* cvar = CreateService<CVarService>();
+      CVarService* cvar_service = CreateService<CVarService>();
 
-      CreateService<WindowService>();
+      WindowService* window_service = CreateService<WindowService>();
+      InputService* input_service = CreateService<InputService>();
 
-#ifndef SNUFF_NSCRIPTING
-      CreateService<ScriptService>();
-#endif
+      CREATE_SCRIPT_SERVICE();
 
       foundation::ErrorCodes err = InitializeServices();
       if (err != foundation::ErrorCodes::kSuccess)
@@ -131,7 +135,9 @@ namespace snuffbox
       }
 
       OnInitialize();
-      cvar->RegisterFromCLI(cli_);
+
+      cvar_service->RegisterFromCLI(cli_);
+      input_service->RegisterInputFilter(window_service->GetWindow());
 
       return foundation::ErrorCodes::kSuccess;
     }

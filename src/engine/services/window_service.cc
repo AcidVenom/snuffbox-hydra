@@ -50,5 +50,16 @@ namespace snuffbox
     {
       return window_ == nullptr ? true : window_->ProcessEvents();
     }
+
+    //--------------------------------------------------------------------------
+    Window* WindowService::GetWindow() const
+    {
+      if (window_ == nullptr)
+      {
+        return nullptr;
+      }
+
+      return window_.get();
+    }
   }
 }

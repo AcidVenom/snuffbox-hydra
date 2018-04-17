@@ -44,8 +44,6 @@ SET(CVarSources
 SET(InputSources
   "input/input_filter.h"
   "input/input_filter.cc"
-  "input/input_queue.h"
-  "input/input_queue.cc"
   "input/input_event.h"
   "input/input_event.cc"
   "input/keyboard.h"

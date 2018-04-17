@@ -148,6 +148,7 @@ namespace snuffbox
     */
     SCRIPT_ENUM() enum class MouseButtons
     {
+      kUnknown = -1,
       kMouse1 = 0,
       kMouse2 = 1,
       kMouse3 = 2,
@@ -167,6 +168,7 @@ namespace snuffbox
     */
     SCRIPT_ENUM() enum class ControllerButtons
     {
+      kUnknown = -1,
       kA = 0,
       kB = 1,
       kX = 2,
@@ -189,6 +191,7 @@ namespace snuffbox
     */
     SCRIPT_ENUM() enum class ControllerAxes
     {
+      kUnknown = -1,
       kLeftStickX,
       kLeftStickY,
       kRightStickX,
