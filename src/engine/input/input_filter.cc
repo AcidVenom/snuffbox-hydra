@@ -82,6 +82,10 @@ namespace snuffbox
         size = sizeof(InputJoystickAxisEvent);
         break;
 
+      case InputEventType::kJoystickConnect:
+        size = sizeof(InputJoystickConnectEvent);
+        break;
+
       default:
         break;
       }

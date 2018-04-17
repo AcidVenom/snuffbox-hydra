@@ -30,6 +30,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     InputJoystickButtonEvent::InputJoystickButtonEvent() :
       InputEvent(InputEventType::kJoystickButton),
+      id(-1),
       button(JoystickButtons::kUnknown)
     {
 
@@ -55,7 +56,19 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     InputJoystickAxisEvent::InputJoystickAxisEvent() :
       InputEvent(InputEventType::kJoystickAxis),
-      axis(JoystickAxes::kUnknown)
+      id(-1),
+      axis(JoystickAxes::kUnknown),
+      value(0.0f)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    InputJoystickConnectEvent::InputJoystickConnectEvent() :
+      InputEvent(InputEventType::kJoystickConnect),
+      id(-1),
+      connected(false),
+      device_name("Unknown")
     {
 
     }

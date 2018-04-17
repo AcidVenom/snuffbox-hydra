@@ -1,9 +1,11 @@
 #pragma once
 
 #include "engine/input/input_filter.h"
+#include "engine/definitions/keycodes.h"
 
 #include <foundation/containers/string.h>
 
+#include <cstddef>
 #include <cinttypes>
 
 struct GLFWwindow;
@@ -55,6 +57,21 @@ namespace snuffbox
       bool ProcessEvents();
 
       /**
+      * @brief As we don't have a GLFWwindow user pointer in a joystick callback
+      *        we manually process the controllers by retrieving the data
+      *        from GLFW directly
+      *
+      * This is done through a global list of connected controllers, since
+      * we simply don't have any state for the joysticks or whatsoever
+      */
+      void UpdateJoysticks();
+
+      /**
+      * @brief Checks if any new joysticks have been connected
+      */
+      void CheckJoystickConnected();
+
+      /**
       * @brief Initializes GLFW for use
       *
       * @return Was the initialization a success?
@@ -98,6 +115,32 @@ namespace snuffbox
         double x, 
         double y);
 
+    protected:
+
+      /**
+      * @brief Used to store previous data of joysticks to send events if they
+      *        changed
+      *
+      * @author Daniel Konings
+      */
+      struct JoystickData
+      {
+        /**
+        * @brief Default constructor, sets all data to their initial value
+        */
+        JoystickData();
+
+        /**
+        * @brief The previous state of every button
+        */
+        unsigned char buttons[static_cast<int>(JoystickButtons::kCount)];
+
+        /**
+        * @brief The previous state of each axis
+        */
+        float axes[static_cast<int>(JoystickAxes::kCount)];
+      };
+
     public:
 
       /**
@@ -112,6 +155,16 @@ namespace snuffbox
       uint16_t height_; //!< The window height
 
       GLFWwindow* window_; //!< The window handle
+
+      /**
+      * @brief The previously connected joysticks
+      */
+      bool previous_connected_joysticks_[kNumSupportedJoysticks];
+
+      /**
+      * @brief The current data of every supported joystick 
+      */
+      JoystickData joystick_data_[kNumSupportedJoysticks];
 
       static bool glfw_initialized_; //!< Is GLFW initialized?
 

@@ -14,7 +14,8 @@ namespace snuffbox
       kJoystickButton,
       kMouseMove,
       kMouseScroll,
-      kJoystickAxis
+      kJoystickAxis,
+      kJoystickConnect
     };
 
     /**

@@ -201,6 +201,11 @@ namespace snuffbox
       kRightTrigger = 5,
       kCount = 6
     };
+
+    /**
+    * @brief The number of supported joysticks
+    */
+    static const size_t kNumSupportedJoysticks = 8;
   }
 }
 

@@ -14,6 +14,23 @@ namespace snuffbox
     const size_t Window::kMaxInputEvents_ = 128;
 
     //--------------------------------------------------------------------------
+    Window::JoystickData::JoystickData()
+    {
+      for (size_t i = 0; i < static_cast<size_t>(JoystickButtons::kCount); ++i)
+      {
+        buttons[i] = GLFW_RELEASE;
+      }
+
+      for (size_t i = 0; i < static_cast<size_t>(JoystickAxes::kCount); ++i)
+      {
+        axes[i] = 0.0f;
+      }
+      
+      axes[static_cast<size_t>(JoystickAxes::kLeftTrigger)] = -1.0f;
+      axes[static_cast<size_t>(JoystickAxes::kRightTrigger)] = -1.0f;
+    }
+
+    //--------------------------------------------------------------------------
     Window::Window(const char* title, uint16_t width, uint16_t height) :
       IInputFilter(kMaxInputEvents_),
       title_(title),
@@ -21,7 +38,10 @@ namespace snuffbox
       height_(height),
       window_(nullptr)
     {
-      
+      for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
+      {
+        previous_connected_joysticks_[i] = false;
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -75,9 +95,110 @@ namespace snuffbox
         return true;
       }
 
+      UpdateJoysticks();
       glfwPollEvents();
 
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::UpdateJoysticks()
+    {
+      CheckJoystickConnected();
+
+      int count;
+      int id;
+
+      const unsigned char* buttons;
+      const float* axes;
+
+      unsigned char button_state;
+      float axis;
+
+      static const int max_buttons = static_cast<int>(JoystickButtons::kCount);
+      static const int max_axes = static_cast<int>(JoystickAxes::kCount);
+
+      for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
+      {
+        JoystickData& data = joystick_data_[i];
+
+        if (previous_connected_joysticks_[i] == false)
+        {
+          continue;
+        }
+
+        id = static_cast<int>(i);
+        buttons = glfwGetJoystickButtons(id, &count);
+
+        count = count > max_buttons ? max_buttons : count;
+
+        for (int b = 0; b < count; ++b)
+        {
+          button_state = buttons[b];
+
+          if (button_state != data.buttons[b])
+          {
+            InputJoystickButtonEvent e;
+            e.button = static_cast<JoystickButtons>(b);
+            e.evt = button_state == GLFW_PRESS ? 
+              KeyButtonEvent::kPressed : 
+              KeyButtonEvent::kReleased;
+            e.id = id;
+            
+            BufferEvent(&e);
+
+            data.buttons[b] = button_state;
+          }
+        }
+
+        axes = glfwGetJoystickAxes(id, &count);
+
+        count = count > max_axes ? max_axes : count;
+
+        for (int a = 0; a < count; ++a)
+        {
+          axis = axes[a];
+
+          if (axis != data.axes[a])
+          {
+            InputJoystickAxisEvent e;
+            e.axis = static_cast<JoystickAxes>(a);
+            e.id = id;
+            e.value = axis;
+
+            BufferEvent(&e);
+
+            data.axes[a] = axis;
+          }
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::CheckJoystickConnected()
+    {
+      bool now = false;
+      bool prev = false;
+      int id;
+
+      for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
+      {
+        id = static_cast<int>(i);
+        prev = previous_connected_joysticks_[i];
+        now = glfwJoystickPresent(id);
+
+        if (prev != now)
+        {
+          InputJoystickConnectEvent e;
+          e.connected = now;
+          e.device_name = now == true ? glfwGetJoystickName(id) : "";
+          e.id = id;
+
+          BufferEvent(&e);
+
+          previous_connected_joysticks_[i] = now;
+        }
+      }
     }
 
     //--------------------------------------------------------------------------

@@ -3,6 +3,10 @@
 #include "engine/definitions/input.h"
 #include "engine/definitions/keycodes.h"
 
+#include <foundation/containers/string.h>
+
+#include <cinttypes>
+
 namespace snuffbox
 {
   namespace engine
@@ -68,6 +72,7 @@ namespace snuffbox
       */
       InputJoystickButtonEvent();
 
+      uint8_t id; //!< The joystick ID this event corresponds to
       KeyButtonEvent evt; //!< The event that was fired for the button
       JoystickButtons button; //!< The affected button code
     };
@@ -116,8 +121,27 @@ namespace snuffbox
       */
       InputJoystickAxisEvent();
 
+      uint8_t id; //!< The joystick ID this event corresponds to
       JoystickAxes axis; //!< The affected axis
       float value; //!< A value in the -1.0 to 1.0 range
+    };
+
+    /**
+    * @brief Joystick connect event, called when a joystick is connected to or
+    *        disconnected from the host machine
+    *
+    * @author Daniel Konings
+    */
+    struct InputJoystickConnectEvent : public InputEvent
+    {
+      /**
+      * @see InputEvent::InputEvent
+      */
+      InputJoystickConnectEvent();
+
+      uint8_t id; //!< The joystick ID this event corresponds to
+      bool connected; //!< Is the joystick connected or disconnected?
+      const char* device_name; //!< The device name of the joystick
     };
   }
 }

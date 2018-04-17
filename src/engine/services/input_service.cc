@@ -12,7 +12,10 @@ namespace snuffbox
     InputService::InputService() :
       ServiceBase("InputService")
     {
-
+      for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
+      {
+        joysticks_[i] = Joystick(static_cast<int>(i));
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -80,6 +83,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void InputService::HandleJoystickButtonEvent(
+      const InputJoystickButtonEvent* evt)
+    {
+      int id = evt->id;
+
+      if (id < 0 || id >= kNumSupportedJoysticks)
+      {
+        return;
+      }
+
+      joysticks_[id].HandleKeyButtonEvent(
+        static_cast<int>(evt->button), 
+        evt->evt);
+    }
+
+    //--------------------------------------------------------------------------
     void InputService::HandleMouseMoveEvent(const InputMouseMoveEvent* evt)
     {
       mouse_.HandleMouseMoveEvent(evt);
@@ -92,10 +111,43 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void InputService::HandleJoystickConnectEvent(
+      const InputJoystickConnectEvent* evt)
+    {
+      int id = evt->id;
+
+      if (id < 0 || id >= kNumSupportedJoysticks)
+      {
+        return;
+      }
+
+      joysticks_[id].HandleJoystickConnectEvent(evt);
+    }
+
+    //--------------------------------------------------------------------------
+    void InputService::HandleJoystickAxisEvent(
+      const InputJoystickAxisEvent* evt)
+    {
+      int id = evt->id;
+
+      if (id < 0 || id >= kNumSupportedJoysticks)
+      {
+        return;
+      }
+
+      joysticks_[id].HandleJoystickAxisEvent(evt);
+    }
+
+    //--------------------------------------------------------------------------
     void InputService::Flush()
     {
       keyboard_.ResetPreviousStates();
       mouse_.ResetPreviousStates();
+
+      for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
+      {
+        joysticks_[i].ResetPreviousStates();
+      }
 
       IInputFilter* filter;
       const InputEvent* e;
@@ -118,6 +170,11 @@ namespace snuffbox
               static_cast<const InputMouseButtonEvent*>(e));
             break;
 
+          case InputEventType::kJoystickButton:
+            HandleJoystickButtonEvent(
+              static_cast<const InputJoystickButtonEvent*>(e));
+            break;
+
           case InputEventType::kMouseMove:
             HandleMouseMoveEvent(
               static_cast<const InputMouseMoveEvent*>(e));
@@ -126,6 +183,19 @@ namespace snuffbox
           case InputEventType::kMouseScroll:
             HandleMouseScrollEvent(
               static_cast<const InputMouseScrollEvent*>(e));
+            break;
+
+          case InputEventType::kJoystickConnect:
+            HandleJoystickConnectEvent(
+              static_cast<const InputJoystickConnectEvent*>(e));
+            break;
+
+          case InputEventType::kJoystickAxis:
+            HandleJoystickAxisEvent(
+              static_cast<const InputJoystickAxisEvent*>(e));
+            break;
+
+          default:
             break;
           }
         }

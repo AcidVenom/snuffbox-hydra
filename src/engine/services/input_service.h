@@ -4,6 +4,7 @@
 
 #include "engine/input/keyboard.h"
 #include "engine/input/mouse.h"
+#include "engine/input/joystick.h"
 
 #include <foundation/containers/vector.h>
 
@@ -17,6 +18,8 @@ namespace snuffbox
     struct InputMouseButtonEvent;
     struct InputMouseMoveEvent;
     struct InputMouseScrollEvent;
+    struct InputJoystickButtonEvent;
+    struct InputJoystickAxisEvent;
 
     /**
     * @brief An input service to read input data from, that can be received
@@ -82,6 +85,14 @@ namespace snuffbox
       void HandleMouseButtonEvent(const InputMouseButtonEvent* evt);
 
       /**
+      * @brief Handles a joystick button event by sending it to the
+      *        correct joystick based on evt->id
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleJoystickButtonEvent(const InputJoystickButtonEvent* evt);
+
+      /**
       * @brief Handles a mouse move event by sending it to
       *        InputService::mouse_
       *
@@ -96,6 +107,22 @@ namespace snuffbox
       * @param[in] evt The event to handle
       */
       void HandleMouseScrollEvent(const InputMouseScrollEvent* evt);
+
+      /**
+      * @brief Handles a joystick connect event by sending it to the
+      *        correct joystick based on evt->id
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleJoystickConnectEvent(const InputJoystickConnectEvent* evt);
+
+      /**
+      * @brief Handles a joystick axis event by sending it to the
+      *        correct joystick based on evt->id
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleJoystickAxisEvent(const InputJoystickAxisEvent* evt);
 
       /**
       * @brief Flushes all input filters
@@ -114,6 +141,7 @@ namespace snuffbox
 
       Keyboard keyboard_; //!< The keyboard input event handler
       Mouse mouse_; //!< The mouse input event handler
+      Joystick joysticks_[kNumSupportedJoysticks];
     };
   }
 }
