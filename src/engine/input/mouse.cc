@@ -10,7 +10,8 @@ namespace snuffbox
       x_(0),
       y_(0),
       dx_(0),
-      dy_(0)
+      dy_(0),
+      scroll_(0)
     {
       for (size_t i = 0; i < static_cast<size_t>(MouseButtons::kCount); ++i)
       {
@@ -39,7 +40,7 @@ namespace snuffbox
         state = ResetPressedState(state);
       }
 
-      dx_ = dy_ = 0;
+      dx_ = dy_ = scroll_ = 0;
     }
 
     //--------------------------------------------------------------------------
@@ -67,6 +68,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Mouse::HandleMouseScrollEvent(const InputMouseScrollEvent* evt)
+    {
+      scroll_ = evt->delta;
+    }
+
+    //--------------------------------------------------------------------------
     void Mouse::GetMousePosition(int* x, int* y)
     {
       if (x == nullptr || y == nullptr)
@@ -88,6 +95,12 @@ namespace snuffbox
 
       *dx = dx_;
       *dy = dy_;
+    }
+
+    //--------------------------------------------------------------------------
+    int Mouse::scroll() const
+    {
+      return scroll_;
     }
   }
 }

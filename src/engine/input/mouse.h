@@ -10,6 +10,7 @@ namespace snuffbox
   namespace engine
   {
     struct InputMouseMoveEvent;
+    struct InputMouseScrollEvent;
 
     /**
     * @brief Used to handle mouse events, like mouse move, scroll and mouse
@@ -49,6 +50,11 @@ namespace snuffbox
       void HandleMouseMoveEvent(const InputMouseMoveEvent* evt);
 
       /**
+      * @see InputService::HandleMouseScrollEvent
+      */
+      void HandleMouseScrollEvent(const InputMouseScrollEvent* evt);
+
+      /**
       * @brief Retrieves the mouse position
       *
       * @param[out] x The current horizontal mouse position in pixels
@@ -64,6 +70,11 @@ namespace snuffbox
       */
       void GetMouseMovement(int* dx, int* dy);
 
+      /**
+      * @return The current scroll factor of this frame
+      */
+      int scroll() const;
+
     private:
 
       int x_; //!< The current horizontal mouse position in pixels
@@ -71,6 +82,8 @@ namespace snuffbox
 
       int dx_; //!< The current delta movement on the horizontal axis, in pixels
       int dy_; //!< The current delta movement on the vertical axis, in pixels
+
+      int scroll_; //!< The current scroll factor of this frame
 
       /**
       * @brief The current mouse button states

@@ -16,6 +16,7 @@ namespace snuffbox
     struct InputKeyboardKeyEvent;
     struct InputMouseButtonEvent;
     struct InputMouseMoveEvent;
+    struct InputMouseScrollEvent;
 
     /**
     * @brief An input service to read input data from, that can be received
@@ -87,6 +88,14 @@ namespace snuffbox
       * @param[in] evt The event to handle
       */
       void HandleMouseMoveEvent(const InputMouseMoveEvent* evt);
+
+      /**
+      * @brief Handles a mouse scroll event by sending it to
+      *        InputService::mouse_
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleMouseScrollEvent(const InputMouseScrollEvent* evt);
 
       /**
       * @brief Flushes all input filters

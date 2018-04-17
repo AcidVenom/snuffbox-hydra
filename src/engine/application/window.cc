@@ -60,6 +60,7 @@ namespace snuffbox
       glfwSetKeyCallback(window_, GLFWKeyCallback);
       glfwSetMouseButtonCallback(window_, GLFWMouseButtonCallback);
       glfwSetCursorPosCallback(window_, GLFWMousePosCallback);
+      glfwSetScrollCallback(window_, GLFWMouseScrollCallback);
 
       glfwShowWindow(window_);
 
@@ -218,6 +219,25 @@ namespace snuffbox
       InputMouseMoveEvent e;
       e.x = px;
       e.y = py;
+
+      ud->BufferEvent(&e);
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::GLFWMouseScrollCallback(
+      GLFWwindow* window, 
+      double x, 
+      double y)
+    {
+      Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      if (ud == nullptr)
+      {
+        return;
+      }
+
+      InputMouseScrollEvent e;
+      e.delta = static_cast<int>(y);
 
       ud->BufferEvent(&e);
     }

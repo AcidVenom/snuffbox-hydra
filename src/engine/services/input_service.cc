@@ -86,6 +86,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void InputService::HandleMouseScrollEvent(const InputMouseScrollEvent* evt)
+    {
+      mouse_.HandleMouseScrollEvent(evt);
+    }
+
+    //--------------------------------------------------------------------------
     void InputService::Flush()
     {
       keyboard_.ResetPreviousStates();
@@ -115,6 +121,11 @@ namespace snuffbox
           case InputEventType::kMouseMove:
             HandleMouseMoveEvent(
               static_cast<const InputMouseMoveEvent*>(e));
+            break;
+
+          case InputEventType::kMouseScroll:
+            HandleMouseScrollEvent(
+              static_cast<const InputMouseScrollEvent*>(e));
             break;
           }
         }

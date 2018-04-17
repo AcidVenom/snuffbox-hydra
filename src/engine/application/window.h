@@ -90,6 +90,14 @@ namespace snuffbox
       */
       static void GLFWMousePosCallback(GLFWwindow* window, double x, double y);
 
+      /**
+      * @see http://www.glfw.org/docs/latest/input_guide.html
+      */
+      static void GLFWMouseScrollCallback(
+        GLFWwindow* window, 
+        double x, 
+        double y);
+
     public:
 
       /**
