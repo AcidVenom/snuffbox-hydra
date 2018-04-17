@@ -11,7 +11,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     bool Window::glfw_initialized_ = false;
-    const size_t Window::kMaxInputEvents_ = 128;
+    const size_t Window::kMaxInputEvents_ = 512;
 
     //--------------------------------------------------------------------------
     Window::JoystickData::JoystickData()
