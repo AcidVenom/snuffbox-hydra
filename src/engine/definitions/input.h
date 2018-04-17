@@ -18,15 +18,24 @@ namespace snuffbox
     };
 
     /**
-    * @brief The different states a key or button can be in
-    *
-    * kUp is not required, as it is simply not kDown
+    * @brief The different events that can be fired for a key or button
+    */
+    enum class KeyButtonEvent
+    {
+      kPressed,
+      kReleased
+    };
+
+    /**
+    * @brief The different states that a key or button can be in
     */
     enum class KeyButtonState
     {
-      kPressed,
-      kReleased,
-      kDown
+      kPressed, //!< The state for when a key or button is pressed this frame
+      kReleased, //!< The state for when a key or button is released this frame
+      kDown, //!< When a button is being held
+      kUp, //!< Idle state
+      kError //!< An error state if a key was requested, but out of bounds
     };
   }
 }

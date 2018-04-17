@@ -2,6 +2,9 @@
 
 #include "engine/services/service.h"
 
+#include "engine/input/keyboard.h"
+#include "engine/input/mouse.h"
+
 #include <foundation/containers/vector.h>
 
 namespace snuffbox
@@ -9,6 +12,9 @@ namespace snuffbox
   namespace engine
   {
     class IInputFilter;
+
+    struct InputKeyboardKeyEvent;
+    struct InputMouseButtonEvent;
 
     /**
     * @brief An input service to read input data from, that can be received
@@ -57,6 +63,27 @@ namespace snuffbox
       */
       void RemoveInputFilter(IInputFilter* filter);
 
+      /**
+      * @brief Handles a keyboard key event by sending it to
+      *        InputService::keyboard_
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleKeyboardKeyEvent(const InputKeyboardKeyEvent* evt);
+
+      /**
+      * @brief Handles a mouse button event by sending it to
+      *        InputService::mouse_
+      *
+      * @param[in] evt The event to handle
+      */
+      void HandleMouseButtonEvent(const InputMouseButtonEvent* evt);
+
+      /**
+      * @brief Flushes all input filters
+      */
+      void Flush();
+
     private:
 
       /**
@@ -66,6 +93,9 @@ namespace snuffbox
       * input states for per event
       */
       foundation::Vector<IInputFilter*> filters_;
+
+      Keyboard keyboard_; //!< The keyboard input event handler
+      Mouse mouse_; //!< The mouse input event handler
     };
   }
 }

@@ -58,6 +58,7 @@ namespace snuffbox
       glfwSetWindowUserPointer(window_, this);
 
       glfwSetKeyCallback(window_, GLFWKeyCallback);
+      glfwSetMouseButtonCallback(window_, GLFWMouseButtonCallback);
 
       glfwShowWindow(window_);
 
@@ -123,15 +124,50 @@ namespace snuffbox
       switch (action)
       {
       case GLFW_PRESS:
-        e.state = KeyButtonState::kPressed;
+        e.evt = KeyButtonEvent::kPressed;
         break;
 
       case GLFW_RELEASE:
-        e.state = KeyButtonState::kReleased;
+        e.evt = KeyButtonEvent::kReleased;
         break;
 
       default:
-        e.state = KeyButtonState::kPressed;
+        e.evt = KeyButtonEvent::kPressed;
+        break;
+      }
+
+      ud->BufferEvent(&e);
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::GLFWMouseButtonCallback(
+      GLFWwindow* window,
+      int button,
+      int action,
+      int mods)
+    {
+      if (action != GLFW_PRESS && action != GLFW_RELEASE)
+      {
+        return;
+      }
+
+      Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      InputMouseButtonEvent e;
+      e.button = static_cast<MouseButtons>(button);
+
+      switch (action)
+      {
+      case GLFW_PRESS:
+        e.evt = KeyButtonEvent::kPressed;
+        break;
+
+      case GLFW_RELEASE:
+        e.evt = KeyButtonEvent::kReleased;
+        break;
+
+      default:
+        e.evt = KeyButtonEvent::kPressed;
         break;
       }
 

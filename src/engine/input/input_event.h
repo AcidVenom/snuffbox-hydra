@@ -36,7 +36,7 @@ namespace snuffbox
       */
       InputKeyboardKeyEvent();
 
-      KeyButtonState state; //!< The state of the key
+      KeyButtonEvent evt; //!< The event that was fired for the key
       Keys key_code; //!< The affected key code
     };
 
@@ -52,7 +52,7 @@ namespace snuffbox
       */
       InputMouseButtonEvent();
 
-      KeyButtonState state; //!< The state of the button
+      KeyButtonEvent evt; //!< The event that was fired for the button
       MouseButtons button; //!< The affected button code
     };
 
@@ -68,7 +68,7 @@ namespace snuffbox
       */
       InputControllerButtonEvent();
 
-      KeyButtonState state; //!< The state of the button
+      KeyButtonEvent evt; //!< The event that was fired for the button
       ControllerButtons button; //!< The affected button code
     };
 

@@ -136,7 +136,7 @@ namespace snuffbox
       kRightAlt = 346,
       kRightSuper = 347,
       kMenu = 348,
-      kLast = 348
+      kCount = 349
     };
 
     /**
@@ -157,10 +157,10 @@ namespace snuffbox
       kMouse6 = 5,
       kMouse7 = 6,
       kMouse8 = 7,
-      kLast = 7,
+      kCount = 8,
       kLeft = 0,
       kRight = 1,
-      kMiddle = 2
+      kMiddle = 2,
     };
 
     /**
@@ -182,7 +182,8 @@ namespace snuffbox
       kUp = 10,
       kRight = 11,
       kDown = 12,
-      kLeft = 13
+      kLeft = 13,
+      kCount = 14
     };
 
     /**
@@ -192,12 +193,13 @@ namespace snuffbox
     SCRIPT_ENUM() enum class ControllerAxes
     {
       kUnknown = -1,
-      kLeftStickX,
-      kLeftStickY,
-      kRightStickX,
-      kRightStickY,
-      kLeftTrigger,
-      kRightTrigger
+      kLeftStickX = 0,
+      kLeftStickY = 1,
+      kRightStickX = 2,
+      kRightStickY = 3,
+      kLeftTrigger = 4,
+      kRightTrigger = 5,
+      kCount = 6
     };
   }
 }

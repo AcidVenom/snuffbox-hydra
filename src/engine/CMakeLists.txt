@@ -46,6 +46,8 @@ SET(InputSources
   "input/input_filter.cc"
   "input/input_event.h"
   "input/input_event.cc"
+  "input/input_event_handler.h"
+  "input/input_event_handler.cc"
   "input/keyboard.h"
   "input/keyboard.cc"
   "input/mouse.h"

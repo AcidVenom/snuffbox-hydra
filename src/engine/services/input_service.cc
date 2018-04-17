@@ -1,5 +1,6 @@
 #include "engine/services/input_service.h"
 #include "engine/input/input_filter.h"
+#include "engine/input/input_event.h"
 
 #include "engine/auxiliary/debug.h"
 
@@ -58,6 +59,59 @@ namespace snuffbox
         {
           filters_.erase(filters_.begin() + i);
           break;
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void InputService::HandleKeyboardKeyEvent(const InputKeyboardKeyEvent* evt)
+    {
+      const InputKeyboardKeyEvent* k = 
+        static_cast<const InputKeyboardKeyEvent*>(evt);
+
+      keyboard_.HandleKeyButtonEvent(
+        static_cast<int>(k->key_code), 
+        k->evt);
+    }
+
+    //--------------------------------------------------------------------------
+    void InputService::HandleMouseButtonEvent(const InputMouseButtonEvent* evt)
+    {
+      const InputMouseButtonEvent* b = 
+        static_cast<const InputMouseButtonEvent*>(evt);
+
+      mouse_.HandleKeyButtonEvent(
+        static_cast<int>(b->button), 
+        b->evt);
+    }
+
+    //--------------------------------------------------------------------------
+    void InputService::Flush()
+    {
+      keyboard_.ResetPreviousStates();
+      mouse_.ResetPreviousStates();
+
+      IInputFilter* filter;
+      const InputEvent* e;
+
+      for (size_t i = 0; i < filters_.size(); ++i)
+      {
+        filter = filters_.at(i);
+
+        while (filter->GetNext(&e) == true)
+        {
+          switch (e->type)
+          {
+          case InputEventType::kKeyboardKey:
+            HandleKeyboardKeyEvent(
+              static_cast<const InputKeyboardKeyEvent*>(e));
+            break;
+
+          case InputEventType::kMouseButton:
+            HandleMouseButtonEvent(
+              static_cast<const InputMouseButtonEvent*>(e));
+            break;
+          }
         }
       }
     }

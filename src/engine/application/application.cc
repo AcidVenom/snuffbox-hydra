@@ -101,9 +101,11 @@ namespace snuffbox
       }
 
       WindowService* window = GetService<WindowService>();
+      InputService* input = GetService<InputService>();
 
       while (window->ProcessEvents() == false)
       {
+        input->Flush();
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
       }
 

@@ -76,6 +76,15 @@ namespace snuffbox
         int action,
         int mods);
 
+      /**
+      * @see http://www.glfw.org/docs/latest/input_guide.html
+      */
+      static void GLFWMouseButtonCallback(
+        GLFWwindow* window, 
+        int button,
+        int action,
+        int mods);
+
     public:
 
       /**
