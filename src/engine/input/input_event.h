@@ -84,8 +84,8 @@ namespace snuffbox
       */
       InputMouseMoveEvent();
 
-      int dx; //!< The movement on the horizontal axis, in pixels
-      int dy; //!< The movement on the vertical axis, in pixels
+      int x; //!< The position on the horizontal axis, in pixels
+      int y; //!< The position on the vertical axis, in pixels
     };
 
     /**

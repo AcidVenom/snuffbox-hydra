@@ -38,8 +38,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     InputMouseMoveEvent::InputMouseMoveEvent() :
       InputEvent(InputEventType::kMouseMove),
-      dx(0),
-      dy(0)
+      x(0),
+      y(0)
     {
 
     }

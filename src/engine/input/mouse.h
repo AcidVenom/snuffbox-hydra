@@ -9,6 +9,8 @@ namespace snuffbox
 {
   namespace engine
   {
+    struct InputMouseMoveEvent;
+
     /**
     * @brief Used to handle mouse events, like mouse move, scroll and mouse
     *        button presses
@@ -40,6 +42,11 @@ namespace snuffbox
       * @see IInputEventHandler::GetKeyButtonState
       */
       KeyButtonState GetKeyButtonState(int key_code) const override;
+
+      /**
+      * @see InputService::HandleMouseMoveEvent
+      */
+      void HandleMouseMoveEvent(const InputMouseMoveEvent* evt);
 
       /**
       * @brief Retrieves the mouse position

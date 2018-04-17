@@ -59,6 +59,7 @@ namespace snuffbox
 
       glfwSetKeyCallback(window_, GLFWKeyCallback);
       glfwSetMouseButtonCallback(window_, GLFWMouseButtonCallback);
+      glfwSetCursorPosCallback(window_, GLFWMousePosCallback);
 
       glfwShowWindow(window_);
 
@@ -68,9 +69,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Window::ProcessEvents()
     {
+      if (glfwWindowShouldClose(window_) == GL_TRUE)
+      {
+        return true;
+      }
+
       glfwPollEvents();
 
-      return glfwWindowShouldClose(window_) == GL_TRUE;
+      return false;
     }
 
     //--------------------------------------------------------------------------
@@ -81,6 +87,17 @@ namespace snuffbox
         Debug::Log(foundation::LogSeverity::kError, "GLFW already initialized");
         return false;
       }
+
+      auto GLFWErrorHandler = [](int err, const char* msg)
+      {
+        Debug::Log(
+          foundation::LogSeverity::kError, 
+          "[GLFW] {0}: {1}", 
+          err, 
+          msg);
+      };
+
+      glfwSetErrorCallback(GLFWErrorHandler);
 
       if (glfwInit() == GLFW_FALSE)
       {
@@ -101,6 +118,7 @@ namespace snuffbox
       }
 
       glfwTerminate();
+      glfw_initialized_ = false;
     }
 
     //--------------------------------------------------------------------------
@@ -117,6 +135,11 @@ namespace snuffbox
       }
 
       Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      if (ud == nullptr)
+      {
+        return;
+      }
 
       InputKeyboardKeyEvent e;
       e.key_code = static_cast<Keys>(key_code);
@@ -153,6 +176,11 @@ namespace snuffbox
 
       Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
 
+      if (ud == nullptr)
+      {
+        return;
+      }
+
       InputMouseButtonEvent e;
       e.button = static_cast<MouseButtons>(button);
 
@@ -170,6 +198,26 @@ namespace snuffbox
         e.evt = KeyButtonEvent::kPressed;
         break;
       }
+
+      ud->BufferEvent(&e);
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::GLFWMousePosCallback(GLFWwindow* window, double x, double y)
+    {
+      Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      if (ud == nullptr)
+      {
+        return;
+      }
+
+      int px = static_cast<int>(x);
+      int py = static_cast<int>(y);
+
+      InputMouseMoveEvent e;
+      e.x = px;
+      e.y = py;
 
       ud->BufferEvent(&e);
     }

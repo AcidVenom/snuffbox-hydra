@@ -1,4 +1,5 @@
 #include "engine/input/mouse.h"
+#include "engine/input/input_event.h"
 
 namespace snuffbox
 {
@@ -32,7 +33,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Mouse::ResetPreviousStates()
     {
-      for (size_t i = 0; i < static_cast<size_t>(Keys::kCount); ++i)
+      for (size_t i = 0; i < static_cast<size_t>(MouseButtons::kCount); ++i)
       {
         KeyButtonState& state = states_[i];
         state = ResetPressedState(state);
@@ -50,6 +51,19 @@ namespace snuffbox
       }
 
       return states_[key_code];
+    }
+
+    //--------------------------------------------------------------------------
+    void Mouse::HandleMouseMoveEvent(const InputMouseMoveEvent* evt)
+    {
+      int old_x = x_;
+      int old_y = y_;
+
+      x_ = evt->x;
+      y_ = evt->y;
+
+      dx_ = x_ - old_x;
+      dy_ = y_ - old_y;
     }
 
     //--------------------------------------------------------------------------

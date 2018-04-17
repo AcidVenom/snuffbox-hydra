@@ -66,23 +66,23 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void InputService::HandleKeyboardKeyEvent(const InputKeyboardKeyEvent* evt)
     {
-      const InputKeyboardKeyEvent* k = 
-        static_cast<const InputKeyboardKeyEvent*>(evt);
-
       keyboard_.HandleKeyButtonEvent(
-        static_cast<int>(k->key_code), 
-        k->evt);
+        static_cast<int>(evt->key_code), 
+        evt->evt);
     }
 
     //--------------------------------------------------------------------------
     void InputService::HandleMouseButtonEvent(const InputMouseButtonEvent* evt)
     {
-      const InputMouseButtonEvent* b = 
-        static_cast<const InputMouseButtonEvent*>(evt);
-
       mouse_.HandleKeyButtonEvent(
-        static_cast<int>(b->button), 
-        b->evt);
+        static_cast<int>(evt->button), 
+        evt->evt);
+    }
+
+    //--------------------------------------------------------------------------
+    void InputService::HandleMouseMoveEvent(const InputMouseMoveEvent* evt)
+    {
+      mouse_.HandleMouseMoveEvent(evt);
     }
 
     //--------------------------------------------------------------------------
@@ -110,6 +110,11 @@ namespace snuffbox
           case InputEventType::kMouseButton:
             HandleMouseButtonEvent(
               static_cast<const InputMouseButtonEvent*>(e));
+            break;
+
+          case InputEventType::kMouseMove:
+            HandleMouseMoveEvent(
+              static_cast<const InputMouseMoveEvent*>(e));
             break;
           }
         }
