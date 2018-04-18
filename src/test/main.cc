@@ -17,6 +17,7 @@ int main(int argc, char** argv)
   cfg.window_height = 720;
 
   Application app = Application(argc, argv, cfg);
+
   ErrorCodes err = app.Run();
 
   return static_cast<int>(err);

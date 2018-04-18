@@ -5,6 +5,8 @@
 #include "foundation/containers/string.h"
 #include "foundation/containers/vector.h"
 
+#include "foundation/io/path.h"
+
 #include <glm/glm.hpp>
 
 #include <iostream>
@@ -322,6 +324,13 @@ namespace snuffbox
     inline String Logger::ToString(const String& value)
     {
       return value;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String Logger::ToString(const Path& value)
+    {
+      return value.ToString();
     }
 
     //--------------------------------------------------------------------------

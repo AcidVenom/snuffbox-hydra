@@ -7,8 +7,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     StringUtils::StringList StringUtils::Split(const String& str, char delim)
     {
-      foundation::String current = "";
-      foundation::Vector<foundation::String> split;
+      String current = "";
+      Vector<String> split;
 
       char c = '\0';
 

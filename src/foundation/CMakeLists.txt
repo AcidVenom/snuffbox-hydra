@@ -33,12 +33,24 @@ SET(AuxiliarySources
   "auxiliary/pointer_math.cc"
 )
 
+SET(IOSources
+  "io/path.h"
+  "io/path.cc"
+  "io/file.h"
+  "io/file.cc"
+  "io/directory.h"
+  "io/directory.cc"
+  "io/resources.h"
+  "io/resources.cc"
+)
+
 SET(FoundationSources
   ${DefinitionsSources}
   ${MemorySources}
   ${MemoryAllocatorSources}
   ${ContainerSources}
   ${AuxiliarySources}
+  ${IOSources}
 )
 
 SOURCE_GROUP("definitions"        FILES ${DefinitionsSources})
@@ -46,6 +58,7 @@ SOURCE_GROUP("memory"             FILES ${MemorySources})
 SOURCE_GROUP("memory\\allocator"  FILES ${MemoryAllocatorSources})
 SOURCE_GROUP("containers"         FILES ${ContainerSources})
 SOURCE_GROUP("auxiliary"          FILES ${AuxiliarySources})
+SOURCE_GROUP("io"                 FILES ${IOSources})
 
 ADD_LIBRARY(snuffbox-foundation ${FoundationSources})
 TARGET_LINK_LIBRARIES(snuffbox-foundation PUBLIC eastl glm)
