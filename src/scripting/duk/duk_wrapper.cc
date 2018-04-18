@@ -53,6 +53,115 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(bool value) const
+    {
+      duk_push_boolean(context_, value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(double value) const
+    {
+      duk_push_number(context_, value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(const char* value) const
+    {
+      duk_push_string(context_, value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(foundation::String value) const
+    {
+      PushValueImpl<const char*>(value.c_str());
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(ScriptHandle value) const;
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(ScriptObject* value) const
+    {
+      duk_push_object(context_);
+
+      for (
+        ScriptObject::iterator it = value->begin();
+        it != value->end();
+        ++it)
+      {
+        PushValueImpl(it->second);
+        duk_put_prop_string(context_, -2, it->first.c_str());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(ScriptArray* value) const
+    {
+      duk_push_array(context_);
+
+      for (size_t i = 0; i < value->size(); ++i)
+      {
+        PushValueImpl(value->at(i));
+        duk_put_prop_string(context_, -2, std::to_string(i).c_str());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(ScriptValue* value) const
+    {
+      switch (value->type())
+      {
+      case ScriptValueTypes::kNull:
+        duk_push_undefined(context_);
+        break;
+
+      case ScriptValueTypes::kNumber:
+        PushValueImpl(
+          static_cast<ScriptNumber*>(value)->value());
+        break;
+
+      case ScriptValueTypes::kBoolean:
+        PushValueImpl(
+          static_cast<ScriptBoolean*>(value)->value());
+        break;
+
+      case ScriptValueTypes::kString:
+        PushValueImpl(
+          static_cast<ScriptString*>(value)->value());
+        break;
+
+      case ScriptValueTypes::kObject:
+        PushValueImpl(
+          static_cast<ScriptObject*>(value));
+        break;
+
+      case ScriptValueTypes::kArray:
+        PushValueImpl(
+          static_cast<ScriptArray*>(value));
+        break;
+
+      default:
+        duk_push_undefined(context_);
+        break;
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    void DukWrapper::PushValueImpl(ScriptHandle value) const
+    {
+      return PushValueImpl<ScriptValue*>(value.get());
+    }
+
+    //--------------------------------------------------------------------------
     ScriptHandle DukWrapper::GetValueAt(duk_idx_t stack_idx) const
     {
       duk_int_t type = duk_get_type(context_, stack_idx);

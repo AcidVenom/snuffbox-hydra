@@ -62,6 +62,54 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      double value, 
+      if_n_script_handle<double>*)
+    {
+      return foundation::Memory::ConstructShared<ScriptNumber>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      bool value, 
+      if_n_script_handle<bool>*)
+    {
+      return foundation::Memory::ConstructShared<ScriptBoolean>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      const char* value,
+      if_n_script_handle<const char*>*)
+    {
+      return foundation::Memory::ConstructShared<ScriptString>(
+        &foundation::Memory::default_allocator(),
+        value
+        );
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      foundation::String value,
+      if_n_script_handle<foundation::String>*)
+    {
+      return foundation::Memory::ConstructShared<ScriptString>(
+        &foundation::Memory::default_allocator(),
+        value.c_str()
+        );
+    }
+
+    //--------------------------------------------------------------------------
     ScriptNull::ScriptNull() :
       ScriptValue(ScriptValueTypes::kNull)
     {

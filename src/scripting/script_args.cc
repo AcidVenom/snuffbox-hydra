@@ -102,6 +102,31 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <>
+    bool ScriptArgs::Get(
+      uint8_t idx, 
+      bool def, 
+      if_n_number_and_enum<bool>*) const
+    {
+      return 
+        GetImpl<bool, ScriptBoolean, ScriptValueTypes::kBoolean>(idx, def);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    foundation::String ScriptArgs::Get(
+      uint8_t idx, 
+      foundation::String def, 
+      if_n_number_and_enum<foundation::String>*) const
+    {
+      return 
+        GetImpl<
+        foundation::String, 
+        ScriptString, 
+        ScriptValueTypes::kString>(idx, def);
+    }
+
+    //--------------------------------------------------------------------------
     void* ScriptArgs::callee() const
     {
       return callee_;

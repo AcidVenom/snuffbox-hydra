@@ -128,6 +128,15 @@ namespace snuffbox
 
     protected:
 
+      /**
+      * @brief Prepends a slash to a string, if there is not one there already
+      *
+      * @remarks This also calls Path::ConvertSlashes on the string
+      *
+      * @param[in] str The string to prepend the slash to
+      *
+      * @return The new string
+      */
       static String PrependSlash(const String& str);
 
       /**

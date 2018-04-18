@@ -242,31 +242,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <>
-    inline bool ScriptArgs::Get(
-      uint8_t idx, 
-      bool def, 
-      if_n_number_and_enum<bool>*) const
-    {
-      return 
-        GetImpl<bool, ScriptBoolean, ScriptValueTypes::kBoolean>(idx, def);
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline foundation::String ScriptArgs::Get(
-      uint8_t idx, 
-      foundation::String def, 
-      if_n_number_and_enum<foundation::String>*) const
-    {
-      return 
-        GetImpl<
-        foundation::String, 
-        ScriptString, 
-        ScriptValueTypes::kString>(idx, def);
-    }
-
-    //--------------------------------------------------------------------------
     template <typename T>
     inline T* ScriptArgs::GetPointer(uint8_t idx) const
     {

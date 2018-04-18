@@ -47,5 +47,113 @@ namespace snuffbox
     {
       return description_;
     }
+
+    //--------------------------------------------------------------------------
+    template <>
+    bool CVar<bool>::ParseFrom(const char* value)
+    {
+      size_t len = strlen(value);
+
+      if (len == 0 || len > 5)
+      {
+        return false;
+      }
+
+      char buffer[6];
+
+      for (size_t i = 0; i < len; ++i)
+      {
+        buffer[i] = static_cast<char>(tolower(value[i]));
+      }
+
+      buffer[len] = '\0';
+
+      if (strcmp(buffer, "true") == 0)
+      {
+        value_ = true;
+        return true;
+      }
+
+      if (strcmp(buffer, "false") == 0)
+      {
+        value_ = false;
+        return true;
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    const char* CVar<bool>::Usage() const
+    {
+      return "Boolean (case insensitive): true | false";
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    bool CVar<double>::ParseFrom(const char* value)
+    {
+      char* result;
+      double v = strtod(value, &result);
+
+      if ((*result) != 0)
+      {
+        return false;
+      }
+
+      bool in_range = true;
+
+      if (range_.has_min == true && v < value_)
+      {
+        in_range = false;
+      }
+
+      if (range_.has_max == true && v > value_)
+      {
+        in_range = false;
+      }
+
+      if (in_range == false)
+      {
+        Debug::LogVerbosity<1>(
+          foundation::LogSeverity::kWarning,
+          "The specified value was not in the range for CVar '{0}'\n\
+          \n\
+          \tThe valid range is: {1} .. {2}",
+          name(),
+          range_.has_min == true ? "x" : std::to_string(range_.min).c_str(),
+          range_.has_max == true ? "x" : std::to_string(range_.max).c_str());
+
+        return false;
+      }
+
+      value_ = v;
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    const char* CVar<double>::Usage() const
+    {
+      return 
+        "Number: 0x* | * | *.** | *e* | *e-*";
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    bool CVar<foundation::String>::ParseFrom(const char* value)
+    {
+      value_ = value;
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    const char* CVar<foundation::String>::Usage() const
+    {
+      return "String: This should always work";
+    }
   }
 }
