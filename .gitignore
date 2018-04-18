@@ -1,2 +1,8 @@
 CMakeLists.txt.user
 *.txt.user
+*.db
+doc
+Doxyfile
+doxygen*.*
+doxy*.*
+libclang.dll

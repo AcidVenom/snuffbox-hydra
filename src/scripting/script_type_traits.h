@@ -15,9 +15,6 @@ namespace snuffbox
     class ScriptObject;
     class ScriptArray;
 
-    template <typename T>
-    class ScriptUserdata;
-
     /**
     * @brief Used to only enable a function if the template parameter is a
     *        number or enumerator, but not a boolean
