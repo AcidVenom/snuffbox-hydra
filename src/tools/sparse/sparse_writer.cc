@@ -18,9 +18,9 @@ namespace snuffbox
       { "String", 'S' },
       { "ScriptObject", 'O' },
       { "ScriptArray", 'A' },
-      { "vec", 'V' },
-      { "quat", 'Q' },
-      { "mat", 'M' }
+      { "vec", 'O' },
+      { "quat", 'O' },
+      { "mat", 'O' }
     };
 
     //--------------------------------------------------------------------------
@@ -126,7 +126,10 @@ namespace snuffbox
       WriteComment(defs);
 
       output_ << "#include \"" << header << "\"" << std::endl;
-      output_ << "#include <scripting/script_register.h>" << std::endl << std::endl;
+      output_ << "#include <scripting/script_register.h>" << std::endl;
+      output_ << "#include <engine/application/application.h>" << std::endl;
+
+      WriteLine("");
 
       for (size_t i = 0; i < defs.classes.size(); ++i)
       {
@@ -134,6 +137,11 @@ namespace snuffbox
       }
 
       WriteLine("");
+
+      if (defs.enums.size() == 0)
+      {
+        return;
+      }
 
       EnterNamespaces("snuffbox::scripting");
       for (size_t i = 0; i < defs.enums.size(); ++i)
@@ -150,7 +158,7 @@ namespace snuffbox
 
       for (size_t i = 0; i < d.functions.size(); ++i)
       {
-        WriteFunction(d.functions.at(i), d.c_name);
+        WriteFunction(d.functions.at(i), d);
       }
 
       WriteFunctionRegister(d);
@@ -349,14 +357,27 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SparseWriter::WriteSelf(
       const FunctionDefinition& d, 
-      const std::string& cl)
+      const ClassDefinition& cl)
     {
       if (d.is_static == true)
       {
         return;
       }
 
-      WriteLine((cl + "* self = args.GetSelf<" + cl + ">();").c_str());
+      std::string type = cl.c_name.c_str();
+
+      if (cl.is_service == true)
+      {
+        WriteLine((type + "* self = " +
+            "snuffbox::engine::Application::Instance()->GetService<"
+            + type + 
+            ">();").c_str());
+      }
+      else
+      {
+        WriteLine((type + "* self = args.GetSelf<" + type + ">();").c_str());
+      }
+
       WriteLine("");
       WriteLine("if (self == nullptr)");
       WriteLine("{");
@@ -400,7 +421,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SparseWriter::WriteFunctionCall(
       const FunctionDefinition& d, 
-      const std::string& cl)
+      const ClassDefinition& cl)
     {
       std::string call = "";
 
@@ -424,7 +445,7 @@ namespace snuffbox
       }
       else
       {
-        call += cl + "::";
+        call += cl.c_name + "::";
       }
 
       std::string args = "";
@@ -460,9 +481,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SparseWriter::WriteFunction(
       const FunctionDefinition& d,
-      const std::string& cl)
+      const ClassDefinition& cl)
     {
-      std::string func_name = FormatFunctionName(d.name, cl);
+      std::string func_name = FormatFunctionName(d.name, cl.c_name);
       std::string def = 
         ("bool " + func_name + "(snuffbox::scripting::ScriptArgs& args)");
 

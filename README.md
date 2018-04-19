@@ -31,3 +31,11 @@ Snuffbox currently builds on Linux succesfully. The engine on Linux is developed
 **clang version 3.8.0-2ubuntu4 - x86_64-pc-linux-gnu** as compiler. The primary reason to use Clang
 over GCC is because EASTL throws a *-Wliteral-suffix* under GCC, but *-w* is enabled for treating
 warnings as errors. It doesn't happen when compiling EASTL, but when *\<EASTL/string.h\>* is included.
+
+# Scripting
+
+Currently duktape is implemented for JavaScript as the main scripting language. Scripting can however be
+disabled for full C++ games. By setting **SNUFF_SCRIPTING** to **disabled**, *SNUFF_NSCRIPTING* will be defined
+in the preprocessor, compiling away all scripting definitions. CMake will make sure to not include any script
+related source files in the engine (apart from *src/scripting/script_class.h*). It is advised to do a full rebuild
+when switching the scripting environment.

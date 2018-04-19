@@ -114,7 +114,7 @@ namespace snuffbox
       *
       * @return Was the call a success?
       */
-      bool Call(Args&&... args);
+      bool Call(Args... args);
 
     private:
 
@@ -219,7 +219,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename ... Args>
-    inline bool DukCallback<Args...>::Call(Args&&... args)
+    inline bool DukCallback<Args...>::Call(Args... args)
     {
       if (is_valid_ == false || state_ == nullptr)
       {

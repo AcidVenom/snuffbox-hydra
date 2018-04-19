@@ -4,6 +4,10 @@
 
 #include "engine/auxiliary/debug.h"
 
+#ifndef SNUFF_NSCRIPTING
+#include <sparsed/input_service.gen.cc>
+#endif
+
 namespace snuffbox
 {
   namespace engine
@@ -200,6 +204,133 @@ namespace snuffbox
           }
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsKeyDown(Keys key) const
+    {
+      return keyboard_.GetKeyButtonState(static_cast<int>(key)) 
+        == KeyButtonState::kDown;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsKeyPressed(Keys key) const
+    {
+      return keyboard_.GetKeyButtonState(static_cast<int>(key)) 
+        == KeyButtonState::kPressed;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsKeyReleased(Keys key) const
+    {
+      return keyboard_.GetKeyButtonState(static_cast<int>(key)) 
+        == KeyButtonState::kReleased;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsMouseButtonDown(MouseButtons button) const
+    {
+      return mouse_.GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kDown;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsMouseButtonPressed(MouseButtons button) const
+    {
+      return mouse_.GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kPressed;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsMouseButtonReleased(MouseButtons button) const
+    {
+      return mouse_.GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kReleased;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsJoystickButtonDown(
+      int id, 
+      JoystickButtons button) const
+    {
+      if (id >= kNumSupportedJoysticks)
+      {
+        return false;
+      }
+
+      return joysticks_[id].GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kDown;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsJoystickButtonPressed(
+      int id, 
+      JoystickButtons button) const
+    {
+      if (id >= kNumSupportedJoysticks)
+      {
+        return false;
+      }
+
+      return joysticks_[id].GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kPressed;
+    }
+
+    //--------------------------------------------------------------------------
+    bool InputService::IsJoystickButtonReleased(
+      int id, 
+      JoystickButtons button) const
+    {
+      if (id >= kNumSupportedJoysticks)
+      {
+        return false;
+      }
+
+      return joysticks_[id].GetKeyButtonState(static_cast<int>(button)) 
+        == KeyButtonState::kReleased;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec2 InputService::GetMousePosition() const
+    {
+      int x, y;
+      mouse_.GetMousePosition(&x, &y);
+
+      return glm::vec2
+      {
+        static_cast<float>(x),
+        static_cast<float>(y)
+      };
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec2 InputService::GetMouseMovement() const
+    {
+      int dx, dy;
+      mouse_.GetMouseMovement(&dx, &dy);
+
+      return glm::vec2
+      {
+        static_cast<float>(dx),
+        static_cast<float>(dy)
+      };
+    }
+
+    //--------------------------------------------------------------------------
+    int InputService::GetMouseScroll() const
+    {
+      return mouse_.scroll();
+    }
+
+    //--------------------------------------------------------------------------
+    float InputService::GetJoystickAxis(int id, JoystickAxes axis) const
+    {
+      if (id >= kNumSupportedJoysticks)
+      {
+        return 0.0f;
+      }
+
+      return joysticks_[id].GetAxis(axis);
     }
   }
 }

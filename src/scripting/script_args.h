@@ -6,6 +6,8 @@
 
 #include "scripting/script_value.h"
 
+#include <glm/glm.hpp>
+
 namespace snuffbox
 {
   namespace scripting
@@ -91,7 +93,15 @@ namespace snuffbox
       * @see ScriptArgs::GetImpl
       */
       template <typename T>
-      T Get(uint8_t idx, T def = T(), if_number_or_enum<T>* = nullptr) const;
+      T Get(uint8_t idx, T def = T(), if_number<T>* = nullptr) const;
+
+      /**
+      * @brief Retrieves an enum value
+      *
+      * @see ScriptArgs::GetImpl
+      */
+      template <typename T>
+      T Get(uint8_t idx, T def = T(), if_enum<T>* = nullptr) const;
       
       /**
       * @brief Retrieves any other value
@@ -219,6 +229,19 @@ namespace snuffbox
       template <typename T, typename Y, ScriptValueTypes U>
       T GetImpl(uint8_t idx, T def) const;
 
+      /**
+      * @brief Retrieves a glm vector value from a script handle
+      *
+      * @tparam T The vector type to convert to
+      *
+      * @param[in] idx The argument index to retrieve the value from
+      * @param[in] def The default value if conversion failed
+      *
+      * @return The converted vector value
+      */
+      template <typename T>
+      T GetVectorValue(uint8_t idx, T def) const;
+
     private:
 
       /**
@@ -241,10 +264,19 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline T ScriptArgs::Get(uint8_t idx, T def, if_number_or_enum<T>*) const
+    inline T ScriptArgs::Get(uint8_t idx, T def, if_number<T>*) const
     {
       return static_cast<T>(
-        GetImpl<double, ScriptNumber, ScriptValueTypes::kNumber>(idx, def));
+        GetImpl<double, ScriptNumber, ScriptValueTypes::kNumber>(
+          idx, 
+          static_cast<double>(def)));
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T ScriptArgs::Get(uint8_t idx, T def, if_enum<T>*) const
+    {
+      return static_cast<T>(Get<int>(idx, static_cast<int>(def)));
     }
 
     //--------------------------------------------------------------------------
@@ -327,6 +359,56 @@ namespace snuffbox
       }
       
       return def;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T ScriptArgs::GetVectorValue(uint8_t idx, T def) const
+    {
+      ScriptHandle handle = arguments_.at(idx);
+
+      if (handle->type() != ScriptValueTypes::kObject)
+      {
+        return def;
+      }
+
+      ScriptObject* obj = static_cast<ScriptObject*>(handle.get());
+
+      static const char* keys[] =
+      {
+        "x", "y", "z", "w"
+      };
+
+      static_assert(T::length() <= 4, 
+        "Only vectors with a component count of\
+        <= 4 can be converted to a ScriptValue");
+
+      auto Get = [&](const char* key)
+      {
+        if (obj->Contains(key) == false)
+        {
+          return 0.0f;
+        }
+
+        ScriptValue* v = obj->Get(key);
+        if (v->type() != ScriptValueTypes::kNumber)
+        {
+          return 0.0f;
+        }
+
+        return static_cast<float>(static_cast<ScriptNumber*>(v)->value());
+      };
+
+      T ret;
+
+      int n = T::length();
+
+      for (int i = 0; i < n; ++i)
+      {
+        ret[i] = Get(keys[i]);
+      }
+
+      return ret;
     }
   }
 }

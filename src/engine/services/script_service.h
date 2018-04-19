@@ -37,6 +37,36 @@ namespace snuffbox
       */
       bool CompileAndRun(const char* src);
 
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnInitializeCallback();
+
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnUpdateCallback(float dt);
+
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnFixedUpdateCallback(float time_step);
+
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnRenderCallback(float dt);
+
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnShutdownCallback();
+
+      /**
+      * @see ScriptService::InitializeCallbacks
+      */
+      void OnReloadCallback(const foundation::String& path);
+
     protected:
 
       /**
@@ -70,12 +100,12 @@ namespace snuffbox
       *
       * The callbacks to be set are:
       *
-      * - Snuffbox.OnInitialize, called when the application is initialized
-      * - Snuffbox.OnUpdate, called in the variable update
-      * - Snuffbox.OnFixedUpdate, called in the fixed update
-      * - Snuffbox.OnRender, called before a frame is rendered
-      * - Snuffbox.OnShutdown, called when the application is shut down
-      * - Snuffbox.OnReload, called when a script file is reloaded
+      * - OnInitialize, called when the application is initialized
+      * - OnUpdate, called in the variable update
+      * - OnFixedUpdate, called in the fixed update
+      * - OnRender, called before a frame is rendered
+      * - OnShutdown, called when the application is shut down
+      * - OnReload, called when a script file is reloaded
       *
       */
       void InitializeCallbacks();

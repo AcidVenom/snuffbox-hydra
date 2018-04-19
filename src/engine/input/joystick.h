@@ -68,7 +68,7 @@ namespace snuffbox
       *
       * @return The value of the axis, between -1.0 and 1.0
       */
-      float GetAxis(JoystickAxes axis);
+      float GetAxis(JoystickAxes axis) const;
 
       /**
       * @return Is this joystick connected?

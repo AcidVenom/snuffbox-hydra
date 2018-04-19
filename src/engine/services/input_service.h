@@ -8,6 +8,10 @@
 
 #include <foundation/containers/vector.h>
 
+#include <scripting/script_class.h>
+
+#include <glm/glm.hpp>
+
 namespace snuffbox
 {
   namespace engine
@@ -34,10 +38,14 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class InputService : public ServiceBase<InputService>
+    SCRIPT_CLASS() class InputService : 
+      public ServiceBase<InputService>,
+      public scripting::ScriptClass
     {
 
     public:
+
+      SCRIPT_NAME(Input);
 
       /**
       * @see ServiceBase::ServiceBase
@@ -128,6 +136,121 @@ namespace snuffbox
       * @brief Flushes all input filters
       */
       void Flush();
+
+      /**
+      * @brief Checks if a keyboard key is down this frame
+      *
+      * @param[in] key The key to check
+      *
+      * @return Is it down this frame?
+      */
+      SCRIPT_FUNC() bool IsKeyDown(Keys key) const;
+
+      /**
+      * @brief Checks if a keyboard key was pressed this frame
+      *
+      * @param[in] key The key to check
+      *
+      * @return Was it pressed this frame?
+      */
+      SCRIPT_FUNC() bool IsKeyPressed(Keys key) const;
+
+      /**
+      * @brief Checks if a keyboard key was released this frame
+      *
+      * @param[in] key The key to check
+      *
+      * @return Was it released this frame?
+      */
+      SCRIPT_FUNC() bool IsKeyReleased(Keys key) const;
+
+      /**
+      * @brief Checks if a mouse button is down this frame
+      *
+      * @param[in] button The button to check
+      *
+      * @return Is it down this frame?
+      */
+      SCRIPT_FUNC() bool IsMouseButtonDown(MouseButtons button) const;
+
+      /**
+      * @brief Checks if a mouse button was pressed this frame
+      *
+      * @param[in] button The button to check
+      *
+      * @return Was it pressed this frame?
+      */
+      SCRIPT_FUNC() bool IsMouseButtonPressed(MouseButtons button) const;
+
+      /**
+      * @brief Checks if a mouse button was released this frame
+      *
+      * @param[in] button The button to check
+      *
+      * @return Was it released this frame?
+      */
+      SCRIPT_FUNC() bool IsMouseButtonReleased(MouseButtons button) const;
+
+      /**
+      * @brief Checks if a joystick button is down this frame
+      *
+      * @param[in] id The joystick ID to check for
+      * @param[in] button The button to check
+      *
+      * @return Is it down this frame?
+      */
+      SCRIPT_FUNC() bool IsJoystickButtonDown(
+        int id, 
+        JoystickButtons button) const;
+
+      /**
+      * @brief Checks if a joystick button was pressed this frame
+      *
+      * @param[in] id The joystick ID to check for
+      * @param[in] button The button to check
+      *
+      * @return Was it pressed this frame?
+      */
+      SCRIPT_FUNC() bool IsJoystickButtonPressed(
+        int id,
+        JoystickButtons button) const;
+
+      /**
+      * @brief Checks if a joystick button was released this frame
+      *
+      * @param[in] id The joystick ID to check for
+      * @param[in] button The button to check
+      *
+      * @return Was it released this frame?
+      */
+      SCRIPT_FUNC() bool IsJoystickButtonReleased(
+        int id,
+        JoystickButtons button) const;
+
+      /**
+      * @return The current mouse position, in pixels, from 0,0 to w,h
+      */
+      SCRIPT_FUNC() glm::vec2 GetMousePosition() const;
+
+      /**
+      * @return The current mouse movement, in pixels, of this frame
+      */
+      SCRIPT_FUNC() glm::vec2 GetMouseMovement() const;
+
+      /**
+      * @return The current mouse scroll delta of this frame
+      */
+      SCRIPT_FUNC() int GetMouseScroll() const;
+
+      /**
+      * @brief Retrieves the axis value of a joystick axis
+      *
+      * @param[in] id The joystick ID to retrieve an axis from
+      * @param[in] axis The axis to retrieve the value of
+      *
+      * @return The value in the -1.0 to 1.0 range
+      */
+      SCRIPT_FUNC() float GetJoystickAxis(int id, JoystickAxes axis) const;
 
     private:
 

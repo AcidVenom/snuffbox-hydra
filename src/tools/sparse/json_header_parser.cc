@@ -238,6 +238,8 @@ namespace snuffbox
         return false;
       }
 
+      d.is_service = DerivesFrom("ServiceBase", v);
+
       std::cout << "sparse: " << d.ns << "::" << d.c_name << std::endl;
 
       if (ParseClassMembers(&d, v) == false)

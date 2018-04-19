@@ -103,6 +103,11 @@ namespace snuffbox
       T* GetService();
 
       /**
+      * @return The instance of the application
+      */
+      static Application* Instance();
+
+      /**
       * @return The configuration of the application
       */
       const Configuration& config() const;

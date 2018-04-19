@@ -17,15 +17,28 @@ namespace snuffbox
 
     /**
     * @brief Used to only enable a function if the template parameter is a
-    *        number or enumerator, but not a boolean
+    *        number, but not a boolean, nor an enum
     *
     * @tparam T The type to check
     */
     template <typename T>
-    using if_number_or_enum = 
+    using if_number = 
       typename eastl::enable_if<
-      (eastl::is_arithmetic<T>::value == true || 
-      eastl::is_enum<T>::value == true) &&
+      eastl::is_arithmetic<T>::value == true && 
+      eastl::is_enum<T>::value == false &&
+      eastl::is_same<T, bool>::value == false, T>::type;
+
+    /**
+    * @brief Used to only enable a function if the template parameter is an
+    *        enum, but not a boolean, nor a number
+    *
+    * @tparam T The type to check
+    */
+    template <typename T>
+    using if_enum = 
+      typename eastl::enable_if<
+      eastl::is_arithmetic<T>::value == false &&
+      eastl::is_enum<T>::value == true &&
       eastl::is_same<T, bool>::value == false, T>::type;
 
     /**

@@ -2,6 +2,7 @@
 
 #include "engine/auxiliary/debug.h"
 #include "engine/definitions/keycodes.h"
+#include "engine/services/input_service.h"
 
 #include <sparsed/keycodes.gen.cc>
 
@@ -26,6 +27,42 @@ namespace snuffbox
       }
 
       return state_->CompileFromSource("application", src, true);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnInitializeCallback()
+    {
+      on_initialize_.Call();
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnUpdateCallback(float dt)
+    {
+      on_update_.Call(dt);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnFixedUpdateCallback(float time_step)
+    {
+      on_fixed_update_.Call(time_step);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnRenderCallback(float dt)
+    {
+      on_render_.Call(dt);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnShutdownCallback()
+    {
+      on_shutdown_.Call();
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptService::OnReloadCallback(const foundation::String& path)
+    {
+      on_reload_.Call(path);
     }
 
     //--------------------------------------------------------------------------
@@ -68,6 +105,7 @@ namespace snuffbox
     void ScriptService::RegisterClasses()
     {
       register_->RegisterClass<Debug>();
+      register_->RegisterClass<InputService>();
 
       register_->RegisterEnum<Keys>();
       register_->RegisterEnum<MouseButtons>();
@@ -78,7 +116,59 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptService::InitializeCallbacks()
     {
-      
+      auto CheckError = [](bool f, const char* name)
+      {
+        if (f == false)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kScript,
+            foundation::LogSeverity::kWarning,
+            "Could not find '{0}' callback in main script",
+            name);
+        }
+      };
+
+      bool found = scripting::ScriptCallback<>::FromGlobal(
+        state_.get(), 
+        "OnInitialize", 
+        &on_initialize_);
+
+      CheckError(found, "OnInitialize");
+
+      found = scripting::ScriptCallback<float>::FromGlobal(
+        state_.get(), 
+        "OnUpdate", 
+        &on_update_);
+
+      CheckError(found, "OnUpdate");
+
+      found = scripting::ScriptCallback<float>::FromGlobal(
+        state_.get(), 
+        "OnFixedUpdate", 
+        &on_fixed_update_);
+
+      CheckError(found, "OnFixedUpdate");
+
+      found = scripting::ScriptCallback<float>::FromGlobal(
+        state_.get(), 
+        "OnRender", 
+        &on_render_);
+
+      CheckError(found, "OnRender");
+
+      found = scripting::ScriptCallback<>::FromGlobal(
+        state_.get(), 
+        "OnShutdown", 
+        &on_shutdown_);
+
+      CheckError(found, "OnShutdown");
+
+      found = scripting::ScriptCallback<foundation::String>::FromGlobal(
+        state_.get(), 
+        "OnReload", 
+        &on_reload_);
+
+      CheckError(found, "OnReload");
     }
   }
 }

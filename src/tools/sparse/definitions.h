@@ -85,6 +85,8 @@ namespace snuffbox
       std::string s_name; //!< The script name
       std::string ns; //!< The namespace string including '::'
 
+      bool is_service; //!< Does this class derive from ServiceBase?
+
       std::vector<FunctionDefinition> functions; //!< The functions of the class
     };
 

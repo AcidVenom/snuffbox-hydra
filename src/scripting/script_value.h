@@ -9,6 +9,8 @@
 
 #include <foundation/memory/memory.h>
 
+#include <glm/glm.hpp>
+
 namespace snuffbox
 {
   namespace scripting
@@ -54,12 +56,20 @@ namespace snuffbox
       ScriptValue(ScriptValueTypes type);
 
       /**
-      * @brief Used to cast any number or enumerator value
+      * @brief Used to cast any number value
       *
       * @see ScriptValue::FromImpl
       */
       template <typename T>
-      static ScriptHandle From(T value, if_number_or_enum<T>* = nullptr);
+      static ScriptHandle From(T value, if_number<T>* = nullptr);
+
+      /**
+      * @brief Used to cast any enum value
+      *
+      * @see ScriptValue::FromImpl
+      */
+      template <typename T>
+      static ScriptHandle From(T value, if_enum<T>* = nullptr);
 
       /**
       * @brief Used to cast any other value
@@ -110,6 +120,16 @@ namespace snuffbox
       */
       template <typename T>
       static ScriptHandle FromImpl(T value, if_n_script_handle<T>* = nullptr);
+
+      /**
+      * @brief Constructs a script value from a GLM vector
+      *
+      * @tparam T The glm vector type
+      *
+      * @return The converted script handle
+      */
+      template <typename T>
+      static ScriptHandle FromVector(T value);
 
     private:
 
@@ -349,9 +369,16 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline ScriptHandle ScriptValue::From(T value, if_number_or_enum<T>*)
+    inline ScriptHandle ScriptValue::From(T value, if_number<T>*)
     {
       return FromImpl<double>(static_cast<double>(value));
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ScriptHandle ScriptValue::From(T value, if_enum<T>*)
+    {
+      return From<int>(static_cast<int>(value));
     }
 
     //--------------------------------------------------------------------------
@@ -401,6 +428,31 @@ namespace snuffbox
     {
       ScriptHandle handle = ScriptValue::From<T>(value);
       Add(handle);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ScriptHandle ScriptValue::FromVector(T value)
+    {
+      static const char* keys[] =
+      {
+        "x", "y", "z", "w"
+      };
+
+      static_assert(T::length() <= 4, 
+        "Only vectors with a component count of\
+        <= 4 can be converted to a ScriptValue");
+
+      foundation::SharedPtr<ScriptObject> obj = CreateObject();
+
+      int n = T::length();
+
+      for (int i = 0; i < n; ++i)
+      {
+        obj->Insert(keys[i], value[i]);
+      }
+
+      return obj;
     }
   }
 }

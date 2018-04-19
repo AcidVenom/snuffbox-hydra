@@ -60,7 +60,7 @@ namespace snuffbox
       * @param[out] x The current horizontal mouse position in pixels
       * @param[out] y The current vertical mouse position in pixels
       */
-      void GetMousePosition(int* x, int* y);
+      void GetMousePosition(int* x, int* y) const;
 
       /**
       * @brief Retrieves the mouse movement
@@ -68,7 +68,7 @@ namespace snuffbox
       * @param[out] dx The current movement on the horizontal axis, in pixels
       * @param[out] dy The current movement on the vertical axis, in pixels
       */
-      void GetMouseMovement(int* dx, int* dy);
+      void GetMouseMovement(int* dx, int* dy) const;
 
       /**
       * @return The current scroll factor of this frame

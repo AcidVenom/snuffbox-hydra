@@ -138,9 +138,9 @@ namespace snuffbox
       *        non-static
       *
       * @param[in] d The function definition
-      * @param[in] cl The class name of the "self" pointer
+      * @param[in] cl The class of the "self" pointer
       */
-      void WriteSelf(const FunctionDefinition& d, const std::string& cl);
+      void WriteSelf(const FunctionDefinition& d, const ClassDefinition& cl);
       
       /**
       * @brief Writes the list of arguments and their value retrieval to the
@@ -154,19 +154,21 @@ namespace snuffbox
       * @brief Writes the actual function call with the retrieved arguments
       *
       * @param[in] d The function definition
-      * @param[in] cl The class name for static function calls
+      * @param[in] cl The class definition
       */
       void WriteFunctionCall(
         const FunctionDefinition& d, 
-        const std::string& cl);
+        const ClassDefinition& cl);
 
       /**
       * @brief Writes the static function to be registered by the script state
       *
       * @param[in] d The function definition
-      * @param[in] cl The class name
+      * @param[in] cl The class definition
       */
-      void WriteFunction(const FunctionDefinition& d, const std::string& cl);
+      void WriteFunction(
+        const FunctionDefinition& d, 
+        const ClassDefinition& cl);
 
     private:
 

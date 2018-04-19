@@ -102,7 +102,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    float Joystick::GetAxis(JoystickAxes axis)
+    float Joystick::GetAxis(JoystickAxes axis) const
     {
       if (connected_ == false)
       {

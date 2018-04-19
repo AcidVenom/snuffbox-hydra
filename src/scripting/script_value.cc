@@ -110,6 +110,33 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      glm::vec2 value,
+      if_n_script_handle<glm::vec2>*)
+    {
+      return FromVector<glm::vec2>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      glm::vec3 value,
+      if_n_script_handle<glm::vec3>*)
+    {
+      return FromVector<glm::vec3>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      glm::vec4 value,
+      if_n_script_handle<glm::vec4>*)
+    {
+      return FromVector<glm::vec4>(value);
+    }
+
+    //--------------------------------------------------------------------------
     ScriptNull::ScriptNull() :
       ScriptValue(ScriptValueTypes::kNull)
     {

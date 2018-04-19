@@ -74,7 +74,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Mouse::GetMousePosition(int* x, int* y)
+    void Mouse::GetMousePosition(int* x, int* y) const
     {
       if (x == nullptr || y == nullptr)
       {
@@ -86,7 +86,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Mouse::GetMouseMovement(int* dx, int* dy)
+    void Mouse::GetMouseMovement(int* dx, int* dy) const
     {
       if (dx == nullptr || dy == nullptr)
       {

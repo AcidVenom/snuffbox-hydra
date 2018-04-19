@@ -13,8 +13,11 @@
 #include <scripting/scripting.h>
 
 #define CREATE_SCRIPT_SERVICE() CreateService<ScriptService>();
+#define SCRIPT_CALLBACK(x, ...)\
+GetService<ScriptService>()->On##x##Callback(##__VA_ARGS__)
 #else
 #define CREATE_SCRIPT_SERVICE()
+#define SCRIPT_CALLBACK(x, ...)
 #endif
 
 #include <thread>
@@ -101,17 +104,21 @@ namespace snuffbox
       }
 
       WindowService* window = GetService<WindowService>();
-      InputService* input = GetService<InputService>();
 
       while (window->ProcessEvents() == false)
       {
-        input->Flush();
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        Update(0.0f);
       }
 
       Shutdown();
 
       return foundation::ErrorCodes::kSuccess;
+    }
+
+    //--------------------------------------------------------------------------
+    Application* Application::Instance()
+    {
+      return instance_;
     }
 
     //--------------------------------------------------------------------------
@@ -137,6 +144,7 @@ namespace snuffbox
       }
 
       OnInitialize();
+      SCRIPT_CALLBACK(Initialize);
 
       cvar_service->RegisterFromCLI(cli_);
       input_service->RegisterInputFilter(window_service->GetWindow());
@@ -147,18 +155,25 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Application::Update(float dt)
     {
+      GetService<InputService>()->Flush();
+
+      SCRIPT_CALLBACK(Update, dt);
       OnUpdate(dt);
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
     //--------------------------------------------------------------------------
     void Application::FixedUpdate(float time_step)
     {
+      SCRIPT_CALLBACK(FixedUpdate, time_step);
       OnFixedUpdate(time_step);
     }
 
     //--------------------------------------------------------------------------
     void Application::Render(float dt)
     {
+      SCRIPT_CALLBACK(Render, dt);
       OnRender(dt);
     }
 
@@ -170,6 +185,7 @@ namespace snuffbox
         "Shutting down the application"
         );
 
+      SCRIPT_CALLBACK(Shutdown);
       OnShutdown();
 
       ShutdownServices();
