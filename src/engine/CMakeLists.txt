@@ -81,6 +81,7 @@ IF (NOT SNUFF_NSCRIPTING)
   
   SET(ScriptingBinds
     "auxiliary/debug.h"
+    "services/input_service.h"
     "definitions/keycodes.h"
   )
   

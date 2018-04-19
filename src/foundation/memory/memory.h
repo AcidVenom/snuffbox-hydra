@@ -173,7 +173,7 @@ namespace snuffbox
       /**
       * @see Memory::Construct
       *
-      * @brief This constructs and object and makes it a shared pointer
+      * @brief This constructs an object and makes it a shared pointer
       *
       * @return The constructed shared pointer
       */

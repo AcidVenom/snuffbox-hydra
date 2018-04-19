@@ -25,10 +25,16 @@ namespace snuffbox
       
     public:
 
+      /**
+      * @brief A structure to return a pointer bound to scripting
+      *
+      * This pointer can be used for RTTI as it contains a name, so it can
+      * be checked against a T::ScriptName
+      */
       struct ReturnPtr
       {
-        void* ptr;
-        foundation::String type;
+        void* ptr; //!< The underlying pointer
+        foundation::String type; //!< The script name of the pointer
       };
 
       /**
