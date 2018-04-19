@@ -14,7 +14,7 @@
 
 #define CREATE_SCRIPT_SERVICE() CreateService<ScriptService>();
 #define SCRIPT_CALLBACK(x, ...)\
-GetService<ScriptService>()->On##x##Callback(##__VA_ARGS__)
+GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #else
 #define CREATE_SCRIPT_SERVICE()
 #define SCRIPT_CALLBACK(x, ...)
