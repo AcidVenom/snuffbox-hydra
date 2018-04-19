@@ -1,6 +1,3 @@
-#include <foundation/auxiliary/logger.h>
-#include <foundation/memory/memory.h>
-
 #include <engine/application/application.h>
 
 using namespace snuffbox;

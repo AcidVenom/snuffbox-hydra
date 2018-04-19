@@ -1,6 +1,7 @@
 SET(DefinitionsSources
   "definitions/error_codes.h"
   "definitions/logging.h"
+  "definitions/io.h"
 )
 
 SET(MemorySources

@@ -19,6 +19,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Path::Path(const char* path) :
+      path_(ConvertSlashes(path))
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     void Path::operator/=(const String& other)
     {
       path_ += PrependSlash(other);

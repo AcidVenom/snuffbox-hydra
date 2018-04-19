@@ -37,6 +37,13 @@ namespace snuffbox
       Path(const String& path);
 
       /**
+      * @see Path::Path
+      *
+      * @remarks const char* overload
+      */
+      Path(const char* path);
+
+      /**
       * @brief Appends a string to the path while also inserting a new
       *        slash if there is not one already
       */
