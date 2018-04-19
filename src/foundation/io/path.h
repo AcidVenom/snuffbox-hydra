@@ -133,6 +133,11 @@ namespace snuffbox
       */
       const String& ToString() const;
 
+      /**
+      * @return Is this path a virtual path into the virtual file system?
+      */
+      bool is_virtual() const;
+
     protected:
 
       /**
@@ -159,9 +164,21 @@ namespace snuffbox
       */
       static String ConvertSlashes(const String& str);
 
+      /**
+      * @brief Checks if a path is virtual by looking for the prefix defined in
+      *        Path::kVirtualPrefix_
+      *
+      * @param[in] str The stringified path
+      */
+      static bool IsVirtualPath(const String& str);
+
     private:
 
+      static const char* kVirtualPrefix_; //!< The virtual path prefix
+
       String path_; //!< The stringified path
+      bool is_virtual_; //!< Is this a virtual path to the virtual file system?
+
     };
   }
 }

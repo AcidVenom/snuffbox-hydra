@@ -22,7 +22,7 @@ ELSE ()
 ENDIF ()
 
 SET(SNUFF_BUILD_TEST ON CACHE BOOL "Should the snuffbox-test project be built?")
-SET(SNUFF_BUILD_TOOLS ON CACHE BOOL "Should the tool projects be built?")
+SET(SNUFF_BUILD_EDITOR ON CACHE BOOL "Should the editor project be built?")
 SET(SNUFF_SCRIPTING "duktape" CACHE STRING "The type of scripting environment to build")
 SET_PROPERTY(CACHE SNUFF_SCRIPTING PROPERTY STRINGS duktape disabled)
 

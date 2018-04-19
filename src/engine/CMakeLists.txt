@@ -56,12 +56,19 @@ SET(InputSources
   "input/joystick.cc"
 )
 
+SET(Resources
+  "rsc/test.txt"
+  "rsc/some_image.png"
+  "rsc/test_bmp.bmp"
+)
+
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
 SOURCE_GROUP("auxiliary"    FILES ${AuxiliarySources})
 SOURCE_GROUP("services"     FILES ${ServicesSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
 SOURCE_GROUP("cvar"         FILES ${CVarSources})
 SOURCE_GROUP("input"        FILES ${InputSources})
+SOURCE_GROUP("rsc"          FILES ${Resources})
 
 SET(EngineSources
   ${DefinitionsSources}
@@ -70,10 +77,22 @@ SET(EngineSources
   ${ApplicationSources}
   ${CVarSources}
   ${InputSources}
+  ${Resources}
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})
 TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation glfw)
+
+ADD_DEPENDENCIES(snuffbox-engine snuffbox-bin2h)
+
+SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
+
+FILE(MAKE_DIRECTORY ${WorkingDir})
+FILE(MAKE_DIRECTORY ${WorkingDir}/resources)
+
+SNUFF_BIN2H("${Resources}" ${WorkingDir}/resources)
+
+TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PRIVATE ${WorkingDir})
 
 IF (NOT SNUFF_NSCRIPTING)
   TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-scripting)
@@ -85,36 +104,7 @@ IF (NOT SNUFF_NSCRIPTING)
     "definitions/keycodes.h"
   )
   
-  SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
-  FILE(MAKE_DIRECTORY ${WorkingDir})
   FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)
-
-  TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PRIVATE ${WorkingDir})
-  SET(WorkingDir "${WorkingDir}/sparsed")
   
-  FOREACH (Relative ${ScriptingBinds})
-    IF(${Relative} MATCHES "\\.h")
-      SET(InputFile "${CMAKE_CURRENT_SOURCE_DIR}/${Relative}")
-      
-      MESSAGE(STATUS "Adding custom compilation step for ${InputFile}")
-      
-      STRING(REGEX REPLACE ".*\\/" "" RelativePath ${InputFile})
-      STRING(REGEX REPLACE "\\.h" "" NoExtension ${RelativePath})
-      
-      SET(OutputFile "${WorkingDir}/${NoExtension}.gen.cc")
-      
-      SET(ParseArgs "${InputFile}" -c SCRIPT_CLASS -e SCRIPT_ENUM -f SCRIPT_FUNC -m SCRIPT_NAME)
-      SET(ParseTo "${NoExtension}.json")
-      
-      ADD_CUSTOM_COMMAND(
-        OUTPUT ${OutputFile}
-        COMMAND "$<TARGET_FILE:header-parser>" ${ParseArgs} > ${ParseTo} && "$<TARGET_FILE:snuffbox-sparse>" -i ${ParseTo} -o ${OutputFile} -h ${InputFile}
-        DEPENDS ${InputFile}
-        MAIN_DEPENDENCY ${InputFile}
-        WORKING_DIRECTORY "${WorkingDir}"
-        COMMENT "------ sparse: Generating script bindings for ${InputFile}"
-        VERBATIM
-      )
-    ENDIF ()
-  ENDFOREACH ()
+  CREATE_SCRIPT_BINDS("${ScriptingBinds}" ${WorkingDir}/sparsed)
 ENDIF (NOT SNUFF_NSCRIPTING)

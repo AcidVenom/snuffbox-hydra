@@ -1,28 +1,37 @@
 #include "foundation/io/path.h"
 
+#include <cstring>
+#include <cstddef>
+
 namespace snuffbox
 {
   namespace foundation
   {
     //--------------------------------------------------------------------------
+    const char* Path::kVirtualPrefix_ = "snuff:/";
+
+    //--------------------------------------------------------------------------
     Path::Path() :
-      path_("")
+      path_(""),
+      is_virtual_(false)
     {
 
     }
 
     //--------------------------------------------------------------------------
     Path::Path(const String& path) :
-      path_(ConvertSlashes(path))
+      path_(ConvertSlashes(path)),
+      is_virtual_(false)
     {
-
+      is_virtual_ = IsVirtualPath(path_);
     }
 
     //--------------------------------------------------------------------------
     Path::Path(const char* path) :
-      path_(ConvertSlashes(path))
+      path_(ConvertSlashes(path)),
+      is_virtual_(false)
     {
-
+      is_virtual_ = IsVirtualPath(path_);
     }
 
     //--------------------------------------------------------------------------
@@ -110,6 +119,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Path::is_virtual() const
+    {
+      return is_virtual_;
+    }
+
+    //--------------------------------------------------------------------------
     String Path::PrependSlash(const String& str)
     {
       if (str.size() == 0)
@@ -169,6 +184,27 @@ namespace snuffbox
       }
 
       return copy;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Path::IsVirtualPath(const String& path)
+    {
+      size_t len = strlen(kVirtualPrefix_);
+
+      if (path.size() < len)
+      {
+        return false;
+      }
+
+      for (size_t i = 0; i < len; ++i)
+      {
+        if (path.at(i) != kVirtualPrefix_[i])
+        {
+          return false;
+        }
+      }
+
+      return true;
     }
   }
 }
