@@ -90,7 +90,9 @@ namespace snuffbox
         break;
       }
 
-      assert(size <= kEventSize_ && "Input event doesn't fit in event buffer");
+      foundation::Logger::Assert(
+        size <= kEventSize_,
+        "Input event doesn't fit in event buffer");
 
       if (size == 0 || size > kEventSize_)
       {

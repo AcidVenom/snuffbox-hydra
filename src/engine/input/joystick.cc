@@ -65,7 +65,9 @@ namespace snuffbox
     void Joystick::HandleJoystickConnectEvent(
       const InputJoystickConnectEvent* evt)
     {
-      assert(evt->id == id_ && "Joystick event ID doesn't match actual ID");
+      foundation::Logger::Assert(
+        evt->id == id_,
+        "Joystick event ID doesn't match actual ID");
 
       connected_ = evt->connected;
 
@@ -84,7 +86,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Joystick::HandleJoystickAxisEvent(const InputJoystickAxisEvent* evt)
     {
-      assert(evt->id == id_ && "Joystick event ID doesn't match actual ID");
+      foundation::Logger::Assert(
+        evt->id == id_,
+        "Joystick event ID doesn't match actual ID");
 
       if (connected_ == false)
       {
