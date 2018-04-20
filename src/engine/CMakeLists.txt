@@ -57,9 +57,6 @@ SET(InputSources
 )
 
 SET(Resources
-  "rsc/test.txt"
-  "rsc/some_image.png"
-  "rsc/test_bmp.bmp"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
