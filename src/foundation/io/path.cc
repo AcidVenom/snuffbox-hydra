@@ -144,6 +144,8 @@ namespace snuffbox
         break;
       }
 
+      offset = len;
+
       return Path(&path_[offset]);
     }
 

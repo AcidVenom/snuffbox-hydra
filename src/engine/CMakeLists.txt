@@ -57,8 +57,6 @@ SET(InputSources
 )
 
 SET(Resources
-  "rsc/memes.bmp"
-  "rsc/bleh/another_meme.txt"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})

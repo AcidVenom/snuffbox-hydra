@@ -178,7 +178,7 @@ namespace snuffbox
       fin << "static const size_t " << var_name << "_size = " << len << ";" 
         << std::endl;
       fin << "static const char* " << var_name << "_path = \"" << relative <<
-        "/" << name << "\";" << std::endl;
+        "\";" << std::endl;
     }
   }
 }

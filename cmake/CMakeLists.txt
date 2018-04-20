@@ -46,12 +46,9 @@ FUNCTION (SNUFF_BIN2H arg1 arg2)
     STRING(REGEX REPLACE ".*\\/" "" RelativePath ${InputFile})
     STRING(REGEX REPLACE "\\..*" "" NoExtension ${RelativePath})
     
-    STRING(REPLACE "/${RelativePath}" "" RelativeFolder ${Relative})
-    STRING(REPLACE "${RelativePath}" "" RelativeFolder ${RelativeFolder})
-    
     SET(OutputFile "${arg2}/${NoExtension}.h")
     
-    SET(ConvertArgs "${InputFile}" "${RelativeFolder}" "${arg2}")
+    SET(ConvertArgs "${InputFile}" "${Relative}" "${arg2}")
     
     ADD_CUSTOM_COMMAND(
       OUTPUT ${OutputFile}
