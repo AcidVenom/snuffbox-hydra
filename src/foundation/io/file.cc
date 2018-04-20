@@ -1,6 +1,7 @@
 #include "foundation/io/file.h"
 #include "foundation/memory/memory.h"
 #include "foundation/auxiliary/pointer_math.h"
+#include "foundation/io/resources.h"
 
 namespace snuffbox
 {
@@ -9,6 +10,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     File::File() :
       is_ok_(false),
+      virtual_buffer_(nullptr),
       buffer_(nullptr),
       length_(0)
     {
@@ -18,26 +20,21 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     File::File(const Path& path, FileOpenMode mode) :
       is_ok_(false),
+      virtual_buffer_(nullptr),
       buffer_(nullptr),
       length_(0)
     {
-      stream_ = std::fstream(
-        path.ToString().c_str(),
-        FileFlagsToOpenMode(static_cast<FileFlags>(mode)));
-
-      is_ok_ = stream_.is_open();
-
-      if (is_ok_ == false)
+      if (path.is_virtual() == true)
       {
+        is_ok_ = OpenVirtual(path);
         return;
       }
 
-      length_ = stream_.tellg();
-      stream_.seekg(std::ios_base::beg);
+      is_ok_ = OpenFile(path, mode);
     }
 
     //--------------------------------------------------------------------------
-    uint8_t* File::ReadBuffer(size_t* length, bool is_string)
+    const uint8_t* File::ReadBuffer(size_t* length, bool is_string)
     {
       if (length == nullptr)
       {
@@ -48,6 +45,12 @@ namespace snuffbox
       {
         *length = 0;
         return nullptr;
+      }
+
+      if (virtual_buffer_ != nullptr)
+      {
+        *length = length_;
+        return virtual_buffer_;
       }
 
       size_t len = length_ + (is_string == true ? 1 : 0);
@@ -98,6 +101,43 @@ namespace snuffbox
 
       stream_.close();
       is_ok_ = false;
+    }
+
+    //--------------------------------------------------------------------------
+    bool File::OpenVirtual(const Path& path)
+    {
+      const Resources::ResourceData* d = 
+        Resources::GetResource(path.StripVirtualPrefix());
+
+      if (d == nullptr)
+      {
+        length_ = 0;
+        return false;
+      }
+
+      virtual_buffer_ = d->buffer;
+      length_ = d->size;
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    bool File::OpenFile(const Path& path, FileOpenMode mode)
+    {
+      stream_ = std::fstream(
+        path.ToString().c_str(),
+        FileFlagsToOpenMode(static_cast<FileFlags>(mode)));
+
+      if (stream_.is_open() == false)
+      {
+        length_ = 0;
+        return false;
+      }
+
+      length_ = stream_.tellg();
+      stream_.seekg(std::ios_base::beg);
+
+      return true;
     }
 
     //--------------------------------------------------------------------------

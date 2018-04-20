@@ -7,7 +7,7 @@ namespace snuffbox
   namespace bin2h
   {
     //--------------------------------------------------------------------------
-    bool BinaryWriter::WriteFile(const char* file, const char* out_dir)
+    bool BinaryWriter::WriteFile(const char* file, const char* relative, const char* out_dir)
     {
       std::string file_path = file;
 
@@ -45,7 +45,7 @@ namespace snuffbox
         return false;
       }
 
-      WriteDefinitions(buffer, len, name, fout);
+      WriteDefinitions(buffer, len, name, relative, fout);
 
       fout.close();
 
@@ -147,6 +147,7 @@ namespace snuffbox
       uint8_t* buffer,
       size_t len,
       const std::string& name,
+      const char* relative,
       std::fstream& fin)
     {
       std::string var_name = "bin2h_" + GetVariableName(name);
@@ -176,6 +177,8 @@ namespace snuffbox
 
       fin << "static const size_t " << var_name << "_size = " << len << ";" 
         << std::endl;
+      fin << "static const char* " << var_name << "_path = \"" << relative <<
+        "/" << name << "\";" << std::endl;
     }
   }
 }

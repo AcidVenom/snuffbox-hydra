@@ -119,6 +119,35 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Path Path::StripVirtualPrefix() const
+    {
+      size_t len = strlen(kVirtualPrefix_);
+
+      if (is_virtual_ == false || path_.size() < len)
+      {
+        return Path(*this);
+      }
+
+      char c;
+      size_t offset = 0;
+
+      for (size_t i = 0; i < len; ++i)
+      {
+        c = path_.at(i);
+
+        if (c == kVirtualPrefix_[i])
+        {
+          continue;
+        }
+
+        offset = i;
+        break;
+      }
+
+      return Path(&path_[offset]);
+    }
+
+    //--------------------------------------------------------------------------
     bool Path::is_virtual() const
     {
       return is_virtual_;

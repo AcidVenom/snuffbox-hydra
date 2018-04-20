@@ -34,9 +34,14 @@ namespace snuffbox
       * duplicate names. The last file will simply overwrite the previous file.
       *
       * @param[in] file The path to the file to convert
+      * @param[in] relative The relative path to store the file under, without
+      *                     file name
       * @param[in] out_dir The root output directory
       */
-      static bool WriteFile(const char* file, const char* out_dir);
+      static bool WriteFile(
+        const char* file, 
+        const char* relative, 
+        const char* out_dir);
 
     protected:
 
@@ -67,12 +72,14 @@ namespace snuffbox
       * @param[in] buffer The binary data of the file
       * @param[in] len The length of the binary data
       * @param[in] name The name of the file, without extension
+      * @param[in] relative The relative path, without file name
       * @param[in] fin The current opened file stream for the file
       */
       static void WriteDefinitions(
         uint8_t* buffer, 
         size_t len,
         const std::string& name,
+        const char* relative,
         std::fstream& fin);
     };
   }

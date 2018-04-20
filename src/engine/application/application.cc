@@ -20,6 +20,8 @@ GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #define SCRIPT_CALLBACK(x, ...)
 #endif
 
+#include <foundation/io/resources.h>
+
 #include <thread>
 #include <chrono>
 #include <cassert>
@@ -189,6 +191,7 @@ namespace snuffbox
       OnShutdown();
 
       ShutdownServices();
+      foundation::Resources::Shutdown();
 
       instance_ = nullptr;
     }

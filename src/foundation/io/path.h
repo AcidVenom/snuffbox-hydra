@@ -134,6 +134,11 @@ namespace snuffbox
       const String& ToString() const;
 
       /**
+      * @return The path without any virtual prefixes
+      */
+      Path StripVirtualPrefix() const;
+
+      /**
       * @return Is this path a virtual path into the virtual file system?
       */
       bool is_virtual() const;

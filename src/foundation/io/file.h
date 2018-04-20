@@ -52,12 +52,21 @@ namespace snuffbox
       /**
       * @brief Reads the file's buffer into memory
       *
+      * The buffer is only read into memory if the file is non-virtual, if
+      * the file is virtual there's a direct mapping to the buffer in memory.
+      * The buffer should not be deleted by the user, the buffer's lifetime
+      * is either managed by the file for non-virtual data, or by the resource
+      * system for virtual data.
+      *
       * @param[out] length The length of the file
       * @param[in] is_string Should a null-terminator character be appended?
       *
+      * @remarks is_string is currently only applicable for non-virtual files.
+      *          When length is nullptr, the function will silently fail.
+      *
       * @return The file contents as binary data
       */
-      uint8_t* ReadBuffer(size_t* length, bool is_string = false);
+      const uint8_t* ReadBuffer(size_t* length, bool is_string = false);
 
       /**
       * @return Is the file open and able to be used?
@@ -77,6 +86,28 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Used to open a 'file' from the virtual resources system
+      *
+      * @see Resources
+      *
+      * @param[in] path The path to the virtual resource with the virtual
+      *                 prefix
+      *
+      * @return Was the 'file' loaded correctly?
+      */
+      bool OpenVirtual(const Path& path);
+
+      /**
+      * @brief Used to open a file from the system's file system
+      *
+      * @param[in] path The path to the file to open
+      * @param[in] mode The open mode for the file
+      *
+      * @return Was the file loaded correctly?
+      */
+      bool OpenFile(const Path& path, FileOpenMode mode);
+
+      /**
       * @brief Converts Snuffbox's file flags to an std::ios::openmode
       *
       * @param[in] flags The flags to convert
@@ -90,6 +121,7 @@ namespace snuffbox
       std::fstream stream_; //!< The file stream for this file
       bool is_ok_; //!< Is the file open and able to be used?
 
+      const uint8_t* virtual_buffer_; //!< The virtual buffer of this file
       uint8_t* buffer_; //!< The buffer of this file
       size_t length_; //!< The file length
     };
