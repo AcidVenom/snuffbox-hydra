@@ -3,6 +3,7 @@ ADD_SUBDIRECTORY("builder")
 
 SET_SOLUTION_FOLDER("snuffbox-hydra/tools"
   snuffbox-bin2h
+  snuffbox-builder
 )
 
 IF (SNUFF_BUILD_EDITOR)

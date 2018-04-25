@@ -52,6 +52,13 @@ namespace snuffbox
       /**
       * @see Path::operator/=
       *
+      * @remarks const char* overload
+      */
+      void operator/=(const char* other);
+
+      /**
+      * @see Path::operator/=
+      *
       * @remarks Path overload
       */
       void operator/=(const Path& other);
@@ -60,6 +67,13 @@ namespace snuffbox
       * @see Path::operator/=
       */
       Path operator/(const String& other);
+
+      /**
+      * @see Path::operator/
+      *
+      * @remarks const char* overload
+      */
+      Path operator/(const char* other);
 
       /**
       * @see Path::operator/=
@@ -75,6 +89,13 @@ namespace snuffbox
       /**
       * @see Path::operator+=
       *
+      * @remarks const char* overload
+      */
+      void operator+=(const char* other);
+
+      /**
+      * @see Path::operator+=
+      *
       * @remarks Path overload
       */
       void operator+=(const Path& other);
@@ -83,6 +104,13 @@ namespace snuffbox
       * @see Path::operator+=
       */
       Path operator+(const String& other);
+
+      /**
+      * @see Path::operator+
+      *
+      * @remarks const char* overload
+      */
+      Path operator+(const char* other);
 
       /**
       * @see Path::operator+=
@@ -99,6 +127,13 @@ namespace snuffbox
       Path operator=(const String& other);
 
       /**
+      * @see Path::operator=
+      *
+      * @remarks const char* overload
+      */
+      Path operator=(const char* other);
+
+      /**
       * @brief Checks if a path and string are equal
       *
       * @param[in] other The string to check against
@@ -106,6 +141,13 @@ namespace snuffbox
       * @return Are they equal?
       */
       bool operator==(const String& other);
+
+      /**
+      * @see Path::operator==
+      *
+      * @remarks const char* overload
+      */
+      bool operator==(const char* other);
 
       /**
       * @see Path::operator==
@@ -120,6 +162,13 @@ namespace snuffbox
       * @remarks Checks if not equal, by negating the equals operator
       */
       bool operator!=(const String& other);
+
+      /**
+      * @see Path::operator==
+      *
+      * @remarks const char* overload
+      */
+      bool operator!=(const char* other);
 
       /**
       * @see Path::operator==
@@ -177,13 +226,34 @@ namespace snuffbox
       */
       static bool IsVirtualPath(const String& str);
 
+      /**
+      * @brief Checks if a path is a directory or a file
+      *
+      * @param[in] str The stringified path
+      *
+      * @return Is the path a path to a directory?
+      */
+      static bool IsDirectory(const String& str);
+
+      /**
+      * @brief Retrieves the extension of a converted path
+      *
+      * @param[in] str The stringified path
+      * @param[out] ext The retrieved extension if it was found
+      *
+      * @return Was there an extension at all?
+      */
+      static bool GetExtension(const String& str, String* ext);
+
     private:
 
       static const char* kVirtualPrefix_; //!< The virtual path prefix
 
       String path_; //!< The stringified path
-      bool is_virtual_; //!< Is this a virtual path to the virtual file system?
+      String extension_; //!< The extension of the path if the path is a file
 
+      bool is_virtual_; //!< Is this a virtual path to the virtual file system?
+      bool is_directory_; //!< Is this path a directory or a file?
     };
   }
 }

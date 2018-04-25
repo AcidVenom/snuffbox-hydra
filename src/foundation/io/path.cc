@@ -3,6 +3,12 @@
 #include <cstring>
 #include <cstddef>
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
 namespace snuffbox
 {
   namespace foundation
@@ -13,7 +19,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path::Path() :
       path_(""),
-      is_virtual_(false)
+      extension_(""),
+      is_virtual_(false),
+      is_directory_(true)
     {
 
     }
@@ -21,53 +29,86 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path::Path(const String& path) :
       path_(ConvertSlashes(path)),
-      is_virtual_(false)
+      extension_(""),
+      is_virtual_(false),
+      is_directory_(true)
     {
       is_virtual_ = IsVirtualPath(path_);
+      is_directory_ = IsDirectory(path_);
+
+      if (is_directory_ == false)
+      {
+        GetExtension(path_, &extension_);
+      }
     }
 
     //--------------------------------------------------------------------------
     Path::Path(const char* path) :
-      path_(ConvertSlashes(path)),
-      is_virtual_(false)
+      Path(String(path))
     {
-      is_virtual_ = IsVirtualPath(path_);
+      
     }
 
     //--------------------------------------------------------------------------
     void Path::operator/=(const String& other)
     {
-      path_ += PrependSlash(other);
+      *this = *this / other;
+    }
+
+    //--------------------------------------------------------------------------
+    void Path::operator/=(const char* other)
+    {
+      *this /= String(other);
     }
 
     //--------------------------------------------------------------------------
     void Path::operator/=(const Path& other)
     {
-      path_ += '/' + other.path_;
+      *this /= other.path_;
     }
 
     //--------------------------------------------------------------------------
     Path Path::operator/(const String& other)
     {
-      return path_ + PrependSlash(other);
+      if (is_directory_ == false)
+      {
+        return *this;
+      }
+
+      String p = path_;
+      p += PrependSlash(other);
+
+      return Path(p);
+    }
+
+    //--------------------------------------------------------------------------
+    Path Path::operator/(const char* other)
+    {
+      return *this / String(other);
     }
 
     //--------------------------------------------------------------------------
     Path Path::operator/(const Path& other)
     {
-      return Path(path_ + '/' + other.path_);
+      return *this / other.path_;
     }
 
     //--------------------------------------------------------------------------
     void Path::operator+=(const String& other)
     {
-      path_ += ConvertSlashes(other);
+      *this = *this + other;
+    }
+
+    //--------------------------------------------------------------------------
+    void Path::operator+=(const char* other)
+    {
+      *this += String(other);
     }
 
     //--------------------------------------------------------------------------
     void Path::operator+=(const Path& other)
     {
-      path_ += other.path_;
+      *this += other.path_;
     }
 
     //--------------------------------------------------------------------------
@@ -77,13 +118,25 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Path Path::operator+(const char* other)
+    {
+      return *this + String(other);
+    }
+
+    //--------------------------------------------------------------------------
     Path Path::operator+(const Path& other)
     {
-      return Path(path_ + other.path_);
+      return *this + other.path_;
     }
 
     //--------------------------------------------------------------------------
     Path Path::operator=(const String& other)
+    {
+      return Path(other);
+    }
+
+    //--------------------------------------------------------------------------
+    Path Path::operator=(const char* other)
     {
       return Path(other);
     }
@@ -95,13 +148,25 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Path::operator==(const char* other)
+    {
+      return *this == String(other);
+    }
+
+    //--------------------------------------------------------------------------
     bool Path::operator==(const Path& other)
     {
-      return path_ == other.path_;
+      return *this == other.path_;
     }
 
     //--------------------------------------------------------------------------
     bool Path::operator!=(const String& other)
+    {
+      return (*this == other) == false;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Path::operator!=(const char* other)
     {
       return (*this == other) == false;
     }
@@ -234,6 +299,51 @@ namespace snuffbox
           return false;
         }
       }
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Path::IsDirectory(const String& str)
+    {
+      struct stat s;
+      if(stat(str.c_str(), &s) == 0)
+      {
+        return (s.st_mode & S_IFDIR) > 0;
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Path::GetExtension(const String& str, String* ext)
+    {
+      size_t pos = 0;
+      if ((pos = str.find('.')) == String::npos || str.size() < 2)
+      {
+        return false;
+      }
+
+      size_t new_pos;
+
+      while (true)
+      {
+        new_pos = str.find('.', pos + 1);
+
+        if (new_pos == String::npos)
+        {
+          break;
+        }
+
+        pos = new_pos;
+      }
+
+      if (pos >= str.size() - 1)
+      {
+        return false;
+      }
+
+      *ext = &str[pos + 1];
 
       return true;
     }
