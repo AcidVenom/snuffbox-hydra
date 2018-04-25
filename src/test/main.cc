@@ -1,5 +1,4 @@
 #include <engine/application/application.h>
-#include <foundation/io/path.h>
 
 using namespace snuffbox;
 using namespace foundation;
