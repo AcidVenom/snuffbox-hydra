@@ -76,6 +76,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Win32Directory::is_ok() const
+    {
+      return is_ok_;
+    }
+
+    //--------------------------------------------------------------------------
+    const Vector<Path>& Win32Directory::children() const
+    {
+      return children_;
+    }
+
+    //--------------------------------------------------------------------------
     bool Win32Directory::CreateDirectory(const Path& path)
     {
       auto Create = [](const Path& dir)
@@ -110,7 +122,31 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Vector<Path> Win32Directory::EnumerateChildren(const Path& path)
     {
-      return Vector<Path>();
+      Vector<Path> result;
+
+      WIN32_FIND_DATAA ffd;
+      HANDLE current = INVALID_HANDLE_VALUE;
+
+      Path start_at = path.ToString();
+
+      current = FindFirstFileA((start_at + "/*").ToString().c_str(), &ffd);
+
+      if (current == INVALID_HANDLE_VALUE)
+      {
+        return result;
+      }
+
+      do
+      {
+        if (strcmp(ffd.cFileName, ".") == 0 || strcmp(ffd.cFileName, "..") == 0)
+        {
+          continue;
+        }
+
+        result.push_back(start_at / ffd.cFileName);
+      } while (FindNextFileA(current, &ffd) != 0);
+
+      return result;
     }
   }
 }
