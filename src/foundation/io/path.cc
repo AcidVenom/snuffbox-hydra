@@ -221,6 +221,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Path::is_directory() const
+    {
+      return is_directory_;
+    }
+
+    //--------------------------------------------------------------------------
+    const String& Path::extension() const
+    {
+      return extension_;
+    }
+
+    //--------------------------------------------------------------------------
     String Path::PrependSlash(const String& str)
     {
       if (str.size() == 0)

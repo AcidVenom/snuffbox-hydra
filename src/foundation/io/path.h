@@ -192,6 +192,17 @@ namespace snuffbox
       */
       bool is_virtual() const;
 
+      /**
+      * @return Is this path a path to a directory?
+      */
+      bool is_directory() const;
+
+      /**
+      * @return The extension of this path if it is a file, else this is
+      *         an empty string
+      */
+      const String& extension() const;
+
     protected:
 
       /**
