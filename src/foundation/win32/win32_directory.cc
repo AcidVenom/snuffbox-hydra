@@ -26,6 +26,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Win32Directory::Open(const Path& path)
     {
+      if (path.is_virtual() == true)
+      {
+        return false;
+      }
+
       if (Exists(path) == false)
       {
         is_ok_ = CreateDirectory(path);
@@ -61,9 +66,7 @@ namespace snuffbox
         FO_DELETE,
         path.ToString().c_str(),
         "",
-        FOF_NOCONFIRMATION |
-        FOF_NOERRORUI |
-        FOF_SILENT,
+        FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
         false,
         0,
         "" 
