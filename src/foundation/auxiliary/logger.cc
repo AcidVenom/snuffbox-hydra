@@ -4,14 +4,16 @@
 #include <ctime>
 #include <cassert>
 
-#ifdef _WIN32
+#ifdef SNUFF_WIN32
 #define localtime(x, y)   \
 tm x;                     \
 localtime_s(&x, &y);
-#else
+#elif defined (SNUFF_LINUX)
 #define localtime(x, y)   \
 tm* temp = localtime(&y); \
 tm x = *temp;
+#else
+#error "Unknown compiler platform"
 #endif
 
 namespace snuffbox

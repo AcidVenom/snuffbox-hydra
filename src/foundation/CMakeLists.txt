@@ -45,11 +45,28 @@ SET(IOSources
   "io/resources.cc"
 )
 
+IF (SNUFF_WIN32)
+  SET(PlatformFilter "win32")
+  SET(PlatformSources
+    "win32/win32_directory.h"
+    "win32/win32_directory.cc"
+  )
+ELSEIF (SNUFF_LINUX)
+  SET(PlatformFilter "linux")
+  SET(PlatformSources
+    "linux/linux_directory.h"
+    "linux/linux_directory.cc"
+  )
+ELSE ()
+  MESSAGE(FATAL_ERROR "Unknown compiler platform")
+ENDIF (SNUFF_WIN32)
+
 SET(EncryptionSources
   "encryption/rc4.h"
   "encryption/rc4.cc"
 )
 
+SOURCE_GROUP(${PlatformFilter}    FILES ${PlatformSources})
 SOURCE_GROUP("definitions"        FILES ${DefinitionsSources})
 SOURCE_GROUP("memory"             FILES ${MemorySources})
 SOURCE_GROUP("memory\\allocator"  FILES ${MemoryAllocatorSources})
@@ -59,6 +76,7 @@ SOURCE_GROUP("io"                 FILES ${IOSources})
 SOURCE_GROUP("encryption"         FILES ${EncryptionSources})
 
 SET(FoundationSources
+  ${PlatformSources}
   ${DefinitionsSources}
   ${MemorySources}
   ${MemoryAllocatorSources}

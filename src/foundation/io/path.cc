@@ -4,10 +4,12 @@
 #include <cstring>
 #include <cstddef>
 
-#ifdef _WIN32
+#ifdef SNUFF_WIN32
 #include <direct.h>
-#else
+#elif defined (SNUFF_LINUX)
 #include <sys/stat.h>
+#else
+#error "Unknown compiler platform"
 #endif
 
 namespace snuffbox
