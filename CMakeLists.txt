@@ -24,6 +24,7 @@ ENDIF ()
 SET(SNUFF_BUILD_TEST ON CACHE BOOL "Should the snuffbox-test project be built?")
 SET(SNUFF_BUILD_EDITOR ON CACHE BOOL "Should the editor project be built?")
 SET(SNUFF_SCRIPTING "duktape" CACHE STRING "The type of scripting environment to build")
+SET(SNUFF_ENCRYPTION_KEY "snuffbox" CACHE STRING "The encytpion key/salt to use for encryption algorithms")
 SET_PROPERTY(CACHE SNUFF_SCRIPTING PROPERTY STRINGS duktape disabled)
 
 IF (SNUFF_SCRIPTING STREQUAL "duktape")
@@ -45,4 +46,7 @@ ENDIF (SNUFF_BUILD_TOOLS)
 
 ADD_SUBDIRECTORY("cmake")
 ADD_SUBDIRECTORY("deps")
+
+ADD_DEFINITIONS("-DSNUFF_ENCRYPTION_KEY=\"${SNUFF_ENCRYPTION_KEY}\"")
+
 ADD_SUBDIRECTORY("src")

@@ -3,6 +3,9 @@
 #include <foundation/io/path.h>
 #include <foundation/containers/vector.h>
 
+#include <cinttypes>
+#include <cstddef>
+
 namespace snuffbox
 {
   namespace builder
@@ -40,7 +43,8 @@ namespace snuffbox
       *
       * The file path is first checked for the appropriate extension, before
       * actually starting the compilation. The base compiler interface also
-      * checks if the file actually exists.
+      * checks if the file actually exists, along with checking if the path
+      * is a file and not a directory.
       *
       * The derived class should override ICompiler::CompileImpl to actually
       * compile the file if this function passes that check.
@@ -60,7 +64,8 @@ namespace snuffbox
       *
       * The file path is first checked for the appropriate extension, before
       * actually starting the decompilation. The base compiler interface also
-      * checks if the file actually exists.
+      * checks if the file actually exists, along with checking if the path
+      * is a file and not a directory.
       *
       * The derived class should override ICompiler::DecompileImpl to actually
       * decompile the file if this function passes that check.
@@ -75,24 +80,31 @@ namespace snuffbox
       */
       bool Decompile(const foundation::Path& path);
 
-    protected:
-
       /**
-      * @brief Sets the current error message of this compiler
+      * @brief Retrieves the current data of the compiler along with its size
       *
-      * This function should be called from within ICompiler::CompileImpl or
-      * ICompiler::DecompileImpl to send any error messages back to the user 
-      * when a compilation or decompilation fails.
+      * @param[out] size The size of the data in the compiler
       *
-      * @param[in] error The error message to set
+      * @return The data currently contained in this compiler
       */
-      void SetError(const foundation::String& error);
+      const uint8_t* Data(size_t* size) const;
+
+    protected:
 
       /**
       * @brief Checks if the extension of a file path is listed in the
       *        supported extensions of this compiler
+      *
+      * The path is checked for its file extension based on compilation or
+      * decompilation, along with a check to make sure the path is a file
+      * and not a directory.
+      *
+      * @param[in] path The path to check
+      * @param[in] compile Are we compiling or decompiling?
+      *
+      * @return Is the path valid for use?
       */
-      bool IsSupported(const foundation::Path& path);
+      bool IsSupported(const foundation::Path& path, bool compile) const;
 
       /**
       * @see ICompiler::Compile
@@ -103,6 +115,17 @@ namespace snuffbox
       * @see ICompiler::Decompile
       */
       virtual bool DecompileImpl(const foundation::Path& path) = 0;
+
+      /**
+      * @brief Sets the current error message of this compiler
+      *
+      * This function should be called from within ICompiler::CompileImpl or
+      * ICompiler::DecompileImpl to send any error messages back to the user 
+      * when a compilation or decompilation fails.
+      *
+      * @param[in] error The error message to set
+      */
+      void set_error(const foundation::String& error);
 
     private:
 
@@ -115,6 +138,11 @@ namespace snuffbox
       * @brief The out extension for a compiled file
       */
       foundation::String out_extension_;
+
+      foundation::String error_; //!< The current error message of this compiler
+
+      uint8_t* data_; //!< The data currently contained in the compiler
+      size_t size_; //!< The size of the contained data
     };
   }
 }

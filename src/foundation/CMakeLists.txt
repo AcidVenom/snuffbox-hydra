@@ -45,13 +45,9 @@ SET(IOSources
   "io/resources.cc"
 )
 
-SET(FoundationSources
-  ${DefinitionsSources}
-  ${MemorySources}
-  ${MemoryAllocatorSources}
-  ${ContainerSources}
-  ${AuxiliarySources}
-  ${IOSources}
+SET(EncryptionSources
+  "encryption/rc4.h"
+  "encryption/rc4.cc"
 )
 
 SOURCE_GROUP("definitions"        FILES ${DefinitionsSources})
@@ -60,6 +56,17 @@ SOURCE_GROUP("memory\\allocator"  FILES ${MemoryAllocatorSources})
 SOURCE_GROUP("containers"         FILES ${ContainerSources})
 SOURCE_GROUP("auxiliary"          FILES ${AuxiliarySources})
 SOURCE_GROUP("io"                 FILES ${IOSources})
+SOURCE_GROUP("encryption"         FILES ${EncryptionSources})
+
+SET(FoundationSources
+  ${DefinitionsSources}
+  ${MemorySources}
+  ${MemoryAllocatorSources}
+  ${ContainerSources}
+  ${AuxiliarySources}
+  ${IOSources}
+  ${EncryptionSources}
+)
 
 ADD_LIBRARY(snuffbox-foundation ${FoundationSources})
 TARGET_LINK_LIBRARIES(snuffbox-foundation PUBLIC eastl glm)
