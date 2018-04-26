@@ -3,6 +3,10 @@ SET(RootSources
   "builder.cc"
 )
 
+SET(DefinitionsSources
+  "definitions/magic.h"
+)
+
 SET(ThreadingSources
   "threading/build_job.h"
   "threading/build_job.cc"
@@ -17,12 +21,14 @@ SET(CompilersSources
   "compilers/script_compiler.cc"
 )
 
-SOURCE_GROUP("\\"         FILES ${RootSources})
-SOURCE_GROUP("threading"  FILES ${ThreadingSources})
-SOURCE_GROUP("compilers"  FILES ${CompilersSources})
+SOURCE_GROUP("\\"           FILES ${RootSources})
+SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
+SOURCE_GROUP("threading"    FILES ${ThreadingSources})
+SOURCE_GROUP("compilers"    FILES ${CompilersSources})
 
 SET(BuilderSources
   ${RootSources}
+  ${DefinitionsSources}
   ${ThreadingSources}
   ${CompilersSources}
 )

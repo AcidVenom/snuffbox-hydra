@@ -40,6 +40,13 @@ namespace snuffbox
       * @return The offsetted pointer
       */
       static void* Offset(void* ptr, int64_t offset);
+
+      /**
+      * @see PointerMath::Offset
+      *
+      * @remarks const version
+      */
+      static const void* Offset(const void* ptr, int64_t offset);
     };
   }
 }

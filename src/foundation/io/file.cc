@@ -24,13 +24,21 @@ namespace snuffbox
       buffer_(nullptr),
       length_(0)
     {
+      Open(path, mode);
+    }
+
+    //--------------------------------------------------------------------------
+    bool File::Open(const Path& path, FileOpenMode mode)
+    {
       if (path.is_virtual() == true)
       {
         is_ok_ = OpenVirtual(path);
-        return;
+        return is_ok_;
       }
 
       is_ok_ = OpenFile(path, mode);
+
+      return is_ok_;
     }
 
     //--------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 #include "tools/builder/compilers/compiler.h"
 
+#include <foundation/memory/memory.h>
+
 #include <cassert>
 
 namespace snuffbox
@@ -24,31 +26,29 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ICompiler::Compile(const foundation::Path& path)
     {
-      if (IsSupported(path, true) == false)
-      {
-        set_error(
-          "Path for the compilation is invalid\nAre you sure the file\
-          extension is supported and the path is not a directory?");
+      Clear();
 
+      foundation::File file;
+      if (OpenFile(path, true, &file) == false)
+      {
         return false;
       }
 
-      return CompileImpl(path);
+      return CompileImpl(file);
     }
 
     //--------------------------------------------------------------------------
     bool ICompiler::Decompile(const foundation::Path& path)
     {
-      if (IsSupported(path, false) == false)
-      {
-        set_error(
-          "Path for the decompilation is invalid\nAre you sure the file\
-          extension is supported and the path is not a directory?");
+      Clear();
 
+      foundation::File file;
+      if (OpenFile(path, false, &file) == false)
+      {
         return false;
       }
 
-      return CompileImpl(path);
+      return DecompileImpl(file);
     }
 
     //--------------------------------------------------------------------------
@@ -91,9 +91,64 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool ICompiler::OpenFile(
+      const foundation::Path& path,
+      bool compile,
+      foundation::File* file)
+    {
+      if (file == nullptr)
+      {
+        return false;
+      }
+
+      if (IsSupported(path, compile) == false)
+      {
+        set_error(
+          "Path for compilation is invalid\nAre you sure the file\
+          extension is supported and the path is not a directory?");
+
+        return false;
+      }
+
+      if (file->Open(path, foundation::FileFlags::kRead) == false)
+      {
+        set_error("Could not open file for reading");
+
+        return false;
+      }
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void ICompiler::SetData(uint8_t* data, size_t size)
+    {
+      data_ = data;
+      size_ = size;
+    }
+
+    //--------------------------------------------------------------------------
+    void ICompiler::Clear()
+    {
+      if (data_ != nullptr)
+      {
+        foundation::Memory::Deallocate(data_);
+        data_ = nullptr;
+      }
+
+      size_ = 0;
+    }
+
+    //--------------------------------------------------------------------------
     void ICompiler::set_error(const foundation::String& error)
     {
       error_ = error;
+    }
+
+    //--------------------------------------------------------------------------
+    ICompiler::~ICompiler()
+    {
+      Clear();
     }
   }
 }

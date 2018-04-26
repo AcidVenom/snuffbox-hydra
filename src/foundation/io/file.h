@@ -37,6 +37,11 @@ namespace snuffbox
       File();
 
       /**
+      * @see File::Open
+      */
+      File(const Path& path, FileOpenMode mode = FileFlags::kRead);
+
+      /**
       * @brief Opens a file by file path
       *
       * Opening a file doesn't guarantee it to be opened, File::is_ok should
@@ -47,7 +52,7 @@ namespace snuffbox
       *
       * @see FileFlags
       */
-      File(const Path& path, FileOpenMode mode = FileFlags::kRead);
+      bool Open(const Path& path, FileOpenMode mode = FileFlags::kRead);
 
       /**
       * @brief Reads the file's buffer into memory

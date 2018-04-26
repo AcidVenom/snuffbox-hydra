@@ -1,6 +1,6 @@
 #pragma once
 
-#include <foundation/io/path.h>
+#include <foundation/io/file.h>
 #include <foundation/containers/vector.h>
 
 #include <cinttypes>
@@ -16,6 +16,11 @@ namespace snuffbox
     * Compilers are scheduled for compilation from the BuildScheduler.
     * A BuildJob is instantiated along with a compiler to prevent any data
     * contentation.
+    *
+    * Allocated data should only be freed in this base class and the default
+    * memory allocator should be used for consistency. Due to the nature of
+    * the memory interface it is however possible to use a different allocator
+    * if necessary.
     *
     * @author Daniel Konings
     */
@@ -107,14 +112,47 @@ namespace snuffbox
       bool IsSupported(const foundation::Path& path, bool compile) const;
 
       /**
-      * @see ICompiler::Compile
+      * @brief Opens a file, but checks first if the path meets all requirements
+      *        for either compilation or decompilation
+      *
+      * @param[in] path The path to the file
+      * @param[in] compile Are we compiling or decompiling?
+      * @param[out] file The loaded file if the path was valid
+      *
+      * @return Was the path a valid path for this compiler?
       */
-      virtual bool CompileImpl(const foundation::Path& path) = 0;
+      bool OpenFile(
+        const foundation::Path& path, 
+        bool compile, 
+        foundation::File* file);
+
+      /**
+      * @brief Used by the derived classes to set the underlying data
+      *        of the compiler
+      *
+      * @param[in] data The data to set
+      * @param[in] size The size of the data
+      */
+      void SetData(uint8_t* data, size_t size);
+
+      /**
+      * @brief Clears the underlying buffer if there is currently data set
+      */
+      void Clear();
+
+      /**
+      * @see ICompiler::Compile
+      *
+      * @param[in] file The opened file from the compilation call
+      */
+      virtual bool CompileImpl(foundation::File& file) = 0;
 
       /**
       * @see ICompiler::Decompile
+      *
+      * @param[in] file The opened file from the decompilation call
       */
-      virtual bool DecompileImpl(const foundation::Path& path) = 0;
+      virtual bool DecompileImpl(foundation::File& file) = 0;
 
       /**
       * @brief Sets the current error message of this compiler
@@ -126,6 +164,13 @@ namespace snuffbox
       * @param[in] error The error message to set
       */
       void set_error(const foundation::String& error);
+
+    public:
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~ICompiler();
 
     private:
 
