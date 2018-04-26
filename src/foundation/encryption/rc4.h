@@ -35,7 +35,7 @@ namespace snuffbox
       /**
       * @brief Encrypts a character array with RC4
       *
-      * The array is directly modified, so the encryption algorithm doens't
+      * The array is directly modified, so the encryption algorithm doesn't
       * allocate any data.
       *
       * The size of the resulting array will remain the same size as the
