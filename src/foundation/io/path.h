@@ -1,6 +1,7 @@
 #pragma once
 
 #include <foundation/containers/string.h>
+#include <foundation/containers/vector.h>
 
 namespace snuffbox
 {
@@ -186,6 +187,20 @@ namespace snuffbox
       * @return The path without any virtual prefixes
       */
       Path StripVirtualPrefix() const;
+
+      /**
+      * @return The number of directories in this path by counting the '/'
+      *
+      * @remarks The last file or directory is always cut off of the count
+      */
+      size_t NumDirectories() const;
+
+      /**
+      * @return The split directory paths, based on splitting by the '/'
+      *
+      * @remarks The last file or directory is always cut off of the list
+      */
+      Vector<Path> GetDirectories() const;
 
       /**
       * @return Is this path a virtual path into the virtual file system?

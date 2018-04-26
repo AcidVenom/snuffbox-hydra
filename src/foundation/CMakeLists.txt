@@ -40,7 +40,6 @@ SET(IOSources
   "io/file.h"
   "io/file.cc"
   "io/directory.h"
-  "io/directory.cc"
   "io/resources.h"
   "io/resources.cc"
 )
@@ -48,6 +47,7 @@ SET(IOSources
 IF (SNUFF_WIN32)
   SET(PlatformFilter "win32")
   SET(PlatformSources
+    "win32/win32_include.h"
     "win32/win32_directory.h"
     "win32/win32_directory.cc"
   )

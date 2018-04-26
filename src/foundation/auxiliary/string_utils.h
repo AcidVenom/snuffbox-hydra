@@ -53,6 +53,16 @@ namespace snuffbox
       * @return The found position
       */
       static size_t FindLastOf(const String& str, char token);
+
+      /**
+      * @brief Returns the number of occurences of a token in the string
+      *
+      * @param[in] str The string to check
+      * @param[in] token The token to check for
+      *
+      * @return The number of occurences of the token in the string
+      */
+      static size_t NumberOf(const String& str, char token);
     };
   }
 }

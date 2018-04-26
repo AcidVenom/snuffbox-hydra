@@ -73,13 +73,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path Path::operator/(const String& other)
     {
-      if (is_directory_ == false)
+      if (is_directory_ == false && extension_.size() > 0)
       {
         return *this;
       }
 
       String p = path_;
-      p += PrependSlash(other);
+      p += p.size() == 0 ? ConvertSlashes(other) : PrependSlash(other);
 
       return Path(p);
     }
@@ -218,6 +218,72 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    size_t Path::NumDirectories() const
+    {
+      if (path_.size() == 0)
+      {
+        return 0;
+      }
+
+      size_t len = StringUtils::NumberOf(path_, '/');
+
+      if (path_.at(0) == '/' && len > 0)
+      {
+        --len;
+      }
+
+      return len;
+    }
+
+    //--------------------------------------------------------------------------
+    Vector<Path> Path::GetDirectories() const
+    {
+      Vector<Path> result;
+      if (path_.size() == 0)
+      {
+        return result;
+      }
+
+      StringUtils::StringList list = StringUtils::Split(path_, '/');
+
+      size_t len = list.size();
+      if (path_.at(0) == '/')
+      {
+        list.erase(list.begin());
+
+        size_t new_len = list.size();
+        if (new_len > 0)
+        {
+          String& first = list.at(0);
+          first = '/' + first;
+          len = new_len;
+        }
+      }
+      
+      if (len <= 1)
+      {
+        return result;
+      }
+
+      list.erase(list.begin() + len - 1);
+
+      len = list.size();
+      result.resize(len);
+
+      for (size_t i = 0; i < len; ++i)
+      {
+        result.at(i) = "";
+
+        for (size_t j = 0; j <= i; ++j)
+        {
+          result.at(i) /= list.at(j);
+        }
+      }
+
+      return result;
+    }
+
+    //--------------------------------------------------------------------------
     bool Path::is_virtual() const
     {
       return is_virtual_;
@@ -238,7 +304,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     String Path::PrependSlash(const String& str)
     {
-      if (str.size() == 0)
+      if (str.size() == 0 || str.find(':') != String::npos)
       {
         return str;
       }
@@ -264,14 +330,23 @@ namespace snuffbox
       String copy = str;
 
       size_t last = copy.size() - 1;
-      if (IsSlash(copy.at(last)) == true)
+      size_t semicolon = copy.find(':');
+      bool is_drive = false;
+
+      size_t copy_size = copy.size();
+      if (semicolon != String::npos && (copy_size == 2 || copy_size == 3))
       {
-        copy.erase(copy.begin() + last);
+        if (copy_size == 2 && copy.at(last) == ':')
+        {
+          copy += '/';
+        }
+
+        is_drive = copy.at(copy.size() - 1) == '/';
       }
 
-      if (IsSlash(copy.at(0)) == true)
+      if (is_drive == false && IsSlash(copy.at(last)) == true)
       {
-        copy.erase(copy.begin());
+        copy.erase(copy.begin() + last);
       }
 
       char c = '\0';

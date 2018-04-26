@@ -3,6 +3,8 @@
 #include "foundation/auxiliary/pointer_math.h"
 #include "foundation/io/resources.h"
 
+#include <cstdio>
+
 namespace snuffbox
 {
   namespace foundation
@@ -39,6 +41,24 @@ namespace snuffbox
       is_ok_ = OpenFile(path, mode);
 
       return is_ok_;
+    }
+
+    //--------------------------------------------------------------------------
+    void File::Close()
+    {
+      if (is_ok_ == false)
+      {
+        return;
+      }
+
+      if (buffer_ != nullptr)
+      {
+        Memory::Deallocate(buffer_);
+        buffer_ = nullptr;
+      }
+
+      stream_.close();
+      is_ok_ = false;
     }
 
     //--------------------------------------------------------------------------
@@ -94,6 +114,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void File::Remove(const Path& path)
+    {
+      remove(path.ToString().c_str());
+    }
+
+    //--------------------------------------------------------------------------
     bool File::is_ok() const
     {
       return is_ok_;
@@ -108,19 +134,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     File::~File()
     {
-      if (is_ok_ == false)
-      {
-        return;
-      }
-
-      if (buffer_ != nullptr)
-      {
-        Memory::Deallocate(buffer_);
-        buffer_ = nullptr;
-      }
-
-      stream_.close();
-      is_ok_ = false;
+      Close();
     }
 
     //--------------------------------------------------------------------------

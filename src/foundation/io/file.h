@@ -55,6 +55,11 @@ namespace snuffbox
       bool Open(const Path& path, FileOpenMode mode = FileFlags::kRead);
 
       /**
+      * @brief Closes the file
+      */
+      void Close();
+
+      /**
       * @brief Reads the file's buffer into memory
       *
       * The buffer is only read into memory if the file is non-virtual, if
@@ -82,6 +87,15 @@ namespace snuffbox
       void Write(const uint8_t* buffer, size_t size);
 
       /**
+      * @brief Removes a file silently
+      *
+      * @remarks This call can fail, but will not notify the user
+      *
+      * @param[in] path The path to the file to remove
+      */
+      static void Remove(const Path& path);
+
+      /**
       * @return Is the file open and able to be used?
       */
       bool is_ok() const;
@@ -93,6 +107,8 @@ namespace snuffbox
 
       /**
       * @brief Destructor, closes the underlying stream if it was opened
+      *
+      * @see File::Close
       */
       ~File();
 

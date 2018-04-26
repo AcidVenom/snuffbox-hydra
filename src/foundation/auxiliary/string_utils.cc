@@ -12,7 +12,8 @@ namespace snuffbox
 
       char c = '\0';
 
-      for (int i = 0; i < str.size(); ++i)
+      size_t size = str.size();
+      for (int i = 0; i < size; ++i)
       {
         c = str.at(i);
 
@@ -24,6 +25,11 @@ namespace snuffbox
         }
 
         current += c;
+      }
+
+      if (current.size() != 0)
+      {
+        split.push_back(current);
       }
 
       if (split.size() == 0)
@@ -86,6 +92,21 @@ namespace snuffbox
       }
 
       return pos;
+    }
+
+    //--------------------------------------------------------------------------
+    size_t StringUtils::NumberOf(const String& str, char token)
+    {
+      size_t count = 0;
+      for (size_t i = 0; i < str.size(); ++i)
+      {
+        if (str.at(i) == token)
+        {
+          ++count;
+        }
+      }
+
+      return count;
     }
   }
 }
