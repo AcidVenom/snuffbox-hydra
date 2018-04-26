@@ -1,7 +1,7 @@
 #include "scripting/duk/duk_state.h"
 
 #include <foundation/auxiliary/logger.h>
-#include <foundation/containers/string_utils.h>
+#include <foundation/auxiliary/string_utils.h>
 
 #include <duktape.h>
 

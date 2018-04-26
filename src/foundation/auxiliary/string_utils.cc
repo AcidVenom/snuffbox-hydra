@@ -1,4 +1,4 @@
-#include "foundation/containers/string_utils.h"
+#include "foundation/auxiliary/string_utils.h"
 
 namespace snuffbox
 {
@@ -60,6 +60,32 @@ namespace snuffbox
       }
 
       return -1;
+    }
+
+    //--------------------------------------------------------------------------
+    size_t StringUtils::FindLastOf(const String& str, char token)
+    {
+      size_t pos = 0;
+      if ((pos = str.find(token)) == String::npos)
+      {
+        return String::npos;
+      }
+
+      size_t new_pos;
+
+      while (true)
+      {
+        new_pos = str.find('.', pos + 1);
+
+        if (new_pos == String::npos)
+        {
+          break;
+        }
+
+        pos = new_pos;
+      }
+
+      return pos;
     }
   }
 }

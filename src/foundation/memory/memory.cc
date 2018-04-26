@@ -62,7 +62,7 @@ namespace snuffbox
 
       alloc->Deallocate(PointerMath::Offset(
         header,
-        -static_cast<int64_t>(header->align)
+        -static_cast<intptr_t>(header->align)
       ));
     }
 

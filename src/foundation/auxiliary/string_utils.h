@@ -43,6 +43,16 @@ namespace snuffbox
       */
       static int Contains(const String& str, const char* token);
 
+      /**
+      * @brief Finds the last index of a character or String::npos if it
+      *        is not in the string
+      *
+      * @param[in] str The string to check
+      * @param[in] token The token to check for
+      *
+      * @return The found position
+      */
+      static size_t FindLastOf(const String& str, char token);
     };
   }
 }

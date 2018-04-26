@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/builder/definitions/magic.h"
+
 #include <foundation/io/file.h>
 #include <foundation/containers/vector.h>
 
@@ -130,6 +132,8 @@ namespace snuffbox
       * @brief Used by the derived classes to set the underlying data
       *        of the compiler
       *
+      * @remarks This frees any previously set data
+      *
       * @param[in] data The data to set
       * @param[in] size The size of the data
       */
@@ -139,6 +143,38 @@ namespace snuffbox
       * @brief Clears the underlying buffer if there is currently data set
       */
       void Clear();
+
+      /**
+      * @brief Allocates a buffer with a magic number as header
+      *
+      * @param[in] magic The magic number to put at the start of the block
+      * @param[in] size The size to allocate after the magic number
+      * @param[out] block The pointer to the address after the magic number
+      * @param[out] total_size The total size of the newly allocated block
+      *
+      * @return The pointer to the first address of the total block
+      */
+      static uint8_t* AllocateWithMagic(
+        FileHeaderMagic magic, 
+        size_t size, 
+        uint8_t** block,
+        size_t* total_size);
+
+      /**
+      * @brief Retrieves the magic number header from a memory block
+      *
+      * @param[in] buffer The buffer to retrieve the magic number from
+      * @param[in] size The size of the buffer
+      * @param[out] block The memory block after the magic number header
+      * @param[out] block_size The size of the data after the header
+      *
+      * @return The FileHeaderMagic value found at the start of the block
+      */
+      static FileHeaderMagic GetMagic(
+        const uint8_t* buffer,
+        size_t size,
+        const uint8_t** block,
+        size_t* block_size);
 
       /**
       * @see ICompiler::Compile

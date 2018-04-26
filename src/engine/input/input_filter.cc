@@ -37,7 +37,7 @@ namespace snuffbox
       size_t idx = (num_events_ - 1) * kEventSize_;
 
       void* block = 
-        foundation::PointerMath::Offset(buffer_, static_cast<int64_t>(idx));
+        foundation::PointerMath::Offset(buffer_, static_cast<intptr_t>(idx));
 
       *e = reinterpret_cast<const InputEvent*>(block);
 

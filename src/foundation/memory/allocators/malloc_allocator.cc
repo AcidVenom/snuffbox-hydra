@@ -34,7 +34,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     size_t MallocAllocator::DeallocateImpl(void* ptr)
     {
-      int64_t header_size = sizeof(AllocationHeader);
+      intptr_t header_size = static_cast<intptr_t>(sizeof(AllocationHeader));
 
       AllocationHeader* header = reinterpret_cast<AllocationHeader*>(
         PointerMath::Offset(ptr, -header_size));
@@ -54,7 +54,7 @@ namespace snuffbox
         return 0;
       }
 
-      int64_t header_size = sizeof(AllocationHeader);
+      intptr_t header_size = static_cast<intptr_t>(sizeof(AllocationHeader));
 
       AllocationHeader* header = reinterpret_cast<AllocationHeader*>(
         PointerMath::Offset(ptr, -header_size));

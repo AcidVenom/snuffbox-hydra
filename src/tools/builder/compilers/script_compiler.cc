@@ -1,8 +1,6 @@
 #include "tools/builder/compilers/script_compiler.h"
-#include "tools/builder/definitions/magic.h"
 
 #include <foundation/memory/memory.h>
-#include <foundation/auxiliary/pointer_math.h>
 #include <foundation/encryption/rc4.h>
 
 namespace snuffbox
@@ -19,28 +17,23 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ScriptCompiler::CompileImpl(foundation::File& file)
     {
-      size_t len;
+      size_t len, total_size;
       const uint8_t* buffer = file.ReadBuffer(&len);
 
-      size_t header_size = sizeof(FileHeaderMagic);
-      FileHeaderMagic magic = FileHeaderMagic::kScript;
+      uint8_t* ptr = nullptr;
 
-      size_t total_size = len + header_size;
+      uint8_t* block = AllocateWithMagic(
+        FileHeaderMagic::kScript, 
+        len, 
+        &ptr, 
+        &total_size);
 
-      void* block = foundation::Memory::Allocate(total_size);
-      SetData(reinterpret_cast<uint8_t*>(block), total_size);
-
-      memcpy(block, &magic, header_size);
-
-      block = foundation::PointerMath::Offset(
-        block, 
-        static_cast<int64_t>(header_size));
-
-      memcpy(block, buffer, len);
+      memcpy(ptr, buffer, len);
 
       foundation::RC4 rc4;
+      rc4.Encrypt(reinterpret_cast<int8_t*>(ptr), len);
 
-      rc4.Encrypt(reinterpret_cast<int8_t*>(block), len);
+      SetData(block, total_size);
 
       return true;
     }
@@ -48,11 +41,15 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ScriptCompiler::DecompileImpl(foundation::File& file)
     {
-      size_t len;
+      size_t len, block_size;
       const void* buffer = file.ReadBuffer(&len);
 
-      size_t header_size = sizeof(FileHeaderMagic);
-      FileHeaderMagic magic = *reinterpret_cast<const FileHeaderMagic*>(buffer);
+      const uint8_t* data = nullptr;
+      FileHeaderMagic magic = GetMagic(
+          reinterpret_cast<const uint8_t*>(buffer), 
+          len, 
+          &data, 
+          &block_size);
 
       if (magic != FileHeaderMagic::kScript)
       {
@@ -60,18 +57,14 @@ namespace snuffbox
         return false;
       }
 
-      buffer = foundation::PointerMath::Offset(buffer, header_size);
-
-      size_t data_size = len - header_size;
-
-      void* block = foundation::Memory::Allocate(data_size);
-      memcpy(block, buffer, data_size);
+      void* block = foundation::Memory::Allocate(block_size);
+      memcpy(block, data, block_size);
 
       foundation::RC4 rc4;
 
-      rc4.Decrypt(reinterpret_cast<int8_t*>(block), data_size);
+      rc4.Decrypt(reinterpret_cast<int8_t*>(block), block_size);
 
-      SetData(reinterpret_cast<uint8_t*>(block), data_size);
+      SetData(reinterpret_cast<uint8_t*>(block), block_size);
 
       return true;
     }

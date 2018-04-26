@@ -1,4 +1,5 @@
 #include "foundation/io/path.h"
+#include "foundation/auxiliary/string_utils.h"
 
 #include <cstring>
 #include <cstddef>
@@ -330,24 +331,10 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Path::GetExtension(const String& str, String* ext)
     {
-      size_t pos = 0;
-      if ((pos = str.find('.')) == String::npos || str.size() < 2)
+      size_t pos = StringUtils::FindLastOf(str, '.');
+      if (pos == String::npos || str.size() < 2)
       {
         return false;
-      }
-
-      size_t new_pos;
-
-      while (true)
-      {
-        new_pos = str.find('.', pos + 1);
-
-        if (new_pos == String::npos)
-        {
-          break;
-        }
-
-        pos = new_pos;
       }
 
       if (pos >= str.size() - 1)

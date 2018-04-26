@@ -31,22 +31,26 @@ namespace snuffbox
       */
       static size_t AlignDelta(void* ptr, size_t align);
 
+
       /**
-      * @brief Offset the pointer by an integer value
+      * @brief Offset a pointer by an integer value
+      *
+      * @tparam T The pointer type
       *
       * @param[in] ptr The pointer to offset
       * @param[in] offset The amount to offset by, in bytes
       *
       * @return The offsetted pointer
       */
-      static void* Offset(void* ptr, int64_t offset);
-
-      /**
-      * @see PointerMath::Offset
-      *
-      * @remarks const version
-      */
-      static const void* Offset(const void* ptr, int64_t offset);
+      template <typename T>
+      static T* Offset(T* ptr, intptr_t offset);
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T* PointerMath::Offset(T* ptr, intptr_t offset)
+    {
+      return reinterpret_cast<T*>(reinterpret_cast<intptr_t>(ptr) + offset);
+    }
   }
 }

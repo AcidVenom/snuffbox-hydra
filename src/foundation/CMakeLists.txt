@@ -20,8 +20,6 @@ SET(MemoryAllocatorSources
 
 SET(ContainerSources
   "containers/string.h"
-  "containers/string_utils.h"
-  "containers/string_utils.cc"
   "containers/vector.h"
   "containers/map.h"
   "containers/queue.h"
@@ -32,6 +30,8 @@ SET(AuxiliarySources
   "auxiliary/logger.cc"
   "auxiliary/pointer_math.h"
   "auxiliary/pointer_math.cc"
+  "auxiliary/string_utils.h"
+  "auxiliary/string_utils.cc"
 )
 
 SET(IOSources
