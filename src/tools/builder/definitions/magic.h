@@ -12,7 +12,7 @@ namespace snuffbox
     */
     enum class FileHeaderMagic : int32_t
     {
-      kScript = 0x73534352 //!< "sSCR" As a hexadecimal value
+      kScript = 0x52435373 //!< "sSCR" As a hexadecimal value
     };
   }
 }

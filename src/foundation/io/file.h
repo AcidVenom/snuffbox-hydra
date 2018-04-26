@@ -74,6 +74,14 @@ namespace snuffbox
       const uint8_t* ReadBuffer(size_t* length, bool is_string = false);
 
       /**
+      * @brief Writes data to an opened file
+      *
+      * @param[in] buffer The buffer to write
+      * @param[in] size The size of the buffer
+      */
+      void Write(const uint8_t* buffer, size_t size);
+
+      /**
       * @return Is the file open and able to be used?
       */
       bool is_ok() const;

@@ -78,7 +78,7 @@ SET(EngineSources
 )
 
 ADD_LIBRARY(snuffbox-engine ${EngineSources})
-TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-foundation glfw)
+TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-builder glfw)
 
 ADD_DEPENDENCIES(snuffbox-engine snuffbox-bin2h)
 

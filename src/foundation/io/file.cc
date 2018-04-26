@@ -82,6 +82,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void File::Write(const uint8_t* buffer, size_t size)
+    {
+      if (is_ok_ == false)
+      {
+        return;
+      }
+
+      stream_.write(reinterpret_cast<const char*>(buffer), size);
+      stream_.flush();
+    }
+
+    //--------------------------------------------------------------------------
     bool File::is_ok() const
     {
       return is_ok_;
@@ -160,7 +172,7 @@ namespace snuffbox
 
       if ((flags & FileFlags::kWrite) == FileFlags::kWrite)
       {
-        mode |= std::ios::out;
+        mode |= std::ios::out | std::ios::trunc;
       }
 
       mode |= std::ios::binary | std::ios::ate;
