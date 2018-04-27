@@ -8,14 +8,14 @@ namespace snuffbox
   namespace foundation
   {
     /**
-    * @brief A class to wrap native Win32 directory modifications
+    * @brief A class to wrap native Linux directory modifications
     *
     * As this class is simply typedef'd to "Directory", its interface should
-    * match the ones of different platforms (e.g. LinuxDirectory)
+    * match the ones of different platforms (e.g. Win32Directory)
     *
     * @author Daniel Konings
     */
-    class Win32Directory
+    class LinuxDirectory
     {
 
     public:
@@ -23,19 +23,19 @@ namespace snuffbox
       /**
       * @brief Creates an invalid directory
       */
-      Win32Directory();
+      LinuxDirectory();
 
       /**
       * @see Win32Directory::Open
       */
-      Win32Directory(const Path& path);
+      LinuxDirectory(const Path& path);
 
       /**
       * @brief Opens a directory from a provided path
       *
       * This call will create the directory if it does not exist yet
       *
-      * @see Win32Directory::Exists
+      * @see LinuxDirectory::Exists
       *
       * @param[in] path The path to the directory
       *
@@ -61,7 +61,7 @@ namespace snuffbox
       * This call will fail if the directory does not exist, but will fail
       * silently.
       *
-      * @see Win32Directory::Exists
+      * @see LinuxDirectory::Exists
       *
       * @param[in] path The path to the directory to remove
       */
@@ -81,7 +81,7 @@ namespace snuffbox
 
       /**
       * @brief Attempts to create a directory from a provided path using
-      *        CreateDirectoryA
+      *        mkdir
       *
       * The directory path is first split up into its seperate directories
       * and checks if those directories exist first. If these don't exist,
@@ -98,7 +98,7 @@ namespace snuffbox
       *
       * This call will fail if the directory does not exist
       *
-      * @see Win32Directory::Exists
+      * @see LinuxDirectory::Exists
       *
       * @param[in] path The path to the directory to enumerate
       *

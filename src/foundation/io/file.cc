@@ -177,7 +177,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     std::ios::openmode File::FileFlagsToOpenMode(FileFlags flags)
     {
-      std::ios::openmode mode = 0;
+      std::ios::openmode mode = static_cast<std::ios::openmode>(0);
 
       if ((flags & FileFlags::kRead) == FileFlags::kRead)
       {

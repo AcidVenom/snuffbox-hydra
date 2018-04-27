@@ -1,6 +1,7 @@
 #include "tools/bin2h/binary_writer.h"
 
 #include <iostream>
+#include <cstring>
 
 namespace snuffbox
 {

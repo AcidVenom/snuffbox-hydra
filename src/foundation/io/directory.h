@@ -10,7 +10,7 @@ namespace snuffbox
   }
 }
 #elif defined (SNUFF_LINUX)
-#include "foundation/win32/linux_directory.h"
+#include "foundation/linux/linux_directory.h"
 namespace snuffbox
 {
   namespace foundation
