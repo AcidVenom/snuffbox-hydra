@@ -1,16 +1,9 @@
 #include "foundation/io/path.h"
 #include "foundation/auxiliary/string_utils.h"
+#include "foundation/io/directory.h"
 
 #include <cstring>
 #include <cstddef>
-
-#ifdef SNUFF_WIN32
-#include <direct.h>
-#elif defined (SNUFF_LINUX)
-#include <sys/stat.h>
-#else
-#error "Unknown compiler platform"
-#endif
 
 namespace snuffbox
 {
@@ -37,7 +30,13 @@ namespace snuffbox
       is_directory_(true)
     {
       is_virtual_ = IsVirtualPath(path_);
-      is_directory_ = IsDirectory(path_);
+
+      if (is_virtual_ == true)
+      {
+        return;
+      }
+
+      is_directory_ = Directory::Exists(*this);
 
       if (is_directory_ == false)
       {
@@ -391,18 +390,6 @@ namespace snuffbox
       }
 
       return true;
-    }
-
-    //--------------------------------------------------------------------------
-    bool Path::IsDirectory(const String& str)
-    {
-      struct stat s;
-      if(stat(str.c_str(), &s) == 0)
-      {
-        return (s.st_mode & S_IFDIR) > 0;
-      }
-
-      return false;
     }
 
     //--------------------------------------------------------------------------

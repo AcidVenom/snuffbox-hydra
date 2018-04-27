@@ -40,6 +40,8 @@ SET(IOSources
   "io/file.h"
   "io/file.cc"
   "io/directory.h"
+  "io/directory_tree.h"
+  "io/directory_tree.cc"
   "io/resources.h"
   "io/resources.cc"
 )

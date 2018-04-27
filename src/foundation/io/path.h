@@ -253,15 +253,6 @@ namespace snuffbox
       static bool IsVirtualPath(const String& str);
 
       /**
-      * @brief Checks if a path is a directory or a file
-      *
-      * @param[in] str The stringified path
-      *
-      * @return Is the path a path to a directory?
-      */
-      static bool IsDirectory(const String& str);
-
-      /**
       * @brief Retrieves the extension of a converted path
       *
       * @param[in] str The stringified path
