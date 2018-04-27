@@ -23,6 +23,7 @@ SET(ContainerSources
   "containers/vector.h"
   "containers/map.h"
   "containers/queue.h"
+  "containers/function.h"
 )
 
 SET(AuxiliarySources
@@ -40,6 +41,7 @@ SET(IOSources
   "io/file.h"
   "io/file.cc"
   "io/directory.h"
+  "io/directory_listener.h"
   "io/directory_tree.h"
   "io/directory_tree.cc"
   "io/resources.h"
@@ -52,6 +54,8 @@ IF (SNUFF_WIN32)
     "win32/win32_include.h"
     "win32/win32_directory.h"
     "win32/win32_directory.cc"
+    "win32/win32_directory_listener.h"
+    "win32/win32_directory_listener.cc"
   )
 ELSEIF (SNUFF_LINUX)
   SET(PlatformFilter "linux")
