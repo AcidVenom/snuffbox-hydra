@@ -39,6 +39,8 @@ namespace snuffbox
       * @brief Sets the callback that is called when a directory or its contents
       *        have changed and the callback for when a file changed
       *
+      * It is not thread-safe to set these callbacks during listening
+      *
       * @param[in] on_directory_changed When a directory changed
       * @param[in] on_file_changed When a file changed
       */
@@ -54,8 +56,8 @@ namespace snuffbox
       void Listen();
 
       /**
-      * @brief Notifies the directory listener to exit, joining the thread back
-      *        to the main thread
+      * @brief Notifies the directory listener to exit, joining the listening
+      *        thread back to the main thread
       */
       void Stop();
 
@@ -103,7 +105,7 @@ namespace snuffbox
       std::thread thread_; //!< The thread the listener runs on
 
       /**
-      * @brief The timeout if the listener in milliseconds
+      * @brief The timeout of the listener in milliseconds
       *
       * @remarks After this period the listener checks again if it should exit
       *          and if not; continues the listening events
