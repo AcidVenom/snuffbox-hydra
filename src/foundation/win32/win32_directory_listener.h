@@ -18,8 +18,13 @@ namespace snuffbox
     * The changes that are listened for include renames, file modifications,
     * deletions and additions.
     *
-    * The listener should be designed thread safe so that it can run on
+    * The listener should be used thread safe so that it can run on
     * a different thread and not block the main thread.
+    *
+    * The listener only tells the user the root directory or its subdirectories
+    * have changed. There is however a distinction between tree changes and
+    * file changes, for which there are different callbacks. The listener
+    * doesn't specifically list which file or directory has changed.
     *
     * @author Daniel Konings
     */
