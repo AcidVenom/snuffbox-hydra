@@ -5,6 +5,8 @@
 
 #include "foundation/win32/win32_include.h"
 
+#include <thread>
+
 namespace snuffbox
 {
   namespace foundation
@@ -47,10 +49,15 @@ namespace snuffbox
       /**
       * @brief This function will start listening for directory changes
       *
-      * This call is blocking and thus should be ran on a different thread
-      * if we still want to keep running in real-time.
+      * This call is non-blocking and ran on a different thread
       */
       void Listen();
+
+      /**
+      * @brief Notifies the directory listener to exit, joining the thread back
+      *        to the main thread
+      */
+      void Stop();
 
       /**
       * @return Is the directory listener available for use?
@@ -78,6 +85,7 @@ namespace snuffbox
 
       Path path_; //!< The root path of the listener
       bool is_ok_; //!< Is the directory listener available for use?
+      bool should_exit_; //!< Should the directory listener stop listening?
 
       /**
       * @brief The callback when a directory or its contents have changed
@@ -91,6 +99,16 @@ namespace snuffbox
 
       HANDLE refresh_handle_; //!< The change handle to track tree changes
       HANDLE file_handle_; //!< The change handle to track file changes
+
+      std::thread thread_; //!< The thread the listener runs on
+
+      /**
+      * @brief The timeout if the listener in milliseconds
+      *
+      * @remarks After this period the listener checks again if it should exit
+      *          and if not; continues the listening events
+      */
+      static const DWORD kTimeout_;
     };
   }
 }

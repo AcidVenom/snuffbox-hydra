@@ -5,9 +5,13 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
+    const DWORD Win32DirectoryListener::kTimeout_ = 500;
+
+    //--------------------------------------------------------------------------
     Win32DirectoryListener::Win32DirectoryListener(const Path& root) :
       path_(root.ToString()),
       is_ok_(false),
+      should_exit_(false),
       on_directory_changed_(nullptr),
       on_file_changed_(nullptr),
       refresh_handle_(NULL),
@@ -33,52 +37,68 @@ namespace snuffbox
         return;
       }
 
-      DWORD wait_status;
-      HANDLE handles[] =
-      {
-        refresh_handle_,
-        file_handle_
-      };
+      should_exit_ = false;
 
-      while (true)
+      thread_ = std::thread([&]()
       {
-        wait_status = WaitForMultipleObjects(
-          2,
-          handles, 
-          FALSE, 
-          INFINITE); 
-
-        switch (wait_status)
+        DWORD wait_status;
+        HANDLE handles[] =
         {
+          refresh_handle_,
+          file_handle_
+        };
 
-        case WAIT_OBJECT_0:
+        DWORD count = static_cast<DWORD>(sizeof(handles) / sizeof(HANDLE));
 
-          if (on_directory_changed_ != nullptr)
+        OnDirectoryChanged* callbacks[] =
+        {
+          &on_directory_changed_,
+          &on_file_changed_
+        };
+
+        while (should_exit_ == false)
+        {
+          wait_status = WaitForMultipleObjects(
+            count,
+            handles, 
+            FALSE, 
+            kTimeout_); 
+
+          for (DWORD i = 0; i < count; ++i)
           {
-            on_directory_changed_(path_);
+            if (wait_status == WAIT_OBJECT_0 + i)
+            {
+              OnDirectoryChanged& cb = *callbacks[i];
+              if (cb != nullptr)
+              {
+                cb(path_);
+              }
+
+              if (FindNextChangeNotification(handles[i]) == FALSE)
+              {
+                return;
+              }
+
+              break;
+            }
           }
-
-          if (FindNextChangeNotification(handles[0]) == FALSE)
-          {
-            return;
-          }
-
-          break;
-
-        case WAIT_OBJECT_0 + 1:
-
-          if (on_file_changed_ != nullptr)
-          {
-            on_file_changed_(path_);
-          }
-
-          if (FindNextChangeNotification(handles[1]) == FALSE)
-          {
-            return;
-          }
-
-          break;
         }
+      });
+    }
+
+    //--------------------------------------------------------------------------
+    void Win32DirectoryListener::Stop()
+    {
+      if (is_ok_ == false)
+      {
+        return;
+      }
+
+      should_exit_ = true;
+
+      if (thread_.joinable() == true)
+      {
+        thread_.join();
       }
     }
 
