@@ -141,7 +141,7 @@ namespace snuffbox
     bool File::OpenVirtual(const Path& path)
     {
       const Resources::ResourceData* d = 
-        Resources::GetResource(path.StripVirtualPrefix());
+        Resources::GetResource(path.StripPath(Path::kVirtualPrefix));
 
       if (d == nullptr)
       {

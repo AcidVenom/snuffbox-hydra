@@ -16,6 +16,24 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const Path& DirectoryTreeItem::path() const
+    {
+      return path_;
+    }
+
+    //--------------------------------------------------------------------------
+    bool DirectoryTreeItem::is_directory() const
+    {
+      return is_directory_;
+    }
+
+    //--------------------------------------------------------------------------
+    const Vector<DirectoryTreeItem>& DirectoryTreeItem::children() const
+    {
+      return children_;
+    }
+
+    //--------------------------------------------------------------------------
     void DirectoryTreeItem::AddChildren(const Path& dir)
     {
       if (dir.is_directory() == false)
@@ -36,6 +54,12 @@ namespace snuffbox
       {
         children_.push_back(DirectoryTreeItem(children.at(i)));
       }
+    }
+
+    //--------------------------------------------------------------------------
+    DirectoryTree::DirectoryTree()
+    {
+
     }
 
     //--------------------------------------------------------------------------
@@ -60,6 +84,12 @@ namespace snuffbox
       }
 
       AddItems(root_dir.children());
+    }
+
+    //--------------------------------------------------------------------------
+    const Vector<DirectoryTreeItem>& DirectoryTree::items() const
+    {
+      return items_;
     }
 
     //--------------------------------------------------------------------------

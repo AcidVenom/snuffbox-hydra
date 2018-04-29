@@ -10,7 +10,7 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
-    const char* Path::kVirtualPrefix_ = "snuff:/";
+    const char* Path::kVirtualPrefix = "snuff:";
 
     //--------------------------------------------------------------------------
     Path::Path() :
@@ -70,7 +70,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator/(const String& other)
+    Path Path::operator/(const String& other) const
     {
       if (is_directory_ == false && extension_.size() > 0)
       {
@@ -84,13 +84,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator/(const char* other)
+    Path Path::operator/(const char* other) const
     {
       return *this / String(other);
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator/(const Path& other)
+    Path Path::operator/(const Path& other) const
     {
       return *this / other.path_;
     }
@@ -114,19 +114,19 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator+(const String& other)
+    Path Path::operator+(const String& other) const
     {
       return Path(path_ + other);
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator+(const char* other)
+    Path Path::operator+(const char* other) const
     {
       return *this + String(other);
     }
 
     //--------------------------------------------------------------------------
-    Path Path::operator+(const Path& other)
+    Path Path::operator+(const Path& other) const
     {
       return *this + other.path_;
     }
@@ -144,37 +144,37 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator==(const String& other)
+    bool Path::operator==(const String& other) const
     {
       return path_ == other;
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator==(const char* other)
+    bool Path::operator==(const char* other) const
     {
       return *this == String(other);
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator==(const Path& other)
+    bool Path::operator==(const Path& other) const
     {
       return *this == other.path_;
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator!=(const String& other)
+    bool Path::operator!=(const String& other) const
     {
       return (*this == other) == false;
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator!=(const char* other)
+    bool Path::operator!=(const char* other) const
     {
       return (*this == other) == false;
     }
 
     //--------------------------------------------------------------------------
-    bool Path::operator!=(const Path& other)
+    bool Path::operator!=(const Path& other) const
     {
       return (*this == other) == false;
     }
@@ -186,32 +186,36 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Path Path::StripVirtualPrefix() const
+    Path Path::StripPath(const Path& path) const
     {
-      size_t len = strlen(kVirtualPrefix_);
-
-      if (is_virtual_ == false || path_.size() < len)
-      {
-        return Path(*this);
-      }
+      String stringified = path.ToString() + '/';
+      size_t len = stringified.size();
 
       char c;
       size_t offset = 0;
 
-      for (size_t i = 0; i < len; ++i)
+      for (size_t i = 0; i < path_.size() && i < len; ++i)
       {
+        offset = i;
         c = path_.at(i);
 
-        if (c == kVirtualPrefix_[i])
+        if (c == stringified.at(i))
         {
+          if (i == path_.size() - 1 || i == len - 1)
+          {
+            ++offset;
+          }
+
           continue;
         }
 
-        offset = i;
         break;
       }
 
-      offset = len;
+      if (offset >= path_.size())
+      {
+        return "";
+      }
 
       return Path(&path_[offset]);
     }
@@ -235,7 +239,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Vector<Path> Path::GetDirectories() const
+    Vector<Path> Path::GetDirectories(const Path& strip) const
     {
       Vector<Path> result;
       if (path_.size() == 0)
@@ -243,10 +247,13 @@ namespace snuffbox
         return result;
       }
 
-      StringUtils::StringList list = StringUtils::Split(path_, '/');
+      Path stripped = StripPath(strip);
+      String stripped_path = stripped.path_;
+
+      StringUtils::StringList list = StringUtils::Split(stripped_path, '/');
 
       size_t len = list.size();
-      if (path_.at(0) == '/')
+      if (stripped_path.at(0) == '/')
       {
         list.erase(list.begin());
 
@@ -259,14 +266,11 @@ namespace snuffbox
         }
       }
       
-      if (len <= 1)
+      if (len < 1)
       {
         return result;
       }
 
-      list.erase(list.begin() + len - 1);
-
-      len = list.size();
       result.resize(len);
 
       for (size_t i = 0; i < len; ++i)
@@ -374,7 +378,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Path::IsVirtualPath(const String& path)
     {
-      size_t len = strlen(kVirtualPrefix_);
+      size_t len = strlen(kVirtualPrefix);
 
       if (path.size() < len)
       {
@@ -383,7 +387,7 @@ namespace snuffbox
 
       for (size_t i = 0; i < len; ++i)
       {
-        if (path.at(i) != kVirtualPrefix_[i])
+        if (path.at(i) != kVirtualPrefix[i])
         {
           return false;
         }

@@ -60,11 +60,25 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Win32Directory::Remove(const Path& path)
     {
+      String stringified = path.ToString();
+
+      if (stringified.size() + 1 > MAX_PATH)
+      {
+        return;
+      }
+
+      size_t len = stringified.size();
+
+      char buffer[MAX_PATH];
+      memcpy(buffer, stringified.c_str(), len);
+      memset(buffer + len, '\0', sizeof(char));
+      memset(buffer + len + 1, '\0', sizeof(char));
+
       SHFILEOPSTRUCTA file_op = 
       {
         NULL,
         FO_DELETE,
-        path.ToString().c_str(),
+        buffer,
         "",
         FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT,
         false,
@@ -97,7 +111,14 @@ namespace snuffbox
 
       Vector<Path> directories = path.GetDirectories();
 
-      for (size_t i = 0; i < directories.size(); ++i)
+      size_t len = directories.size();
+      if (len > 0)
+      {
+        directories.erase(directories.begin() + len - 1);
+        --len;
+      }
+
+      for (size_t i = 0; i < len; ++i)
       {
         const Path& p = directories.at(i);
         const String& ps = p.ToString();
@@ -145,6 +166,8 @@ namespace snuffbox
 
         result.push_back(start_at / ffd.cFileName);
       } while (FindNextFileA(current, &ffd) != 0);
+
+      FindClose(current);
 
       return result;
     }

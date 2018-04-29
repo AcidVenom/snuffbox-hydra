@@ -67,19 +67,19 @@ namespace snuffbox
       /**
       * @see Path::operator/=
       */
-      Path operator/(const String& other);
+      Path operator/(const String& other) const;
 
       /**
       * @see Path::operator/
       *
       * @remarks const char* overload
       */
-      Path operator/(const char* other);
+      Path operator/(const char* other) const;
 
       /**
       * @see Path::operator/=
       */
-      Path operator/(const Path& other);
+      Path operator/(const Path& other) const;
 
       /**
       * @brief Appends a string to the path, but doesn't insert a new
@@ -104,19 +104,19 @@ namespace snuffbox
       /**
       * @see Path::operator+=
       */
-      Path operator+(const String& other);
+      Path operator+(const String& other) const;
 
       /**
       * @see Path::operator+
       *
       * @remarks const char* overload
       */
-      Path operator+(const char* other);
+      Path operator+(const char* other) const;
 
       /**
       * @see Path::operator+=
       */
-      Path operator+(const Path& other);
+      Path operator+(const Path& other) const;
 
       /**
       * @brief Assigns a path from a string
@@ -141,42 +141,42 @@ namespace snuffbox
       *
       * @return Are they equal?
       */
-      bool operator==(const String& other);
+      bool operator==(const String& other) const;
 
       /**
       * @see Path::operator==
       *
       * @remarks const char* overload
       */
-      bool operator==(const char* other);
+      bool operator==(const char* other) const;
 
       /**
       * @see Path::operator==
       *
       * @remarks Path overload
       */
-      bool operator==(const Path& other);
+      bool operator==(const Path& other) const;
 
       /**
       * @see Path::operator==
       *
       * @remarks Checks if not equal, by negating the equals operator
       */
-      bool operator!=(const String& other);
+      bool operator!=(const String& other) const;
 
       /**
       * @see Path::operator==
       *
       * @remarks const char* overload
       */
-      bool operator!=(const char* other);
+      bool operator!=(const char* other) const;
 
       /**
       * @see Path::operator==
       *
       * @remarks Checks if not equal, by negating the equals operator
       */
-      bool operator!=(const Path& other);
+      bool operator!=(const Path& other) const;
 
       /**
       * @return The underlying string value of the path
@@ -184,9 +184,12 @@ namespace snuffbox
       const String& ToString() const;
 
       /**
-      * @return The path without any virtual prefixes
+      * @return The path without a preceding path, used for relative
+      *         directories
+      *
+      * @param[in] path The path to strip
       */
-      Path StripVirtualPrefix() const;
+      Path StripPath(const Path& path) const;
 
       /**
       * @return The number of directories in this path by counting the '/'
@@ -198,9 +201,12 @@ namespace snuffbox
       /**
       * @return The split directory paths, based on splitting by the '/'
       *
+      * @param[in] strip The path to strip from the directories, used
+      *                  for relative directory listings
+      *
       * @remarks The last file or directory is always cut off of the list
       */
-      Vector<Path> GetDirectories() const;
+      Vector<Path> GetDirectories(const Path& strip = "") const;
 
       /**
       * @return Is this path a virtual path into the virtual file system?
@@ -264,13 +270,15 @@ namespace snuffbox
 
     private:
 
-      static const char* kVirtualPrefix_; //!< The virtual path prefix
-
       String path_; //!< The stringified path
       String extension_; //!< The extension of the path if the path is a file
 
       bool is_virtual_; //!< Is this a virtual path to the virtual file system?
       bool is_directory_; //!< Is this path a directory or a file?
+
+    public:
+
+      static const char* kVirtualPrefix; //!< The virtual path prefix
     };
   }
 }
