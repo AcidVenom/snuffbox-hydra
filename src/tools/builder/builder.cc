@@ -84,6 +84,7 @@ namespace snuffbox
 
       build_tree_.Open(build_directory_);
       RemoveOld(build_tree_.items());
+      build_tree_.Open(build_directory_);
 
       source_tree_.Open(source_directory_);
       SyncItems(source_tree_.items());
