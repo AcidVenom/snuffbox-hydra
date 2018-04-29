@@ -62,7 +62,7 @@ namespace snuffbox
     {
       String stringified = path.ToString();
 
-      if (stringified.size() + 1 > MAX_PATH)
+      if (stringified.size() + 2 > MAX_PATH)
       {
         return;
       }

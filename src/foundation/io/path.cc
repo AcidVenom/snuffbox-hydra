@@ -188,7 +188,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path Path::StripPath(const Path& path) const
     {
-      String stringified = path.ToString() + '/';
+      String stringified = path.ToString();
+      stringified = stringified.size() == 0 ? "" : stringified + '/';
+
       size_t len = stringified.size();
 
       char c;
