@@ -114,7 +114,6 @@ namespace snuffbox
 
           if (foundation::Directory::Exists(current_build) == false)
           {
-            printf("Adding %s\n", current_build.ToString().c_str());
             dir.Open(current_build);
 
             if (dir.is_ok() == false)
@@ -148,7 +147,6 @@ namespace snuffbox
 
           if (foundation::Directory::Exists(current_source) == false)
           {
-            printf("Deleting %s\n", item_path.ToString().c_str());
             foundation::Directory::Remove(item_path);
             continue;
           }
