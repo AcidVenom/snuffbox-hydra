@@ -116,10 +116,14 @@ namespace snuffbox
 
       Vector<Path> directories = path.GetDirectories();
 
+      if (directories.size() > 0)
+      {
+        directories.erase(directories.end());
+      }
+
       for (size_t i = 0; i < directories.size(); ++i)
       {
         const Path& p = directories.at(i);
-        const String& ps = p.ToString();
 
         if (Exists(p) == false)
         {

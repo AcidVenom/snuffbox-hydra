@@ -62,6 +62,8 @@ ELSEIF (SNUFF_LINUX)
   SET(PlatformSources
     "linux/linux_directory.h"
     "linux/linux_directory.cc"
+    "linux/linux_directory_listener.h"
+    "linux/linux_directory_listener.cc"
   )
 ELSE ()
   MESSAGE(FATAL_ERROR "Unknown compiler platform")

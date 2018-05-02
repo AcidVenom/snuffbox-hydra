@@ -71,7 +71,7 @@ namespace snuffbox
       */
       bool is_ok() const;
 
-    public:
+    protected:
 
       /**
       * @brief Creates the build directory under the source-directory/build
