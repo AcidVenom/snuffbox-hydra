@@ -13,14 +13,13 @@ namespace snuffbox
     const size_t LinuxDirectoryListener::kEventSize_ = 4096;
 
     //--------------------------------------------------------------------------
-    LinuxDirectoryListener::LinuxDirectoryListener(const Path& root) :
-      path_(root.ToString()),
+    LinuxDirectoryListener::LinuxDirectoryListener() :
+      path_(""),
       is_ok_(false),
       should_exit_(false),
       on_directory_changed_(nullptr),
       on_file_changed_(nullptr)
     {
-      is_ok_ = Initialize(root);
     }
 
     //--------------------------------------------------------------------------
@@ -33,8 +32,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void LinuxDirectoryListener::Listen()
+    void LinuxDirectoryListener::Listen(const Path& root)
     {
+      path_ = root;
+      is_ok_ = Initialize(path_);
+
       if (is_ok_ == false)
       {
         return;

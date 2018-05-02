@@ -4,6 +4,7 @@
 #include <foundation/auxiliary/logger.h>
 
 #include <foundation/io/directory_tree.h>
+#include <foundation/io/directory_listener.h>
 
 namespace snuffbox
 {
@@ -67,6 +68,15 @@ namespace snuffbox
       bool Initialize(const foundation::Path& source_dir);
 
       /**
+      * @brief Shuts down the builder and its directory listener
+      *
+      * @remarks This function must be called before the exit of the application
+      *          as the listener thread is joined here, along with the
+      *          BuildScheduler
+      */
+      void Shutdown();
+
+      /**
       * @return Is the builder ready for use?
       */
       bool is_ok() const;
@@ -105,6 +115,15 @@ namespace snuffbox
       */
       void RemoveOld(const ItemList& build_items) const;
 
+    public:
+
+      /**
+      * @brief Stops the builder if it was running
+      *
+      * @see Builder::Shutdown
+      */
+      ~Builder();
+
     private:
 
       bool is_ok_; //!< Is the builder ready for use?
@@ -114,6 +133,8 @@ namespace snuffbox
 
       foundation::Path source_directory_; //!< The current source directory
       foundation::Path build_directory_; //!< The current build directory
+
+      foundation::DirectoryListener listener_; //!< The directory listener
     };
   }
 }

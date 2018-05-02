@@ -38,7 +38,27 @@ namespace snuffbox
 
       SyncDirectories();
 
+      listener_.SetCallbacks(
+        [&](const foundation::Path&)
+        { 
+          SyncDirectories(); 
+        },
+        nullptr);
+
+      listener_.Listen(source_directory_);
+
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void Builder::Shutdown()
+    {
+      if (is_ok_ == false)
+      {
+        return;
+      }
+
+      listener_.Stop();
     }
 
     //--------------------------------------------------------------------------
@@ -154,6 +174,12 @@ namespace snuffbox
           RemoveOld(item.children());
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    Builder::~Builder()
+    {
+      Shutdown();
     }
   }
 }

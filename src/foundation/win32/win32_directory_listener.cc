@@ -8,8 +8,8 @@ namespace snuffbox
     const DWORD Win32DirectoryListener::kTimeout_ = 500;
 
     //--------------------------------------------------------------------------
-    Win32DirectoryListener::Win32DirectoryListener(const Path& root) :
-      path_(root.ToString()),
+    Win32DirectoryListener::Win32DirectoryListener() :
+      path_(""),
       is_ok_(false),
       should_exit_(false),
       on_directory_changed_(nullptr),
@@ -17,7 +17,7 @@ namespace snuffbox
       refresh_handle_(NULL),
       file_handle_(NULL)
     {
-      is_ok_ = Initialize(root);
+
     }
 
     //--------------------------------------------------------------------------
@@ -30,8 +30,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Win32DirectoryListener::Listen()
+    void Win32DirectoryListener::Listen(const Path& root)
     {
+      path_ = root;
+      is_ok_ = Initialize(path_);
+
       if (is_ok_ == false)
       {
         return;

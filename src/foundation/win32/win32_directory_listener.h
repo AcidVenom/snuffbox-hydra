@@ -34,11 +34,9 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Initializes the directory listener on a specified root folder
-      *
-      * @see Win32DirectoryListener::Initialize
+      * @brief Creates an invalid directory listener for later use
       */
-      Win32DirectoryListener(const Path& root);
+      Win32DirectoryListener();
 
       /**
       * @brief Sets the callback that is called when a directory or its contents
@@ -56,9 +54,13 @@ namespace snuffbox
       /**
       * @brief This function will start listening for directory changes
       *
+      * @param[in] root The directory to start listening on
+      *
+      * @see Win32DirectoryListener::Initialize
+      *
       * This call is non-blocking and ran on a different thread
       */
-      void Listen();
+      void Listen(const Path& root);
 
       /**
       * @brief Notifies the directory listener to exit, joining the listening

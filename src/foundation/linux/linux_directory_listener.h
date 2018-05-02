@@ -49,11 +49,9 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Initializes the directory listener on a specified root folder
-      *
-      * @see LinuxDirectoryListener::Initialize
+      * @brief Creates an invalid listener for later use
       */
-      LinuxDirectoryListener(const Path& root);
+      LinuxDirectoryListener();
 
       /**
       * @brief Sets the callback that is called when a directory or its contents
@@ -71,9 +69,13 @@ namespace snuffbox
       /**
       * @brief This function will start listening for directory changes
       *
+      * @param[in] root The directory to start listening on
+      *
+      * @see LinuxDirectoryListener::Initialize
+      *
       * This call is non-blocking and ran on a different thread
       */
-      void Listen();
+      void Listen(const Path& root);
 
       /**
       * @brief Notifies the directory listener to exit, joining the listening
