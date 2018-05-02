@@ -47,6 +47,8 @@ namespace snuffbox
         const char* application_name; //!< The name of the application
         const char* version_string; //!< The version string
 
+        bool editor_mode; //!< Are we in editor mode?
+
         /**
         * @brief The verbosity level of the application
         *
@@ -89,7 +91,7 @@ namespace snuffbox
       *
       * @return The error code, succesful with ErrorCodes::kSuccess
       */
-      foundation::ErrorCodes Run();
+      virtual foundation::ErrorCodes Run();
 
       /**
       * @brief Retrieves a service in the application
@@ -101,6 +103,11 @@ namespace snuffbox
       */
       template <typename T>
       T* GetService();
+      
+      /**
+      * @brief Notify the application that it should quit
+      */
+      void NotifyQuit();
 
       /**
       * @return The instance of the application
@@ -111,6 +118,11 @@ namespace snuffbox
       * @return The configuration of the application
       */
       const Configuration& config() const;
+
+      /**
+      * @return Should the application quit?
+      */
+      bool should_quit() const;
 
     protected:
 
@@ -258,6 +270,8 @@ namespace snuffbox
       CLI cli_; //!< The parsed command line
 
       Services services_; //!< The list of services that are available
+
+      bool should_quit_; //!< Should the application quit?
 
       static Application* instance_; //!< The current application instance
     };

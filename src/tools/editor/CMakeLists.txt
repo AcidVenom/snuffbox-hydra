@@ -13,12 +13,19 @@ SET(WindowsSources
   "windows/console.cc"
 )
 
-SOURCE_GROUP("\\"       FILES ${RootSources})
-SOURCE_GROUP("windows"  FILES ${WindowsSources})
+SET(ApplicationSources
+  "application/editor_application.h"
+  "application/editor_application.cc"
+)
+
+SOURCE_GROUP("\\"           FILES ${RootSources})
+SOURCE_GROUP("windows"      FILES ${WindowsSources})
+SOURCE_GROUP("application"  FILES ${ApplicationSources})
 
 SET(EditorSources
   ${RootSources}
   ${WindowsSources}
+  ${ApplicationSources}
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})

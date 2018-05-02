@@ -1,14 +1,16 @@
 #include "tools/editor/windows/main_window.h"
 #include "tools/editor/windows/console.h"
+#include "tools/editor/application/editor_application.h"
 
 #include <qstylefactory.h>
+#include <qevent.h>
 
 namespace snuffbox
 {
   namespace editor
   {
     //--------------------------------------------------------------------------
-    MainWindow::MainWindow(QApplication* app) :
+    MainWindow::MainWindow(EditorApplication* app) :
       app_(app),
       console_(nullptr)
     {
@@ -75,6 +77,13 @@ namespace snuffbox
           color: white;                         \
         }"
       );
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::closeEvent(QCloseEvent* evt)
+    {
+      app_->NotifyQuit();
+      evt->accept();
     }
   }
 }

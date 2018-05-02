@@ -37,6 +37,7 @@ namespace snuffbox
     {
       "Snuffbox",
       "0.0",
+      false,
       1,
       1280,
       720
@@ -51,7 +52,8 @@ namespace snuffbox
       char** argv, 
       const Application::Configuration& config)
       :
-      config_(config)
+      config_(config),
+      should_quit_(false)
     {
       assert(
         instance_ == nullptr && 
@@ -76,12 +78,14 @@ namespace snuffbox
         \n\
         \tApplication name: {0}\n\
         \tVersion string: {1}\n\
-        \tVerbosity: {2}\n\
-        \tWindow width: {3}\n\
-        \tWindow height: {4}\n\
+        \tEditor mode: {2}\n\
+        \tVerbosity: {3}\n\
+        \tWindow width: {4}\n\
+        \tWindow height: {5}\n\
         ",
         config_.application_name,
         config_.version_string,
+        config_.editor_mode,
         config_.verbosity,
         config_.window_width,
         config_.window_height);
@@ -107,14 +111,23 @@ namespace snuffbox
 
       WindowService* window = GetService<WindowService>();
 
-      while (window->ProcessEvents() == false)
+      while (
+        should_quit_ == false &&
+        window->ProcessEvents() == false)
       {
         Update(0.0f);
       }
 
       Shutdown();
 
+
       return foundation::ErrorCodes::kSuccess;
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::NotifyQuit()
+    {
+      should_quit_ = true;
     }
 
     //--------------------------------------------------------------------------
@@ -130,11 +143,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Application::should_quit() const
+    {
+      return should_quit_;
+    }
+
+    //--------------------------------------------------------------------------
     foundation::ErrorCodes Application::Initialize()
     {
       CVarService* cvar_service = CreateService<CVarService>();
 
-      WindowService* window_service = CreateService<WindowService>();
+      WindowService* window_service = nullptr;
+      if (config_.editor_mode == false)
+      {
+        window_service = CreateService<WindowService>();
+      }
+
       InputService* input_service = CreateService<InputService>();
 
       CREATE_SCRIPT_SERVICE();
@@ -149,7 +173,11 @@ namespace snuffbox
       SCRIPT_CALLBACK(Initialize);
 
       cvar_service->RegisterFromCLI(cli_);
-      input_service->RegisterInputFilter(window_service->GetWindow());
+
+      if (window_service != nullptr)
+      {
+        input_service->RegisterInputFilter(window_service->GetWindow());
+      }
 
       return foundation::ErrorCodes::kSuccess;
     }

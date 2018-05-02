@@ -11,6 +11,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class EditorApplication;
+
     /**
     * @brief The main window of the editor application
     *
@@ -32,9 +34,10 @@ namespace snuffbox
       *
       * Sets up the internal UI to this window
       *
-      * @param[in] app The main Qt application
+      * @param[in] app The main editor application, which functions as a
+      *                QApplication as well
       */
-      MainWindow(QApplication* app);
+      MainWindow(EditorApplication* app);
 
       /**
       * @brief Applies the style I've used in "snuffbox", which are
@@ -46,10 +49,15 @@ namespace snuffbox
       */
       void ApplyStyle(QApplication* app);
 
+      /**
+      * @brief Override close event so that it closes the main EditorApplication
+      */
+      void closeEvent(QCloseEvent* evt) override;
+
     private:
 
       Ui::MainWindow ui_; //!< The user interface definition made in Designer
-      QApplication* app_; //!< A reference to the main Qt application
+      EditorApplication* app_; //!< A reference to the main editor application
 
       foundation::UniquePtr<Console> console_; //!< The console
     };
