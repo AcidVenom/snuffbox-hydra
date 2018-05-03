@@ -19,14 +19,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ScriptService::CompileAndRun(const char* src)
+    bool ScriptService::CompileAndRun(
+      const char* ctx, 
+      const char* src,
+      bool print)
     {
       if (state_ == nullptr)
       {
         return false;
       }
 
-      return state_->CompileFromSource("application", src, true);
+      bool success = state_->CompileFromSource(ctx, src, print);
+
+      InitializeCallbacks();
+
+      return success;
     }
 
     //--------------------------------------------------------------------------
@@ -96,7 +103,6 @@ namespace snuffbox
           state_.get());
 
       RegisterClasses();
-      InitializeCallbacks();
 
       return true;
     }

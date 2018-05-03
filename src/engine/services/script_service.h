@@ -31,11 +31,18 @@ namespace snuffbox
       /**
       * @brief Runs script code in the script state
       *
+      * @param[in] ctx The context to run the code in
       * @param[in] src The code to compile and run
+      * @param[in] print Should the result be printed to the console?
+      *
+      * @remarks Every time a script is compiled, the callbacks are
+      *          reinitialized for reloading
+      *
+      * @see ScriptService::InitializeCallbacks
       *
       * @return Was running the code a success?
       */
-      bool CompileAndRun(const char* src);
+      bool CompileAndRun(const char* ctx, const char* src, bool print = false);
 
       /**
       * @see ScriptService::InitializeCallbacks
