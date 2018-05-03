@@ -1,6 +1,8 @@
 #pragma once
 
 #include <engine/application/application.h>
+#include <tools/builder/builder.h>
+
 #include <qapplication.h>
 
 namespace snuffbox
@@ -35,6 +37,20 @@ namespace snuffbox
       * @see Application::Run
       */
       foundation::ErrorCodes Run() override;
+
+      /**
+      * @brief Sets the project directory and starts the builder on that
+      *        directory
+      *
+      * @param[in] path The path to the existing source directory
+      *
+      * @return Was the source directory a valid directory?
+      */
+      bool SetProjectDirectory(const foundation::Path& path);
+
+    private:
+
+      builder::Builder builder_; //!< The builder service
     };
   }
 }

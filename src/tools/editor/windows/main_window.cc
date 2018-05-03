@@ -4,6 +4,7 @@
 
 #include <qstylefactory.h>
 #include <qevent.h>
+#include <qfiledialog.h>
 
 namespace snuffbox
 {
@@ -12,7 +13,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     MainWindow::MainWindow(EditorApplication* app) :
       app_(app),
-      console_(nullptr)
+      console_(nullptr),
+      project_dir_("")
     {
       ui_.setupUi(this);
 
@@ -32,6 +34,12 @@ namespace snuffbox
         output_windows);
 
       ApplyStyle(app);
+
+      connect(
+        ui_.actionOpen_Project, 
+        &QAction::triggered, 
+        this, 
+        &MainWindow::OpenProject);
     }
 
     //--------------------------------------------------------------------------
@@ -84,6 +92,21 @@ namespace snuffbox
     {
       app_->NotifyQuit();
       evt->accept();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OpenProject()
+    {
+      QString dir = QFileDialog::getExistingDirectory(
+        this, 
+        "Open Project",
+        project_dir_,
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+      if (app_->SetProjectDirectory(dir.toStdString().c_str()) == true)
+      {
+        project_dir_ = dir;
+      }
     }
   }
 }

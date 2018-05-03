@@ -44,5 +44,35 @@ namespace snuffbox
 
       return foundation::ErrorCodes::kSuccess;
     }
+
+    //--------------------------------------------------------------------------
+    bool EditorApplication::SetProjectDirectory(const foundation::Path& path)
+    {
+      if (foundation::Directory::Exists(path) == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kError,
+          "Set an invalid project directory: {0}, it does not exist",
+          path
+          );
+
+        return false;
+      }
+
+      if (builder_.Initialize(path) == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kError,
+          "Could not initialize the builder on project directory '{0}'",
+          path
+          );
+
+        return false;
+      }
+
+      return true;
+    }
   }
 }

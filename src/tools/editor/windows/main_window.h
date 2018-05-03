@@ -27,6 +27,8 @@ namespace snuffbox
     class MainWindow : public QMainWindow
     {
 
+      Q_OBJECT
+
     public:
 
       /**
@@ -54,12 +56,24 @@ namespace snuffbox
       */
       void closeEvent(QCloseEvent* evt) override;
 
+    private slots:
+
+      /**
+      * @brief Opens a folder browser dialog to open a project directory
+      *        and sends it to the EditorApplication
+      *
+      * @see EditorApplication::SetProjectDirectory
+      */
+      void OpenProject();
+
     private:
 
       Ui::MainWindow ui_; //!< The user interface definition made in Designer
       EditorApplication* app_; //!< A reference to the main editor application
 
       foundation::UniquePtr<Console> console_; //!< The console
+
+      QString project_dir_; //!< The current project directory
     };
   }
 }

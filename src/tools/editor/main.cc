@@ -3,8 +3,6 @@
 
 #include <foundation/memory/memory.h>
 
-#include <QtWidgets/qapplication.h>
-
 using namespace snuffbox;
 using namespace foundation;
 using namespace editor;
