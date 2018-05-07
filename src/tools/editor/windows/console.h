@@ -3,6 +3,7 @@
 #include <foundation/definitions/logging.h>
 #include <foundation/containers/string.h>
 
+#include <qobject.h>
 #include <qcolor.h>
 
 class QTextBrowser;
@@ -20,8 +21,10 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class Console
+    class Console : public QObject
     {
+
+      Q_OBJECT
 
     public:
 
@@ -105,6 +108,18 @@ namespace snuffbox
       */
       void ApplyFont(QTextBrowser* output);
 
+    signals:
+
+      /**
+      * @see Console::OnReceivedMessage
+      */
+      void OnLog(
+        int channel,
+        int severity,
+        QString message);
+
+    private slots:
+
       /**
       * @brief Writes a message to the output window
       *
@@ -114,9 +129,9 @@ namespace snuffbox
       * @see Console::OnReceivedMessage
       */
       void WriteLine(
-        foundation::LogChannel channel, 
-        foundation::LogSeverity severity,
-        const char* message);
+        int channel, 
+        int severity,
+        QString message);
 
     private:
 

@@ -5,6 +5,10 @@
 
 #include <cstdio>
 
+#ifdef SNUFF_LINUX
+#include <sys/stat.h>
+#endif
+
 namespace snuffbox
 {
   namespace foundation
@@ -120,6 +124,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool File::Exists(const Path& path)
+    {
+      std::ifstream f(path.ToString().c_str(), std::ios::in);
+      return f.good();
+    }
+
+    //--------------------------------------------------------------------------
     bool File::is_ok() const
     {
       return is_ok_;
@@ -129,6 +140,12 @@ namespace snuffbox
     size_t File::length() const
     {
       return length_;
+    }
+
+    //--------------------------------------------------------------------------
+    const time_t& File::last_modified() const
+    {
+      return last_modified_;
     }
 
     //--------------------------------------------------------------------------
@@ -158,8 +175,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool File::OpenFile(const Path& path, FileOpenMode mode)
     {
+      const char* cpath = path.ToString().c_str();
       stream_ = std::fstream(
-        path.ToString().c_str(),
+        cpath,
         FileFlagsToOpenMode(static_cast<FileFlags>(mode)));
 
       if (stream_.is_open() == false)
@@ -170,6 +188,11 @@ namespace snuffbox
 
       length_ = stream_.tellg();
       stream_.seekg(std::ios_base::beg);
+
+      struct stat attributes;
+      stat(cpath, &attributes);
+
+      last_modified_ = attributes.st_mtime;
 
       return true;
     }

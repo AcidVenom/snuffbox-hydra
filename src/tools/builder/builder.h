@@ -35,6 +35,19 @@ namespace snuffbox
     class Builder
     {
 
+    protected:
+
+      /**
+      * @brief A structure to keep track of when files were changed so they
+      *        can be rebuilt automatically
+      *
+      * @author Daniel Konings
+      */
+      struct FileTime
+      {
+        time_t last_modified; //!< When was the file last modified?
+      };
+
     public:
 
       /**
@@ -98,6 +111,18 @@ namespace snuffbox
       *        structure of the source directory
       */
       void SyncDirectories();
+      
+      /**
+      * @brief Finds the file changes when either a file has changed or the
+      *        builder is started up initially.
+      *
+      * The file changes are tracked using .time files, which contain data on
+      * when the file was last built. If the file does not exist, it is created
+      * alongside of the file and the file is marked for build.
+      *
+      * @param[in] items The current item list we're traversing for file changes
+      */
+      void FindFileChanges(const ItemList& items);
 
       /**
       * @brief Syncs the items from the source tree structure to the build
@@ -110,10 +135,26 @@ namespace snuffbox
       /**
       * @brief Removes folders that are not in the source tree anymore
       *
-      *
       * @param[in] build_items The list of build items
       */
       void RemoveOld(const ItemList& build_items) const;
+
+      /**
+      * @brief Finds the time stamp of a file and if it does not exist, it
+      *        is created. It is then checked for rebuild.
+      *
+      * The timestamp is created alongside of the file in the build directory,
+      * next to the relative path of the file in the source directory.
+      *
+      * If the timestamp already exists, it is compared against the source file
+      * to see if their modification times match. If not, the file can be
+      * marked for rebuild.
+      *
+      * @param[in] path The path to the file to check, in the source directory
+      *
+      * @return Should the file be rebuilt?
+      */
+      bool HasChanged(const foundation::Path& path) const;
 
     public:
 
@@ -135,6 +176,16 @@ namespace snuffbox
       foundation::Path build_directory_; //!< The current build directory
 
       foundation::DirectoryListener listener_; //!< The directory listener
+
+      /**
+      * @brief The name of the build directory folder
+      */
+      static const char* kBuildFolder_;
+
+      /**
+      * @brief The extension for the time stamp files
+      */
+      static const char* kStampExtension_;
     };
   }
 }

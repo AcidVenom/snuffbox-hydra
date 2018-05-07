@@ -4,6 +4,7 @@
 #include "foundation/definitions/io.h"
 
 #include <fstream>
+#include <ctime>
 
 namespace snuffbox
 {
@@ -96,6 +97,15 @@ namespace snuffbox
       static void Remove(const Path& path);
 
       /**
+      * @brief Checks if a file exists
+      *
+      * @param[in] path The path to the file
+      *
+      * @return Does it exist?
+      */
+      static bool Exists(const Path& path);
+
+      /**
       * @return Is the file open and able to be used?
       */
       bool is_ok() const;
@@ -104,6 +114,11 @@ namespace snuffbox
       * @return The file length, excluding null-terminator 
       */
       size_t length() const;
+
+      /**
+      * @return When was the file last modified?
+      */
+      const time_t& last_modified() const;
 
       /**
       * @brief Destructor, closes the underlying stream if it was opened
@@ -153,6 +168,8 @@ namespace snuffbox
       const uint8_t* virtual_buffer_; //!< The virtual buffer of this file
       uint8_t* buffer_; //!< The buffer of this file
       size_t length_; //!< The file length
+
+      time_t last_modified_; //!< When was the file last modified?
     };
   }
 }

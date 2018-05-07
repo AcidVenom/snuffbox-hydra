@@ -192,6 +192,11 @@ namespace snuffbox
       Path StripPath(const Path& path) const;
 
       /**
+      * @return The path without its extension, if any
+      */
+      Path NoExtension() const;
+
+      /**
       * @return The number of directories in this path by counting the '/'
       *
       * @remarks The last file or directory is always cut off of the count

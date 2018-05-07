@@ -1,9 +1,16 @@
 #include "tools/builder/builder.h"
 
+#include <foundation/io/file.h>
+#include <foundation/auxiliary/string_utils.h>
+
 namespace snuffbox
 {
   namespace builder
   {
+    //--------------------------------------------------------------------------
+    const char* Builder::kBuildFolder_ = ".build";
+    const char* Builder::kStampExtension_ = "time";
+
     //--------------------------------------------------------------------------
     Builder::Builder() :
       is_ok_(false),
@@ -27,7 +34,7 @@ namespace snuffbox
       }
 
       source_directory_ = source_dir;
-      build_directory_ = source_directory_ / "build";
+      build_directory_ = source_directory_ / kBuildFolder_;
 
       if (CreateBuildDirectory() == false)
       {
@@ -37,13 +44,17 @@ namespace snuffbox
       is_ok_ = true;
 
       SyncDirectories();
+      FindFileChanges(source_tree_.items());
 
       listener_.SetCallbacks(
         [&](const foundation::Path&)
         { 
           SyncDirectories(); 
         },
-        nullptr);
+        [&](const foundation::Path&)
+        {
+          FindFileChanges(source_tree_.items());
+        });
 
       listener_.Listen(source_directory_);
 
@@ -111,6 +122,40 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Builder::FindFileChanges(const ItemList& items)
+    {
+      foundation::Path current;
+
+      for (size_t i = 0; i < items.size(); ++i)
+      {
+        const foundation::DirectoryTreeItem& item = items.at(i);
+        const foundation::Path& item_path = item.path();
+
+        current = item_path.StripPath(source_directory_);
+
+        if (current == kBuildFolder_)
+        {
+          continue;
+        }
+
+        if (item.is_directory() == true)
+        {
+          FindFileChanges(item.children());
+          continue;
+        }
+
+        if (HasChanged(item_path) == true)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kBuilder,
+            foundation::LogSeverity::kInfo,
+            "Marked '{0}' for rebuild",
+            item_path);
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void Builder::SyncItems(const ItemList& source_items) const
     {
       foundation::Path current = "";
@@ -125,7 +170,7 @@ namespace snuffbox
         {
           current = item.path().StripPath(source_directory_);
 
-          if (current == "build")
+          if (current == kBuildFolder_)
           {
             continue;
           }
@@ -152,19 +197,18 @@ namespace snuffbox
     {
       foundation::Path current = "";
       foundation::Path current_source = "";
-      foundation::Path item_path = "";
+      foundation::Path source_file = "";
 
       for (size_t i = 0; i < build_items.size(); ++i)
       {
         const foundation::DirectoryTreeItem& item = build_items.at(i);
+        const foundation::Path& item_path = item.path();
+
+        current = item_path.StripPath(build_directory_);
+        current_source = source_directory_ / current;
 
         if (item.is_directory() == true)
         {
-          item_path = item.path();
-          current = item_path.StripPath(build_directory_);
-
-          current_source = source_directory_ / current;
-
           if (foundation::Directory::Exists(current_source) == false)
           {
             foundation::Directory::Remove(item_path);
@@ -172,8 +216,76 @@ namespace snuffbox
           }
 
           RemoveOld(item.children());
+          continue;
+        }
+
+        if (item_path.extension() == kStampExtension_)
+        {
+          source_file = current_source.NoExtension();
+
+          if (foundation::File::Exists(source_file) == false)
+          {
+            foundation::File::Remove(item_path);
+          }
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    bool Builder::HasChanged(const foundation::Path& path) const
+    {
+      if (
+        foundation::File::Exists(path) == false ||
+        path.is_directory() == true)
+      {
+        return false;
+      }
+
+      foundation::Path relative = path.StripPath(source_directory_);
+
+      foundation::File source(path, foundation::FileFlags::kRead);
+      time_t current_time = source.last_modified();
+
+      foundation::Path stamp = 
+        build_directory_ / relative + "." + kStampExtension_;
+      
+      foundation::File f;
+
+      if (foundation::File::Exists(stamp) == true)
+      {
+        f.Open(stamp, foundation::FileFlags::kRead);
+
+        if (f.is_ok() == false)
+        {
+          return false;
+        }
+
+        size_t len;
+        const FileTime* ft = 
+          reinterpret_cast<const FileTime*>(f.ReadBuffer(&len));
+
+        foundation::Logger::Assert(len == sizeof(FileTime),
+          "Attempted to read an invalid time stamp in the builder");
+
+        if (difftime(current_time, ft->last_modified) <= 0.0)
+        {
+          return false;
+        }
+      }
+
+      f.Open(stamp, foundation::FileFlags::kWrite);
+
+      if (f.is_ok() == false)
+      {
+        return false;
+      }
+
+      FileTime cft;
+      cft.last_modified = current_time;
+
+      f.Write(reinterpret_cast<uint8_t*>(&cft), sizeof(FileTime));
+      
+      return true;
     }
 
     //--------------------------------------------------------------------------

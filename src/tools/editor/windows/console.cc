@@ -72,6 +72,7 @@ namespace snuffbox
       foundation::Logger::RedirectOutput(OnReceivedMessage, this);
 
       SetupOutputWindows(tab, output_windows);
+      connect(this, &Console::OnLog, this, &Console::WriteLine);
 
       foundation::Logger::Log(
         foundation::LogChannel::kEditor,
@@ -89,7 +90,10 @@ namespace snuffbox
     {
       Console* console = reinterpret_cast<Console*>(ud);
 
-      console->WriteLine(channel, verbosity, message.c_str());
+      console->OnLog(
+        static_cast<int>(channel), 
+        static_cast<int>(verbosity), 
+        message.c_str());
     }
 
     //--------------------------------------------------------------------------
@@ -144,16 +148,21 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void Console::WriteLine(
-      foundation::LogChannel channel,
-      foundation::LogSeverity severity,
-      const char* message)
+      int channel,
+      int severity,
+      QString message)
     {
-      OutputWindow& window = output_windows_[static_cast<int>(channel)];
+      foundation::LogChannel ch 
+        = static_cast<foundation::LogChannel>(channel);
+      foundation::LogSeverity sev 
+        = static_cast<foundation::LogSeverity>(severity);
+
+      OutputWindow& window = output_windows_[channel];
       QTextBrowser* output_window = window.window;
 
-      SetLogCount(channel, ++window.log_count);
+      SetLogCount(ch, ++window.log_count);
 
-      LogColor color = LogColor::SeverityToColor(severity);
+      LogColor color = LogColor::SeverityToColor(sev);
 
       QTextCursor cursor = output_window->textCursor();
 
@@ -163,7 +172,7 @@ namespace snuffbox
       QTextCharFormat text_format;
       text_format.setForeground(color.foreground);
 
-      if (severity == foundation::LogSeverity::kFatal)
+      if (sev == foundation::LogSeverity::kFatal)
       {
         text_format.setFontWeight(kFatalFontWeight_);
       }
@@ -171,7 +180,7 @@ namespace snuffbox
       cursor.movePosition(QTextCursor::End);
       cursor.setBlockFormat(format);
       cursor.setCharFormat(text_format);
-      cursor.insertText(QString(message) + '\n');
+      cursor.insertText(message + '\n');
       format.setBackground(QColor(0, 0, 0, 0));
       cursor.setBlockFormat(format);
 
@@ -180,10 +189,10 @@ namespace snuffbox
       QScrollBar* scroll_bar = output_window->verticalScrollBar();
       scroll_bar->setSliderPosition(scroll_bar->maximum());
 
-      if (channel != foundation::LogChannel::kUnspecified)
+      if (ch != foundation::LogChannel::kUnspecified)
       {
-        WriteLine(
-          foundation::LogChannel::kUnspecified,
+        OnLog(
+          static_cast<int>(foundation::LogChannel::kUnspecified),
           severity,
           message);
       }

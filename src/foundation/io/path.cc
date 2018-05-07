@@ -223,6 +223,27 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Path Path::NoExtension() const
+    {
+      if (extension_.size() == 0)
+      {
+        return path_;
+      }
+
+      String no_ext = path_;
+      size_t i = foundation::StringUtils::FindLastOf(no_ext, '.');
+
+      if (i == String::npos)
+      {
+        return no_ext;
+      }
+
+      no_ext.erase(no_ext.begin() + i, no_ext.end());
+
+      return no_ext;
+    }
+
+    //--------------------------------------------------------------------------
     size_t Path::NumDirectories() const
     {
       if (path_.size() == 0)
