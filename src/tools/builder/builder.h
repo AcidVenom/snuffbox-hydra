@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/builder/threading/build_scheduler.h"
+
 #include <foundation/io/path.h>
 #include <foundation/auxiliary/logger.h>
 
@@ -81,6 +83,14 @@ namespace snuffbox
       bool Initialize(const foundation::Path& source_dir);
 
       /**
+      * @brief Notify the builder that the application is idle and that the
+      *        build scheduler can start doing work
+      *
+      * @see BuildScheduler::IdleNotification
+      */
+      void IdleNotification();
+
+      /**
       * @brief Shuts down the builder and its directory listener
       *
       * @remarks This function must be called before the exit of the application
@@ -156,6 +166,13 @@ namespace snuffbox
       */
       bool HasChanged(const foundation::Path& path) const;
 
+      /**
+      * @brief Queues a file for build by path
+      *
+      * @param[in] path The path to the source file
+      */
+      void QueueForBuild(const foundation::Path& path);
+
     public:
 
       /**
@@ -176,6 +193,8 @@ namespace snuffbox
       foundation::Path build_directory_; //!< The current build directory
 
       foundation::DirectoryListener listener_; //!< The directory listener
+
+      BuildScheduler scheduler_; //!< The build scheduler to queue files in
 
       /**
       * @brief The name of the build directory folder

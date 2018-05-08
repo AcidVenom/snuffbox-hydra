@@ -62,6 +62,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Builder::IdleNotification()
+    {
+      scheduler_.IdleNotification();
+    }
+
+    //--------------------------------------------------------------------------
     void Builder::Shutdown()
     {
       if (is_ok_ == false)
@@ -146,11 +152,7 @@ namespace snuffbox
 
         if (HasChanged(item_path) == true)
         {
-          foundation::Logger::LogVerbosity<1>(
-            foundation::LogChannel::kBuilder,
-            foundation::LogSeverity::kInfo,
-            "Marked '{0}' for rebuild",
-            item_path);
+          QueueForBuild(item_path);
         }
       }
     }
@@ -286,6 +288,30 @@ namespace snuffbox
       f.Write(reinterpret_cast<uint8_t*>(&cft), sizeof(FileTime));
       
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void Builder::QueueForBuild(const foundation::Path& path)
+    {
+      if (path.is_directory() == true)
+      {
+        return;
+      }
+
+      foundation::Path build_path = path.StripPath(source_directory_);
+      build_path = build_directory_ / build_path;
+
+      BuildScheduler::BuildItem item;
+      item.in = path;
+      item.out = build_path;
+
+      scheduler_.Queue(item);
+
+      foundation::Logger::LogVerbosity<2>(
+        foundation::LogChannel::kBuilder,
+        foundation::LogSeverity::kDebug,
+        "Marked '{0}' for rebuild",
+        path);
     }
 
     //--------------------------------------------------------------------------

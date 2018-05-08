@@ -38,6 +38,7 @@ namespace snuffbox
       while (should_quit() == false)
       {
         processEvents();
+        builder_.IdleNotification();
       }
 
       Shutdown();

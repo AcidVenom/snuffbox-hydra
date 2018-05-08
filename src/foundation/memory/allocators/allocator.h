@@ -2,6 +2,7 @@
 
 #include <cinttypes>
 #include <cstddef>
+#include <mutex>
 
 namespace snuffbox
 {
@@ -17,6 +18,9 @@ namespace snuffbox
     * open allocations there are. It will check for any memory leaks on shutdown
     * of the application. This however means that the application needs to be
     * shutdown properly.
+    *
+    * Allocators are thread-safe as there is a mutex that locks the allocator
+    * for both Allocator::Allocate and Allocator::Deallocate
     *
     * @see Memory
     *
@@ -70,7 +74,10 @@ namespace snuffbox
       *
       * This function calls the underlying implementation of the allocator that
       * derived from this Allocator base. (Allocator::AllocateImpl)
-      * Calling allocations through these functions guarantee memory bookmarking.
+      * Calling allocations through these functions guarantee 
+      * memory bookmarking.
+      *
+      * @remarks This function locks the Allocator::mutex_ mutex
       *
       * @param[in] size The size of the allocation
       * @param[in] align The alignment of the allocation
@@ -84,7 +91,10 @@ namespace snuffbox
       *
       * This function calls the underlying implementation of the allocator that
       * derived from this Allocator base. (Allocator::DeallocateImpl)
-      * Calling allocations through these functions guarantee memory bookmarking.
+      * Calling allocations through these functions guarantee 
+      * memory bookmarking.
+      *
+      * @remarks This function locks the Allocator::mutex_ mutex
       *
       * @param[in] ptr The pointer to the memory chunk to deallocate
       *
@@ -108,6 +118,7 @@ namespace snuffbox
       size_t open_allocations_; //!< The number of open allocations
       size_t allocated_; //!< The amount of memory that is currently allocated
 
+      std::recursive_mutex mutex_; //!< The mutex for thread-safe allocations
     };
   }
 }

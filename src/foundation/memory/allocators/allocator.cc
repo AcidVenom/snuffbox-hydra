@@ -36,6 +36,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void* Allocator::Allocate(size_t size, size_t align)
     {
+      std::lock_guard<std::recursive_mutex> lock(mutex_);
+
       if (allocated_ + size > max_size_)
       {
         Logger::Assert(false, "Buffer overflow in allocator");
@@ -51,6 +53,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     size_t Allocator::Deallocate(void* ptr)
     {
+      std::lock_guard<std::recursive_mutex> lock(mutex_);
+
       size_t deallocated = DeallocateImpl(ptr);
 
       if (max_size_ < deallocated)
