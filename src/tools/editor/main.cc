@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
   EditorApplication app(argc, argv, cfg);
 
-  UniquePtr<MainWindow> window = 
+  UniquePtr<MainWindow> window =
     Memory::ConstructUnique<MainWindow>(&Memory::default_allocator(), &app);
 
   window->show();

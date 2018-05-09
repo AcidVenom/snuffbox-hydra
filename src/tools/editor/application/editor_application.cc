@@ -6,14 +6,14 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     EditorApplication::EditorApplication(
-      int argc,
+      int& argc,
       char** argv,
       const engine::Application::Configuration& cfg)
       :
       Application(argc, argv, cfg),
       QApplication(argc, argv)
     {
-      
+
     }
 
     //--------------------------------------------------------------------------

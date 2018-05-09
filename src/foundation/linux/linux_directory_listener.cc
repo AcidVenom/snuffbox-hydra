@@ -202,11 +202,9 @@ namespace snuffbox
           {
             RemoveEvent(p);
           }
-
-          DoCallback(on_directory_changed_);
-          return;
         }
 
+        DoCallback(on_directory_changed_);
         DoCallback(on_file_changed_);
       }
     }

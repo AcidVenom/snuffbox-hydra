@@ -27,9 +27,13 @@ namespace snuffbox
 
       /**
       * @see Application::Application
+      *
+      * @remarks Apparently QApplication needs the argc argument
+      *          to be a reference, thus it is a reference in this
+      *          constructor
       */
       EditorApplication(
-        int argc, 
+        int& argc,
         char** argv, 
         const engine::Application::Configuration& cfg);
 

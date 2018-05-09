@@ -36,9 +36,9 @@ namespace snuffbox
       ApplyStyle(app);
 
       connect(
-        ui_.actionOpen_Project, 
-        &QAction::triggered, 
-        this, 
+        ui_.actionOpen_Project,
+        &QAction::triggered,
+        this,
         &MainWindow::OpenProject);
     }
 
