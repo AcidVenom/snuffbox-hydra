@@ -10,7 +10,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     MallocAllocator::MallocAllocator(size_t max_size) :
-      Allocator(max_size)
+      IAllocator(max_size)
     {
 
     }

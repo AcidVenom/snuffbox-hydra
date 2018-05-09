@@ -11,21 +11,10 @@ namespace snuffbox
   namespace builder
   {
     //--------------------------------------------------------------------------
-    ICompiler::ICompiler(
-      const foundation::Vector<foundation::String>& supported_extensions,
-      const foundation::String& out_extension)
-      :
-      supported_extensions_(supported_extensions),
-      out_extension_(out_extension),
-      error_(""),
-      data_(nullptr),
-      size_(0)
+    ICompiler::ICompiler() :
+      data_(nullptr)
     {
-      foundation::Logger::Assert(supported_extensions_.size() > 0, 
-        "No extensions specified for a compiler");
 
-      foundation::Logger::Assert(out_extension_.size() > 0,
-        "No out extension specified for a compiler");
     }
 
     //--------------------------------------------------------------------------
@@ -68,31 +57,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ICompiler::IsSupported(
-      const foundation::Path& path, 
-      bool compile) const
+    const foundation::String& ICompiler::error() const
     {
-      if (path.is_directory() == true)
-      {
-        return false;
-      }
-
-      const foundation::String& ext = path.extension();
-
-      if (compile == false)
-      {
-        return ext == out_extension_;
-      }
-
-      for (size_t i = 0; i < supported_extensions_.size(); ++i)
-      {
-        if (ext == supported_extensions_.at(i))
-        {
-          return true;
-        }
-      }
-
-      return false;
+      return error_;
     }
 
     //--------------------------------------------------------------------------
@@ -106,18 +73,18 @@ namespace snuffbox
         return false;
       }
 
-      if (IsSupported(path, compile) == false)
+      if (path.is_directory() == true)
       {
         set_error(
           "Path for compilation is invalid\nAre you sure the file\
-          extension is supported and the path is not a directory?");
+           path is not a directory?");
 
         return false;
       }
 
       if (file->Open(path, foundation::FileFlags::kRead) == false)
       {
-        set_error("Could not open file for reading");
+        set_error("Could not open file for reading during compilation");
 
         return false;
       }

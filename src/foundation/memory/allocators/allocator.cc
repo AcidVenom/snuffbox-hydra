@@ -6,7 +6,7 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
-    Allocator::Allocator(size_t max_size) :
+    IAllocator::IAllocator(size_t max_size) :
       max_size_(max_size),
       open_allocations_(0),
       allocated_(0)
@@ -15,26 +15,26 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    size_t Allocator::open_allocations() const
+    size_t IAllocator::open_allocations() const
     {
       return open_allocations_;
     }
 
     //--------------------------------------------------------------------------
-    size_t Allocator::allocated() const
+    size_t IAllocator::allocated() const
     {
       return allocated_;
     }
 
     //--------------------------------------------------------------------------
-    Allocator::~Allocator()
+    IAllocator::~IAllocator()
     {
       assert(open_allocations_ == 0 && allocated_ == 0 &&
         "Memory leak detected in an allocator");
     }
 
     //--------------------------------------------------------------------------
-    void* Allocator::Allocate(size_t size, size_t align)
+    void* IAllocator::Allocate(size_t size, size_t align)
     {
       std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -51,7 +51,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    size_t Allocator::Deallocate(void* ptr)
+    size_t IAllocator::Deallocate(void* ptr)
     {
       std::lock_guard<std::recursive_mutex> lock(mutex_);
 

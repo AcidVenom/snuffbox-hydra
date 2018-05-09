@@ -1,10 +1,9 @@
 #pragma once
 
 #include "tools/builder/threading/build_job.h"
+#include "tools/builder/threading/build_item.h"
 
-#include <foundation/io/path.h>
 #include <foundation/containers/vector.h>
-#include <foundation/containers/queue.h>
 
 #include <mutex>
 
@@ -26,18 +25,6 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Used to queue build items and schedule them to the corresponding
-      *        build jobs
-      *
-      * @author Daniel Konings
-      */
-      struct BuildItem
-      {
-        foundation::Path in; //!< The path to the input source file
-        foundation::Path out; //!< The path to the output build file
-      };
-
-      /**
       * @brief Default constructor
       *
       * @remarks Creates an invalid build scheduler
@@ -57,6 +44,11 @@ namespace snuffbox
       */
       void IdleNotification();
 
+      /**
+      * @brief Joins the build jobs back to the main thread by destructing them
+      */
+      ~BuildScheduler();
+
     protected:
 
       /**
@@ -64,10 +56,23 @@ namespace snuffbox
       */
       void Flush();
 
+      /**
+      * @brief Attempts to schedule a compilation for the build jobs
+      *
+      * If no build job is currently available as they're already building,
+      * we wait until our next possible moment to recompile.
+      *
+      * @param[in] item The item to schedule
+      * @param[out] id The job that will build the file, if found
+      *
+      * @return Were we able to schedule the item for build?
+      */
+      bool ScheduleJob(const BuildItem& item, size_t* id);
+      
     private:
 
-      foundation::Vector<BuildJob> jobs_; //!< The build jobs that exist
-      foundation::Queue<BuildItem> queue_; //!< The queue of build items
+      foundation::Vector<BuildJob*> jobs_; //!< The build jobs that exist
+      BuildQueue queue_; //!< The queue of build items, ordered by asset type
 
       /**
       * @brief Used to safely queue items in the build queue from a different

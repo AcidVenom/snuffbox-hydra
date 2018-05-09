@@ -47,7 +47,7 @@ namespace snuffbox
     Memory::DefaultAllocator Memory::default_allocator_(kDefaultHeapSize_);
 
     //--------------------------------------------------------------------------
-    void* Memory::Allocate(size_t size, size_t align, Allocator* allocator)
+    void* Memory::Allocate(size_t size, size_t align, IAllocator* allocator)
     {
       if (allocator == nullptr)
       {
@@ -76,7 +76,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void* Memory::Allocate(size_t size, Allocator* allocator)
+    void* Memory::Allocate(size_t size, IAllocator* allocator)
     {
       return Allocate(size, kDefaultAlignment_, allocator);
     }
@@ -92,7 +92,7 @@ namespace snuffbox
       AllocationHeader* header = reinterpret_cast<AllocationHeader*>(
         PointerMath::Offset(ptr, -static_cast<int>(sizeof(AllocationHeader))));
 
-      Allocator* alloc = header->allocator;
+      IAllocator* alloc = header->allocator;
 
       alloc->Deallocate(PointerMath::Offset(
         header,

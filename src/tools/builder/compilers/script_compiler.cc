@@ -8,8 +8,7 @@ namespace snuffbox
   namespace builder
   {
     //--------------------------------------------------------------------------
-    ScriptCompiler::ScriptCompiler() :
-      ICompiler({ "js" }, "script")
+    ScriptCompiler::ScriptCompiler()
     {
 
     }

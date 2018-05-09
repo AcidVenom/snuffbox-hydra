@@ -81,7 +81,7 @@ namespace snuffbox
     * guarantee that. The interface uses the custom memory allocators provided
     * by the user and has a default allocator fallback if not specified.
     *
-    * @see Allocator
+    * @see IAllocator
     *
     * @author Daniel Konings
     */
@@ -112,7 +112,7 @@ namespace snuffbox
       static void* Allocate(
         size_t size, 
         size_t align, 
-        Allocator* allocator = &default_allocator());
+        IAllocator* allocator = &default_allocator());
 
       /**
       * @see Memory::Allocate
@@ -121,7 +121,7 @@ namespace snuffbox
       */
       static void* Allocate(
         size_t size,
-        Allocator* allocator = &default_allocator());
+        IAllocator* allocator = &default_allocator());
 
       /**
       * @brief Deallocates a memory block and its respective header
@@ -146,7 +146,7 @@ namespace snuffbox
       * @return The constructed object pointer
       */
       template <typename T, typename ... Args>
-      static T* Construct(Allocator* allocator, Args&&... args);
+      static T* Construct(IAllocator* allocator, Args&&... args);
 
       /**
       * @brief Destructs a class and calls its destructor
@@ -178,7 +178,7 @@ namespace snuffbox
       * @return The constructed shared pointer
       */
       template <typename T, typename ... Args>
-      static SharedPtr<T> ConstructShared(Allocator* alloc, Args&&... args);
+      static SharedPtr<T> ConstructShared(IAllocator* alloc, Args&&... args);
 
       /**
       * @see Memory::Construct
@@ -188,7 +188,7 @@ namespace snuffbox
       * @return The constructed unique pointer
       */
       template <typename T, typename ... Args>
-      static UniquePtr<T> ConstructUnique(Allocator* alloc, Args&&... args);
+      static UniquePtr<T> ConstructUnique(IAllocator* alloc, Args&&... args);
 
       /**
       * @return The default allocator
@@ -204,7 +204,7 @@ namespace snuffbox
       */
       struct AllocationHeader
       {
-        Allocator* allocator; //!< The allocator used for the allocation
+        IAllocator* allocator; //!< The allocator used for the allocation
         size_t align; //!< The alignment used during the allocation
         size_t size; //!< The size of the allocation
       };
@@ -246,7 +246,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T, typename ... Args>
-    inline T* Memory::Construct(Allocator* allocator, Args&&... args)
+    inline T* Memory::Construct(IAllocator* allocator, Args&&... args)
     {
       T* allocated = reinterpret_cast<T*>(Allocate(sizeof(T), allocator));
       new (allocated) T(eastl::forward<Args>(args)...);
@@ -277,7 +277,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T, typename ... Args>
     inline SharedPtr<T> Memory::ConstructShared(
-      Allocator* alloc, 
+      IAllocator* alloc, 
       Args&&... args)
     {
       return MakeShared<T>(
@@ -287,7 +287,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T, typename ... Args>
     inline UniquePtr<T> Memory::ConstructUnique(
-      Allocator* alloc, 
+      IAllocator* alloc, 
       Args&&... args)
     {
       return UniquePtr<T>(

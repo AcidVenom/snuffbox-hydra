@@ -173,6 +173,17 @@ namespace snuffbox
       */
       void QueueForBuild(const foundation::Path& path);
 
+      /**
+      * @brief Deduces a file type from an extension
+      *
+      * @param[in] ext The extension to convert from
+      *
+      * @return The found asset type
+      *
+      * @see AssetTypes
+      */
+      static AssetTypes TypeFromExtension(const foundation::String& ext);
+
     public:
 
       /**

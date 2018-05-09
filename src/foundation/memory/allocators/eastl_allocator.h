@@ -6,7 +6,7 @@ namespace snuffbox
 {
   namespace foundation
   {
-    class Allocator;
+    class IAllocator;
 
     /**
     * @brief The allocator for EASTL to use
@@ -108,7 +108,7 @@ namespace snuffbox
 #if EASTL_NAME_ENABLED
       const char* mpName; //!< The debug name of this allocator
 #endif
-      Allocator& allocator_; //!< A reference to the underlying Allocator
+      IAllocator& allocator_; //!< A reference to the underlying IAllocator
     };
   }
 }

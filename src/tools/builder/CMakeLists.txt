@@ -5,11 +5,14 @@ SET(RootSources
 
 SET(DefinitionsSources
   "definitions/magic.h"
+  "definitions/asset_types.h"
 )
 
 SET(ThreadingSources
   "threading/build_job.h"
   "threading/build_job.cc"
+  "threading/build_item.h"
+  "threading/build_item.cc"
   "threading/build_scheduler.h"
   "threading/build_scheduler.cc"
 )

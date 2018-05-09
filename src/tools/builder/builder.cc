@@ -298,12 +298,25 @@ namespace snuffbox
         return;
       }
 
+      BuildItem item;
+      item.type = TypeFromExtension(path.extension());
+
+      if (item.type == AssetTypes::kUnknown)
+      {
+        foundation::Logger::LogVerbosity<2>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kDebug,
+          "Ignoring '{0}' for rebuild, it is of an unknown type",
+          path);
+
+        return;
+      }
+
       foundation::Path build_path = path.StripPath(source_directory_);
       build_path = build_directory_ / build_path;
 
-      BuildScheduler::BuildItem item;
       item.in = path;
-      item.out = build_path;
+      item.out = build_path.NoExtension();
 
       scheduler_.Queue(item);
 
@@ -312,6 +325,17 @@ namespace snuffbox
         foundation::LogSeverity::kDebug,
         "Marked '{0}' for rebuild",
         path);
+    }
+
+    //--------------------------------------------------------------------------
+    AssetTypes Builder::TypeFromExtension(const foundation::String& ext)
+    {
+      if (ext == "js")
+      {
+        return AssetTypes::kScript;
+      }
+
+      return AssetTypes::kUnknown;
     }
 
     //--------------------------------------------------------------------------

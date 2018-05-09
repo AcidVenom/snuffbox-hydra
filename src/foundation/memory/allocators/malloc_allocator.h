@@ -16,7 +16,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class MallocAllocator : public Allocator
+    class MallocAllocator : public IAllocator
     {
 
     public:
@@ -39,14 +39,14 @@ namespace snuffbox
       };
 
       /**
-      * @see Allocator::Allocate
+      * @see IAllocator::Allocate
       *
       * Align is currently unused with this allocator
       */
       void* AllocateImpl(size_t size, size_t align) override;
 
       /**
-      * @see Allocator::Deallocate
+      * @see IAllocator::Deallocate
       */
       size_t DeallocateImpl(void* ptr) override;
 

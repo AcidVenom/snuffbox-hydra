@@ -26,7 +26,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class Allocator
+    class IAllocator
     {
 
       friend class Memory;
@@ -38,17 +38,17 @@ namespace snuffbox
       *
       * @param[in] max_size The maximum size that can be allocated
       */
-      Allocator(size_t max_size);
+      IAllocator(size_t max_size);
 
       /**
       * @brief Delete the copy constructor
       */
-      Allocator(const Allocator& other) = delete;
+      IAllocator(const IAllocator& other) = delete;
 
       /**
       * @brief Delete the move operator
       */
-      Allocator(const Allocator&& other) = delete;
+      IAllocator(const IAllocator&& other) = delete;
 
       /**
       * @return The number of open allocations in this allocator 
@@ -65,7 +65,7 @@ namespace snuffbox
       * 
       * Checks for any leaks in the allocator
       */
-      virtual ~Allocator();
+      virtual ~IAllocator();
 
     protected:
 
