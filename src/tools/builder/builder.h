@@ -91,6 +91,15 @@ namespace snuffbox
       void IdleNotification();
 
       /**
+      * @brief Writes a build item's result to disk
+      *
+      * @param[in] item The corresponding build item
+      * @param[in] buffer The compiled buffer
+      * @param[in] size The size of the buffer
+      */
+      void Write(const BuildItem& item, const uint8_t* buffer, size_t size);
+
+      /**
       * @brief Shuts down the builder and its directory listener
       *
       * @remarks This function must be called before the exit of the application

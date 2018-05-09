@@ -6,6 +6,7 @@ SET(RootSources
 SET(DefinitionsSources
   "definitions/magic.h"
   "definitions/asset_types.h"
+  "definitions/asset_types.cc"
 )
 
 SET(ThreadingSources

@@ -27,11 +27,16 @@ namespace snuffbox
 
     public:
 
+      /**
+      * @brief Used to sync back the compiled data to the main thread
+      *
+      * @author Daniel Konings
+      */
       struct Result
       {
-        bool success;
-        const uint8_t* buffer;
-        size_t length;
+        bool success; //!< Was the compilation a success?
+        const uint8_t* buffer; //!< The compiled buffer
+        size_t length; //!< The length of the buffer
       };
 
       /**

@@ -61,6 +61,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const BuildJob::Result& BuildJob::SyncData()
+    {
+      Join();
+
+      has_data_ = false;
+      return result_;
+    }
+
+    //--------------------------------------------------------------------------
     bool BuildJob::ready() const
     {
       return ready_;

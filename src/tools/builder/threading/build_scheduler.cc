@@ -1,4 +1,5 @@
 #include "tools/builder/threading/build_scheduler.h"
+#include "tools/builder/builder.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -29,9 +30,10 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void BuildScheduler::IdleNotification()
+    void BuildScheduler::IdleNotification(Builder* builder)
     {
       Flush();
+      WriteCompiled(builder);
     }
 
     //--------------------------------------------------------------------------
@@ -58,6 +60,31 @@ namespace snuffbox
         }
 
         break;
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void BuildScheduler::WriteCompiled(Builder* builder)
+    {
+      BuildJob* job = nullptr;
+
+      for (size_t i = 0; i < jobs_.size(); ++i)
+      {
+        job = jobs_.at(i);
+
+        if (job->has_data() == false)
+        {
+          continue;
+        }
+
+        const BuildJob::Result& result = job->SyncData();
+
+        if (result.success == false)
+        {
+          continue;
+        }
+
+        builder->Write(job->current_item(), result.buffer, result.length);
       }
     }
 
@@ -96,7 +123,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    BuildScheduler::~BuildScheduler()
+    void BuildScheduler::Stop()
     {
       bool ready = false;
       BuildJob* current = nullptr;
@@ -123,6 +150,12 @@ namespace snuffbox
       }
 
       jobs_.clear();
+    }
+
+    //--------------------------------------------------------------------------
+    BuildScheduler::~BuildScheduler()
+    {
+      Stop();
     }
   }
 }

@@ -11,6 +11,8 @@ namespace snuffbox
 {
   namespace builder
   {
+    class Builder;
+
     /**
     * @brief Schedules build jobs to compile a file and output it to the
     *        build directory, multi-threaded
@@ -41,8 +43,10 @@ namespace snuffbox
       /**
       * @brief Notifies the builder that the application is currently idle
       *        and can flush the queue of build items
+      *
+      * @param[in] builder The builder that owns this build scheduler
       */
-      void IdleNotification();
+      void IdleNotification(Builder* builder);
 
       /**
       * @brief Joins the build jobs back to the main thread by destructing them
@@ -57,6 +61,13 @@ namespace snuffbox
       void Flush();
 
       /**
+      * @brief Writes any compiled data to disk using the builder
+      *
+      * @param[in] builder The builder that owns this build scheduler
+      */
+      void WriteCompiled(Builder* builder);
+
+      /**
       * @brief Attempts to schedule a compilation for the build jobs
       *
       * If no build job is currently available as they're already building,
@@ -68,6 +79,15 @@ namespace snuffbox
       * @return Were we able to schedule the item for build?
       */
       bool ScheduleJob(const BuildItem& item, size_t* id);
+
+      /**
+      * @brief Stops all build jobs, but waits for them to finish their current
+      *        compilation
+      *
+      * In the BuildJob itself, the thread is joined from the build thread
+      * to the main thread in its destructor.
+      */
+      void Stop();
       
     private:
 

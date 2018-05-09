@@ -64,7 +64,36 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Builder::IdleNotification()
     {
-      scheduler_.IdleNotification();
+      scheduler_.IdleNotification(this);
+    }
+
+    //--------------------------------------------------------------------------
+    void Builder::Write(
+      const BuildItem& item, 
+      const uint8_t* buffer, 
+      size_t size)
+    {
+      foundation::Path build = build_directory_;
+
+      build /= 
+        item.in.StripPath(source_directory_).NoExtension() + 
+        "." + 
+        AssetTypesToExtension(item.type);
+
+      foundation::File fout(build, foundation::FileFlags::kWrite);
+
+      if (fout.is_ok() == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kError,
+          "Cannot save file '{0}'",
+          build);
+
+        return;
+      }
+
+      fout.Write(buffer, size);
     }
 
     //--------------------------------------------------------------------------
@@ -300,6 +329,7 @@ namespace snuffbox
 
       BuildItem item;
       item.type = TypeFromExtension(path.extension());
+      item.in = path;
 
       if (item.type == AssetTypes::kUnknown)
       {
@@ -311,12 +341,6 @@ namespace snuffbox
 
         return;
       }
-
-      foundation::Path build_path = path.StripPath(source_directory_);
-      build_path = build_directory_ / build_path;
-
-      item.in = path;
-      item.out = build_path.NoExtension();
 
       scheduler_.Queue(item);
 

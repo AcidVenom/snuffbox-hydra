@@ -20,5 +20,14 @@ namespace snuffbox
       kCount,
       kUnknown = kCount,
     };
+
+    /**
+    * @brief Converts an asset type to its corresponding build extension
+    *
+    * @param[in] type The asset type
+    *
+    * @return The converted extension
+    */
+    const char* AssetTypesToExtension(AssetTypes type);
   }
 }
