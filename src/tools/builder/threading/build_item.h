@@ -19,6 +19,7 @@ namespace snuffbox
     {
       AssetTypes type; //!< The type of the build item
       foundation::Path in; //!< The path to the input source file
+      foundation::Path relative; //!< The relative path to the source file
 
       /**
       * @brief Used to sort build items by their asset type

@@ -35,6 +35,7 @@ namespace snuffbox
       struct Result
       {
         bool success; //!< Was the compilation a success?
+        foundation::String error; //!< The error if compilation failed
         const uint8_t* buffer; //!< The compiled buffer
         size_t length; //!< The length of the buffer
       };

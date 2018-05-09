@@ -74,11 +74,21 @@ namespace snuffbox
       * we wait until our next possible moment to recompile.
       *
       * @param[in] item The item to schedule
-      * @param[out] id The job that will build the file, if found
       *
       * @return Were we able to schedule the item for build?
       */
-      bool ScheduleJob(const BuildItem& item, size_t* id);
+      bool ScheduleJob(const BuildItem& item);
+
+      /**
+      * @brief Updates the build status and checks whether we finished building
+      *        yet
+      */
+      void UpdateBuildStatus();
+
+      /**
+      * @return Are we currently building?
+      */
+      bool IsBuilding() const;
 
       /**
       * @brief Stops all build jobs, but waits for them to finish their current
@@ -93,6 +103,9 @@ namespace snuffbox
 
       foundation::Vector<BuildJob*> jobs_; //!< The build jobs that exist
       BuildQueue queue_; //!< The queue of build items, ordered by asset type
+
+      bool was_building_; //!< Were we building before queuing an item?
+      uint32_t build_count_; //!< The number of items to build currently
 
       /**
       * @brief Used to safely queue items in the build queue from a different

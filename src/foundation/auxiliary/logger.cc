@@ -104,19 +104,19 @@ namespace snuffbox
         return "-";
 
       case LogSeverity::kInfo:
-        return "Info";
+        return "?";
 
       case LogSeverity::kWarning:
-        return "Warning";
+        return "!";
 
       case LogSeverity::kSuccess:
-        return "Success";
+        return "$";
 
       case LogSeverity::kError:
-        return "Error";
+        return "#";
 
       case LogSeverity::kFatal:
-        return "FATAL";
+        return "###";
       }
 
       return "<unknown>";

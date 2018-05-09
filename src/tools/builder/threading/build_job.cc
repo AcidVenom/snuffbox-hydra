@@ -32,28 +32,10 @@ namespace snuffbox
       thread_ = std::thread([&]()
       {
         result_.success = compiler_->Compile(current_item_.in);
-        ready_ = true;
-
-        if (result_.success == false)
-        {
-          foundation::Logger::LogVerbosity<1>(
-            foundation::LogChannel::kBuilder,
-            foundation::LogSeverity::kError,
-            "Could not compile '{0}'\n\t{1}",
-            current_item_.in,
-            compiler_->error());
-
-          return;
-        }
-
+        result_.error = compiler_->error();
         result_.buffer = compiler_->Data(&result_.length);
 
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kBuilder,
-          foundation::LogSeverity::kSuccess,
-          "Succesfully compiled '{0}'",
-          current_item_.in);
-
+        ready_ = true;
         has_data_ = true;
       });
 

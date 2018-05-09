@@ -10,7 +10,9 @@ namespace snuffbox
   namespace builder
   {
     //--------------------------------------------------------------------------
-    BuildScheduler::BuildScheduler()
+    BuildScheduler::BuildScheduler() :
+      was_building_(false),
+      build_count_(0)
     {
       size_t count = std::thread::hardware_concurrency();
       jobs_.resize(count);
@@ -27,6 +29,14 @@ namespace snuffbox
     {
       std::lock_guard<std::mutex> lock(queue_mutex_);
       queue_.push(item);
+
+      if (was_building_ == false)
+      {
+        build_count_ = 0;
+        was_building_ = true;
+      }
+
+      ++build_count_;
     }
 
     //--------------------------------------------------------------------------
@@ -34,26 +44,30 @@ namespace snuffbox
     {
       Flush();
       WriteCompiled(builder);
+      UpdateBuildStatus();
     }
 
     //--------------------------------------------------------------------------
     void BuildScheduler::Flush()
     {
       std::lock_guard<std::mutex> lock(queue_mutex_);
-      size_t id;
+      size_t progress;
 
       while (queue_.empty() == false)
       {
         const BuildItem& top = queue_.top();
 
-        if (ScheduleJob(top, &id) == true)
+        if (ScheduleJob(top) == true)
         {
+          progress = build_count_ - queue_.size() + 1;
+
           foundation::Logger::LogVerbosity<1>(
             foundation::LogChannel::kBuilder,
             foundation::LogSeverity::kInfo,
-            "{0}> Building '{1}'",
-            id,
-            top.in);
+            "[{0}/{1}] {2}",
+            progress,
+            build_count_,
+            top.relative);
 
           queue_.pop();
           continue;
@@ -78,18 +92,34 @@ namespace snuffbox
         }
 
         const BuildJob::Result& result = job->SyncData();
+        const BuildItem& item = job->current_item();
 
         if (result.success == false)
         {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kBuilder,
+            foundation::LogSeverity::kError,
+            "{0}> ({1}) Error:\n\t{2}",
+            i,
+            item.relative,
+            result.error);
+
           continue;
         }
 
-        builder->Write(job->current_item(), result.buffer, result.length);
+        builder->Write(item, result.buffer, result.length);
+
+        foundation::Logger::LogVerbosity<2>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kSuccess,
+          "{0}> Built '{1}'",
+          i,
+          item.relative);
       }
     }
 
     //--------------------------------------------------------------------------
-    bool BuildScheduler::ScheduleJob(const BuildItem& item, size_t* id)
+    bool BuildScheduler::ScheduleJob(const BuildItem& item)
     {
       BuildJob* job = nullptr;
 
@@ -99,11 +129,6 @@ namespace snuffbox
 
         if (job->ready() == true && job->has_data() == false)
         {
-          if (id != nullptr)
-          {
-            *id = i;
-          }
-
           if (job->Compile(item) == false)
           {
             foundation::Logger::LogVerbosity<1>(
@@ -120,6 +145,42 @@ namespace snuffbox
       }
 
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void BuildScheduler::UpdateBuildStatus()
+    {
+      if (
+        was_building_ == true &&
+        IsBuilding() == false)
+      {
+        was_building_ = false;
+
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kSuccess,
+          "Finished building {0} item(s)",
+          build_count_);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    bool BuildScheduler::IsBuilding() const
+    {
+      BuildJob* job = nullptr;
+      bool compiling = false;
+
+      for (size_t i = 0; i < jobs_.size(); ++i)
+      {
+        job = jobs_.at(i);
+        if (job->ready() == false || job->has_data() == true)
+        {
+          compiling = true;
+          break;
+        }
+      }
+
+      return compiling == true || queue_.empty() == false;
     }
 
     //--------------------------------------------------------------------------

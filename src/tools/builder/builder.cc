@@ -73,10 +73,9 @@ namespace snuffbox
       const uint8_t* buffer, 
       size_t size)
     {
-      foundation::Path build = build_directory_;
-
-      build /= 
-        item.in.StripPath(source_directory_).NoExtension() + 
+      foundation::Path build = 
+        build_directory_ /
+        item.relative.NoExtension() + 
         "." + 
         AssetTypesToExtension(item.type);
 
@@ -330,6 +329,7 @@ namespace snuffbox
       BuildItem item;
       item.type = TypeFromExtension(path.extension());
       item.in = path;
+      item.relative = path.StripPath(source_directory_);
 
       if (item.type == AssetTypes::kUnknown)
       {
