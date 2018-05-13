@@ -13,11 +13,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     D3D11Renderer::D3D11Renderer(const GraphicsWindow& window) :
-      IRenderer(window),
-      device_(nullptr),
-      swap_chain_(nullptr),
-      context_(nullptr),
-      back_buffer_(nullptr)
+      IRenderer(window)
     {
 
     }
@@ -25,7 +21,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool D3D11Renderer::Initialize()
     {
-      CoInitialize(NULL);
       adapter_ = FindAdapter();
 
       if (CreateDevice(adapter_.Get()) == false)
@@ -57,7 +52,7 @@ namespace snuffbox
     bool D3D11Renderer::CreateBackBuffer(
       ID3D11Device* device)
     {
-      ComPtr<ID3D11Texture2D> b = nullptr;
+      ComPtr<ID3D11Texture2D> b;
       
       if (D3D11Utils::Check(swap_chain_->GetBuffer(
         0,
@@ -104,8 +99,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ComPtr<IDXGIAdapter> D3D11Renderer::FindAdapter()
     {
-      ComPtr<IDXGIFactory> factory = nullptr;
-      ComPtr<IDXGIAdapter> adapter = nullptr;
+      ComPtr<IDXGIFactory> factory;
+      ComPtr<IDXGIAdapter> adapter;
 
       if (D3D11Utils::Check(CreateDXGIFactory(
         __uuidof(IDXGIFactory), 
