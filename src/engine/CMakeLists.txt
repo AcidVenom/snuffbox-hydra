@@ -18,6 +18,8 @@ SET(ServicesSources
   "services/window_service.cc"
   "services/input_service.h"
   "services/input_service.cc"
+  "services/renderer_service.h"
+  "services/renderer_service.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)

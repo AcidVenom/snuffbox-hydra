@@ -14,6 +14,8 @@ namespace snuffbox
 {
   namespace engine
   {
+    class WindowService;
+
     /**
     * @brief The application class to use as entry point for Snuffbox
     *
@@ -229,6 +231,18 @@ namespace snuffbox
       * @see Application::Shutdown
       */
       virtual void OnShutdown();
+
+      /**
+      * @brief Creates the renderer service
+      *
+      * This method should be overridden by the editor application to
+      * use a different graphics window over the GLFW window used in the
+      * regular player application.
+      *
+      * @param[in] window The window service, or nullptr if we're running editor
+      *                   mode
+      */
+      virtual void CreateRenderer(WindowService* window);
 
       /**
       * @brief Creates a service contained by the application

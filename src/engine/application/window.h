@@ -3,7 +3,10 @@
 #include "engine/input/input_filter.h"
 #include "engine/definitions/keycodes.h"
 
+#include <graphics/definitions/graphics_window.h>
+
 #include <foundation/containers/string.h>
+#include <foundation/containers/function.h>
 
 #include <cstddef>
 #include <cinttypes>
@@ -55,6 +58,16 @@ namespace snuffbox
       * @return Should the application exit?
       */
       bool ProcessEvents();
+
+      /**
+      * @brief Shows the window
+      */
+      void Show();
+
+      /**
+      * @return The native handle of this window
+      */
+      void* NativeHandle() const;
 
       /**
       * @brief As we don't have a GLFWwindow user pointer in a joystick callback
@@ -115,6 +128,14 @@ namespace snuffbox
         double x, 
         double y);
 
+      /**
+      * @see http://www.glfw.org/docs/latest/window_guide.html#window_size
+      */
+      static void GLFWWindowSizeCallback(
+        GLFWwindow* window, 
+        int width, 
+        int height);
+
     protected:
 
       /**
@@ -155,6 +176,11 @@ namespace snuffbox
       uint16_t height_; //!< The window height
 
       GLFWwindow* window_; //!< The window handle
+
+      /**
+      * @brief The callback for when the window resizes
+      */
+      graphics::GraphicsWindow::SizeCallback on_resize_;
 
       /**
       * @brief The previously connected joysticks

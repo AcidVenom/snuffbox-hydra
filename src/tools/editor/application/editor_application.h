@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/editor/windows/main_window.h"
+
 #include <engine/application/application.h>
 #include <tools/builder/builder.h>
 
@@ -52,9 +54,17 @@ namespace snuffbox
       */
       bool SetProjectDirectory(const foundation::Path& path);
 
+    protected:
+
+      /**
+      * @see Application::CreateRenderer
+      */
+      void CreateRenderer(engine::WindowService* window) override;
+
     private:
 
       builder::Builder builder_; //!< The builder service
+      foundation::UniquePtr<MainWindow> window_; //!< The main window
     };
   }
 }

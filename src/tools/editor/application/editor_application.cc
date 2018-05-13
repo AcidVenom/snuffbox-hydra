@@ -1,5 +1,7 @@
 #include "tools/editor/application/editor_application.h"
 
+#include <engine/services/renderer_service.h>
+
 namespace snuffbox
 {
   namespace editor
@@ -11,7 +13,8 @@ namespace snuffbox
       const engine::Application::Configuration& cfg)
       :
       Application(argc, argv, cfg),
-      QApplication(argc, argv)
+      QApplication(argc, argv),
+      window_(nullptr)
     {
 
     }
@@ -27,6 +30,10 @@ namespace snuffbox
         "Initializing the editor"
         );
 
+      window_ = foundation::Memory::ConstructUnique<MainWindow>(
+        &foundation::Memory::default_allocator(),
+        this);
+
       foundation::ErrorCodes err = Initialize();
 
       if (err != foundation::ErrorCodes::kSuccess)
@@ -35,10 +42,19 @@ namespace snuffbox
         return err;
       }
 
+      window_->show();
+
+      engine::RendererService* renderer = GetService<engine::RendererService>();
+      window_->BindResizeCallback([&](uint16_t width, uint16_t height)
+      {
+        renderer->OnResize(width, height);
+      });
+
       while (should_quit() == false)
       {
         processEvents();
         builder_.IdleNotification();
+        renderer->Present();
       }
 
       Shutdown();
@@ -74,6 +90,14 @@ namespace snuffbox
       }
 
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::CreateRenderer(
+      engine::WindowService* window)
+    {
+      CreateService<engine::RendererService>(
+        window_->GetGraphicsWindow());
     }
   }
 }

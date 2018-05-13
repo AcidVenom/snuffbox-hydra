@@ -3,6 +3,7 @@
 #include "engine/services/service.h"
 #include "engine/application/window.h"
 
+#include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
 
 namespace snuffbox
@@ -44,9 +45,27 @@ namespace snuffbox
       bool ProcessEvents();
 
       /**
+      * @see Window::Show
+      */
+      void Show();
+
+      /**
       * @return The window pointer
       */
       Window* GetWindow() const;
+
+      /**
+      * @return The graphics window data for this window
+      */
+      graphics::GraphicsWindow GetGraphicsWindow() const;
+
+      /**
+      * @see GraphicsWindow::SizeCallback
+      *
+      * @brief Actually binds the callback to the underlying GLFW window
+      */
+      void BindResizeCallback(
+        const graphics::GraphicsWindow::SizeCallback& cb);
 
     private:
 

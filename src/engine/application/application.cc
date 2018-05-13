@@ -7,6 +7,7 @@
 #include "engine/services/cvar_service.h"
 #include "engine/services/window_service.h"
 #include "engine/services/input_service.h"
+#include "engine/services/renderer_service.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
@@ -110,12 +111,19 @@ namespace snuffbox
       }
 
       WindowService* window = GetService<WindowService>();
+      RendererService* renderer = GetService<RendererService>();
+      window->BindResizeCallback([&](uint16_t width, uint16_t height)
+      { 
+          renderer->OnResize(width, height);
+      });
+      window->Show();
 
       while (
         should_quit_ == false &&
         window->ProcessEvents() == false)
       {
         Update(0.0f);
+        renderer->Present();
       }
 
       Shutdown();
@@ -164,6 +172,15 @@ namespace snuffbox
       CREATE_SCRIPT_SERVICE();
 
       foundation::ErrorCodes err = InitializeServices();
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
+
+      CreateRenderer(window_service);
+      err = reinterpret_cast<IService*>(
+        GetService<RendererService>())->OnInitialize(*this);
+
       if (err != foundation::ErrorCodes::kSuccess)
       {
         return err;
@@ -252,6 +269,17 @@ namespace snuffbox
     void Application::OnShutdown()
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::CreateRenderer(WindowService* window)
+    {
+      if (window == nullptr)
+      {
+        return;
+      }
+
+      CreateService<RendererService>(window->GetGraphicsWindow());
     }
 
     //--------------------------------------------------------------------------

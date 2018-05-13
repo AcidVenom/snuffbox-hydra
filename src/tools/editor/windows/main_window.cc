@@ -40,6 +40,8 @@ namespace snuffbox
         &QAction::triggered,
         this,
         &MainWindow::OpenProject);
+
+      ui_.gameWindow->installEventFilter(this);
     }
 
     //--------------------------------------------------------------------------
@@ -92,6 +94,38 @@ namespace snuffbox
     {
       app_->NotifyQuit();
       evt->accept();
+    }
+
+    //--------------------------------------------------------------------------
+    bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
+    {
+      if (evt->type() == QEvent::Paint)
+      {
+        if (on_resize_ != nullptr)
+        {
+          on_resize_(ui_.gameWindow->width(), ui_.gameWindow->height());
+        }
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    graphics::GraphicsWindow MainWindow::GetGraphicsWindow() const
+    {
+      graphics::GraphicsWindow gw;
+      gw.width = ui_.gameWindow->width();
+      gw.height = ui_.gameWindow->height();
+      gw.handle = reinterpret_cast<void*>(ui_.gameWindow->winId());
+
+      return gw;
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::BindResizeCallback(
+      const graphics::GraphicsWindow::SizeCallback& cb)
+    {
+      on_resize_ = cb;
     }
 
     //--------------------------------------------------------------------------

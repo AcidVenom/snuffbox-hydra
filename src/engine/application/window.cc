@@ -5,6 +5,16 @@
 
 #include <GLFW/glfw3.h>
 
+#ifdef SNUFF_WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#elif defined (SNUFF_LINUX)
+#define GLFW_EXPOSE_NATIVE_X11
+#else
+#error "Unsupported window implementation"
+#endif
+
+#include <GLFW/glfw3native.h>
+
 namespace snuffbox
 {
   namespace engine
@@ -36,7 +46,8 @@ namespace snuffbox
       title_(title),
       width_(width),
       height_(height),
-      window_(nullptr)
+      window_(nullptr),
+      on_resize_(nullptr)
     {
       for (size_t i = 0; i < kNumSupportedJoysticks; ++i)
       {
@@ -81,8 +92,7 @@ namespace snuffbox
       glfwSetMouseButtonCallback(window_, GLFWMouseButtonCallback);
       glfwSetCursorPosCallback(window_, GLFWMousePosCallback);
       glfwSetScrollCallback(window_, GLFWMouseScrollCallback);
-
-      glfwShowWindow(window_);
+      glfwSetWindowSizeCallback(window_, GLFWWindowSizeCallback);
 
       return true;
     }
@@ -99,6 +109,18 @@ namespace snuffbox
       glfwPollEvents();
 
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::Show()
+    {
+      glfwShowWindow(window_);
+    }
+
+    //--------------------------------------------------------------------------
+    void* Window::NativeHandle() const
+    {
+      return glfwGetWin32Window(window_);
     }
 
     //--------------------------------------------------------------------------
@@ -361,6 +383,25 @@ namespace snuffbox
       e.delta = static_cast<int>(y);
 
       ud->BufferEvent(&e);
+    }
+
+    //--------------------------------------------------------------------------
+    void Window::GLFWWindowSizeCallback(
+      GLFWwindow* window,
+      int width,
+      int height)
+    {
+      Window* ud = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      if (ud == nullptr)
+      {
+        return;
+      }
+
+      if (ud->on_resize_ != nullptr)
+      {
+        ud->on_resize_(width, height);
+      }
     }
 
     //--------------------------------------------------------------------------

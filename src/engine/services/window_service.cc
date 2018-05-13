@@ -52,6 +52,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void WindowService::Show()
+    {
+      window_->Show();
+    }
+
+    //--------------------------------------------------------------------------
     Window* WindowService::GetWindow() const
     {
       if (window_ == nullptr)
@@ -60,6 +66,24 @@ namespace snuffbox
       }
 
       return window_.get();
+    }
+
+    //--------------------------------------------------------------------------
+    graphics::GraphicsWindow WindowService::GetGraphicsWindow() const
+    {
+      graphics::GraphicsWindow gw;
+      gw.width = window_->width_;
+      gw.height = window_->height_;
+      gw.handle = window_->NativeHandle();
+
+      return gw;
+    }
+
+    //--------------------------------------------------------------------------
+    void WindowService::BindResizeCallback(
+      const graphics::GraphicsWindow::SizeCallback& cb)
+    {
+      window_->on_resize_ = cb;
     }
   }
 }

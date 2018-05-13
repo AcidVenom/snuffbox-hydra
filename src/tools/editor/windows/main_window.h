@@ -3,6 +3,7 @@
 #include "ui_main_window.h"
 #include "tools/editor/windows/console.h"
 
+#include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
 
 #include <qmainwindow.h>
@@ -56,6 +57,23 @@ namespace snuffbox
       */
       void closeEvent(QCloseEvent* evt) override;
 
+      /**
+      * @brief Used to send resize events and input data from Qt to the engine
+      */
+      bool eventFilter(QObject* obj, QEvent* evt) override;
+
+      /**
+      * @return The graphics window data from the central player widget
+      */
+      graphics::GraphicsWindow GetGraphicsWindow() const;
+
+      /**
+      * @see GraphicsWindow::SizeCallback
+      *
+      * @brief Actually bind the callback here
+      */
+      void BindResizeCallback(const graphics::GraphicsWindow::SizeCallback& cb);
+
     private slots:
 
       /**
@@ -74,6 +92,11 @@ namespace snuffbox
       foundation::UniquePtr<Console> console_; //!< The console
 
       QString project_dir_; //!< The current project directory
+
+      /**
+      * @see GraphicsWindow::SizeCallback
+      */
+      graphics::GraphicsWindow::SizeCallback on_resize_;
     };
   }
 }
