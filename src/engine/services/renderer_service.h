@@ -11,6 +11,8 @@ namespace snuffbox
 {
   namespace engine
   {
+    class CVarService;
+
     /**
     * @brief Used to interface the native rendering implementations and display
     *        graphics contents on the screen, in a specified window
@@ -27,8 +29,16 @@ namespace snuffbox
       *        the renderer should run in
       *
       * @param[in] window The graphics window to assign
+      * @param[in] cvar The CVar service
       */
-      RendererService(const graphics::GraphicsWindow& gw);
+      RendererService(
+        const graphics::GraphicsWindow& gw,
+        CVarService* cvar);
+
+      /**
+      * @brief Registers all rendering related CVars
+      */
+      void RegisterCVars();
 
       /**
       * @brief Presents the renderer to the bound graphics window
@@ -58,6 +68,8 @@ namespace snuffbox
       * @brief The underlying renderer
       */
       foundation::UniquePtr<graphics::Renderer> renderer_;
+
+      CVarService* cvar_; //!< The current CVar service
     };
   }
 }

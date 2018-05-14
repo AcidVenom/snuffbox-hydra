@@ -84,7 +84,7 @@ namespace snuffbox
       /**
       * @brief A mapping from a file path to a resource
       */
-      static Map<String, ResourceData> resources_;
+      static UMap<String, ResourceData> resources_;
     };
   }
 }

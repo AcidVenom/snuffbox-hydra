@@ -6,6 +6,10 @@ SET(RootSources
 
 SET(DefinitionsSources
   "definitions/graphics_window.h"
+  "definitions/viewport.h"
+  "definitions/vertex.h"
+  "definitions/texture_formats.h"
+  "definitions/render_target.h"
 )
 
 IF (SNUFF_WIN32)

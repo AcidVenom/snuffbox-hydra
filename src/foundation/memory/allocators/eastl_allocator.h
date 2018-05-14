@@ -58,6 +58,13 @@ namespace snuffbox
       bool operator==(const EASTLAllocator& x);
 
       /**
+      * @brief Comparison operator, always returns false
+      *
+      * @see EASTLAllocator::operator==
+      */
+      bool operator!=(const EASTLAllocator& x);
+
+      /**
       * @brief Allocate with a given size
       *
       * @param[in] n The size to allocate

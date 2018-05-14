@@ -4,6 +4,8 @@
 
 #include <comdef.h>
 
+#include <d3d11.h>
+
 namespace snuffbox
 {
   namespace graphics

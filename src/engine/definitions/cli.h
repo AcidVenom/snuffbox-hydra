@@ -33,6 +33,6 @@ namespace snuffbox
     /**
     * @brief A container to store the CLI definitions
     */
-    using CLI = foundation::Map<foundation::String, foundation::String>;
+    using CLI = foundation::UMap<foundation::String, foundation::String>;
   }
 }

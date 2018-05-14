@@ -1,6 +1,7 @@
 #include "tools/editor/application/editor_application.h"
 
 #include <engine/services/renderer_service.h>
+#include <engine/services/cvar_service.h>
 
 namespace snuffbox
 {
@@ -97,7 +98,8 @@ namespace snuffbox
       engine::WindowService* window)
     {
       CreateService<engine::RendererService>(
-        window_->GetGraphicsWindow());
+        window_->GetGraphicsWindow(),
+        GetService<engine::CVarService>());
     }
   }
 }

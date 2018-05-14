@@ -254,7 +254,7 @@ namespace snuffbox
     */
     class ScriptObject : 
       public ScriptValue, 
-      public foundation::Map<foundation::String, ScriptHandle>
+      public foundation::UMap<foundation::String, ScriptHandle>
     {
 
     public:

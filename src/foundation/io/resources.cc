@@ -5,7 +5,7 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
-    Map<String, Resources::ResourceData> Resources::resources_;
+    UMap<String, Resources::ResourceData> Resources::resources_;
 
     //--------------------------------------------------------------------------
     void Resources::Register(
@@ -28,7 +28,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     const Resources::ResourceData* Resources::GetResource(const Path& path)
     {
-      Map<String, ResourceData>::const_iterator it = 
+      UMap<String, ResourceData>::const_iterator it = 
         resources_.find(path.ToString());
 
       if (it == resources_.end())

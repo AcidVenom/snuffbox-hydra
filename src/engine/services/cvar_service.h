@@ -180,7 +180,7 @@ namespace snuffbox
       * @brief The CVar map, which consists of a string to value relationship
       */
       using CVarMap = 
-        foundation::Map<foundation::String, foundation::UniquePtr<CVarValue>>;
+        foundation::UMap<foundation::String, foundation::UniquePtr<CVarValue>>;
 
       /**
       * @brief The list of registered CVar values

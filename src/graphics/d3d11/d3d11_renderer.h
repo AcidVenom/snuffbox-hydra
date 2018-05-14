@@ -36,9 +36,24 @@ namespace snuffbox
       bool Initialize() override;
 
       /**
+      * @see IRenderer::Clear
+      */
+      void Clear(const glm::vec4& color) override;
+
+      /**
+      * @see IRenderer::Clear
+      */
+      void Clear(const RenderTarget& rt, const glm::vec4& color) override;
+
+      /**
+      * @see IRenderer::SetViewport
+      */
+      void SetViewport(const Viewport& vp) override;
+
+      /**
       * @see IRenderer::Present
       */
-      void Present() override;
+      void Present(bool vsync) override;
 
     protected:
 

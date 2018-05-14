@@ -1,6 +1,10 @@
 #pragma once
 
 #include "graphics/definitions/graphics_window.h"
+#include "graphics/definitions/viewport.h"
+#include "graphics/definitions/render_target.h"
+
+#include <glm/glm.hpp>
 
 namespace snuffbox
 {
@@ -32,9 +36,34 @@ namespace snuffbox
       virtual bool Initialize() = 0;
 
       /**
-      * @brief Presents the renderer in the window after rendering
+      * @brief Sets the viewport of the renderer to use for the upcoming draw
+      *        calls
+      *
+      * @param[in] vp The viewport to set
       */
-      virtual void Present() = 0;
+      virtual void SetViewport(const Viewport& vp) = 0;
+
+      /**
+      * @brief Clears the back buffer
+      *
+      * @param[in] color The color to clear the back buffer with
+      */
+      virtual void Clear(const glm::vec4& color) = 0;
+
+      /**
+      * @brief Clears a specified render target
+      *
+      * @param[in] rt The render target to clear
+      * @param[in] color The color to clear the render target with
+      */
+      virtual void Clear(const RenderTarget& rt, const glm::vec4& color) = 0;
+
+      /**
+      * @brief Presents the renderer in the window after rendering
+      *
+      * @param[in] vsync Should vertical sync be enabled?
+      */
+      virtual void Present(bool vsync) = 0;
 
       /**
       * @brief This method should be called when the window is resized to

@@ -178,8 +178,9 @@ namespace snuffbox
       }
 
       CreateRenderer(window_service);
-      err = reinterpret_cast<IService*>(
-        GetService<RendererService>())->OnInitialize(*this);
+      RendererService* renderer = GetService<RendererService>();
+
+      err = reinterpret_cast<IService*>(renderer)->OnInitialize(*this);
 
       if (err != foundation::ErrorCodes::kSuccess)
       {
@@ -189,6 +190,7 @@ namespace snuffbox
       OnInitialize();
       SCRIPT_CALLBACK(Initialize);
 
+      renderer->RegisterCVars();
       cvar_service->RegisterFromCLI(cli_);
 
       if (window_service != nullptr)
@@ -206,8 +208,6 @@ namespace snuffbox
 
       SCRIPT_CALLBACK(Update, dt);
       OnUpdate(dt);
-
-      std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
     //--------------------------------------------------------------------------
@@ -279,7 +279,9 @@ namespace snuffbox
         return;
       }
 
-      CreateService<RendererService>(window->GetGraphicsWindow());
+      CreateService<RendererService>(
+        window->GetGraphicsWindow(),
+        GetService<CVarService>());
     }
 
     //--------------------------------------------------------------------------

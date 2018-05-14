@@ -44,6 +44,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool EASTLAllocator::operator!=(const EASTLAllocator& x)
+    {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
     void* EASTLAllocator::allocate(size_t n, int flags)
     {
       return Memory::Allocate(n, &allocator_);

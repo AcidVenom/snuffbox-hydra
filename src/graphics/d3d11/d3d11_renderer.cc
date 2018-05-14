@@ -49,6 +49,31 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void D3D11Renderer::Clear(const glm::vec4& color)
+    {
+      context_->ClearRenderTargetView(back_buffer_.Get(), &color[0]);
+    }
+
+    //--------------------------------------------------------------------------
+    void D3D11Renderer::Clear(const RenderTarget& rt, const glm::vec4& color)
+    {
+      //!< @todo Implement this function once render targets are a thing
+    }
+
+    //--------------------------------------------------------------------------
+    void D3D11Renderer::SetViewport(const Viewport& vp)
+    {
+      D3D11_VIEWPORT viewport = D3D11Utils::EmptyStruct<D3D11_VIEWPORT>();
+
+      viewport.TopLeftX = vp.x;
+      viewport.TopLeftY = vp.y;
+      viewport.Width = vp.width;
+      viewport.Height = vp.height;
+
+      context_->RSSetViewports(1, &viewport);
+    }
+
+    //--------------------------------------------------------------------------
     bool D3D11Renderer::CreateBackBuffer(
       ID3D11Device* device)
     {
@@ -74,25 +99,10 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void D3D11Renderer::Present()
+    void D3D11Renderer::Present(bool vsync)
     {
-      D3D11_VIEWPORT viewport = D3D11Utils::EmptyStruct<D3D11_VIEWPORT>();
-      const GraphicsWindow& gw = window();
-
-      viewport.TopLeftX = 0;
-      viewport.TopLeftY = 0;
-      viewport.Width = gw.width;
-      viewport.Height = gw.height;
-
-      context_->RSSetViewports(1, &viewport);
       context_->OMSetRenderTargets(1, back_buffer_.GetAddressOf(), nullptr);
-
-      float color[4] = {0.0f, 0.5f, 1.0f, 1.0f};
-      context_->ClearRenderTargetView(
-        back_buffer_.Get(), 
-        color);
-
-      swap_chain_->Present(0, 0);
+      swap_chain_->Present(vsync == true ? 1 : 0, 0);
       context_->OMSetRenderTargets(0, nullptr, nullptr);
     }
 
