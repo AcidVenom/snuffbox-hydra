@@ -39,3 +39,13 @@ disabled for full C++ games. By setting **SNUFF_SCRIPTING** to **disabled**, *SN
 in the preprocessor, compiling away all scripting definitions. CMake will make sure to not include any script
 related source files in the engine (apart from *src/scripting/script_class.h*). It is advised to do a full rebuild
 when switching the scripting environment.
+
+# CVars
+
+The current available CVars are the following:
+
+|Name     |Description                           |Default    |
+|---------|--------------------------------------|-----------|
+|r_vsync  |Should VSync be enabled?              |true       |
+|r_width  |The width of the renderer in pixels   |1280       |
+|r_height |The height of the renderer in pixels  |720        |
