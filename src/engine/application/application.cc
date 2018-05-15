@@ -190,13 +190,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Application::CreateServices()
     {
-      CVarService* cvar_service = CreateService<CVarService>();
+      CreateService<CVarService>();
+
       InputService* input_service = CreateService<InputService>();
 
-      WindowService* window_service = nullptr;
       if (config_.editor_mode == false)
       {
-        window_service = CreateService<WindowService>(input_service);
+        CreateService<WindowService>(input_service);
       }
 
       CREATE_SCRIPT_SERVICE();
