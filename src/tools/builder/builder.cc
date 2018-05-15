@@ -22,6 +22,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool Builder::Initialize(const foundation::Path& source_dir)
     {
+      listener_.Stop();
+
       if (foundation::Directory::Exists(source_dir) == false)
       {
         foundation::Logger::LogVerbosity<1>(
@@ -137,12 +139,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Builder::SyncDirectories()
     {
-      if (is_ok_ == false)
-      {
-        return;
-      }
+      bool exists = foundation::Directory::Exists(build_directory_);
 
-      if (CreateBuildDirectory() == false)
+      if (is_ok_ == false || CreateBuildDirectory() == false)
       {
         return;
       }
@@ -153,11 +152,21 @@ namespace snuffbox
 
       source_tree_.Open(source_directory_);
       SyncItems(source_tree_.items());
+
+      if (exists == false)
+      {
+        FindFileChanges(source_tree_.items());
+      }
     }
 
     //--------------------------------------------------------------------------
     void Builder::FindFileChanges(const ItemList& items)
     {
+      if (is_ok_ == false || CreateBuildDirectory() == false)
+      {
+        return;
+      }
+
       foundation::Path current;
 
       for (size_t i = 0; i < items.size(); ++i)
@@ -342,13 +351,13 @@ namespace snuffbox
         return;
       }
 
-      scheduler_.Queue(item);
-
-      foundation::Logger::LogVerbosity<2>(
+      foundation::Logger::LogVerbosity<3>(
         foundation::LogChannel::kBuilder,
         foundation::LogSeverity::kDebug,
         "Marked '{0}' for rebuild",
         path);
+
+      scheduler_.Queue(item);
     }
 
     //--------------------------------------------------------------------------

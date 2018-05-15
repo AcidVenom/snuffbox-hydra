@@ -109,7 +109,7 @@ namespace snuffbox
 
         builder->Write(item, result.buffer, result.length);
 
-        foundation::Logger::LogVerbosity<2>(
+        foundation::Logger::LogVerbosity<3>(
           foundation::LogChannel::kBuilder,
           foundation::LogSeverity::kSuccess,
           "{0}> Built '{1}'",

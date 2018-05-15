@@ -72,11 +72,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path Path::operator/(const String& other) const
     {
-      if (is_directory_ == false && extension_.size() > 0)
-      {
-        return *this;
-      }
-
       String p = path_;
       p += p.size() == 0 ? ConvertSlashes(other) : PrependSlash(other);
 
