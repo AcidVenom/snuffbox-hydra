@@ -22,6 +22,7 @@ GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #endif
 
 #include <foundation/io/resources.h>
+#include <foundation/auxiliary/timer.h>
 
 #include <thread>
 #include <chrono>
@@ -121,12 +122,20 @@ namespace snuffbox
 
       window->Show();
 
+      foundation::Timer delta_time("delta_time");
+      float dt = 0.0f;
+
       while (
         should_quit_ == false &&
         window->ProcessEvents() == false)
       {
-        Update(0.0f);
+        delta_time.Start();
+
+        Update(dt);
         renderer->Render();
+
+        delta_time.Stop();
+        dt = delta_time.Elapsed(foundation::TimeUnits::kMillisecond);
       }
 
       Shutdown();

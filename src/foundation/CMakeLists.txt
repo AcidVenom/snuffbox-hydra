@@ -2,6 +2,7 @@ SET(DefinitionsSources
   "definitions/error_codes.h"
   "definitions/logging.h"
   "definitions/io.h"
+  "definitions/time_units.h"
 )
 
 SET(MemorySources
@@ -33,6 +34,8 @@ SET(AuxiliarySources
   "auxiliary/pointer_math.cc"
   "auxiliary/string_utils.h"
   "auxiliary/string_utils.cc"
+  "auxiliary/timer.h"
+  "auxiliary/timer.cc"
 )
 
 SET(IOSources
