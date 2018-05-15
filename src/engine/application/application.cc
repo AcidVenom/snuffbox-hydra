@@ -111,11 +111,14 @@ namespace snuffbox
       }
 
       WindowService* window = GetService<WindowService>();
+
       RendererService* renderer = GetService<RendererService>();
+
       window->BindResizeCallback([&](uint16_t width, uint16_t height)
       { 
           renderer->OnResize(width, height);
       });
+
       window->Show();
 
       while (
@@ -123,7 +126,7 @@ namespace snuffbox
         window->ProcessEvents() == false)
       {
         Update(0.0f);
-        renderer->Present();
+        renderer->Render();
       }
 
       Shutdown();
@@ -159,17 +162,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes Application::Initialize()
     {
-      CVarService* cvar_service = CreateService<CVarService>();
-
-      WindowService* window_service = nullptr;
-      if (config_.editor_mode == false)
-      {
-        window_service = CreateService<WindowService>();
-      }
-
-      InputService* input_service = CreateService<InputService>();
-
-      CREATE_SCRIPT_SERVICE();
+      CreateServices();
 
       foundation::ErrorCodes err = InitializeServices();
       if (err != foundation::ErrorCodes::kSuccess)
@@ -177,28 +170,99 @@ namespace snuffbox
         return err;
       }
 
-      CreateRenderer(window_service);
-      RendererService* renderer = GetService<RendererService>();
-
-      err = reinterpret_cast<IService*>(renderer)->OnInitialize(*this);
-
-      if (err != foundation::ErrorCodes::kSuccess)
-      {
-        return err;
-      }
+      RegisterCVars();
 
       OnInitialize();
       SCRIPT_CALLBACK(Initialize);
 
-      renderer->RegisterCVars();
-      cvar_service->RegisterFromCLI(cli_);
+      return foundation::ErrorCodes::kSuccess;
+    }
 
-      if (window_service != nullptr)
+    //--------------------------------------------------------------------------
+    void Application::CreateServices()
+    {
+      CVarService* cvar_service = CreateService<CVarService>();
+      InputService* input_service = CreateService<InputService>();
+
+      WindowService* window_service = nullptr;
+      if (config_.editor_mode == false)
       {
-        input_service->RegisterInputFilter(window_service->GetWindow());
+        window_service = CreateService<WindowService>(input_service);
+      }
+
+      CREATE_SCRIPT_SERVICE();
+    }
+
+    //--------------------------------------------------------------------------
+    foundation::ErrorCodes Application::InitializeServices()
+    {
+      foundation::ErrorCodes err;
+
+      for (size_t i = 0; i < services_.size(); ++i)
+      {
+        if ((err = services_.at(i)->OnInitialize(*this)) 
+          != foundation::ErrorCodes::kSuccess)
+        {
+          Debug::LogVerbosity<1>(
+            foundation::LogSeverity::kFatal,
+            "Could not initialize service '{0}'",
+            services_.at(i)->name());
+
+          return err;
+        }
+      }
+
+      CreateRenderer();
+      err = InitializeRenderer();
+
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        Debug::LogVerbosity<1>(
+          foundation::LogSeverity::kFatal,
+          "Could not initialize the renderer service");
+
+        return err;
       }
 
       return foundation::ErrorCodes::kSuccess;
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::ShutdownServices()
+    {
+      for (int i = static_cast<int>(services_.size()) - 1; i >= 0; --i)
+      {
+        services_.at(i)->OnShutdown(*this);
+      }
+
+      services_.clear();
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::CreateRenderer()
+    {
+      CreateService<RendererService>(
+        GetService<WindowService>()->GetGraphicsWindow());
+    }
+
+    //--------------------------------------------------------------------------
+    foundation::ErrorCodes Application::InitializeRenderer()
+    {
+      RendererService* renderer = GetService<RendererService>();
+      return reinterpret_cast<IService*>(renderer)->OnInitialize(*this);
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::RegisterCVars()
+    {
+      CVarService* cvar = GetService<CVarService>();
+
+      for (size_t i = 0; i < services_.size(); ++i)
+      {
+        services_.at(i)->RegisterCVars(cvar);
+      }
+
+      cvar->RegisterFromCLI(cli_);
     }
 
     //--------------------------------------------------------------------------
@@ -269,53 +333,6 @@ namespace snuffbox
     void Application::OnShutdown()
     {
 
-    }
-
-    //--------------------------------------------------------------------------
-    void Application::CreateRenderer(WindowService* window)
-    {
-      if (window == nullptr)
-      {
-        return;
-      }
-
-      CreateService<RendererService>(
-        window->GetGraphicsWindow(),
-        GetService<CVarService>());
-    }
-
-    //--------------------------------------------------------------------------
-    foundation::ErrorCodes Application::InitializeServices()
-    {
-      foundation::ErrorCodes err;
-
-      for (size_t i = 0; i < services_.size(); ++i)
-      {
-        if ((err = services_.at(i)->OnInitialize(*this)) 
-          != foundation::ErrorCodes::kSuccess)
-        {
-          Debug::LogVerbosity<1>(
-            foundation::LogSeverity::kFatal,
-            "Could not initialize service '{0}'",
-            services_.at(i)->name()
-            );
-
-          return err;
-        }
-      }
-
-      return foundation::ErrorCodes::kSuccess;
-    }
-
-    //--------------------------------------------------------------------------
-    void Application::ShutdownServices()
-    {
-      for (int i = static_cast<int>(services_.size()) - 1; i >= 0; --i)
-      {
-        services_.at(i)->OnShutdown(*this);
-      }
-
-      services_.clear();
     }
   }
 }

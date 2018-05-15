@@ -29,21 +29,13 @@ namespace snuffbox
       *        the renderer should run in
       *
       * @param[in] window The graphics window to assign
-      * @param[in] cvar The CVar service
       */
-      RendererService(
-        const graphics::GraphicsWindow& gw,
-        CVarService* cvar);
+      RendererService(const graphics::GraphicsWindow& gw);
 
       /**
-      * @brief Registers all rendering related CVars
+      * @brief Presents the renderer and its data to the bound graphics window
       */
-      void RegisterCVars();
-
-      /**
-      * @brief Presents the renderer to the bound graphics window
-      */
-      void Present();
+      void Render();
 
       /**
       * @see GraphicsWindow::SizeCallback
@@ -62,6 +54,11 @@ namespace snuffbox
       */
       void OnShutdown(Application& app) override;
 
+      /**
+      * @see IService::RegisterCVars
+      */
+      void RegisterCVars(CVarService* cvar) override;
+
     private:
 
       /**
@@ -70,6 +67,10 @@ namespace snuffbox
       foundation::UniquePtr<graphics::Renderer> renderer_;
 
       CVarService* cvar_; //!< The current CVar service
+
+      const static bool kDefaultVsync_; //!< The default r_vsync value
+      const static double kDefaultWidth_; //!< The default r_width value
+      const static double kDefaultHeight_; //!< The default r_height value
     };
   }
 }

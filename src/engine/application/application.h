@@ -136,12 +136,67 @@ namespace snuffbox
       /**
       * @brief Initializes the application
       *
-      * Calls Application::OnInitialize
+      * The initialization order is as follows:
+      *
+      * 1) Application::CreateServices
+      * 2) Application::InitializeServices
+      * 3) Application::RegisterCVars
+      * 4) Application::OnInitialize
+      * 5) Optionally call the script's OnInitialize
       *
       * @return The error code, or ErrorCodes::kSuccess if everything
       *         was initialized succesfully
       */
       foundation::ErrorCodes Initialize();
+
+      /**
+      * @brief Create all required services
+      */
+      void CreateServices();
+
+      /**
+      * @brief Initializes all services
+      *
+      * After initialization of the main services, the renderer service is
+      * created and initialized as well
+      *
+      * @see Application::CreateRenderer
+      * @see Application::InitializeRenderer
+      *
+      * @return The error code, or ErrorCodes::kSuccess if every service
+      *         was initialized succesfully
+      */
+      foundation::ErrorCodes InitializeServices();
+
+      /**
+      * @brief Shuts down all services
+      *
+      * @remarks All memory should be deallocated appropriately here
+      */
+      void ShutdownServices();
+
+      /**
+      * @brief Creates the renderer service
+      *
+      * This method should be overridden by the editor application to
+      * use a different graphics window over the GLFW window used in the
+      * regular player application.
+      */
+      virtual void CreateRenderer();
+
+      /**
+      * @brief Initializes the renderer after initializing all other services
+      *
+      * @return The error code, or ErrorCodes::kSuccess if initialization was
+      *         a success
+      */
+      foundation::ErrorCodes InitializeRenderer();
+
+      /**
+      * @brief Registers all CVars from the different systems and set
+      *        the CVars from the command-line
+      */
+      void RegisterCVars();
 
       /**
       * @brief Calls the update functions, to update data real-time
@@ -233,18 +288,6 @@ namespace snuffbox
       virtual void OnShutdown();
 
       /**
-      * @brief Creates the renderer service
-      *
-      * This method should be overridden by the editor application to
-      * use a different graphics window over the GLFW window used in the
-      * regular player application.
-      *
-      * @param[in] window The window service, or nullptr if we're running editor
-      *                   mode
-      */
-      virtual void CreateRenderer(WindowService* window);
-
-      /**
       * @brief Creates a service contained by the application
       *
       * @tparam T A service derived from IService
@@ -257,21 +300,6 @@ namespace snuffbox
       */
       template <typename T, typename ... Args>
       T* CreateService(Args&&... args);
-
-      /**
-      * @brief Initializes all services
-      *
-      * @return The error code, or ErrorCodes::kSuccess if every service
-      *         was initialized succesfully
-      */
-      foundation::ErrorCodes InitializeServices();
-
-      /**
-      * @brief Shuts down all services
-      *
-      * @remarks All memory should be deallocated appropriately here
-      */
-      void ShutdownServices();
 
     private:
 

@@ -1,4 +1,5 @@
 #include "engine/services/window_service.h"
+#include "engine/services/input_service.h"
 #include "engine/application/application.h"
 
 namespace snuffbox
@@ -6,8 +7,10 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    WindowService::WindowService() :
-      ServiceBase<WindowService>("WindowService")
+    WindowService::WindowService(InputService* input) :
+      ServiceBase<WindowService>("WindowService"),
+      input_(input),
+      window_(nullptr)
     {
 
     }
@@ -34,6 +37,8 @@ namespace snuffbox
         window_.reset();
         return foundation::ErrorCodes::kCreateWindowError;
       }
+
+      input_->RegisterInputFilter(window_.get());
 
       return foundation::ErrorCodes::kSuccess;
     }

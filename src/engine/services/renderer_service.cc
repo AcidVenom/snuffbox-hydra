@@ -8,12 +8,14 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    RendererService::RendererService(
-      const graphics::GraphicsWindow& gw,
-      CVarService* cvar) 
-      :
+    const bool RendererService::kDefaultVsync_ = true;
+    const double RendererService::kDefaultWidth_ = 1280.0;
+    const double RendererService::kDefaultHeight_ = 720.0;
+
+    //--------------------------------------------------------------------------
+    RendererService::RendererService(const graphics::GraphicsWindow& gw) :
       ServiceBase<RendererService>("RendererService"),
-      cvar_(cvar)
+      cvar_(nullptr)
     {
       renderer_ = foundation::Memory::ConstructUnique<graphics::Renderer>(
         &foundation::Memory::default_allocator(),
@@ -21,35 +23,30 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void RendererService::RegisterCVars()
+    void RendererService::RegisterCVars(CVarService* cvar)
     {
-      cvar_->Register("r_vsync", "Should VSync be enabled?", true);
-      cvar_->Register("r_width", "The rendering width in pixels", 1280.0);
-      cvar_->Register("r_height", "The rendering height in pixels", 720.0);
+      cvar->Register("r_vsync", "Should VSync be enabled?", kDefaultVsync_);
+      cvar->Register("r_width", "Renderer width in pixels", kDefaultWidth_);
+      cvar->Register("r_height", "Renderer height in pixels", kDefaultHeight_);
+
+      cvar_ = cvar;
     }
 
     //--------------------------------------------------------------------------
-    void RendererService::Present()
+    void RendererService::Render()
     {
       if (renderer_ == nullptr)
       {
         return;
       }
 
-      bool vsync = static_cast<CVar<bool>*>(cvar_->Get("r_vsync"))->value();
+      bool sync = cvar_->Get<bool>("r_vsync");
+      float w = cvar_->Get<float>("r_width");
+      float h = cvar_->Get<float>("r_height");
 
-      double width 
-        = static_cast<CVar<double>*>(cvar_->Get("r_width"))->value();
-
-      double height 
-        = static_cast<CVar<double>*>(cvar_->Get("r_height"))->value();
-
-      float fwidth = static_cast<float>(width);
-      float fheight = static_cast<float>(height);
-
-      renderer_->SetViewport(graphics::Viewport{0.0f, 0.0f, fwidth, fheight});
-      renderer_->Clear(glm::vec4{0.0f, 0.5, 1.0f, 1.0f});
-      renderer_->Present(vsync);
+      renderer_->SetViewport(graphics::Viewport{ 0.0f, 0.0f, w, h });
+      renderer_->Clear(glm::vec4{ 0.0f, 0.5, 1.0f, 1.0f });
+      renderer_->Present(sync);
     }
 
     //--------------------------------------------------------------------------

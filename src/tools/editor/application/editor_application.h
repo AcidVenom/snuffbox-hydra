@@ -59,7 +59,7 @@ namespace snuffbox
       /**
       * @see Application::CreateRenderer
       */
-      void CreateRenderer(engine::WindowService* window) override;
+      void CreateRenderer() override;
 
     private:
 

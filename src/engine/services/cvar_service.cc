@@ -31,7 +31,7 @@ namespace snuffbox
       {
         const foundation::String& name = it->first;
 
-        if ((v = Get(name)) == nullptr)
+        if ((v = GetRaw(name)) == nullptr)
         {
           value = it->second.c_str();
           cname = name.c_str();
@@ -102,7 +102,7 @@ namespace snuffbox
     void CVarService::LogValue(const foundation::String& name) const
     {
       CVarValue* v;
-      if ((v = Get(name)) == nullptr)
+      if ((v = GetRaw(name)) == nullptr)
       {
         Debug::LogVerbosity<1>(foundation::LogSeverity::kDebug, "<undefined>");
         return;
@@ -124,7 +124,7 @@ namespace snuffbox
     void CVarService::LogDescription(const foundation::String& name) const
     {
       CVarValue* v;
-      if ((v = Get(name)) == nullptr)
+      if ((v = GetRaw(name)) == nullptr)
       {
         Debug::LogVerbosity<1>(foundation::LogSeverity::kDebug, "<undefined>");
         return;
@@ -162,7 +162,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    CVarValue* CVarService::Get(const foundation::String& name) const
+    CVarValue* CVarService::GetRaw(const foundation::String& name) const
     {
       CVarMap::const_iterator it = registered_.find(name);
 

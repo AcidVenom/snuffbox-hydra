@@ -43,19 +43,20 @@ namespace snuffbox
         return err;
       }
 
-      window_->show();
-
       engine::RendererService* renderer = GetService<engine::RendererService>();
+
       window_->BindResizeCallback([&](uint16_t width, uint16_t height)
       {
         renderer->OnResize(width, height);
       });
 
+      window_->show();
+
       while (should_quit() == false)
       {
         processEvents();
+        renderer->Render();
         builder_.IdleNotification();
-        renderer->Present();
       }
 
       Shutdown();
@@ -94,12 +95,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::CreateRenderer(
-      engine::WindowService* window)
+    void EditorApplication::CreateRenderer()
     {
-      CreateService<engine::RendererService>(
-        window_->GetGraphicsWindow(),
-        GetService<engine::CVarService>());
+      CreateService<engine::RendererService>(window_->GetGraphicsWindow());
     }
   }
 }

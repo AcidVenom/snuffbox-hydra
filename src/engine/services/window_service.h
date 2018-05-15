@@ -10,6 +10,8 @@ namespace snuffbox
 {
   namespace engine
   {
+    class InputService;
+
     /**
     * @brief The window service, which creates the main window if the engine
     *        is ran outside of the editor
@@ -22,9 +24,12 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Default constructor
+      * @brief Construct by providing the input service to register
+      *        on as an input filter
+      *
+      * @param[in] input The input service
       */
-      WindowService();
+      WindowService(InputService* input);
       
       /**
       * @see IService::OnInitialize
@@ -69,6 +74,7 @@ namespace snuffbox
 
     private:
 
+      InputService* input_; //!< The input service
       foundation::UniquePtr<Window> window_; //!< The current window
     };
   }

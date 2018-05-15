@@ -149,7 +149,19 @@ namespace snuffbox
       *
       * @return The retrieved CVar, or nullptr if it doesn't exist
       */
-      CVarValue* Get(const foundation::String& name) const;
+      CVarValue* GetRaw(const foundation::String& name) const;
+
+      /**
+      * @brief Retrieves a typed CVar by name
+      *
+      * @see CVarService::GetRaw
+      *
+      * @param[in] def The default value if the CVar doesn't exist
+      *
+      * @return The retrieved value, or the default if it doesn't exist
+      */
+      template <typename T>
+      T Get(const foundation::String& name, const T& def = T()) const;
 
       /**
       * @brief Checks if a CVar value exists
@@ -212,6 +224,50 @@ namespace snuffbox
         });
 
       return ptr;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T CVarService::Get(
+      const foundation::String& name, 
+      const T& def) const
+    {
+      CVarValue* v = GetRaw(name);
+
+      if (v == nullptr)
+      {
+        return def;
+      }
+
+      return static_cast<CVar<T>*>(v)->value();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline int CVarService::Get(
+      const foundation::String& name,
+      const int& def) const
+    {
+      return static_cast<int>(Get<double>(name, static_cast<double>(def)));
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline unsigned int CVarService::Get(
+      const foundation::String& name,
+      const unsigned int& def) const
+    {
+      return 
+        static_cast<unsigned int>(Get<double>(name, static_cast<double>(def)));
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline float CVarService::Get(
+      const foundation::String& name,
+      const float& def) const
+    {
+      return static_cast<float>(Get<double>(name, static_cast<double>(def)));
     }
   }
 }

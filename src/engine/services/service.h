@@ -10,6 +10,7 @@ namespace snuffbox
   namespace engine
   {
     class Application;
+    class CVarService;
 
     template <typename T>
     class ServiceBase;
@@ -73,6 +74,13 @@ namespace snuffbox
       * @param[in] app The application the service was created from
       */
       virtual void OnShutdown(Application& app) = 0;
+
+      /**
+      * @brief To register CVars of a system, this method should be overridden
+      *
+      * @param[in] cvar The current CVar service from the application
+      */
+      virtual void RegisterCVars(CVarService* cvar);
 
       /**
       * @return The name of this service

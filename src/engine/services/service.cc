@@ -12,6 +12,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void IService::RegisterCVars(CVarService* cvar)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     const foundation::String& IService::name() const
     {
       return name_;
