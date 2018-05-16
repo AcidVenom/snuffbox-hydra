@@ -2,6 +2,7 @@ SET(DefinitionsSources
   "definitions/cli.h"
   "definitions/keycodes.h"
   "definitions/input.h"
+  "definitions/components.h"
 )
 
 SET(AuxiliarySources
@@ -20,6 +21,8 @@ SET(ServicesSources
   "services/input_service.cc"
   "services/renderer_service.h"
   "services/renderer_service.cc"
+  "services/scene_service.h"
+  "services/scene_service.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)
@@ -58,6 +61,20 @@ SET(InputSources
   "input/joystick.cc"
 )
 
+SET(ECSSources
+  "ecs/scene.h"
+  "ecs/scene.cc"
+  "ecs/entity.h"
+  "ecs/entity.cc"
+  "ecs/component.h"
+  "ecs/component.cc"
+)
+
+SET(ComponentsSources
+  "components/transform_component.h"
+  "components/transform_component.cc"
+)
+
 SET(Resources
 )
 
@@ -67,6 +84,8 @@ SOURCE_GROUP("services"     FILES ${ServicesSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
 SOURCE_GROUP("cvar"         FILES ${CVarSources})
 SOURCE_GROUP("input"        FILES ${InputSources})
+SOURCE_GROUP("ecs"          FILES ${ECSSources})
+SOURCE_GROUP("components"   FILES ${ComponentsSources})
 SOURCE_GROUP("rsc"          FILES ${Resources})
 
 SET(EngineSources
@@ -76,6 +95,8 @@ SET(EngineSources
   ${ApplicationSources}
   ${CVarSources}
   ${InputSources}
+  ${ECSSources}
+  ${ComponentsSources}
   ${Resources}
 )
 
