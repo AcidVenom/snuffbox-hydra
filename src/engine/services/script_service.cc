@@ -37,7 +37,7 @@ namespace snuffbox
 
       bool success = state_->CompileFromSource(ctx, src, print);
 
-      //InitializeCallbacks();
+      InitializeCallbacks();
 
       return success;
     }

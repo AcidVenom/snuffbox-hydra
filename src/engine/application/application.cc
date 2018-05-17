@@ -135,9 +135,6 @@ namespace snuffbox
         Update(dt);
         renderer->Render();
 
-        std::getline(std::cin, input);
-        GetService<ScriptService>()->CompileAndRun("console", input.c_str(), true);
-
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kMillisecond);
       }
