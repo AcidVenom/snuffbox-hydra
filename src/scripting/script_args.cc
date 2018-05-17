@@ -157,6 +157,19 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void ScriptArgs::AddReturnPointer(
+      void* ptr,
+      const foundation::String& type_name)
+    {
+      if (return_value_ != nullptr)
+      {
+        return_value_.reset();
+      }
+
+      return_ptr_ = ReturnPtr{ ptr, type_name };
+    }
+
+    //--------------------------------------------------------------------------
     void* ScriptArgs::callee() const
     {
       return callee_;

@@ -147,6 +147,14 @@ namespace snuffbox
       void AddReturnPointer(T* ptr);
 
       /**
+      * @brief Returns a pointer, with its metadata set from a type name
+      *
+      * @param[in] ptr The pointer to return
+      * @param[in] type_name The type name or a registered ScriptClass
+      */
+      void AddReturnPointer(void* ptr, const foundation::String& type_name);
+
+      /**
       * @brief Retrieves the callee as a typed pointer
       *
       * @tparam T The type to cast the pointer to
