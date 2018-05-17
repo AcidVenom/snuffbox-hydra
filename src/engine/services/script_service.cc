@@ -2,9 +2,15 @@
 
 #include "engine/auxiliary/debug.h"
 #include "engine/definitions/keycodes.h"
+#include "engine/definitions/components.h"
 #include "engine/services/input_service.h"
+#include "engine/ecs/entity.h"
+#include "engine/components/transform_component.h"
 
+#ifndef SNUFF_NSCRIPTING
 #include <sparsed/keycodes.gen.cc>
+#include <sparsed/components.gen.cc>
+#endif
 
 namespace snuffbox
 {
@@ -31,7 +37,7 @@ namespace snuffbox
 
       bool success = state_->CompileFromSource(ctx, src, print);
 
-      InitializeCallbacks();
+      //InitializeCallbacks();
 
       return success;
     }
@@ -112,11 +118,14 @@ namespace snuffbox
     {
       register_->RegisterClass<Debug>();
       register_->RegisterClass<InputService>();
+      register_->RegisterClass<Entity, true>();
+      register_->RegisterClass<TransformComponent>();
 
       register_->RegisterEnum<Keys>();
       register_->RegisterEnum<MouseButtons>();
       register_->RegisterEnum<JoystickButtons>();
       register_->RegisterEnum<JoystickAxes>();
+      register_->RegisterEnum<Components>();
     }
 
     //--------------------------------------------------------------------------

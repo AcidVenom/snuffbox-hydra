@@ -122,6 +122,9 @@ IF (NOT SNUFF_NSCRIPTING)
     "auxiliary/debug.h"
     "services/input_service.h"
     "definitions/keycodes.h"
+    "definitions/components.h"
+    "ecs/entity.h"
+    "components/transform_component.h"
   )
   
   FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)

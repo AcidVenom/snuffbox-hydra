@@ -319,10 +319,20 @@ namespace snuffbox
       */
       void* GetPointer(const char* type) const;
 
+      /**
+      * @return The underlying pointer for userdata objects
+      */
+      void* ptr() const;
+
+      /**
+      * @return The type of the underlying pointer
+      */
+      const foundation::String& ptr_type() const;
+
     private:
 
       void* ptr_; //!< An underlying pointer for userdata objects
-      foundation::String type_; //!< The type of the underlying pointer
+      foundation::String ptr_type_; //!< The type of the underlying pointer
     };
 
     /**

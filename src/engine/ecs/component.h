@@ -9,7 +9,7 @@ snuffbox::engine::IComponent::CreateComponent<id>()                            \
 {                                                                              \
   return snuffbox::foundation::Memory::Construct<type>(                        \
     &snuffbox::foundation::Memory::default_allocator());                       \
-}                                                                               
+}                                                                              
 
 namespace snuffbox
 {
@@ -56,6 +56,14 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to create components from script by script name, from
+      *        the base class
+      *
+      * @return The type name as in the script state
+      */
+      virtual const char* GetScriptName() const = 0;
+
+      /**
       * @brief Virtual destructor
       */
       virtual ~IComponent();
@@ -69,7 +77,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    template <Components C>
+    template <typename T, Components C>
     class ComponentBase : public IComponent
     {
 
@@ -79,6 +87,11 @@ namespace snuffbox
       * @return The ID of this component
       */
       static const Components type_id = C;
+
+      /**
+      * @see IComponent::GetScriptName
+      */
+      const char* GetScriptName() const override;
 
       /**
       * @brief Virtual destructor
@@ -99,8 +112,19 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <Components C>
-    inline ComponentBase<C>::~ComponentBase()
+    template <typename T, Components C>
+    inline const char* ComponentBase<T, C>::GetScriptName() const
+    {
+#ifndef SNUFF_NSCRIPTING
+      return T::ScriptName();
+#else
+      return "undefined";
+#endif
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, Components C>
+    inline ComponentBase<T, C>::~ComponentBase()
     {
 
     }

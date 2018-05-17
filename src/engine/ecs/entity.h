@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/ecs/component.h"
+#include <scripting/script_class.h>
 
 #include <foundation/containers/vector.h>
 #include <foundation/memory/memory.h>
@@ -18,15 +19,19 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class Entity
+    SCRIPT_CLASS() class Entity : public scripting::ScriptClass
     {
 
     public:
+
+      SCRIPT_NAME(Entity);
 
       /**
       * @brief Construct and add a TransformComponent
       */
       Entity();
+
+      SCRIPT_CONSTRUCTOR(Entity);
 
       /**
       * @brief Adds a typed component and returns it
@@ -45,7 +50,7 @@ namespace snuffbox
       *
       * @see Entity::CreateComponentByID
       */
-      IComponent* AddComponent(Components id);
+      SCRIPT_FUNC(custom) IComponent* AddComponent(Components id);
       
       /**
       * @brief Removes the first found typed component
@@ -56,12 +61,26 @@ namespace snuffbox
       void RemoveComponent();
 
       /**
+      * @brief Removes the first found typed component by ID
+      *
+      * @param[in] id The ID of the component to remove
+      */
+      SCRIPT_FUNC() void RemoveComponent(Components id);
+
+      /**
       * @brief Removes all components of a certain type
       *
       * @tparam T The component type
       */
       template <typename T>
       void RemoveComponents();
+
+      /**
+      * @brief Removes all components of a certain type by ID
+      *
+      * @param[in] id The ID of the components to remove
+      */
+      SCRIPT_FUNC() void RemoveComponents(Components id);
 
       /**
       * @brief Checks if a typed component exists within this entity
@@ -74,6 +93,15 @@ namespace snuffbox
       bool HasComponent();
 
       /**
+      * @brief Checks if a typed component exists within this entity by ID
+      *
+      * @param[in] id The ID of the component to check
+      *
+      * @return Do we have more than 0 components of this type?
+      */
+      SCRIPT_FUNC() bool HasComponent(Components id);
+
+      /**
       * @brief Retrieves the first typed component found within this entity
       *
       * @tparam T The component type
@@ -84,6 +112,16 @@ namespace snuffbox
       T* GetComponent();
 
       /**
+      * @brief Retrieves the first typed component found within 
+      *        this entity by ID
+      *
+      * @param[in] id The ID of the component to retrieve
+      *
+      * @return The found component, or nullptr if it doesn't exist
+      */
+      SCRIPT_FUNC(custom) IComponent* GetComponent(Components id);
+
+      /**
       * @brief Retrieves all components of a certain component type
       *
       * @tparam T The component type
@@ -92,6 +130,16 @@ namespace snuffbox
       */
       template <typename T>
       foundation::Vector<T*> GetComponents();
+
+      /**
+      * @brief Retrieves all components of a certain component type by ID
+      *
+      * @param[in] id The ID of the component to retrieve
+      *
+      * @return The list of found components
+      */
+      SCRIPT_FUNC(custom) foundation::Vector<IComponent*> GetComponents(
+        Components id);
 
     protected:
 
@@ -107,6 +155,15 @@ namespace snuffbox
       static void TypeCheck();
 
       /**
+      * @brief Checks if a component type is a valid type to use
+      *
+      * @param[in] id The ID to check
+      *
+      * @remarks This method asserts if the component type is not supported
+      */
+      static void IDCheck(Components id);
+
+      /**
       * @brief Short-hand for the underlying structure of the components array
       */
       using ComponentArray = 
@@ -115,12 +172,11 @@ namespace snuffbox
       /**
       * @brief Retrieves the component array of a certain component type
       *
-      * @tparam T The component type
+      * @param[in] id The component type
       *
       * @return The underlying component array
       */
-      template <typename T>
-      ComponentArray& GetComponentArray();
+      ComponentArray& GetComponentArray(Components id);
 
       /**
       * @brief A type definition for the functions to create components
@@ -187,16 +243,7 @@ namespace snuffbox
     inline T* Entity::AddComponent()
     {
       TypeCheck<T>();
-      ComponentArray& c = GetComponentArray<T>();
-
-      IComponent* comp = IComponent::CreateComponent<T::type_id>();
-      comp->Create();
-
-      T* ptr = static_cast<T*>(comp);
-
-      c.push_back(foundation::Memory::MakeUnique<T>(ptr));
-
-      return ptr;
+      return static_cast<T*>(AddComponent(T::type_id));
     }
 
     //--------------------------------------------------------------------------
@@ -204,18 +251,7 @@ namespace snuffbox
     inline void Entity::RemoveComponent()
     {
       TypeCheck<T>();
-
-      if (HasComponent<T>() == false)
-      {
-        return;
-      }
-
-      ComponentArray& c = GetComponentArray<T>();
-
-      ComponentArray::iterator it = c.begin();
-      it->get()->Destroy();
-
-      c.erase(it);
+      RemoveComponent(T::type_id);
     }
 
     //--------------------------------------------------------------------------
@@ -223,20 +259,7 @@ namespace snuffbox
     inline void Entity::RemoveComponents()
     {
       TypeCheck<T>();
-
-      if (HasComponent<T>() == false)
-      {
-        return;
-      }
-
-      ComponentArray& c = GetComponentArray<T>();
-
-      for (size_t i = 0; i < c.size(); ++i)
-      {
-        c.at(i)->Destroy();
-      }
-
-      c.clear();
+      RemoveComponents(T::type_id);
     }
 
     //--------------------------------------------------------------------------
@@ -244,9 +267,7 @@ namespace snuffbox
     inline bool Entity::HasComponent()
     {
       TypeCheck<T>();
-      ComponentArray& c = GetComponentArray<T>();
-
-      return c.size() > 0;
+      return HasComponent(T::type_id);
     }
 
     //--------------------------------------------------------------------------
@@ -254,15 +275,7 @@ namespace snuffbox
     inline T* Entity::GetComponent()
     {
       TypeCheck<T>();
-
-      if (HasComponent<T>() == false)
-      {
-        return nullptr;
-      }
-
-      ComponentArray& c = GetComponentArray<T>();
-
-      return static_cast<T*>(c.at(0).get());
+      return GetComponent(T::type_id);
     }
 
     //--------------------------------------------------------------------------
@@ -272,13 +285,13 @@ namespace snuffbox
       TypeCheck<T>();
 
       foundation::Vector<T*> result;
-      ComponentArray& c = GetComponentArray<T>();
+      foundation::Vector<IComponent*> comps = GetComponents(T::type_id);
 
-      result.resize(c.size());
+      result.resize(comps.size());
 
-      for (size_t i = 0; i < c.size(); ++i)
+      for (size_t i = 0; i < comps.size(); ++i)
       {
-        result.at(i) = static_cast<T*>(c.at(i).get());
+        result.at(i) = static_cast<T*>(comps.at(i));
       }
 
       return result;
@@ -290,22 +303,8 @@ namespace snuffbox
     {
       const Components id = T::type_id;
 
-      static_assert(eastl::is_base_of<ComponentBase<id>, T>::value == true,
+      static_assert(eastl::is_base_of<ComponentBase<T, id>, T>::value == true,
         "Attempted to add an invalid component");
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline Entity::ComponentArray& Entity::GetComponentArray()
-    {
-      TypeCheck<T>();
-
-      Components id = T::type_id;
-      foundation::Logger::Assert(id < Components::kCount,
-        "Attempted to index a component type that is larger than the maximum\
-         number of allowed components");
-
-      return components_[static_cast<size_t>(id)];
     }
 
     //--------------------------------------------------------------------------

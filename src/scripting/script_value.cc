@@ -189,7 +189,7 @@ namespace snuffbox
     ScriptObject::ScriptObject() :
       ScriptValue(ScriptValueTypes::kObject),
       ptr_(nullptr),
-      type_("")
+      ptr_type_("")
     {
 
     }
@@ -214,18 +214,30 @@ namespace snuffbox
     void ScriptObject::SetPointer(void* ptr, const char* type)
     {
       ptr_ = ptr;
-      type_ = type;
+      ptr_type_ = type;
     }
 
     //--------------------------------------------------------------------------
     void* ScriptObject::GetPointer(const char* type) const
     {
-      if (strcmp(type_.c_str(), type) != 0)
+      if (strcmp(ptr_type_.c_str(), type) != 0)
       {
         return nullptr;
       }
 
       return ptr_;
+    }
+
+    //--------------------------------------------------------------------------
+    void* ScriptObject::ptr() const
+    {
+      return ptr_;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::String& ScriptObject::ptr_type() const
+    {
+      return ptr_type_;
     }
 
     //--------------------------------------------------------------------------

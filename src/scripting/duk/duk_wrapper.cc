@@ -33,7 +33,12 @@ namespace snuffbox
       duk_push_object(context_);
 
       duk_get_global_string(context_, type);
-      duk_get_prop_string(context_, -1, "prototype");
+
+      if (duk_get_prop_string(context_, -1, "prototype") <= 0)
+      {
+        duk_pop(context_);
+        duk_get_global_string(context_, type);
+      }
 
       duk_enum(context_, -1, DUK_ENUM_INCLUDE_HIDDEN);
 
@@ -88,7 +93,16 @@ namespace snuffbox
     template <>
     void DukWrapper::PushValueImpl(ScriptObject* value) const
     {
-      duk_push_object(context_);
+      void* ptr = value->ptr();
+
+      if (ptr != nullptr)
+      {
+        PushPointer(nullptr, ptr, value->ptr_type().c_str());
+      }
+      else
+      {
+        duk_push_object(context_);
+      }
 
       for (
         ScriptObject::iterator it = value->begin();

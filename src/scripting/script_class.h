@@ -11,7 +11,7 @@
 #define SCRIPT_CONSTRUCTOR(x) x(snuffbox::scripting::ScriptArgs&)
 
 #define SCRIPT_NAME(x)                                                        \
-static const char* ScriptName() { return #x; }                                \
+static const char* ScriptName() { static const char* name = #x; return name; }\
 static void RegisterScriptFunctions(snuffbox::scripting::ScriptRegister*);
 
 #define SCRIPT_ENUM_DECL(x)                                                   \
@@ -27,8 +27,6 @@ namespace snuffbox                                                            \
 
 #define SPARSE_CUSTOM(cl, func) bool sparse_##cl##_##func                     \
 (snuffbox::scripting::ScriptArgs& args)
-
-#define SCRIPT_CONSTRUCTOR(x) x(snuffbox::scripting::ScriptArgs&)
 
 #include "scripting/script_args.h"
 #else

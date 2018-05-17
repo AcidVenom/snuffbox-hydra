@@ -2,6 +2,8 @@
 
 #include "engine/ecs/component.h"
 
+#include <scripting/script_class.h>
+
 namespace snuffbox
 {
   namespace engine
@@ -16,9 +18,30 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class TransformComponent : public ComponentBase<Components::kTransform>
+    SCRIPT_CLASS() class TransformComponent 
+
+      : 
+      public ComponentBase<TransformComponent, Components::kTransform>,
+      public scripting::ScriptClass
     {
 
+    public:
+
+      SCRIPT_NAME(TransformComponent);
+
+      SCRIPT_FUNC() void SetSomeValue(float x)
+      {
+        x_ = x;
+      }
+
+      SCRIPT_FUNC() float GetValue()
+      {
+        return x_;
+      }
+
+    private:
+
+      float x_;
     };
 
     //--------------------------------------------------------------------------

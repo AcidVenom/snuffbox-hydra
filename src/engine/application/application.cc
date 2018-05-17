@@ -125,6 +125,7 @@ namespace snuffbox
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
 
+      std::string input;
       while (
         should_quit_ == false &&
         window->ProcessEvents() == false)
@@ -133,6 +134,9 @@ namespace snuffbox
 
         Update(dt);
         renderer->Render();
+
+        std::getline(std::cin, input);
+        GetService<ScriptService>()->CompileAndRun("console", input.c_str(), true);
 
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kMillisecond);

@@ -18,3 +18,5 @@ namespace snuffbox
     };
   }
 }
+
+SCRIPT_ENUM_DECL(snuffbox::engine::Components);
