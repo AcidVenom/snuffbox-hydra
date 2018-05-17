@@ -37,6 +37,15 @@ namespace snuffbox
       */
       template <typename T>
       T* AddComponent();
+
+      /**
+      * @brief Adds a component by ID
+      *
+      * @param[in] id The component ID
+      *
+      * @see Entity::CreateComponentByID
+      */
+      IComponent* AddComponent(Components id);
       
       /**
       * @brief Removes the first found typed component
@@ -113,6 +122,57 @@ namespace snuffbox
       template <typename T>
       ComponentArray& GetComponentArray();
 
+      /**
+      * @brief A type definition for the functions to create components
+      *
+      * @see IComponent::CreateComponent
+      */
+      using ComponentCreateFunc = IComponent*(*)();
+
+      /**
+      * @brief A short-hand to easily reach the component creation functions
+      */
+      using ComponentCreateArray = foundation::Vector<ComponentCreateFunc>;
+
+      /**
+      * @brief Retrieves the list of component creation functions by ID
+      *
+      * The return array will be a list of function pointers that have a
+      * 1 on 1 mapping to their respective component IDs
+      *
+      * @remarks The first time this function is called, all assignments to
+      *          the creation array will be done
+      *
+      * @see Entity::AssignComponentCreator
+      *
+      * @return The function pointer array
+      */
+      static const ComponentCreateArray& ComponentCreators();
+
+      /**
+      * @brief Assigns a component creation function by component ID, to the
+      *        list of component creation functions
+      *
+      * @remarks This function recurses until Components::kCount is found.
+      *          This function is a compile-time unrolled loop.
+      *
+      * @tparam C The current ID
+      *
+      * @param[in] arr The list to add the component creation function to
+      */
+      template <Components C>
+      static void AssignComponentCreator(ComponentCreateArray& arr);
+
+      /**
+      * @brief Used to create a component by ID, using the creation functions
+      *        assigned in Entity::AssignComponentCreator
+      *
+      * @param[in] id The ID of the component to create
+      *
+      * @return The base component pointer to the created component
+      */
+      static IComponent* CreateComponentByID(Components id);
+
     private:
 
       /**
@@ -130,12 +190,13 @@ namespace snuffbox
       ComponentArray& c = GetComponentArray<T>();
 
       IComponent* comp = IComponent::CreateComponent<T::type_id>();
-
       comp->Create();
 
-      c.push_back(ptr);
+      T* ptr = static_cast<T*>(comp);
 
-      return static_cast<T*>(comp);
+      c.push_back(foundation::Memory::MakeUnique<T>(ptr));
+
+      return ptr;
     }
 
     //--------------------------------------------------------------------------
@@ -194,14 +255,14 @@ namespace snuffbox
     {
       TypeCheck<T>();
 
-      if (HasComponent<T> == false)
+      if (HasComponent<T>() == false)
       {
         return nullptr;
       }
 
       ComponentArray& c = GetComponentArray<T>();
 
-      return c.at(0).get();
+      return static_cast<T*>(c.at(0).get());
     }
 
     //--------------------------------------------------------------------------
@@ -217,7 +278,7 @@ namespace snuffbox
 
       for (size_t i = 0; i < c.size(); ++i)
       {
-        result.at(i) = c.at(i).get();
+        result.at(i) = static_cast<T*>(c.at(i).get());
       }
 
       return result;
@@ -227,7 +288,9 @@ namespace snuffbox
     template <typename T>
     void Entity::TypeCheck()
     {
-      static_assert(eastl::is_base_of<ComponentBase<T::type_id>, T>,
+      const Components id = T::type_id;
+
+      static_assert(eastl::is_base_of<ComponentBase<id>, T>::value == true,
         "Attempted to add an invalid component");
     }
 
@@ -242,7 +305,26 @@ namespace snuffbox
         "Attempted to index a component type that is larger than the maximum\
          number of allowed components");
 
-      return components_[id];
+      return components_[static_cast<size_t>(id)];
+    }
+
+    //--------------------------------------------------------------------------
+    template <Components C>
+    inline void Entity::AssignComponentCreator(ComponentCreateArray& arr)
+    {
+      const size_t id = static_cast<size_t>(C);
+      arr.at(id) = &IComponent::CreateComponent<C>;
+      
+      const size_t next = id + 1;
+      AssignComponentCreator<static_cast<Components>(next)>(arr);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void Entity::AssignComponentCreator<Components::kCount>(
+      ComponentCreateArray& arr)
+    {
+
     }
   }
 }

@@ -2,6 +2,15 @@
 
 #include "engine/definitions/components.h"
 
+#define CREATE_COMPONENT(type, id)                                             \
+template <>                                                                    \
+inline snuffbox::engine::IComponent*                                           \
+snuffbox::engine::IComponent::CreateComponent<id>()                            \
+{                                                                              \
+  return snuffbox::foundation::Memory::Construct<type>(                        \
+    &snuffbox::foundation::Memory::default_allocator());                       \
+}                                                                               
+
 namespace snuffbox
 {
   namespace engine
@@ -43,6 +52,13 @@ namespace snuffbox
       */
       template <Components C>
       static IComponent* CreateComponent();
+
+    public:
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~IComponent();
     };
 
     /**
@@ -63,6 +79,30 @@ namespace snuffbox
       * @return The ID of this component
       */
       static const Components type_id = C;
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~ComponentBase();
     };
+
+    //--------------------------------------------------------------------------
+    template <Components C>
+    inline IComponent* IComponent::CreateComponent()
+    {
+      foundation::Logger::LogVerbosity<1>(
+        foundation::LogChannel::kEngine,
+        foundation::LogSeverity::kWarning,
+        "Attempted to create a component with an undefined create function");
+
+      return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    template <Components C>
+    inline ComponentBase<C>::~ComponentBase()
+    {
+
+    }
   }
 }

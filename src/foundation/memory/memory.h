@@ -171,6 +171,18 @@ namespace snuffbox
       static SharedPtr<T> MakeShared(T* ptr);
 
       /**
+      * @brief Creates a unique pointer for a provided pointer
+      *
+      * @tparam T The type of the pointer to make a unique pointer of
+      * 
+      * @param[in] ptr The pointer to create a unique pointer of
+      *
+      * @return The created unique pointer
+      */
+      template <typename T>
+      static UniquePtr<T> MakeUnique(T* ptr);
+
+      /**
       * @see Memory::Construct
       *
       * @brief This constructs an object and makes it a shared pointer
@@ -275,6 +287,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    template <typename T>
+    inline UniquePtr<T> Memory::MakeUnique(T* ptr)
+    {
+      return UniquePtr<T>(ptr, MemoryDeleter<T>());
+    }
+
+    //--------------------------------------------------------------------------
     template <typename T, typename ... Args>
     inline SharedPtr<T> Memory::ConstructShared(
       IAllocator* alloc, 
@@ -290,11 +309,8 @@ namespace snuffbox
       IAllocator* alloc, 
       Args&&... args)
     {
-      return UniquePtr<T>(
-        Construct<T, Args...>(
-          alloc, 
-          eastl::forward<Args>(args)...), 
-        MemoryDeleter<T>());
+      return MakeUnique<T>(
+        Construct<T, Args...>(alloc, eastl::forward<Args>(args)...));
     }
   }
 }
