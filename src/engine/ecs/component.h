@@ -2,6 +2,8 @@
 
 #include "engine/definitions/components.h"
 
+#include <foundation/memory/memory.h>
+
 #define CREATE_COMPONENT(type, id)                                             \
 template <>                                                                    \
 inline snuffbox::engine::IComponent*                                           \

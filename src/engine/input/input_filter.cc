@@ -3,6 +3,7 @@
 
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/pointer_math.h>
+#include <foundation/auxiliary/logger.h>
 
 #include <cinttypes>
 #include <cassert>
