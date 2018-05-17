@@ -37,7 +37,7 @@ namespace snuffbox
       if (duk_get_prop_string(context_, -1, "prototype") <= 0)
       {
         duk_pop(context_);
-        duk_get_global_string(context_, type);
+        duk_dup(context_, -1);
       }
 
       duk_enum(context_, -1, DUK_ENUM_INCLUDE_HIDDEN);
@@ -120,11 +120,16 @@ namespace snuffbox
     {
       duk_push_array(context_);
 
-      for (size_t i = 0; i < value->size(); ++i)
+      size_t size = value->size();
+
+      for (size_t i = 0; i < size; ++i)
       {
         PushValueImpl(value->at(i));
-        duk_put_prop_string(context_, -2, std::to_string(i).c_str());
+        duk_put_prop_index(context_, -2, static_cast<duk_uarridx_t>(i));
       }
+
+      duk_push_number(context_, static_cast<double>(size));
+      duk_put_prop_string(context_, -2, "length");
     }
 
     //--------------------------------------------------------------------------
