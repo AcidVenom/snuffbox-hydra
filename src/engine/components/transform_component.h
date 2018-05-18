@@ -28,20 +28,6 @@ namespace snuffbox
     public:
 
       SCRIPT_NAME(TransformComponent);
-
-      SCRIPT_FUNC() void SetSomeValue(float x)
-      {
-        x_ = x;
-      }
-
-      SCRIPT_FUNC() float GetValue()
-      {
-        return x_;
-      }
-
-    private:
-
-      float x_;
     };
 
     //--------------------------------------------------------------------------
