@@ -13,11 +13,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Entity::Entity()
     {
-      AddComponent<TransformComponent>();
+      AddComponentInternal(Components::kTransform);
     }
 
     //--------------------------------------------------------------------------
-    IComponent* Entity::AddComponent(Components id)
+    IComponent* Entity::AddComponentInternal(Components id)
     {
       IComponent* ptr = CreateComponentByID(id);
       ptr->Create();
@@ -28,8 +28,26 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    IComponent* Entity::AddComponent(Components id)
+    {
+      if (
+        id == Components::kTransform &&
+        HasComponent(Components::kTransform) == true)
+      {
+        return GetComponent(Components::kTransform);
+      }
+
+      return AddComponentInternal(id);
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::RemoveComponent(Components id)
     {
+      if (id == Components::kTransform)
+      {
+        return;
+      }
+
       ComponentArray& arr = GetComponentArray(id);
 
       if (arr.size() == 0)

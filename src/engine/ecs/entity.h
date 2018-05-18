@@ -144,6 +144,15 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Adds a component to the entity by ID
+      *
+      * @param[in] id The ID of the component to add
+      *
+      * @return The created component
+      */
+      IComponent* AddComponentInternal(Components id);
+
+      /**
       * @brief Checks if a component type is actually derived from its
       *        respective component base
       *
