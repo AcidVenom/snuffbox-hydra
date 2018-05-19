@@ -69,10 +69,6 @@ namespace snuffbox
       * @brief Pushes a pointer by type, by retrieving its meta information
       *        from the global object
       *
-      * If the callee's pointer is the same as the pointer requested,
-      * the object is simply duplicated. This keeps reference counting intact
-      * and makes sure there are no double deletions of objects.
-      *
       * @param[in] ptr The pointer to push
       * @param[in] type The type name of the pointer
       */
