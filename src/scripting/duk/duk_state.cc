@@ -27,16 +27,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    duk_ret_t print(duk_context* ctx)
-    {
-      duk_int_t argc = duk_get_top(ctx);
-      const char* value = duk_safe_to_string(ctx, -1);
-      printf("%s\n", value);
-
-      return 0;
-    }
-
-    //--------------------------------------------------------------------------
     bool DukState::Initialize()
     {
       context_ = duk_create_heap(
@@ -51,8 +41,8 @@ namespace snuffbox
         return false;
       }
 
-      duk_push_c_function(context_, print, 1);
-      duk_put_global_string(context_, "print");
+      DukWrapper wrapper(context_);
+      wrapper.SetState(this);
 
       return true;
     }

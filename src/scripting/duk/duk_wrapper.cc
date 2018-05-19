@@ -56,6 +56,7 @@ namespace snuffbox
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
 
       StashObject(ptr->id());
+      ptr->set_script_state(GetState());
     }
 
     //--------------------------------------------------------------------------
@@ -107,6 +108,28 @@ namespace snuffbox
       duk_del_prop_string(context_, -1, string_id.c_str());
 
       duk_pop(context_);
+    }
+
+    //--------------------------------------------------------------------------
+    void DukWrapper::SetState(DukState* state) const
+    {
+      duk_push_global_stash(context_);
+      duk_push_pointer(context_, state);
+      duk_put_prop_string(context_, -2, DUK_HIDDEN_STATE);
+      duk_pop(context_);
+    }
+
+    //--------------------------------------------------------------------------
+    DukState* DukWrapper::GetState() const
+    {
+      duk_push_global_stash(context_);
+
+      duk_get_prop_string(context_, -1, DUK_HIDDEN_STATE);
+      void* ptr = duk_to_pointer(context_, -1);
+
+      duk_pop_2(context_);
+
+      return reinterpret_cast<DukState*>(ptr);
     }
 
     //--------------------------------------------------------------------------

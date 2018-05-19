@@ -17,6 +17,7 @@ namespace snuffbox
   namespace scripting
   {
     class ScriptClass;
+    class DukState;
 
     /**
     * @brief Used to wrap the stack of duktape and automatically do value
@@ -99,6 +100,20 @@ namespace snuffbox
       * @param[in] id The ID to the object to remove
       */
       void RemoveStashedObject(size_t id) const;
+
+      /**
+      * @brief Sets the userdata state pointer within the global stash
+      *
+      * @param[in] state The state to set
+      */
+      void SetState(DukState* state) const;
+
+      /**
+      * @brief Retrieves the userdata state pointer from the global stash
+      *
+      * @return The state object
+      */
+      DukState* GetState() const;
 
     protected:
 
