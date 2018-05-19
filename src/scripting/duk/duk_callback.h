@@ -65,7 +65,23 @@ namespace snuffbox
         const foundation::String& name,
         DukCallback<Args...>* func);
 
+      static bool FromClass(
+        DukState* state,
+        const foundation::String& object,
+        const foundation::String& name,
+        DukCallback<Args...>* func);
+
     protected:
+
+      /**
+      *
+      */
+      static bool FromStackIndex(
+        DukState* state,
+        const foundation::String& name,
+        const foundation::String& store_name,
+        DukCallback<Args...>* func,
+        duk_idx_t stack_idx = -1);
 
       /**
       * @brief Variadic unroll of the input arguments for the DukWrapper
@@ -116,6 +132,32 @@ namespace snuffbox
       */
       bool Call(Args... args);
 
+      /**
+      * @see DukCallback::Call
+      *
+      * @tparam T The ScriptClass that calls this callback
+      *
+      * @brief Calls the callback with a context (for instance, a self or this)
+      *
+      * @remarks An object containing the pointer will be set as the "this"
+      *          object of the called function
+      *
+      * @param[in] self The callee that calls this function
+      * @param[in] args The arguments to call the callback with
+      */
+      template <typename T>
+      bool CallContext(T* self, Args... args);
+
+      /**
+      * @brief Pushes the callback from the global stash
+      *
+      * @param[out] nargs The number of arguments for this callback
+      * @param[in] args The arguments to call the callback with
+      *
+      * @return Were we able to push the callback onto the stack?
+      */
+      bool PushCallback(uint8_t* nargs, Args... args);
+
     private:
 
       foundation::String name_; //!< The name of this callback
@@ -154,34 +196,70 @@ namespace snuffbox
       const foundation::String& name,
       DukCallback<Args...>* func)
     {
-      DukCallback<Args...> cb = DukCallback<Args...>(name, state);
-
       duk_context* ctx = state->context();
 
-      const char* func_name = name.c_str();
+      duk_push_global_object(ctx);
+      bool found = FromStackIndex(state, name, name, func);
+      duk_pop(ctx);
+
+      return found;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline bool DukCallback<Args...>::FromClass(
+      DukState* state,
+      const foundation::String& object,
+      const foundation::String& name,
+      DukCallback<Args...>* func)
+    {
+      duk_context* ctx = state->context();
+
+      duk_push_global_object(ctx);
+      if (duk_get_prop_string(ctx, -1, object.c_str()) <= 0)
+      {
+        duk_pop_2(ctx);
+        return false;
+      }
+
+      bool found = FromStackIndex(state, name, object + "." + name, func);
+      duk_pop_2(ctx);
+
+      return found;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline bool DukCallback<Args...>::FromStackIndex(
+      DukState* state,
+      const foundation::String& name,
+      const foundation::String& store_name,
+      DukCallback<Args...>* func,
+      duk_idx_t stack_idx)
+    {
+      duk_context* ctx = state->context();
+      DukCallback<Args...> cb = DukCallback<Args...>(store_name, state);
 
       duk_push_global_stash(ctx);
-      duk_push_global_object(ctx);
+      bool res = duk_get_prop_string(ctx, stack_idx - 1, name.c_str()) > 0;
 
-      bool res = duk_get_prop_string(ctx, -1, func_name);
-
-      if (res == false)
+      if (res == false || duk_is_function(ctx, -1) <= 0)
       {
         if (func != nullptr)
         {
           *func = cb;
         }
 
-        duk_pop_3(ctx);
+        duk_pop_2(ctx);
 
         return false;
       }
 
       cb.is_valid_ = true;
 
-      duk_put_prop_string(ctx, -3, func_name);
+      duk_put_prop_string(ctx, -2, store_name.c_str());
 
-      duk_pop_2(ctx);
+      duk_pop(ctx);
 
       if (func != nullptr)
       {
@@ -192,7 +270,8 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <typename ... Args> template <typename T, typename ... Others>
+    template <typename ... Args> 
+    template <typename T, typename ... Others>
     inline uint8_t DukCallback<Args...>::PushArg(
       DukWrapper& wrapper, 
       T current, 
@@ -203,7 +282,8 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    template <typename ... Args> template <typename T>
+    template <typename ... Args> 
+    template <typename T>
     inline uint8_t DukCallback<Args...>::PushArg(DukWrapper& wrapper, T last)
     {
       wrapper.PushValue<T>(last);
@@ -221,6 +301,56 @@ namespace snuffbox
     template <typename ... Args>
     inline bool DukCallback<Args...>::Call(Args... args)
     {
+      uint8_t nargs;
+      if (PushCallback(&nargs, eastl::forward<Args>(args)...) == false)
+      {
+        return false;
+      }
+
+      duk_context* ctx = state_->context();
+
+      bool has_error = false;
+      if ((has_error = duk_pcall(ctx, nargs)) != 0)
+      {
+        state_->LogLastError("Callback error in ({0}:{1}):\n\n{2}");
+      }
+
+      duk_pop(ctx);
+
+      return has_error;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    template <typename T>
+    inline bool DukCallback<Args...>::CallContext(T* self, Args... args)
+    {
+      uint8_t nargs;
+      if (PushCallback(&nargs, eastl::forward<Args>(args)...) == false)
+      {
+        return false;
+      }
+
+      duk_context* ctx = state_->context();
+
+      DukWrapper wrapper(ctx);
+      wrapper.PushPointer(self, T::ScriptName());
+
+      bool has_error = false;
+      if ((has_error = duk_pcall_method(ctx, nargs)) != 0)
+      {
+        state_->LogLastError("Callback error in ({0}:{1}):\n\n{2}");
+      }
+
+      duk_pop(ctx);
+
+      return has_error;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline bool DukCallback<Args...>::PushCallback(uint8_t* nargs, Args... args)
+    {
       if (is_valid_ == false || state_ == nullptr)
       {
         return false;
@@ -237,17 +367,12 @@ namespace snuffbox
 
       DukWrapper wrapper = DukWrapper(ctx);
 
-      uint8_t nargs = PushArg(wrapper, eastl::forward<Args>(args)...);
-
-      bool has_error = false;
-      if ((has_error = duk_pcall(ctx, nargs)) != 0)
+      if (nargs != nullptr)
       {
-        state_->LogLastError("Callback error in ({0}:{1}):\n\n{2}");
+        *nargs = PushArg(wrapper, eastl::forward<Args>(args)...);
       }
 
-      duk_pop_2(ctx);
-
-      return has_error;
+      return true;
     }
   }
 }

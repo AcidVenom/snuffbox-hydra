@@ -25,8 +25,6 @@ GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #include <foundation/auxiliary/timer.h>
 
 #include <cassert>
-#include <iostream>
-#include <string>
 
 namespace snuffbox
 {
@@ -123,6 +121,9 @@ namespace snuffbox
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
+
+      std::string input;
+      static scripting::ScriptCallback<> cb;
 
       while (
         should_quit_ == false &&
