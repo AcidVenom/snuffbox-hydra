@@ -33,6 +33,28 @@ namespace snuffbox
 
       SCRIPT_CONSTRUCTOR(Entity);
 
+#ifndef SNUFF_NSCRIPTING
+      /**
+      * @brief Creates a script object for a component and adds some short-hand
+      *        fields to retrieve values of the parent entity
+      *
+      * The fields are:
+      * - entity: The entity parent
+      * - transform: The transform of the entity, but this is only added
+      *              if the type of the component to add is not a transform
+      *              already
+      *
+      * @param[in] e The entity to 
+      * @param[in] c The component to create a script object for
+      * @param[in] type The component type, if it's a transform component
+      *                 the "transform" field is not added
+      */
+      static scripting::ScriptObjectHandle CreateScriptComponent(
+          Entity* e,
+          IComponent* c,
+          Components type);
+#endif
+
       /**
       * @brief Adds a typed component and returns it
       *
@@ -284,7 +306,7 @@ namespace snuffbox
     inline T* Entity::GetComponent()
     {
       TypeCheck<T>();
-      return GetComponent(T::type_id);
+      return static_cast<T*>(GetComponent(T::type_id));
     }
 
     //--------------------------------------------------------------------------

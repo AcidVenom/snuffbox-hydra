@@ -73,11 +73,10 @@ namespace snuffbox
       * the object is simply duplicated. This keeps reference counting intact
       * and makes sure there are no double deletions of objects.
       *
-      * @param[in] callee The callee
       * @param[in] ptr The pointer to push
       * @param[in] type The type name of the pointer
       */
-      void PushPointer(void* callee, void* ptr, const char* type) const;
+      void PushPointer(void* ptr, const char* type) const;
 
     protected:
 

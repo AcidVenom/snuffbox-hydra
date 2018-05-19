@@ -25,6 +25,8 @@ GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #include <foundation/auxiliary/timer.h>
 
 #include <cassert>
+#include <iostream>
+#include <string>
 
 namespace snuffbox
 {

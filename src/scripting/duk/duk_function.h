@@ -105,21 +105,13 @@ namespace snuffbox
       }
 
       ScriptValue* ret = args.return_value();
-      ScriptArgs::ReturnPtr ptr = args.return_ptr();
 
-      if (ret == nullptr && ptr.ptr == nullptr)
+      if (ret == nullptr)
       {
         return 0;
       }
-      else if (ret != nullptr)
-      {
-        wrapper.PushValue<ScriptValue*>(ret);
-      }
-      else
-      {
-        wrapper.PushPointer(args.callee(), ptr.ptr, ptr.type.c_str());
-      }
 
+      wrapper.PushValue<ScriptValue*>(ret);
       return 1;
     }
   }

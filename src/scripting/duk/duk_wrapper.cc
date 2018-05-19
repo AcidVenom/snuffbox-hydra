@@ -20,17 +20,10 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void DukWrapper::PushPointer(
-      void* callee, 
       void* ptr, 
       const char* type) const
     {
-      if (callee == ptr)
-      {
-        duk_push_this(context_);
-        return;
-      }
-
-      duk_push_object(context_);
+      duk_idx_t obj = duk_push_object(context_);
 
       duk_get_global_string(context_, type);
 
@@ -44,17 +37,17 @@ namespace snuffbox
 
       while (duk_next(context_, -1, 1) > 0)
       {
-        duk_put_prop_string(context_, -5, duk_get_string(context_, -2));
+        duk_put_prop_string(context_, obj, duk_get_string(context_, -2));
         duk_pop(context_);
       }
 
-      duk_pop(context_);
+      duk_pop_n(context_, 3);
 
       duk_push_pointer(context_, ptr);
-      duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);
+      duk_put_prop_string(context_, obj, DUK_HIDDEN_PTR);
 
       duk_push_string(context_, type);
-      duk_put_prop_string(context_, -2, DUK_HIDDEN_NAME);
+      duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
     }
 
     //--------------------------------------------------------------------------
@@ -97,7 +90,7 @@ namespace snuffbox
 
       if (ptr != nullptr)
       {
-        PushPointer(nullptr, ptr, value->ptr_type().c_str());
+        PushPointer(ptr, value->ptr_type().c_str());
       }
       else
       {
@@ -127,9 +120,6 @@ namespace snuffbox
         PushValueImpl(value->at(i));
         duk_put_prop_index(context_, -2, static_cast<duk_uarridx_t>(i));
       }
-
-      duk_push_number(context_, static_cast<double>(size));
-      duk_put_prop_string(context_, -2, "length");
     }
 
     //--------------------------------------------------------------------------

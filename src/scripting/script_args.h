@@ -175,17 +175,9 @@ namespace snuffbox
       * @return The return value that was set in the function call
       *
       * @remarks This is nullptr if it was never set, thus there will be no
-      *          return value, unless ScriptArgs::return_ptr_ is set
+      *          return value
       */
       ScriptValue* return_value() const;
-
-      /**
-      * @return The return pointer that was set in the function call
-      *
-      * @remarks The .ptr field is nullptr if it was never set, thus there will
-      *          be no return value, unless ScriptArgs::return_value_ is set
-      */
-      ReturnPtr return_ptr() const;
 
     protected:
 
@@ -263,11 +255,6 @@ namespace snuffbox
       * @brief The return value that was set in the function call
       */
       ScriptHandle return_value_;
-
-      /**
-      * @brief The return pointer that was set in the function call
-      */
-      ReturnPtr return_ptr_;
     };
 
     //--------------------------------------------------------------------------
@@ -320,11 +307,6 @@ namespace snuffbox
     template <typename T>
     inline void ScriptArgs::AddReturnValue(T value)
     {
-      if (return_ptr_.ptr != nullptr)
-      {
-        return_ptr_ = ReturnPtr{ nullptr, "" };
-      }
-
       return_value_ = ScriptValue::From<T>(value);
     }
 
@@ -332,12 +314,7 @@ namespace snuffbox
     template <typename T>
     void ScriptArgs::AddReturnPointer(T* ptr)
     {
-      if (return_value_ != nullptr)
-      {
-        return_value_.reset();
-      }
-
-      return_ptr_ = ReturnPtr{ ptr, T::ScriptName() };
+      AddReturnPointer(ptr, T::ScriptName());
     }
 
     //--------------------------------------------------------------------------

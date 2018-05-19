@@ -12,8 +12,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptArgs::ScriptArgs() :
       callee_(nullptr),
-      return_value_(nullptr),
-      return_ptr_({nullptr, ""})
+      return_value_(nullptr)
     {
 
     }
@@ -25,8 +24,7 @@ namespace snuffbox
       :
       arguments_(args),
       callee_(callee),
-      return_value_(nullptr),
-      return_ptr_({nullptr, ""})
+      return_value_(nullptr)
     {
 
     }
@@ -161,12 +159,10 @@ namespace snuffbox
       void* ptr,
       const foundation::String& type_name)
     {
-      if (return_value_ != nullptr)
-      {
-        return_value_.reset();
-      }
+      ScriptObjectHandle h = ScriptValue::CreateObject();
+      h->SetPointer(ptr, type_name.c_str());
 
-      return_ptr_ = ReturnPtr{ ptr, type_name };
+      AddReturnValue<ScriptObjectHandle>(h);
     }
 
     //--------------------------------------------------------------------------
@@ -184,12 +180,6 @@ namespace snuffbox
       }
 
       return return_value_.get();
-    }
-
-    //--------------------------------------------------------------------------
-    ScriptArgs::ReturnPtr ScriptArgs::return_ptr() const
-    {
-      return return_ptr_;
     }
 
     //--------------------------------------------------------------------------

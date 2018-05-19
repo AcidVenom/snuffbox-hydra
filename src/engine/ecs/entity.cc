@@ -150,6 +150,37 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    scripting::ScriptObjectHandle Entity::CreateScriptComponent(
+      Entity* e,
+      IComponent* c,
+      Components type)
+    {
+      scripting::ScriptObjectHandle comp = 
+        scripting::ScriptValue::CreateObject();
+
+      scripting::ScriptObjectHandle ent = 
+        scripting::ScriptValue::CreateObject();
+
+      ent->SetPointer(e, Entity::ScriptName());
+
+      comp->SetPointer(c, c->GetScriptName());
+      comp->Insert("entity", ent);
+
+      if (type != Components::kTransform)
+      {
+        scripting::ScriptObjectHandle transform = 
+          CreateScriptComponent(
+            e, 
+            e->GetComponent<TransformComponent>(),
+            Components::kTransform);
+
+        comp->Insert("transform", transform);
+      }
+
+      return comp;
+    }
+
+    //--------------------------------------------------------------------------
     SPARSE_CUSTOM(Entity, AddComponent)
     {
       Entity* self = args.GetSelf<Entity>();
@@ -161,7 +192,10 @@ namespace snuffbox
       Components c = args.Get<Components>(0, Components::kCount);
       IComponent* ptr = self->AddComponent(c);
 
-      args.AddReturnPointer(ptr, ptr->GetScriptName());
+      scripting::ScriptObjectHandle h = 
+        Entity::CreateScriptComponent(self, ptr, c);
+
+      args.AddReturnValue(h);
 
       return true;
     }
@@ -189,7 +223,10 @@ namespace snuffbox
         return false;
       }
 
-      args.AddReturnPointer(ptr, ptr->GetScriptName());
+      scripting::ScriptObjectHandle h = 
+        Entity::CreateScriptComponent(self, ptr, c);
+
+      args.AddReturnValue(h);
 
       return true;
     }
@@ -209,17 +246,9 @@ namespace snuffbox
       foundation::SharedPtr<scripting::ScriptArray> arr = 
         scripting::ScriptValue::CreateArray();
 
-      foundation::SharedPtr<scripting::ScriptObject> obj;
-      IComponent* current = nullptr;
-
       for (size_t i = 0; i < comps.size(); ++i)
       {
-        current = comps.at(i);
-
-        obj = scripting::ScriptValue::CreateObject();
-        obj->SetPointer(current, current->GetScriptName());
-
-        arr->Add(obj);
+        arr->Add(Entity::CreateScriptComponent(self, comps.at(i), c));
       }
 
       args.AddReturnValue(arr);

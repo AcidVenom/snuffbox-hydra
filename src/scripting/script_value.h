@@ -25,6 +25,16 @@ namespace snuffbox
     using ScriptHandle = foundation::SharedPtr<ScriptValue>;
 
     /**
+    * @brief A short-hand for an array value stored in a SharedPtr
+    */
+    using ScriptArrayHandle = foundation::SharedPtr<ScriptArray>;
+    
+    /**
+    * @brief A short-hand for an object value stored in a SharedPtr
+    */
+    using ScriptObjectHandle = foundation::SharedPtr<ScriptObject>;
+
+    /**
     * @brief Used to store values from the scripting environment as C++
     *        data types
     *
@@ -254,7 +264,7 @@ namespace snuffbox
     */
     class ScriptObject : 
       public ScriptValue, 
-      public foundation::UMap<foundation::String, ScriptHandle>
+      public foundation::Map<foundation::String, ScriptHandle>
     {
 
     public:
