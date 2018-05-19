@@ -18,11 +18,9 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    SCRIPT_CLASS() class TransformComponent 
-
+    SCRIPT_CLASS() class TransformComponent
       : 
-      public ComponentBase<TransformComponent, Components::kTransform>,
-      public scripting::ScriptClass
+      public ComponentBase<TransformComponent, Components::kTransform>
     {
 
     public:

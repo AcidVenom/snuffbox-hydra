@@ -6,6 +6,8 @@ namespace snuffbox
 {
   namespace scripting
   {
+    class ScriptClass;
+
     /**
     * @brief The interface for every native scripting API to use
     *
@@ -48,6 +50,13 @@ namespace snuffbox
         const char* ctx, 
         const char* src, 
         bool print) = 0;
+
+      /**
+      * @brief Removes a script class reference from the script state
+      *
+      * @param[in] ptr The pointer to the script class to remove
+      */
+      virtual void RemoveScriptClass(ScriptClass* ptr) = 0;
 
       /**
       * @brief Shuts down the native scripting API after usage

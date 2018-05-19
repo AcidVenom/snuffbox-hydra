@@ -156,7 +156,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void ScriptArgs::AddReturnPointer(
-      void* ptr,
+      ScriptClass* ptr,
       const foundation::String& type_name)
     {
       ScriptObjectHandle h = ScriptValue::CreateObject();

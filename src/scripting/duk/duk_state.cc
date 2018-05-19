@@ -1,4 +1,6 @@
 #include "scripting/duk/duk_state.h"
+#include "scripting/duk/duk_wrapper.h"
+#include "scripting/script_class.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/auxiliary/string_utils.h>
@@ -133,6 +135,13 @@ namespace snuffbox
         stack);
 
       duk_pop_3(context_);
+    }
+
+    //--------------------------------------------------------------------------
+    void DukState::RemoveScriptClass(ScriptClass* ptr)
+    {
+      DukWrapper wrapper(context_);
+      wrapper.RemoveStashedObject(ptr->id());
     }
 
     //--------------------------------------------------------------------------

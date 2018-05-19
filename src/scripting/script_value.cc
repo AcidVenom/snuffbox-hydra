@@ -211,14 +211,14 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void ScriptObject::SetPointer(void* ptr, const char* type)
+    void ScriptObject::SetPointer(ScriptClass* ptr, const char* type)
     {
       ptr_ = ptr;
       ptr_type_ = type;
     }
 
     //--------------------------------------------------------------------------
-    void* ScriptObject::GetPointer(const char* type) const
+    ScriptClass* ScriptObject::GetPointer(const char* type) const
     {
       if (strcmp(ptr_type_.c_str(), type) != 0)
       {
@@ -229,7 +229,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void* ScriptObject::ptr() const
+    ScriptClass* ScriptObject::ptr() const
     {
       return ptr_;
     }

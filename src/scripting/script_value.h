@@ -18,6 +18,7 @@ namespace snuffbox
     class ScriptValue;
     class ScriptObject;
     class ScriptArray;
+    class ScriptClass;
 
     /**
     * @brief A short-hand for all the values stored in a SharedPtr
@@ -318,7 +319,7 @@ namespace snuffbox
       * @param[in] ptr The pointer to set
       * @param[in] type The type name to set
       */
-      void SetPointer(void* ptr, const char* type);
+      void SetPointer(ScriptClass* ptr, const char* type);
 
       /**
       * @brief Retrieves the underlying pointer
@@ -327,12 +328,12 @@ namespace snuffbox
       *
       * @return The pointer, or nullptr if there was a type mismatch
       */
-      void* GetPointer(const char* type) const;
+      ScriptClass* GetPointer(const char* type) const;
 
       /**
       * @return The underlying pointer for userdata objects
       */
-      void* ptr() const;
+      ScriptClass* ptr() const;
 
       /**
       * @return The type of the underlying pointer
@@ -341,7 +342,7 @@ namespace snuffbox
 
     private:
 
-      void* ptr_; //!< An underlying pointer for userdata objects
+      ScriptClass* ptr_; //!< An underlying pointer for userdata objects
       foundation::String ptr_type_; //!< The type of the underlying pointer
     };
 

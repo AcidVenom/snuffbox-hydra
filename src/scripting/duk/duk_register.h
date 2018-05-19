@@ -127,6 +127,7 @@ namespace snuffbox
 
     private:
 
+      DukState* state_; //!< The state this register lives in
       duk_context* context_; //!< The context this register is operating on
     };
 
@@ -256,6 +257,8 @@ namespace snuffbox
 
       duk_push_string(ctx, name);
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_NAME);
+
+      wrapper.StashObject(ptr->id());
 
       return 0;
     }

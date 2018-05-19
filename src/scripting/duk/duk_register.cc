@@ -9,6 +9,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     DukRegister::DukRegister(DukState* state) :
+      state_(state),
       context_(nullptr)
     {
       foundation::Logger::Assert(state != nullptr, 

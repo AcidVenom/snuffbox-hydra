@@ -65,6 +65,16 @@ namespace snuffbox
         const foundation::String& name,
         DukCallback<Args...>* func);
 
+      /**
+      * @brief Creates a callback from an object
+      *
+      * @param[in] state The duktape state
+      * @param[in] object The name of the object in the global scope
+      * @param[in] name The name of the function in the object
+      * @param[out] func The created callback, if not nullptr
+      *
+      * @return Could we find the function?
+      */
       static bool FromClass(
         DukState* state,
         const foundation::String& object,
@@ -74,7 +84,12 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Creates a callback from a stack index
       *
+      * @see DukCallback::FromGlobal
+      * @see DukCallback::FromClass
+      *
+      * @param[in] stack_idx The index of the callback object
       */
       static bool FromStackIndex(
         DukState* state,
@@ -365,6 +380,7 @@ namespace snuffbox
         return false;
       }
 
+      duk_remove(ctx, -2);
       DukWrapper wrapper = DukWrapper(ctx);
 
       if (nargs != nullptr)

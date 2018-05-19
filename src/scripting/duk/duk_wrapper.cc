@@ -1,6 +1,7 @@
 #include "scripting/duk/duk_wrapper.h"
 
 #include "scripting/script_args.h"
+#include "scripting/script_class.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/memory/memory.h>
@@ -20,9 +21,14 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void DukWrapper::PushPointer(
-      void* ptr, 
+      ScriptClass* ptr, 
       const char* type) const
     {
+      if (PushStashedObject(ptr->id()) == true)
+      {
+        return;
+      }
+
       duk_idx_t obj = duk_push_object(context_);
 
       duk_get_global_string(context_, type);
@@ -48,6 +54,59 @@ namespace snuffbox
 
       duk_push_string(context_, type);
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
+
+      StashObject(ptr->id());
+    }
+
+    //--------------------------------------------------------------------------
+    void DukWrapper::StashObject(size_t id, duk_idx_t stack_idx) const
+    {
+      duk_push_global_stash(context_);
+
+      void* hptr = duk_get_heapptr(context_, stack_idx - 1);
+      duk_push_object(context_);
+      duk_push_pointer(context_, hptr);
+      duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);
+      
+      std::string string_id = std::to_string(id);
+      duk_put_prop_string(context_, -2, string_id.c_str());
+      
+      duk_pop(context_);
+    }
+
+    //--------------------------------------------------------------------------
+    bool DukWrapper::PushStashedObject(size_t id) const
+    {
+      duk_push_global_stash(context_);
+
+      std::string string_id = std::to_string(id);
+      if (duk_get_prop_string(context_, -1, string_id.c_str()) > 0)
+      {
+        duk_get_prop_string(context_, -1, DUK_HIDDEN_PTR);
+        void* hptr = duk_get_pointer(context_, -1);
+
+        duk_push_heapptr(context_, hptr);
+
+        duk_remove(context_, -2);
+        duk_remove(context_, -2);
+
+        return true;
+      }
+
+      duk_pop(context_);
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void DukWrapper::RemoveStashedObject(size_t id) const
+    {
+      duk_push_global_stash(context_);
+
+      std::string string_id = std::to_string(id);
+      duk_del_prop_string(context_, -1, string_id.c_str());
+
+      duk_pop(context_);
     }
 
     //--------------------------------------------------------------------------
@@ -86,7 +145,7 @@ namespace snuffbox
     template <>
     void DukWrapper::PushValueImpl(ScriptObject* value) const
     {
-      void* ptr = value->ptr();
+      ScriptClass* ptr = value->ptr();
 
       if (ptr != nullptr)
       {
@@ -261,12 +320,12 @@ namespace snuffbox
         foundation::Memory::Construct<ScriptObject>(
           &foundation::Memory::default_allocator());
 
-      if (duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_PTR) == 1)
+      if (duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_PTR) > 0)
       {
         duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_NAME);
 
         obj->SetPointer(
-          duk_get_pointer(context_, -2),
+          reinterpret_cast<ScriptClass*>(duk_get_pointer(context_, -2)),
           duk_get_string(context_, -1));
 
         duk_pop(context_);

@@ -43,6 +43,9 @@ namespace snuffbox
   {
     class DukRegister;
     using ScriptRegister = DukRegister;
+
+    class DukState;
+    using ScriptState = DukState;
   }
 }
 #endif
@@ -77,9 +80,14 @@ namespace snuffbox
     */
     class ScriptClass
     {
-
 #ifndef SNUFF_NSCRIPTING
+
     public:
+
+      /**
+      * @brief Default constructor, assigns a script ID
+      */
+      ScriptClass();
 
       /**
       * @brief This function should be specialized with an enumerator
@@ -91,6 +99,30 @@ namespace snuffbox
       */
       template <typename T>
       static void RegisterScriptEnum(ScriptRegister* reg);
+
+      /**
+      * @brief Sets the script state
+      *
+      * @param[in] state The state to set
+      */
+      void set_script_state(ScriptState* state);
+
+      /**
+      * @return The script ID of this class
+      */
+      size_t id() const;
+
+      /**
+      * @brief Removes the script ID reference
+      */
+      virtual ~ScriptClass();
+
+    private:
+
+      size_t id_; //!< The script ID of this class
+      ScriptState* state_; //!< The current script state
+
+      static size_t kCurrentID_; //!< The current ID to assign
 #endif
     };
   }

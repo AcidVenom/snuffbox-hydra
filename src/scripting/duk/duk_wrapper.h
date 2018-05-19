@@ -16,6 +16,8 @@ namespace snuffbox
 {
   namespace scripting
   {
+    class ScriptClass;
+
     /**
     * @brief Used to wrap the stack of duktape and automatically do value
     *        retrieving and casting without having to check types
@@ -72,7 +74,31 @@ namespace snuffbox
       * @param[in] ptr The pointer to push
       * @param[in] type The type name of the pointer
       */
-      void PushPointer(void* ptr, const char* type) const;
+      void PushPointer(ScriptClass* ptr, const char* type) const;
+
+      /**
+      * @brief Stashes an object by ID
+      *
+      * @param[in] id The ID to stash the object at
+      * @param[in] stack_idx The stack index of the object
+      */
+      void StashObject(size_t id, duk_idx_t stack_idx = -1) const;
+
+      /**
+      * @brief Pushes a stashed object onto the stack if it exists
+      *
+      * @param[in] id The ID to stash the object at
+      *
+      * @return Was the stashed object found?
+      */
+      bool PushStashedObject(size_t id) const;
+
+      /**
+      * @brief Removes the stashed object for a given script ID
+      *
+      * @param[in] id The ID to the object to remove
+      */
+      void RemoveStashedObject(size_t id) const;
 
     protected:
 

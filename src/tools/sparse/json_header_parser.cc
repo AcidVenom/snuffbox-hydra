@@ -227,12 +227,12 @@ namespace snuffbox
       assert(v.HasMember("name") == true);
       d.c_name = v["name"].GetString();
 
-      const char* base = "ScriptClass";
-
-      if (DerivesFrom(base, v) == false)
+      if (
+        DerivesFrom("ScriptClass", v) == false && 
+        DerivesFrom("ComponentBase", v) == false)
       {
         std::cerr << 
-          "Class '" << d.c_name << "' does not derive from '" << base << "'" <<
+          "Class '" << d.c_name << "' does not derive from a scriptable type" <<
           std::endl;
 
         return false;

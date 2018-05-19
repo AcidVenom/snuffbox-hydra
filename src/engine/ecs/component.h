@@ -2,6 +2,8 @@
 
 #include "engine/definitions/components.h"
 
+#include <scripting/script_class.h>
+
 #include <foundation/memory/memory.h>
 
 #define CREATE_COMPONENT(type, id)                                             \
@@ -25,7 +27,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class IComponent
+    class IComponent : public scripting::ScriptClass
     {
 
       friend Entity;

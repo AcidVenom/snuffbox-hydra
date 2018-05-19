@@ -12,6 +12,8 @@ namespace snuffbox
 {
   namespace scripting
   {
+    class ScriptClass;
+
     /**
     * @brief Used to contain a list of script values that were passed through
     *        a native C-function
@@ -152,7 +154,9 @@ namespace snuffbox
       * @param[in] ptr The pointer to return
       * @param[in] type_name The type name or a registered ScriptClass
       */
-      void AddReturnPointer(void* ptr, const foundation::String& type_name);
+      void AddReturnPointer(
+        ScriptClass* ptr, 
+        const foundation::String& type_name);
 
       /**
       * @brief Retrieves the callee as a typed pointer
