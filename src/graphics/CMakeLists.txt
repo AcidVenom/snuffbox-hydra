@@ -36,8 +36,29 @@ ELSEIF (SNUFF_D3D12)
 ELSEIF (SNUFF_OGL)
   SET(PlatformPrefix "ogl")
   SET(PlatformSources
+    "ogl/ogl_context.h"
     "ogl/ogl_renderer.h"
     "ogl/ogl_renderer.cc"
+  )
+  
+  IF (SNUFF_WIN32)
+    SET(ContextSources
+      "ogl/win32/win32_ogl_context.h"
+      "ogl/win32/win32_ogl_context.cc"
+    )
+    
+    SOURCE_GROUP("ogl\\win32"     FILES ${ContextSources})
+  ELSEIF (SNUFF_LINUX)
+    SET(ContextSources
+      "ogl/linux/linux_ogl_context.h"
+      "ogl/linux/linux_ogl_context.cc"
+    )
+    
+    SOURCE_GROUP("ogl\\linux"     FILES ${ContextSources})
+  ENDIF ()
+    
+  SET(PlatformSources
+    ${PlatformSources}
   )
 ELSE ()
   MESSAGE(FATAL_ERROR "Unsupported renderer implementation")
@@ -53,6 +74,13 @@ SET(GraphicsSources
   ${PlatformSources}
 )
 
+IF (SNUFF_OGL)
+  SET(GraphicsSources
+    ${GraphicsSources}
+    ${ContextSources}
+  )
+ENDIF (SNUFF_OGL)
+
 ADD_LIBRARY(snuffbox-graphics ${GraphicsSources})
 TARGET_LINK_LIBRARIES(snuffbox-graphics snuffbox-foundation)
 
@@ -62,4 +90,8 @@ ELSEIF (SNUFF_D3D12)
   MESSAGE(FATAL_ERROR "D3D12 is currently unsupported")
 ELSEIF (SNUFF_OGL)
   TARGET_LINK_LIBRARIES(snuffbox-graphics glad)
+  
+  IF (SNUFF_WIN32)
+    TARGET_LINK_LIBRARIES(snuffbox-graphics "opengl32.lib")
+  ENDIF (SNUFF_WIN32)
 ENDIF (SNUFF_D3D11)

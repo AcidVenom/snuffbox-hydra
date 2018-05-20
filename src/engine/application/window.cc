@@ -120,7 +120,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void* Window::NativeHandle() const
     {
+#ifdef SNUFF_WIN32
       return glfwGetWin32Window(window_);
+#elif defined(SNUFF_LINUX)
+      return glfwGetX11Window(window_);
+#endif
     }
 
     //--------------------------------------------------------------------------

@@ -7,6 +7,12 @@
 
 #include <qapplication.h>
 
+#ifdef SNUFF_WIN32
+#ifdef CreateService
+#undef CreateService
+#endif
+#endif
+
 namespace snuffbox
 {
   namespace editor
