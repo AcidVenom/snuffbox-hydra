@@ -227,9 +227,14 @@ namespace snuffbox
       assert(v.HasMember("name") == true);
       d.c_name = v["name"].GetString();
 
+      bool is_component = DerivesFrom("ComponentBase", v);
+      bool is_service = DerivesFrom("ServiceBase", v);
+      bool is_script_class = DerivesFrom("ScriptClass", v);
+
       if (
-        DerivesFrom("ScriptClass", v) == false && 
-        DerivesFrom("ComponentBase", v) == false)
+        is_script_class == false && 
+        is_service == false &&
+        is_component == false)
       {
         std::cerr << 
           "Class '" << d.c_name << "' does not derive from a scriptable type" <<
@@ -238,7 +243,8 @@ namespace snuffbox
         return false;
       }
 
-      d.is_service = DerivesFrom("ServiceBase", v);
+      d.is_component = is_component;
+      d.is_service = is_service;
 
       std::cout << "sparse: " << d.ns << "::" << d.c_name << std::endl;
 
@@ -248,6 +254,11 @@ namespace snuffbox
           "'" << std::endl;
 
         return false;
+      }
+
+      if (d.is_component == true)
+      {
+        AddComponentMethods(&d);
       }
 
       definitions_.classes.push_back(d);
@@ -361,6 +372,33 @@ namespace snuffbox
       });
 
       return success;
+    }
+
+    //--------------------------------------------------------------------------
+    void JsonHeaderParser::AddComponentMethods(ClassDefinition* d)
+    {
+      FunctionDefinition f;
+      ArgumentDefinition a;
+
+      f.is_custom = false;
+      f.is_static = false;
+
+      f.name = "set_active";
+      f.ret_val = {"void", RefType::kLiteral};
+
+      a.name = "active";
+      a.type = {"bool", RefType::kLiteral};
+
+      f.arguments.push_back(a);
+
+      d->functions.push_back(f);
+
+      f.name = "active";
+      f.ret_val = {"bool", RefType::kLiteral};
+
+      f.arguments.clear();
+
+      d->functions.push_back(f);
     }
 
     //--------------------------------------------------------------------------

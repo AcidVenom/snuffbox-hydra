@@ -12,6 +12,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void IService::OnUpdate(Application& app, float dt)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     void IService::RegisterCVars(CVarService* cvar)
     {
 

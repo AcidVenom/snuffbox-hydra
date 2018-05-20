@@ -74,6 +74,11 @@ namespace snuffbox
       */
       void OnReloadCallback(const foundation::String& path);
 
+      /**
+      * @return The current scripting state
+      */
+      scripting::ScriptState* state() const;
+
     protected:
 
       /**

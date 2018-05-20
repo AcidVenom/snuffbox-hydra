@@ -6,7 +6,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     IComponent::IComponent(Entity* entity) :
-      entity_(entity)
+      entity_(entity),
+      active_(true)
     {
 
     }
@@ -33,6 +34,18 @@ namespace snuffbox
     Entity* IComponent::entity() const
     {
       return entity_;
+    }
+
+    //--------------------------------------------------------------------------
+    void IComponent::set_active(bool active)
+    {
+      active_ = active;
+    }
+
+    //--------------------------------------------------------------------------
+    bool IComponent::active() const
+    {
+      return active_;
     }
 
     //--------------------------------------------------------------------------

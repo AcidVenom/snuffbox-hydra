@@ -69,6 +69,15 @@ namespace snuffbox
       virtual foundation::ErrorCodes OnInitialize(Application& app) = 0;
 
       /**
+      * @brief Called on every service when the Application class updates a
+      *        frame in the variadic update
+      *
+      * @param[in] app The application the service was created from
+      * @param[in] dt The current delta-time of the application
+      */
+      virtual void OnUpdate(Application& app, float dt);
+
+      /**
       * @brief Called on every service when the Application class is shutdown 
       *
       * @param[in] app The application the service was created from

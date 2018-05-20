@@ -172,6 +172,18 @@ namespace snuffbox
       bool ParseClassMembers(ClassDefinition* d, RapidValue v);
 
       /**
+      * @brief Adds the base class members for a component if
+      *        the class definition is a component
+      *
+      * The following methods are added:
+      * - void set_active(bool)
+      * - bool active()
+      *
+      * @param[in] d The class definition to add the methods to
+      */
+      void AddComponentMethods(ClassDefinition* d);
+
+      /**
       * @brief Sets the script name of a class definition
       *
       * @param[out] d The class definition to modify

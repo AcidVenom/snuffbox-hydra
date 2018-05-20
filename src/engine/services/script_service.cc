@@ -8,6 +8,7 @@
 #include "engine/components/transform_component.h"
 
 #ifndef SNUFF_NSCRIPTING
+#include "engine/components/script_component.h"
 #include <sparsed/keycodes.gen.cc>
 #include <sparsed/components.gen.cc>
 #endif
@@ -79,6 +80,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    scripting::ScriptState* ScriptService::state() const
+    {
+      return state_.get();
+    }
+
+    //--------------------------------------------------------------------------
     foundation::ErrorCodes ScriptService::OnInitialize(Application& app)
     {
       return Initialize() == true ? 
@@ -120,6 +127,7 @@ namespace snuffbox
       register_->RegisterClass<InputService>();
       register_->RegisterClass<Entity, true>();
       register_->RegisterClass<TransformComponent>();
+      register_->RegisterClass<ScriptComponent>();
 
       register_->RegisterEnum<Keys>();
       register_->RegisterEnum<MouseButtons>();

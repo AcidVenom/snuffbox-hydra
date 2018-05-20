@@ -86,6 +86,7 @@ namespace snuffbox
       std::string ns; //!< The namespace string including '::'
 
       bool is_service; //!< Does this class derive from ServiceBase?
+      bool is_component; //!< Does this class derive from ComponentBase?
 
       std::vector<FunctionDefinition> functions; //!< The functions of the class
     };

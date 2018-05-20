@@ -2,8 +2,6 @@
 
 #include "engine/ecs/component.h"
 
-#include <scripting/script_class.h>
-
 namespace snuffbox
 {
   namespace engine
@@ -110,6 +108,13 @@ namespace snuffbox
       * @see IComponent::Update
       */
       void Update(float dt) override;
+
+    public:
+
+      /**
+      * @brief Detaches this component from its parent if it has one
+      */
+      ~TransformComponent();
 
     private:
 

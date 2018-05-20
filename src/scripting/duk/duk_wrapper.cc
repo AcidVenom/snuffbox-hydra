@@ -62,7 +62,7 @@ namespace snuffbox
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
 
       duk_push_c_function(context_, &DukWrapper::Finalize, DUK_VARARGS);
-      duk_set_finalizer(context_, -2);
+      duk_set_finalizer(context_, obj);
 
       StashObject(ptr->id());
     }
@@ -94,15 +94,13 @@ namespace snuffbox
         duk_get_prop_string(context_, -1, DUK_HIDDEN_PTR);
         void* hptr = duk_get_pointer(context_, -1);
 
+        duk_pop_3(context_);
         duk_push_heapptr(context_, hptr);
-
-        duk_remove(context_, -2);
-        duk_remove(context_, -2);
 
         return true;
       }
 
-      duk_pop(context_);
+      duk_pop_2(context_);
 
       return false;
     }

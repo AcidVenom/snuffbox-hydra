@@ -12,6 +12,7 @@ ENDFUNCTION (SET_SOLUTION_FOLDER)
 FUNCTION (CREATE_SCRIPT_BINDS arg1 arg2)
   FOREACH (Relative ${arg1})
     IF(${Relative} MATCHES "\\.h")
+      SET(EngineDir "${PROJECT_SOURCE_DIR}/src")
       SET(InputFile "${CMAKE_CURRENT_SOURCE_DIR}/${Relative}")
       
       MESSAGE(STATUS "Adding 'sparse' step for ${Relative}")

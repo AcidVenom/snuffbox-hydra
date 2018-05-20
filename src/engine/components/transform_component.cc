@@ -140,6 +140,12 @@ namespace snuffbox
       }
     }
 
+    //--------------------------------------------------------------------------
+    TransformComponent::~TransformComponent()
+    {
+      SetParent(nullptr);
+    }
+
 #ifndef SNUFF_NSCRIPTING
     //--------------------------------------------------------------------------
     SPARSE_CUSTOM(TransformComponent, children)

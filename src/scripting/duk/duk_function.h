@@ -112,6 +112,7 @@ namespace snuffbox
       }
 
       wrapper.PushValue<ScriptValue*>(ret);
+
       return 1;
     }
   }

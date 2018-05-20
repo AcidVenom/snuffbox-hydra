@@ -75,6 +75,14 @@ SET(ComponentsSources
   "components/transform_component.cc"
 )
 
+IF (NOT SNUFF_NSCRIPTING)
+  SET(ComponentsSources
+    ${ComponentsSources}
+    "components/script_component.h"
+    "components/script_component.cc"
+  )
+ENDIF (NOT SNUFF_NSCRIPTING)
+
 SET(Resources
 )
 
@@ -125,6 +133,7 @@ IF (NOT SNUFF_NSCRIPTING)
     "definitions/components.h"
     "ecs/entity.h"
     "components/transform_component.h"
+    "components/script_component.h"
   )
   
   FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)

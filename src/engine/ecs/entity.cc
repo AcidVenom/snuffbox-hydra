@@ -1,8 +1,13 @@
 #include "engine/ecs/entity.h"
+#include "engine/ecs/scene.h"
+
+#include "engine/services/scene_service.h"
+#include "engine/application/application.h"
 
 #include "engine/components/transform_component.h"
 
 #ifndef SNUFF_NSCRIPTING
+#include "engine/components/script_component.h"
 #include <sparsed/entity.gen.cc>
 #endif
 
@@ -11,9 +16,18 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    Entity::Entity()
+    const char* Entity::kDefaultName_ = "Entity";
+
+    //--------------------------------------------------------------------------
+    Entity::Entity() :
+      name_(kDefaultName_),
+      destroyed_(false),
+      active_(true)
     {
       AddComponentInternal(Components::kTransform);
+
+      SceneService* s = Application::Instance()->GetService<SceneService>();
+      s->current_scene()->AddEntity(this);
     }
 
     //--------------------------------------------------------------------------
@@ -105,6 +119,25 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Entity::Destroy()
+    {
+      if (destroyed_ == true)
+      {
+        return;
+      }
+
+      SceneService* s = Application::Instance()->GetService<SceneService>();
+      s->current_scene()->RemoveEntity(this);
+
+      for (size_t i = 0; i < static_cast<size_t>(Components::kCount); ++i)
+      {
+        components_[i].clear();
+      }
+
+      destroyed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::IDCheck(Components id)
     {
       foundation::Logger::Assert(
@@ -139,6 +172,65 @@ namespace snuffbox
     {
       const ComponentCreateArray& c = ComponentCreators();
       return c.at(static_cast<size_t>(id))(this);
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::Update(float dt)
+    {
+      if (active_ == false)
+      {
+        return;
+      }
+
+      IComponent* comp = nullptr;
+
+      for (
+        unsigned int i = 0; 
+        i < static_cast<unsigned int>(Components::kCount); 
+        ++i)
+      {
+        ComponentArray& arr = components_[i];
+        for (size_t c = 0; c < arr.size(); ++c)
+        {
+          comp = arr.at(c).get();
+          if (comp->active() == false)
+          {
+            continue;
+          }
+          
+          comp->Update(dt);
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_name(const foundation::String& name)
+    {
+      name_ = name;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::String& Entity::name() const
+    {
+      return name_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_active(bool active)
+    {
+      active_ = active;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Entity::active() const
+    {
+      return active_;
+    }
+
+    //--------------------------------------------------------------------------
+    Entity::~Entity()
+    {
+      Destroy();
     }
 
 #ifndef SNUFF_NSCRIPTING

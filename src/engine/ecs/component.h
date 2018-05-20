@@ -85,6 +85,16 @@ namespace snuffbox
       Entity* entity() const;
 
       /**
+      * @brief Sets if this component is currently active
+      */
+      void set_active(bool active);
+
+      /**
+      * @return Is this component currently active?
+      */
+      bool active() const;
+
+      /**
       * @brief Virtual destructor
       */
       virtual ~IComponent();
@@ -92,6 +102,7 @@ namespace snuffbox
     private:
 
       Entity* entity_; //!< The entity parent of this component
+      bool active_; //!< Is this component currently active?
     };
 
     /**

@@ -2,8 +2,6 @@
 
 #define SCRIPT_CLASS(...)
 #define SCRIPT_FUNC(...)
-#define SCRIPT_FUNC_EX(...)
-#define SCRIPT_EXPAND(...)
 #define SCRIPT_ENUM(...)
 
 #ifndef SNUFF_NSCRIPTING

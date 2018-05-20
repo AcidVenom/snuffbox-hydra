@@ -13,6 +13,8 @@ namespace snuffbox
 {
   namespace engine
   {
+    class Scene;
+
     /**
     * @brief An entity class to hold a multitude of components that are updated
     *        through the Scene
@@ -21,6 +23,8 @@ namespace snuffbox
     */
     SCRIPT_CLASS() class Entity : public scripting::ScriptClass
     {
+
+      friend Scene;
 
     public:
 
@@ -163,6 +167,35 @@ namespace snuffbox
       SCRIPT_FUNC(custom) foundation::Vector<IComponent*> GetComponents(
         Components id);
 
+      /**
+      * @brief Destroys this entity and all its components
+      */
+      SCRIPT_FUNC() void Destroy();
+
+      /**
+      * @brief Sets the name of this entity
+      *
+      * @param[in] name The name to set
+      */
+      SCRIPT_FUNC() void set_name(const foundation::String& name);
+
+      /**
+      * @return The name of this entity
+      */
+      SCRIPT_FUNC() const foundation::String& name() const;
+
+      /**
+      * @brief Sets if this entity is active
+      *
+      * @param[in] active Is this entity active?
+      */
+      SCRIPT_FUNC() void set_active(bool active);
+
+      /**
+      * @return Is this entity active?
+      */
+      SCRIPT_FUNC() bool active() const;
+
     protected:
 
       /**
@@ -260,6 +293,22 @@ namespace snuffbox
       */
       IComponent* CreateComponentByID(Components id);
 
+      /**
+      * @brief Updates this entity and its components
+      *
+      * @remarks The entity is only updated if the entity itself is active
+      *
+      * @param[in] dt The current delta-time of the application
+      */
+      void Update(float dt);
+
+    public:
+
+      /**
+      * @brief Destructs the entity and removes it from the scene
+      */
+      ~Entity();
+
     private:
 
       /**
@@ -267,6 +316,12 @@ namespace snuffbox
       *        contained multiple times
       */
       ComponentArray components_[static_cast<size_t>(Components::kCount)];
+
+      foundation::String name_; //!< The name of this entity
+      bool destroyed_; //!< Has this entity been destroyed yet?
+      bool active_; //!< Is this entity active?
+
+      static const char* kDefaultName_; //!< The default name for entities
     };
 
     //--------------------------------------------------------------------------

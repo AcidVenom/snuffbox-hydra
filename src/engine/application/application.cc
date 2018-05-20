@@ -8,6 +8,7 @@
 #include "engine/services/window_service.h"
 #include "engine/services/input_service.h"
 #include "engine/services/renderer_service.h"
+#include "engine/services/scene_service.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
@@ -23,12 +24,6 @@ GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 
 #include <foundation/io/resources.h>
 #include <foundation/auxiliary/timer.h>
-
-#include <cassert>
-#include <iostream>
-#include <string>
-
-#include "engine/ecs/entity.h"
 
 namespace snuffbox
 {
@@ -200,6 +195,7 @@ namespace snuffbox
         CreateService<WindowService>(input_service);
       }
 
+      CreateService<SceneService>();
       CREATE_SCRIPT_SERVICE();
     }
 
@@ -279,6 +275,11 @@ namespace snuffbox
     void Application::Update(float dt)
     {
       GetService<InputService>()->Flush();
+
+      for (size_t i = 0; i < services_.size(); ++i)
+      {
+        services_.at(i)->OnUpdate(*this, dt);
+      }
 
       SCRIPT_CALLBACK(Update, dt);
       OnUpdate(dt);

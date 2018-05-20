@@ -167,11 +167,13 @@ namespace snuffbox
       * @brief Pushes the callback from the global stash
       *
       * @param[out] nargs The number of arguments for this callback
+      * @param[out] top_args The stack index between the callback and the
+      *                      arguments, used for context calls
       * @param[in] args The arguments to call the callback with
       *
       * @return Were we able to push the callback onto the stack?
       */
-      bool PushCallback(uint8_t* nargs, Args... args);
+      bool PushCallback(uint8_t* nargs, duk_idx_t* top_args, Args... args);
 
     private:
 
@@ -316,8 +318,13 @@ namespace snuffbox
     template <typename ... Args>
     inline bool DukCallback<Args...>::Call(Args... args)
     {
+      if (state_ == nullptr || is_valid_ == false)
+      {
+        return false;
+      }
+
       uint8_t nargs;
-      if (PushCallback(&nargs, eastl::forward<Args>(args)...) == false)
+      if (PushCallback(&nargs, nullptr, eastl::forward<Args>(args)...) == false)
       {
         return false;
       }
@@ -340,16 +347,24 @@ namespace snuffbox
     template <typename T>
     inline bool DukCallback<Args...>::CallContext(T* self, Args... args)
     {
-      uint8_t nargs;
-      if (PushCallback(&nargs, eastl::forward<Args>(args)...) == false)
+      if (state_ == nullptr || is_valid_ == false)
       {
         return false;
       }
 
       duk_context* ctx = state_->context();
-
       DukWrapper wrapper(ctx);
+
+      uint8_t nargs;
+      duk_idx_t top;
+
+      if (PushCallback(&nargs, &top, eastl::forward<Args>(args)...) == false)
+      {
+        return false;
+      }
+
       wrapper.PushPointer(self, T::ScriptName());
+      duk_replace(ctx, top - 1);
 
       bool has_error = false;
       if ((has_error = duk_pcall_method(ctx, nargs)) != 0)
@@ -364,7 +379,10 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename ... Args>
-    inline bool DukCallback<Args...>::PushCallback(uint8_t* nargs, Args... args)
+    inline bool DukCallback<Args...>::PushCallback(
+      uint8_t* nargs, 
+      duk_idx_t* top_args, 
+      Args... args)
     {
       if (is_valid_ == false || state_ == nullptr)
       {
@@ -381,11 +399,24 @@ namespace snuffbox
       }
 
       duk_remove(ctx, -2);
+
+      if (top_args != nullptr)
+      {
+        duk_push_undefined(ctx);
+      }
+
       DukWrapper wrapper = DukWrapper(ctx);
+
+      uint8_t n = PushArg(wrapper, eastl::forward<Args>(args)...);
 
       if (nargs != nullptr)
       {
-        *nargs = PushArg(wrapper, eastl::forward<Args>(args)...);
+        *nargs = n;
+      }
+
+      if (top_args != nullptr)
+      {
+        *top_args = -(static_cast<duk_idx_t>(n) + 1);
       }
 
       return true;
