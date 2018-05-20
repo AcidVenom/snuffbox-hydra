@@ -37,6 +37,13 @@ namespace snuffbox
         return false;
       }
 
+      foundation::Logger::LogVerbosity<2>(
+        foundation::LogChannel::kEngine,
+        foundation::LogSeverity::kInfo,
+        "OpenGL version {0}.{1}",
+        GLVersion.major,
+        GLVersion.minor);
+
       return true;
     }
 

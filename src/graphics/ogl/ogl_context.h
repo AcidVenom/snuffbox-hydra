@@ -11,6 +11,13 @@ namespace snuffbox
 }
 #elif defined (SNUFF_LINUX)
 #include "graphics/ogl/linux/linux_ogl_context.h"
+namespace snuffbox
+{
+  namespace graphics
+  {
+    using OGLContext = LinuxOGLContext;
+  }
+}
 #else
 #error "Unsupported compiler platform"
 #endif

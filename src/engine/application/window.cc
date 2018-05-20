@@ -123,7 +123,7 @@ namespace snuffbox
 #ifdef SNUFF_WIN32
       return glfwGetWin32Window(window_);
 #elif defined(SNUFF_LINUX)
-      return glfwGetX11Window(window_);
+      return reinterpret_cast<void*>(glfwGetX11Window(window_));
 #endif
     }
 

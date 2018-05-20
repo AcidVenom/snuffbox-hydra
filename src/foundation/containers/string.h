@@ -52,7 +52,7 @@ namespace eastl
   template <>
   struct equal_to<snuffbox::foundation::String> 
   {
-    EA_CPP14_CONSTEXPR bool operator()(
+    bool operator()(
       const snuffbox::foundation::String& a, 
       const snuffbox::foundation::String& b) const
     { 

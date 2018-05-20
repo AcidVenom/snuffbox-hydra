@@ -93,5 +93,7 @@ ELSEIF (SNUFF_OGL)
   
   IF (SNUFF_WIN32)
     TARGET_LINK_LIBRARIES(snuffbox-graphics "opengl32.lib")
+  ELSEIF (SNUFF_LINUX)
+    TARGET_LINK_LIBRARIES(snuffbox-graphics "GL" "X11")
   ENDIF (SNUFF_WIN32)
 ENDIF (SNUFF_D3D11)
