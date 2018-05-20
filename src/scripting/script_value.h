@@ -322,6 +322,16 @@ namespace snuffbox
       void SetPointer(ScriptClass* ptr, const char* type);
 
       /**
+      * @see ScriptObject::SetPointer
+      *
+      * @tparam T The type of the pointer
+      *
+      * @brief Sets a pointer of a script class by template parameter
+      */
+      template <typename T>
+      void SetPointer(T* ptr);
+
+      /**
       * @brief Retrieves the underlying pointer
       *
       * @param[in] type The type that we expect as a named string
@@ -434,6 +444,13 @@ namespace snuffbox
     {
       ScriptHandle handle = ScriptValue::From<T>(value);
       Insert(key, handle);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void ScriptObject::SetPointer(T* ptr)
+    {
+      SetPointer(ptr, T::ScriptName());
     }
 
     //--------------------------------------------------------------------------

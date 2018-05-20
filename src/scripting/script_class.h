@@ -43,9 +43,6 @@ namespace snuffbox
   {
     class DukRegister;
     using ScriptRegister = DukRegister;
-
-    class DukState;
-    using ScriptState = DukState;
   }
 }
 #endif
@@ -101,13 +98,6 @@ namespace snuffbox
       static void RegisterScriptEnum(ScriptRegister* reg);
 
       /**
-      * @brief Sets the script state
-      *
-      * @param[in] state The state to set
-      */
-      void set_script_state(ScriptState* state);
-
-      /**
       * @return The script ID of this class
       */
       size_t id() const;
@@ -120,7 +110,6 @@ namespace snuffbox
     private:
 
       size_t id_; //!< The script ID of this class
-      ScriptState* state_; //!< The current script state
 
       static size_t kCurrentID_; //!< The current ID to assign
 #endif

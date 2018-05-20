@@ -130,6 +130,12 @@ namespace snuffbox
       template <typename T>
       void PushValueImpl(T value) const;
 
+      /**
+      * @brief Used to remove stashed objects after they lose all their
+      *        references
+      */
+      static duk_ret_t Finalize(duk_context* ctx);
+
     public:
 
       /**

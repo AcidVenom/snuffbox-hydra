@@ -138,7 +138,7 @@ namespace snuffbox
     IComponent* Entity::CreateComponentByID(Components id)
     {
       const ComponentCreateArray& c = ComponentCreators();
-      return c.at(static_cast<size_t>(id))();
+      return c.at(static_cast<size_t>(id))(this);
     }
 
 #ifndef SNUFF_NSCRIPTING
@@ -161,7 +161,7 @@ namespace snuffbox
       scripting::ScriptObjectHandle ent = 
         scripting::ScriptValue::CreateObject();
 
-      ent->SetPointer(e, Entity::ScriptName());
+      ent->SetPointer<Entity>(e);
 
       comp->SetPointer(c, c->GetScriptName());
       comp->Insert("entity", ent);

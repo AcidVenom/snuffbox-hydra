@@ -128,13 +128,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DukState::RemoveScriptClass(ScriptClass* ptr)
-    {
-      DukWrapper wrapper(context_);
-      wrapper.RemoveStashedObject(ptr->id());
-    }
-
-    //--------------------------------------------------------------------------
     void DukState::Shutdown()
     {
       if (context_ != nullptr)

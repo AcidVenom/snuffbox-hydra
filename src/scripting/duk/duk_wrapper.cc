@@ -24,6 +24,12 @@ namespace snuffbox
       ScriptClass* ptr, 
       const char* type) const
     {
+      if (ptr == nullptr)
+      {
+        duk_push_undefined(context_);
+        return;
+      }
+
       if (PushStashedObject(ptr->id()) == true)
       {
         return;
@@ -55,8 +61,10 @@ namespace snuffbox
       duk_push_string(context_, type);
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
 
+      duk_push_c_function(context_, &DukWrapper::Finalize, DUK_VARARGS);
+      duk_set_finalizer(context_, -2);
+
       StashObject(ptr->id());
-      ptr->set_script_state(GetState());
     }
 
     //--------------------------------------------------------------------------
@@ -250,6 +258,25 @@ namespace snuffbox
     void DukWrapper::PushValueImpl(ScriptHandle value) const
     {
       return PushValueImpl<ScriptValue*>(value.get());
+    }
+
+    //--------------------------------------------------------------------------
+    duk_ret_t DukWrapper::Finalize(duk_context* ctx)
+    {
+      DukWrapper wrapper(ctx);
+
+      duk_idx_t argc = duk_get_top(ctx);
+      foundation::Logger::Assert(argc > 0, "duktape finalizer invalid");
+
+      duk_get_prop_string(ctx, 0, DUK_HIDDEN_PTR);
+      ScriptClass* ptr = 
+        reinterpret_cast<ScriptClass*>(duk_get_pointer(ctx, -1));
+
+      wrapper.RemoveStashedObject(ptr->id());
+
+      duk_pop(ctx);
+
+      return 0;
     }
 
     //--------------------------------------------------------------------------

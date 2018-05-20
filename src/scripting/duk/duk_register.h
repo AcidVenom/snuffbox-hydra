@@ -259,7 +259,6 @@ namespace snuffbox
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_NAME);
 
       wrapper.StashObject(ptr->id());
-      ptr->set_script_state(wrapper.GetState());
 
       return 0;
     }
@@ -268,13 +267,16 @@ namespace snuffbox
     template <typename T>
     inline duk_ret_t DukRegister::Delete(duk_context* ctx)
     {
+      DukWrapper wrapper(ctx);
+
       duk_idx_t argc = duk_get_top(ctx);
       foundation::Logger::Assert(argc > 0, "duktape finalizer invalid");
 
       duk_get_prop_string(ctx, 0, DUK_HIDDEN_PTR);
-      void* ptr = duk_get_pointer(ctx, -1);
+      T* ptr = reinterpret_cast<T*>(duk_get_pointer(ctx, -1));
 
-      foundation::Memory::Destruct<T>(reinterpret_cast<T*>(ptr));
+      wrapper.RemoveStashedObject(ptr->id());
+      foundation::Memory::Destruct<T>(ptr);
 
       duk_pop(ctx);
 

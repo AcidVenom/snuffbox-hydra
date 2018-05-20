@@ -214,7 +214,7 @@ namespace snuffbox
       *
       * @see IComponent::CreateComponent
       */
-      using ComponentCreateFunc = IComponent*(*)();
+      using ComponentCreateFunc = IComponent*(*)(Entity*);
 
       /**
       * @brief A short-hand to easily reach the component creation functions
@@ -258,7 +258,7 @@ namespace snuffbox
       *
       * @return The base component pointer to the created component
       */
-      static IComponent* CreateComponentByID(Components id);
+      IComponent* CreateComponentByID(Components id);
 
     private:
 

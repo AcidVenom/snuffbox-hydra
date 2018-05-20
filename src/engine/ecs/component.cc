@@ -5,13 +5,20 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
+    IComponent::IComponent(Entity* entity) :
+      entity_(entity)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     void IComponent::Create()
     {
 
     }
 
     //--------------------------------------------------------------------------
-    void IComponent::Update()
+    void IComponent::Update(float dt)
     {
 
     }
@@ -20,6 +27,12 @@ namespace snuffbox
     void IComponent::Destroy()
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    Entity* IComponent::entity() const
+    {
+      return entity_;
     }
 
     //--------------------------------------------------------------------------

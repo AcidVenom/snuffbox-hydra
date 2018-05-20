@@ -62,11 +62,6 @@ namespace snuffbox
       void LogLastError(const char* format);
 
       /**
-      * @see IScriptState::RemoveScriptClass
-      */
-      void RemoveScriptClass(ScriptClass* ptr) override;
-
-      /**
       * @see IScriptState::Shutdown
       */
       void Shutdown() override;

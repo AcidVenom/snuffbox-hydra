@@ -52,13 +52,6 @@ namespace snuffbox
         bool print) = 0;
 
       /**
-      * @brief Removes a script class reference from the script state
-      *
-      * @param[in] ptr The pointer to the script class to remove
-      */
-      virtual void RemoveScriptClass(ScriptClass* ptr) = 0;
-
-      /**
       * @brief Shuts down the native scripting API after usage
       */
       virtual void Shutdown() = 0;
