@@ -2,6 +2,8 @@
 
 #include "engine/ecs/component.h"
 
+#include <foundation/containers/vector.h>
+
 namespace snuffbox
 {
   namespace engine
