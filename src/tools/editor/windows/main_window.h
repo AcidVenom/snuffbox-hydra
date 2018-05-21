@@ -74,6 +74,20 @@ namespace snuffbox
       */
       void BindResizeCallback(const graphics::GraphicsWindow::SizeCallback& cb);
 
+    protected:
+
+      /**
+      * @brief Loads the layout the user had during previous execution,
+      *        using QSettings
+      */
+      void LoadLayout();
+
+      /**
+      * @brief Saves the layout the user has during current execution,
+      *        storing them in QSettings
+      */
+      void SaveLayout();
+
     private slots:
 
       /**
@@ -97,6 +111,29 @@ namespace snuffbox
       * @see GraphicsWindow::SizeCallback
       */
       graphics::GraphicsWindow::SizeCallback on_resize_;
+
+      static const char* kCompanyName_; //!< The company name for QSettings
+      static const char* kAppName_; //!< The app name for QSettings
+
+      /**
+      * @brief The name to save the window geometry at in the QSettings
+      */
+      static const char* kSaveGeometry_;
+
+      /**
+      * @brief The name to save the window state at in the QSettings
+      */
+      static const char* kSaveWindow_;
+
+      /**
+      * @brief The name to save the console splitter state at in the QSettings
+      */
+      static const char* kSaveSplitterA_;
+
+      /**
+      * @brief The name to save the file tree splitter state at in the QSettings
+      */
+      static const char* kSaveSplitterB_;
     };
   }
 }

@@ -5,11 +5,20 @@
 #include <qstylefactory.h>
 #include <qevent.h>
 #include <qfiledialog.h>
+#include <qsettings.h>
 
 namespace snuffbox
 {
   namespace editor
   {
+    //--------------------------------------------------------------------------
+    const char* MainWindow::kCompanyName_ = "Snuffbox";
+    const char* MainWindow::kAppName_ = "snuffbox-hydra-editor";
+    const char* MainWindow::kSaveGeometry_ = "geometry";
+    const char* MainWindow::kSaveWindow_ = "window";
+    const char* MainWindow::kSaveSplitterA_ = "splitter_a";
+    const char* MainWindow::kSaveSplitterB_ = "splitter_b";
+
     //--------------------------------------------------------------------------
     MainWindow::MainWindow(EditorApplication* app) :
       app_(app),
@@ -42,6 +51,8 @@ namespace snuffbox
         &MainWindow::OpenProject);
 
       ui_.gameWindow->installEventFilter(this);
+
+      LoadLayout();
     }
 
     //--------------------------------------------------------------------------
@@ -93,6 +104,8 @@ namespace snuffbox
     void MainWindow::closeEvent(QCloseEvent* evt)
     {
       app_->NotifyQuit();
+      SaveLayout();
+
       evt->accept();
     }
 
@@ -126,6 +139,35 @@ namespace snuffbox
       const graphics::GraphicsWindow::SizeCallback& cb)
     {
       on_resize_ = cb;
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::LoadLayout()
+    {
+      resizeDocks({ ui_.consoleDock }, { 100 }, Qt::Vertical);
+
+      QSettings settings(kCompanyName_, kAppName_);
+
+      restoreGeometry(settings.value(kSaveGeometry_).toByteArray());
+      restoreState(settings.value(kSaveWindow_).toByteArray());
+
+      ui_.splitter->restoreState(
+        settings.value(kSaveSplitterA_).toByteArray());
+
+      ui_.splitter_2->restoreState(
+        settings.value(kSaveSplitterB_).toByteArray());
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::SaveLayout()
+    {
+      QSettings settings(kCompanyName_, kAppName_);
+
+      settings.setValue(kSaveGeometry_, saveGeometry());
+      settings.setValue(kSaveWindow_, saveState());
+
+      settings.setValue(kSaveSplitterA_, ui_.splitter->saveState());
+      settings.setValue(kSaveSplitterB_, ui_.splitter_2->saveState());
     }
 
     //--------------------------------------------------------------------------
