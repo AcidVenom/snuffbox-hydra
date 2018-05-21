@@ -52,12 +52,6 @@ namespace snuffbox
 
       wglMakeCurrent(hdc_, hglrc_);
 
-      foundation::Logger::LogVerbosity<2>(
-        foundation::LogChannel::kEngine,
-        foundation::LogSeverity::kInfo,
-        "OpenGL version: {0}",
-        reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-
       swap_ = reinterpret_cast<wglSwapIntervalEXT>(
         wglGetProcAddress("wglSwapIntervalEXT"));
 
