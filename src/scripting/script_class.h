@@ -75,7 +75,6 @@ namespace snuffbox
     */
     class ScriptClass
     {
-#ifndef SNUFF_NSCRIPTING
 
     public:
 
@@ -83,6 +82,30 @@ namespace snuffbox
       * @brief Default constructor, assigns a script ID
       */
       ScriptClass();
+
+      /**
+      * @brief Sets if this script class is instantiated from script
+      *
+      * @param[in] value Is this instantiated from script?
+      */
+      void set_is_from_script(bool value);
+
+      /**
+      * @return Was this script class instantiated from script?
+      *
+      * @remarks By checking the ownership, we can determine whether it's up
+      *          to the script state to destruct the object after all references
+      *          are lost, or that we have to deallocate from C++.
+      */
+      bool is_from_script() const;
+
+    private:
+
+      bool is_from_script_; //!< Was this script class instantiated from script?
+
+#ifndef SNUFF_NSCRIPTING
+
+    public:
 
       /**
       * @brief This function should be specialized with an enumerator
@@ -112,5 +135,26 @@ namespace snuffbox
       static size_t kCurrentID_; //!< The current ID to assign
 #endif
     };
+
+#ifdef SNUFF_NSCRIPTING
+    //--------------------------------------------------------------------------
+    inline ScriptClass::ScriptClass() :
+      is_from_script_(false)
+    {
+
+    }
+#endif
+
+    //--------------------------------------------------------------------------
+    inline void ScriptClass::set_is_from_script(bool value)
+    {
+      is_from_script_ = value;
+    }
+
+    //--------------------------------------------------------------------------
+    inline bool ScriptClass::is_from_script() const
+    {
+      return is_from_script_;
+    }
   }
 }

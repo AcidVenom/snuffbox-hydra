@@ -51,6 +51,17 @@ namespace snuffbox
       */
       void Update(float dt);
 
+      /**
+      * @brief Clears all entities in the scene
+      *
+      * The entities that were created from script are not destructed here,
+      * they are however removed from the list of entities and thus not
+      * updated anymore.
+      *
+      * Entities created from C++-side still get destructed appropriately.
+      */
+      void Clear();
+
     protected:
 
       /**

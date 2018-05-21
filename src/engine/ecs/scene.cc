@@ -50,5 +50,24 @@ namespace snuffbox
         entities_.at(i)->Update(dt);
       }
     }
+
+    //--------------------------------------------------------------------------
+    void Scene::Clear()
+    {
+      Entity* e = nullptr;
+      for (size_t i = 0; i < entities_.size(); ++i)
+      {
+        e = entities_.at(i);
+
+        if (e->is_from_script() == true)
+        {
+          continue;
+        }
+
+        foundation::Memory::Destruct(e);
+      }
+
+      entities_.clear();
+    }
   }
 }

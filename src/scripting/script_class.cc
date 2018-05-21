@@ -10,6 +10,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     ScriptClass::ScriptClass() :
+      is_from_script_(false),
       id_(0)
     {
       id_ = kCurrentID_;
