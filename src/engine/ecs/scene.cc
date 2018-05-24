@@ -42,10 +42,17 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::Clear()
     {
+      foundation::Vector<Entity*> copy = entities_;
+
       Entity* e = nullptr;
-      for (int i = static_cast<int>(entities_.size()) - 1; i >= 0; --i)
+      for (int i = static_cast<int>(copy.size()) - 1; i >= 0; --i)
       {
-        foundation::Memory::Destruct(entities_.at(i));
+        if (HasEntity(copy.at(i)) == -1)
+        {
+          continue;
+        }
+
+        foundation::Memory::Destruct(copy.at(i));
       }
 
       hierarchy_.clear();

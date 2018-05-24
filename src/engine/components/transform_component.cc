@@ -104,7 +104,7 @@ namespace snuffbox
     {
       if (parent != nullptr)
       {
-        if (parent->parent() == this)
+        if (parent->parent() == this || parent == this)
         {
           return;
         }
@@ -155,6 +155,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     TransformComponent::~TransformComponent()
     {
+      for (size_t i = 0; i < children_.size(); ++i)
+      {
+        children_.at(i)->SetParent(nullptr);
+      }
+
       SetParent(nullptr);
     }
 

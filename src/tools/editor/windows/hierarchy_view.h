@@ -116,6 +116,32 @@ namespace snuffbox
         engine::TransformComponent* child,
         HierarchyViewItem* item = nullptr);
 
+      /**
+      * @brief Handles a drag start event received from the viewport's event
+      *        filter
+      *
+      * This method will set the current dragging item to the widget that we
+      * started dragging on
+      *
+      * @param[in] evt The drag enter event
+      */
+      void OnDragEnter(QDragEnterEvent* evt);
+
+      /**
+      * @brief Handles a drop event received from the viewport's event filter
+      *
+      * This method will reparent the dropped item to the item it was dropped
+      * on, if any. Otherwise, it will rearrange the hierarchy.
+      *
+      * @param[in] evt The drop event
+      */
+      void OnDropEvent(QDropEvent* evt);
+
+      /**
+      * @brief The event filter to enable custom drag and drop behavior
+      */
+      bool eventFilter(QObject* obj, QEvent* evt) override;
+
     private slots:
 
       /**
@@ -131,11 +157,15 @@ namespace snuffbox
     private:
 
       QTreeWidget* tree_; //!< The underlying Qt tree widget
+
       QMenu* context_menu_; //!< The context menu
       QAction* add_entity_; //!< The add entity option
       QAction* remove_entity_; //!< The remove entity option
+
       MainWindow* window_; //!< The window that owns this hierarchy
       engine::SceneService* scene_service_; //!< The current scene service
+
+      HierarchyViewItem* dragged_; //!< The currently dragged item
     };
   }
 }

@@ -9,6 +9,7 @@
 
 #include <qmenu.h>
 #include <qaction.h>
+#include <qevent.h>
 
 namespace snuffbox
 {
@@ -39,9 +40,13 @@ namespace snuffbox
       context_menu_(nullptr),
       add_entity_(nullptr),
       remove_entity_(nullptr),
-      scene_service_(scene_service)
+      scene_service_(scene_service),
+      dragged_(nullptr)
     {
       AddContextMenu();
+      tree_->setAcceptDrops(true);
+      tree_->setDragEnabled(true);
+      tree_->viewport()->installEventFilter(this);
     }
 
     //--------------------------------------------------------------------------
@@ -134,6 +139,48 @@ namespace snuffbox
       {
         AddSceneChild(children.at(i), new_item);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnDragEnter(QDragEnterEvent* evt)
+    {
+      dragged_ = static_cast<HierarchyViewItem*>(tree_->currentItem());
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnDropEvent(QDropEvent* evt)
+    {
+      QPoint p = evt->pos();
+
+      HierarchyViewItem* to = 
+        static_cast<HierarchyViewItem*>(tree_->itemAt(evt->pos()));
+
+      if (to != nullptr)
+      {
+        dragged_->transform()->SetParent(to->transform());
+      }
+      else
+      {
+        dragged_->transform()->SetParent(nullptr);
+      }
+
+      OnHierarchyChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    bool HierarchyView::eventFilter(QObject* obj, QEvent* evt)
+    {
+      if (evt->type() == QEvent::Type::DragEnter)
+      {
+        OnDragEnter(static_cast<QDragEnterEvent*>(evt));
+      }
+      else if (evt->type() == QEvent::Type::Drop)
+      {
+        OnDropEvent(static_cast<QDropEvent*>(evt));
+        return true;
+      }
+
+      return false;
     }
 
     //--------------------------------------------------------------------------
