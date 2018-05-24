@@ -123,6 +123,11 @@ namespace snuffbox
       */
       void OnCustomContextMenu(const QPoint& p);
 
+      /**
+      * @brief Called when an item changed, which implies a rename
+      */
+      void OnRenameItem(QTreeWidgetItem* item, int column);
+
     private:
 
       QTreeWidget* tree_; //!< The underlying Qt tree widget

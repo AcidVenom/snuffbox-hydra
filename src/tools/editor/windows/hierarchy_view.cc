@@ -21,6 +21,7 @@ namespace snuffbox
       transform_(transform)
     {
       setText(0, transform_->entity()->name().c_str());
+      setFlags(flags() | Qt::ItemIsEditable);
     }
 
     //--------------------------------------------------------------------------
@@ -60,6 +61,12 @@ namespace snuffbox
         &QTreeWidget::customContextMenuRequested,
         this,
         &HierarchyView::OnCustomContextMenu);
+
+      connect(
+        tree_,
+        &QTreeWidget::itemChanged,
+        this,
+        &HierarchyView::OnRenameItem);
     }
 
     //--------------------------------------------------------------------------
@@ -145,6 +152,13 @@ namespace snuffbox
       {
         RemoveEntity(static_cast<HierarchyViewItem*>(tree_->itemAt(p)));
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnRenameItem(QTreeWidgetItem* item, int column)
+    {
+      HierarchyViewItem* hvi = static_cast<HierarchyViewItem*>(item);
+      hvi->transform()->entity()->set_name(item->text(0).toStdString().c_str());
     }
   }
 }
