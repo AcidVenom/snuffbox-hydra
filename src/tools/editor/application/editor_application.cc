@@ -48,6 +48,8 @@ namespace snuffbox
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
 
+      window_->InitializeHierarchy(GetService<engine::SceneService>());
+
       window_->BindResizeCallback([&](uint16_t width, uint16_t height)
       {
         renderer->OnResize(width, height);

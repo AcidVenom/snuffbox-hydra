@@ -127,14 +127,22 @@ namespace snuffbox
         return;
       }
 
+      destroyed_ = true;
+
       TransformComponent* current = GetComponent<TransformComponent>();
 
       const foundation::Vector<TransformComponent*>& children =
         current->children();
 
+      Entity* child = nullptr;
       for (size_t i = 0; i < children.size(); ++i)
       {
-        children.at(i)->entity()->Destroy();
+        child = children.at(i)->entity();
+
+        if (child->is_from_script() == false)
+        {
+          foundation::Memory::Destruct<Entity>(child);
+        }
       }
 
       scene_->RemoveEntity(this);
@@ -143,8 +151,6 @@ namespace snuffbox
       {
         components_[i].clear();
       }
-
-      destroyed_ = true;
     }
 
     //--------------------------------------------------------------------------

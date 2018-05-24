@@ -2,10 +2,6 @@
 #include "tools/editor/windows/console.h"
 #include "tools/editor/application/editor_application.h"
 
-#include <engine/ecs/scene.h>
-#include <engine/ecs/entity.h>
-#include <engine/components/transform_component.h>
-
 #include <qstylefactory.h>
 #include <qevent.h>
 #include <qfiledialog.h>
@@ -27,7 +23,9 @@ namespace snuffbox
     MainWindow::MainWindow(EditorApplication* app) :
       app_(app),
       console_(nullptr),
-      project_dir_("")
+      hierarchy_(nullptr),
+      project_dir_(""),
+      on_resize_(nullptr)
     {
       ui_.setupUi(this);
 
@@ -45,10 +43,6 @@ namespace snuffbox
         &foundation::Memory::default_allocator(),
         ui_.outputTabs,
         output_windows);
-
-      hierarchy_ = foundation::Memory::ConstructUnique<HierarchyView>(
-        &foundation::Memory::default_allocator(),
-        ui_.hierarchyView);
 
       ApplyStyle(app);
 
@@ -150,6 +144,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::InitializeHierarchy(engine::SceneService* scene_service)
+    {
+      hierarchy_ = foundation::Memory::ConstructUnique<HierarchyView>(
+        &foundation::Memory::default_allocator(),
+        ui_.hierarchyView,
+        scene_service);
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::LoadLayout()
     {
       resizeDocks({ ui_.consoleDock }, { 100 }, Qt::Vertical);
@@ -179,49 +182,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::UpdateHierarchy(engine::Scene* scene)
-    {
-      ui_.hierarchyView->clear();
-
-      const foundation::Vector<engine::TransformComponent*>& hierarchy =
-        scene->hierarchy();
-
-      for (size_t i = 0; i < hierarchy.size(); ++i)
-      {
-        AddSceneChild(hierarchy.at(i));
-      }
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::AddSceneChild(
-      engine::TransformComponent* child,
-      QTreeWidgetItem* item)
-    {
-      const engine::Entity* ent = child->entity();
-      const foundation::String& name = ent->name();
-
-      QTreeWidgetItem* new_item = new QTreeWidgetItem();
-      new_item->setText(0, name.c_str());
-
-      if (item == nullptr)
-      {
-        ui_.hierarchyView->addTopLevelItem(new_item);
-      }
-      else
-      {
-        item->addChild(new_item);
-      }
-
-      const foundation::Vector<engine::TransformComponent*>& children =
-        child->children();
-
-      for (size_t i = 0; i < children.size(); ++i)
-      {
-        AddSceneChild(children.at(i), new_item);
-      }
-    }
-
-    //--------------------------------------------------------------------------
     void MainWindow::OpenProject()
     {
       QString dir = QFileDialog::getExistingDirectory(
@@ -234,6 +194,12 @@ namespace snuffbox
       {
         project_dir_ = dir;
       }
+    }
+
+    //--------------------------------------------------------------------------
+    EditorApplication* MainWindow::app() const
+    {
+      return app_;
     }
   }
 }

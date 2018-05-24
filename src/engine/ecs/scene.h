@@ -78,6 +78,15 @@ namespace snuffbox
       int HasEntity(Entity* entity);
 
       /**
+      * @brief Checks if a transform exists within the hierarchy
+      *
+      * @param[in] transform The transform to check for
+      *
+      * @return The index of the transform, or -1 if it doesn't exist
+      */
+      int HasTransform(TransformComponent* transform);
+
+      /**
       * @brief Updates the transform hierarchy whenever a new transform
       *        is created or re-parented
       *

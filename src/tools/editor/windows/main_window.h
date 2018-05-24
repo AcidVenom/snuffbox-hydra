@@ -14,8 +14,7 @@ namespace snuffbox
 {
   namespace engine
   {
-    class Scene;
-    class TransformComponent;
+    class SceneService;
   }
 
   namespace editor
@@ -87,6 +86,14 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Initializes the hierarchy inspector with the scene service
+      *        to sync with
+      *
+      * @param[in] scene_service The current scene service to sync with
+      */
+      void InitializeHierarchy(engine::SceneService* scene_service);
+
+      /**
       * @brief Loads the layout the user had during previous execution,
       *        using QSettings
       */
@@ -98,27 +105,6 @@ namespace snuffbox
       */
       void SaveLayout();
 
-      /**
-      * @brief Updates the scene inspector with the current transform
-      *        hierarchy
-      *
-      * @see Scene::UpdateHierarchy
-      *
-      * @param[in] scene The scene to retrieve the hierarchy from
-      */
-      void UpdateHierarchy(engine::Scene* scene);
-
-      /**
-      * @brief Adds a transform component as a child item of the hierarchy
-      *
-      * @param[in] child The child to add
-      * @param[in] item The parent item, if nullptr the item is added as a top
-      *                 level item
-      */
-      void AddSceneChild(
-        engine::TransformComponent* child,
-        QTreeWidgetItem* item = nullptr);
-
     private slots:
 
       /**
@@ -128,6 +114,13 @@ namespace snuffbox
       * @see EditorApplication::SetProjectDirectory
       */
       void OpenProject();
+
+    public:
+
+      /**
+      * @return A reference to the main editor application
+      */
+      EditorApplication* app() const;
 
     private:
 
