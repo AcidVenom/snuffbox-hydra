@@ -46,6 +46,10 @@ namespace snuffbox
         ui_.outputTabs,
         output_windows);
 
+      hierarchy_ = foundation::Memory::ConstructUnique<HierarchyView>(
+        &foundation::Memory::default_allocator(),
+        ui_.hierarchyView);
+
       ApplyStyle(app);
 
       connect(

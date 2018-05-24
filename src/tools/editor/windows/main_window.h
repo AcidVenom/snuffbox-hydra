@@ -1,7 +1,9 @@
 #pragma once
 
 #include "ui_main_window.h"
+
 #include "tools/editor/windows/console.h"
+#include "tools/editor/windows/hierarchy_view.h"
 
 #include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
@@ -133,6 +135,7 @@ namespace snuffbox
       EditorApplication* app_; //!< A reference to the main editor application
 
       foundation::UniquePtr<Console> console_; //!< The console
+      foundation::UniquePtr<HierarchyView> hierarchy_; //!< The hierarchy view
 
       QString project_dir_; //!< The current project directory
 

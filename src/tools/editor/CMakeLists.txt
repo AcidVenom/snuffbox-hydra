@@ -11,6 +11,8 @@ SET(WindowsSources
   "windows/main_window.cc"
   "windows/console.h"
   "windows/console.cc"
+  "windows/hierarchy_view.h"
+  "windows/hierarchy_view.cc"
 )
 
 SET(ApplicationSources
