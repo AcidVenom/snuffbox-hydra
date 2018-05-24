@@ -22,12 +22,13 @@ namespace snuffbox
     Entity::Entity() :
       name_(kDefaultName_),
       destroyed_(false),
-      active_(true)
+      active_(true),
+      scene_(
+        Application::Instance()->GetService<SceneService>()->current_scene())
     {
       AddComponentInternal(Components::kTransform);
 
-      SceneService* s = Application::Instance()->GetService<SceneService>();
-      s->current_scene()->AddEntity(this);
+      scene_->AddEntity(this);
     }
 
     //--------------------------------------------------------------------------
@@ -126,8 +127,17 @@ namespace snuffbox
         return;
       }
 
-      SceneService* s = Application::Instance()->GetService<SceneService>();
-      s->current_scene()->RemoveEntity(this);
+      TransformComponent* current = GetComponent<TransformComponent>();
+
+      const foundation::Vector<TransformComponent*>& children =
+        current->children();
+
+      for (size_t i = 0; i < children.size(); ++i)
+      {
+        children.at(i)->entity()->Destroy();
+      }
+
+      scene_->RemoveEntity(this);
 
       for (size_t i = 0; i < static_cast<size_t>(Components::kCount); ++i)
       {
@@ -201,6 +211,12 @@ namespace snuffbox
           comp->Update(dt);
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    Scene* Entity::scene() const
+    {
+      return scene_;
     }
 
     //--------------------------------------------------------------------------

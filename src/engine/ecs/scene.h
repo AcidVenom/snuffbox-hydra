@@ -7,6 +7,7 @@ namespace snuffbox
   namespace engine
   {
     class Entity;
+    class TransformComponent;
 
     /**
     * @brief A scene to contain all entities and to load and unload required
@@ -28,7 +29,10 @@ namespace snuffbox
     class Scene
     {
 
-    public:
+      friend Entity;
+      friend TransformComponent;
+
+    protected:
 
       /**
       * @brief Adds an entity to the current list of entities
@@ -45,11 +49,13 @@ namespace snuffbox
       void RemoveEntity(Entity* entity);
 
       /**
-      * @brief Updates all entities in the scene
+      * @brief Removes an entity from a provided index
       *
-      * @param[in] dt The current delta-time of the application
+      * @see Scene::RemoveEntity
+      *
+      * @param[in] idx The index to remove the entity from
       */
-      void Update(float dt);
+      void RemoveEntityAt(int idx);
 
       /**
       * @brief Clears all entities in the scene
@@ -62,8 +68,6 @@ namespace snuffbox
       */
       void Clear();
 
-    protected:
-
       /**
       * @brief Checks if an entity exists within the scene
       *
@@ -73,12 +77,53 @@ namespace snuffbox
       */
       int HasEntity(Entity* entity);
 
+      /**
+      * @brief Updates the transform hierarchy whenever a new transform
+      *        is created or re-parented
+      *
+      * Only the root-level transforms should be in the list of the hierarchy.
+      * From here, the transform components can be updated recursively through
+      * the children tree. Whenever a transform is reparented to have no
+      * parent, or a transform is added; it is added to the list.
+      *
+      * If a transform component is parented while it previously had a parent;
+      * the transform is removed from the list.
+      *
+      * @param[in] transform The new or updated transform component
+      * @param[in] removed Was the transform removed?
+      */
+      void UpdateHierarchy(TransformComponent* transform, bool removed = false);
+
+    public:
+
+      /**
+      * @brief Updates all entities in the scene
+      *
+      * @param[in] dt The current delta-time of the application
+      */
+      void Update(float dt);
+
+      /**
+      * @return The transform hierarchy with the upper-level transforms
+      */
+      const foundation::Vector<TransformComponent*>& hierarchy() const;
+
+      /**
+      * @brief Default destructor, calls Scene::Clear
+      */
+      ~Scene();
+
     private:
 
       /**
       * @brief All current entities in this scene
       */
       foundation::Vector<Entity*> entities_;
+
+      /**
+      * @brief The transform hierarchy with the upper-level transforms
+      */
+      foundation::Vector<TransformComponent*> hierarchy_;
     };
   }
 }

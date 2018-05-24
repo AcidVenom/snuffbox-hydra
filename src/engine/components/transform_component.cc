@@ -1,5 +1,6 @@
 #include "engine/components/transform_component.h"
 #include "engine/ecs/entity.h"
+#include "engine/ecs/scene.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include <sparsed/transform_component.gen.cc>
@@ -14,7 +15,7 @@ namespace snuffbox
       ComponentBase<TransformComponent, Components::kTransform>(entity),
       parent_(nullptr)
     {
-
+      entity->scene()->UpdateHierarchy(this);
     }
 
     //--------------------------------------------------------------------------
@@ -78,7 +79,11 @@ namespace snuffbox
         return;
       }
 
-      children_.erase(children_.begin() + i);
+      foundation::Vector<TransformComponent*>::iterator it = 
+        children_.begin() + i;
+
+      (*it)->SetParentRaw(nullptr);
+      children_.erase(it);
     }
 
     //--------------------------------------------------------------------------
@@ -97,19 +102,25 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::SetParent(TransformComponent* parent)
     {
-      if (parent == nullptr)
+      if (parent != nullptr)
       {
-        if (parent_ != nullptr)
+        if (parent->parent() == this)
         {
-          parent_->Detach(this);
-          parent_ = nullptr;
+          return;
         }
-        
-        return;
       }
 
-      parent->Attach(this);
-      parent_ = parent;
+      if (parent_ != nullptr)
+      {
+        parent_->Detach(this);
+      }
+
+      if (parent != nullptr)
+      {
+        parent->Attach(this);
+      }
+
+      SetParentRaw(parent);
     }
 
     //--------------------------------------------------------------------------
@@ -129,6 +140,7 @@ namespace snuffbox
     void TransformComponent::SetParentRaw(TransformComponent* parent)
     {
       parent_ = parent;
+      entity()->scene()->UpdateHierarchy(this);
     }
 
     //--------------------------------------------------------------------------

@@ -10,6 +10,12 @@
 
 namespace snuffbox
 {
+  namespace engine
+  {
+    class Scene;
+    class TransformComponent;
+  }
+
   namespace editor
   {
     class EditorApplication;
@@ -29,6 +35,8 @@ namespace snuffbox
     {
 
       Q_OBJECT
+
+      friend EditorApplication;
 
     public:
 
@@ -87,6 +95,27 @@ namespace snuffbox
       *        storing them in QSettings
       */
       void SaveLayout();
+
+      /**
+      * @brief Updates the scene inspector with the current transform
+      *        hierarchy
+      *
+      * @see Scene::UpdateHierarchy
+      *
+      * @param[in] scene The scene to retrieve the hierarchy from
+      */
+      void UpdateHierarchy(engine::Scene* scene);
+
+      /**
+      * @brief Adds a transform component as a child item of the hierarchy
+      *
+      * @param[in] child The child to add
+      * @param[in] item The parent item, if nullptr the item is added as a top
+      *                 level item
+      */
+      void AddSceneChild(
+        engine::TransformComponent* child,
+        QTreeWidgetItem* item = nullptr);
 
     private slots:
 

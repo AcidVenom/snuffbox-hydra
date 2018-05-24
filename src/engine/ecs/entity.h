@@ -305,6 +305,11 @@ namespace snuffbox
     public:
 
       /**
+      * @return The scene this entity was spawned in
+      */
+      Scene* scene() const;
+
+      /**
       * @brief Destructs the entity and removes it from the scene
       */
       ~Entity();
@@ -320,6 +325,8 @@ namespace snuffbox
       foundation::String name_; //!< The name of this entity
       bool destroyed_; //!< Has this entity been destroyed yet?
       bool active_; //!< Is this entity active?
+
+      Scene* scene_; //!< The scene this entity was spawned in
 
       static const char* kDefaultName_; //!< The default name for entities
     };

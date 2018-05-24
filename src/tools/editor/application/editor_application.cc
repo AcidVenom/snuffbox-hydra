@@ -2,6 +2,9 @@
 
 #include <engine/services/renderer_service.h>
 #include <engine/services/cvar_service.h>
+#include <engine/ecs/entity.h>
+#include <engine/components/transform_component.h>
+#include <engine/services/scene_service.h>
 
 namespace snuffbox
 {

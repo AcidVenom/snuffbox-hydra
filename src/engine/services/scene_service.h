@@ -43,6 +43,8 @@ namespace snuffbox
       */
       void OnShutdown(Application& app) override;
 
+    public:
+
       /**
       * @return The current scene that is being updated
       */

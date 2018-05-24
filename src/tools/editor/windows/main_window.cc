@@ -2,6 +2,10 @@
 #include "tools/editor/windows/console.h"
 #include "tools/editor/application/editor_application.h"
 
+#include <engine/ecs/scene.h>
+#include <engine/ecs/entity.h>
+#include <engine/components/transform_component.h>
+
 #include <qstylefactory.h>
 #include <qevent.h>
 #include <qfiledialog.h>
@@ -168,6 +172,49 @@ namespace snuffbox
 
       settings.setValue(kSaveSplitterA_, ui_.splitter->saveState());
       settings.setValue(kSaveSplitterB_, ui_.splitter_2->saveState());
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::UpdateHierarchy(engine::Scene* scene)
+    {
+      ui_.hierarchyView->clear();
+
+      const foundation::Vector<engine::TransformComponent*>& hierarchy =
+        scene->hierarchy();
+
+      for (size_t i = 0; i < hierarchy.size(); ++i)
+      {
+        AddSceneChild(hierarchy.at(i));
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::AddSceneChild(
+      engine::TransformComponent* child,
+      QTreeWidgetItem* item)
+    {
+      const engine::Entity* ent = child->entity();
+      const foundation::String& name = ent->name();
+
+      QTreeWidgetItem* new_item = new QTreeWidgetItem();
+      new_item->setText(0, name.c_str());
+
+      if (item == nullptr)
+      {
+        ui_.hierarchyView->addTopLevelItem(new_item);
+      }
+      else
+      {
+        item->addChild(new_item);
+      }
+
+      const foundation::Vector<engine::TransformComponent*>& children =
+        child->children();
+
+      for (size_t i = 0; i < children.size(); ++i)
+      {
+        AddSceneChild(children.at(i), new_item);
+      }
     }
 
     //--------------------------------------------------------------------------
