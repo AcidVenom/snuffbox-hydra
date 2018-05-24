@@ -102,6 +102,23 @@ namespace snuffbox
     {
       engine::Scene* scene = CurrentScene();
 
+      QMap<engine::TransformComponent*, bool> was_expanded;
+
+      QTreeWidgetItemIterator it(tree_);
+      HierarchyViewItem* item;
+
+      while (*it) 
+      {
+        item = static_cast<HierarchyViewItem*>(*it);
+
+        was_expanded.insert(
+          item->transform(),
+          item->isExpanded()
+        );
+
+        ++it;
+      }
+
       tree_->clear();
 
       const foundation::Vector<engine::TransformComponent*>& hierarchy =
@@ -110,6 +127,23 @@ namespace snuffbox
       for (size_t i = 0; i < hierarchy.size(); ++i)
       {
         AddSceneChild(hierarchy.at(i));
+      }
+
+      it = QTreeWidgetItemIterator(tree_);
+      QMap<engine::TransformComponent*, bool>::iterator map_it;
+
+      while (*it) 
+      {
+        item = static_cast<HierarchyViewItem*>(*it);
+
+        if (
+          (map_it = was_expanded.find(item->transform())) 
+          != was_expanded.end())
+        {
+          item->setExpanded(map_it.value());
+        }
+
+        ++it;
       }
     }
 
@@ -158,6 +192,7 @@ namespace snuffbox
       if (to != nullptr)
       {
         dragged_->transform()->SetParent(to->transform());
+        to->setExpanded(true);
       }
       else
       {
