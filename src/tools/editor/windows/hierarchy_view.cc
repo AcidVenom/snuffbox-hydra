@@ -121,8 +121,8 @@ namespace snuffbox
 
       tree_->clear();
 
-      const foundation::Vector<engine::TransformComponent*>& hierarchy =
-        scene->hierarchy();
+      foundation::Vector<engine::TransformComponent*> hierarchy =
+        scene->TopLevelTransforms();
 
       for (size_t i = 0; i < hierarchy.size(); ++i)
       {

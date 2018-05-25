@@ -15,7 +15,7 @@ namespace snuffbox
       ComponentBase<TransformComponent, Components::kTransform>(entity),
       parent_(nullptr)
     {
-      entity->scene()->UpdateHierarchy(this);
+
     }
 
     //--------------------------------------------------------------------------
@@ -140,7 +140,6 @@ namespace snuffbox
     void TransformComponent::SetParentRaw(TransformComponent* parent)
     {
       parent_ = parent;
-      entity()->scene()->UpdateHierarchy(this);
     }
 
     //--------------------------------------------------------------------------
@@ -155,11 +154,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     TransformComponent::~TransformComponent()
     {
-      for (size_t i = 0; i < children_.size(); ++i)
-      {
-        children_.at(i)->SetParent(nullptr);
-      }
-
       SetParent(nullptr);
     }
 

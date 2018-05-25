@@ -30,11 +30,15 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::RemoveEntityAt(int idx)
     {
-      foundation::Logger::Assert(idx >= 0 && idx < entities_.size(),
-        "Attempted to remove a non-existing entity");
+      if (idx < 0 || idx >= entities_.size())
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kError,
+          "Attempted to remove a non-existing entity");
 
-      Entity* e = entities_.at(idx);
-      UpdateHierarchy(e->GetComponent<TransformComponent>(), true);
+        return;
+      }
 
       entities_.erase(entities_.begin() + idx);
     }
@@ -54,8 +58,6 @@ namespace snuffbox
 
         foundation::Memory::Destruct(copy.at(i));
       }
-
-      hierarchy_.clear();
     }
 
     //--------------------------------------------------------------------------
@@ -73,47 +75,6 @@ namespace snuffbox
 
       return idx;
     }
-    //--------------------------------------------------------------------------
-    int Scene::HasTransform(TransformComponent* transform)
-    {
-      int idx = -1;
-      for (int i = 0; i < static_cast<int>(hierarchy_.size()); ++i)
-      {
-        if (hierarchy_.at(i) == transform)
-        {
-          idx = i;
-          break;
-        }
-      }
-
-      return idx;
-    }
-
-    //--------------------------------------------------------------------------
-    void Scene::UpdateHierarchy(TransformComponent* transform, bool removed)
-    {
-      removed = transform->entity()->destroyed_ == true ? true : removed;
-
-      if (transform->parent() == nullptr && removed == false)
-      {
-        if (HasTransform(transform) != -1)
-        {
-          return;
-        }
-
-        hierarchy_.push_back(transform);
-        return;
-      }
-
-      for (size_t i = 0; i < hierarchy_.size(); ++i)
-      {
-        if (hierarchy_.at(i) == transform)
-        {
-          hierarchy_.erase(hierarchy_.begin() + i);
-          break;
-        }
-      }
-    }
 
     //--------------------------------------------------------------------------
     void Scene::Update(float dt)
@@ -125,9 +86,23 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const foundation::Vector<TransformComponent*>& Scene::hierarchy() const
+    foundation::Vector<TransformComponent*> Scene::TopLevelTransforms() const
     {
-      return hierarchy_;
+      foundation::Vector<TransformComponent*> result;
+
+      TransformComponent* t = nullptr;
+
+      for (size_t i = 0; i < entities_.size(); ++i)
+      {
+        t = entities_.at(i)->GetComponent<TransformComponent>();
+
+        if (t->parent() == nullptr)
+        {
+          result.push_back(t);
+        }
+      }
+
+      return result;
     }
 
     //--------------------------------------------------------------------------

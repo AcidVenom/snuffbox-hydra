@@ -77,32 +77,6 @@ namespace snuffbox
       */
       int HasEntity(Entity* entity);
 
-      /**
-      * @brief Checks if a transform exists within the hierarchy
-      *
-      * @param[in] transform The transform to check for
-      *
-      * @return The index of the transform, or -1 if it doesn't exist
-      */
-      int HasTransform(TransformComponent* transform);
-
-      /**
-      * @brief Updates the transform hierarchy whenever a new transform
-      *        is created or re-parented
-      *
-      * Only the root-level transforms should be in the list of the hierarchy.
-      * From here, the transform components can be updated recursively through
-      * the children tree. Whenever a transform is reparented to have no
-      * parent, or a transform is added; it is added to the list.
-      *
-      * If a transform component is parented while it previously had a parent;
-      * the transform is removed from the list.
-      *
-      * @param[in] transform The new or updated transform component
-      * @param[in] removed Was the transform removed?
-      */
-      void UpdateHierarchy(TransformComponent* transform, bool removed = false);
-
     public:
 
       /**
@@ -115,7 +89,7 @@ namespace snuffbox
       /**
       * @return The transform hierarchy with the upper-level transforms
       */
-      const foundation::Vector<TransformComponent*>& hierarchy() const;
+      foundation::Vector<TransformComponent*> TopLevelTransforms() const;
 
       /**
       * @brief Default destructor, calls Scene::Clear
@@ -128,11 +102,6 @@ namespace snuffbox
       * @brief All current entities in this scene
       */
       foundation::Vector<Entity*> entities_;
-
-      /**
-      * @brief The transform hierarchy with the upper-level transforms
-      */
-      foundation::Vector<TransformComponent*> hierarchy_;
     };
   }
 }
