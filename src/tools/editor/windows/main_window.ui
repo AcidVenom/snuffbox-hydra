@@ -119,7 +119,13 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QListView" name="tempListView"/>
+        <widget class="QTreeWidget" name="inspectorTree">
+         <column>
+          <property name="text">
+           <string/>
+          </property>
+         </column>
+        </widget>
        </item>
       </layout>
      </item>

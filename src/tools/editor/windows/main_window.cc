@@ -24,35 +24,17 @@ namespace snuffbox
       app_(app),
       console_(nullptr),
       hierarchy_(nullptr),
+      inspector_(nullptr),
       project_dir_(""),
       on_resize_(nullptr)
     {
       ui_.setupUi(this);
 
-      QTextBrowser* output_windows[] =
-      {
-        ui_.allOutput,
-        ui_.engineOutput,
-        ui_.editorOutput,
-        ui_.playerOutput,
-        ui_.scriptOutput,
-        ui_.builderOutput
-      };
-
-      console_ = foundation::Memory::ConstructUnique<Console>(
-        &foundation::Memory::default_allocator(),
-        ui_.outputTabs,
-        output_windows);
-
       ApplyStyle(app);
+      CreateConsole();
+      CreateInspector();
 
-      connect(
-        ui_.actionOpen_Project,
-        &QAction::triggered,
-        this,
-        &MainWindow::OpenProject);
-
-      ui_.gameWindow->installEventFilter(this);
+      BindEvents();
 
       LoadLayout();
     }
@@ -144,12 +126,57 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::InitializeHierarchy(engine::SceneService* scene_service)
+    void MainWindow::BindEvents()
+    {
+      connect(
+        ui_.actionOpen_Project,
+        &QAction::triggered,
+        this,
+        &MainWindow::OpenProject);
+
+      ui_.gameWindow->installEventFilter(this);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::CreateConsole()
+    {
+      QTextBrowser* output_windows[] =
+      {
+        ui_.allOutput,
+        ui_.engineOutput,
+        ui_.editorOutput,
+        ui_.playerOutput,
+        ui_.scriptOutput,
+        ui_.builderOutput
+      };
+
+      console_ = foundation::Memory::ConstructUnique<Console>(
+        &foundation::Memory::default_allocator(),
+        ui_.outputTabs,
+        output_windows);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::CreateHierarchy(engine::SceneService* scene_service)
     {
       hierarchy_ = foundation::Memory::ConstructUnique<HierarchyView>(
         &foundation::Memory::default_allocator(),
         ui_.hierarchyView,
         scene_service);
+
+      connect(
+        hierarchy_.get(),
+        SIGNAL(OnSelectEntity(engine::Entity*)),
+        this,
+        SLOT(OnSelectEntity(engine::Entity*)));
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::CreateInspector()
+    {
+      inspector_ = foundation::Memory::ConstructUnique<Inspector>(
+        &foundation::Memory::default_allocator(),
+        ui_.inspectorTree);
     }
 
     //--------------------------------------------------------------------------
@@ -194,6 +221,12 @@ namespace snuffbox
       {
         project_dir_ = dir;
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSelectEntity(engine::Entity* entity)
+    {
+      inspector_->ShowEntity(entity);
     }
 
     //--------------------------------------------------------------------------

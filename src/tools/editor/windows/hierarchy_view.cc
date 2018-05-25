@@ -44,9 +44,7 @@ namespace snuffbox
       dragged_(nullptr)
     {
       AddContextMenu();
-      tree_->setAcceptDrops(true);
-      tree_->setDragEnabled(true);
-      tree_->viewport()->installEventFilter(this);
+      BindEvents();
     }
 
     //--------------------------------------------------------------------------
@@ -60,7 +58,11 @@ namespace snuffbox
 
       remove_entity_ = new QAction("Remove Entity", context_menu_);
       context_menu_->addAction(remove_entity_);
+    }
 
+    //--------------------------------------------------------------------------
+    void HierarchyView::BindEvents()
+    {
       connect(
         tree_,
         &QTreeWidget::customContextMenuRequested,
@@ -72,6 +74,16 @@ namespace snuffbox
         &QTreeWidget::itemChanged,
         this,
         &HierarchyView::OnRenameItem);
+
+      connect(
+        tree_,
+        &QTreeWidget::itemSelectionChanged,
+        this,
+        &HierarchyView::OnSelectionChanged);
+
+      tree_->setAcceptDrops(true);
+      tree_->setDragEnabled(true);
+      tree_->viewport()->installEventFilter(this);
     }
 
     //--------------------------------------------------------------------------
@@ -200,6 +212,16 @@ namespace snuffbox
       }
 
       OnHierarchyChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnSelectionChanged()
+    {
+      HierarchyViewItem* item = 
+        static_cast<HierarchyViewItem*>(tree_->currentItem());
+
+      engine::Entity* e = item->transform()->entity();
+      emit OnSelectEntity(e);
     }
 
     //--------------------------------------------------------------------------

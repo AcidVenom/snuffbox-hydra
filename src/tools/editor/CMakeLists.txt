@@ -13,6 +13,8 @@ SET(WindowsSources
   "windows/console.cc"
   "windows/hierarchy_view.h"
   "windows/hierarchy_view.cc"
+  "windows/inspector.h"
+  "windows/inspector.cc"
 )
 
 SET(ApplicationSources

@@ -15,6 +15,7 @@ namespace snuffbox
     class TransformComponent;
     class Scene;
     class SceneService;
+    class Entity;
   }
 
   namespace editor
@@ -83,6 +84,11 @@ namespace snuffbox
       void AddContextMenu();
 
       /**
+      * @brief Bind the events for communication between the different widgets
+      */
+      void BindEvents();
+
+      /**
       * @return The current scene retrieved from the scene service
       */
       engine::Scene* CurrentScene();
@@ -138,6 +144,11 @@ namespace snuffbox
       void OnDropEvent(QDropEvent* evt);
 
       /**
+      * @brief Called when a new item was selected in the hierarchy
+      */
+      void OnSelectionChanged();
+
+      /**
       * @brief The event filter to enable custom drag and drop behavior
       */
       bool eventFilter(QObject* obj, QEvent* evt) override;
@@ -153,6 +164,13 @@ namespace snuffbox
       * @brief Called when an item changed, which implies a rename
       */
       void OnRenameItem(QTreeWidgetItem* item, int column);
+
+    signals:
+
+      /**
+      * @brief Used to send a signal when the entity selection was changed
+      */
+      void OnSelectEntity(engine::Entity*);
 
     private:
 

@@ -4,6 +4,7 @@
 
 #include "tools/editor/windows/console.h"
 #include "tools/editor/windows/hierarchy_view.h"
+#include "tools/editor/windows/inspector.h"
 
 #include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
@@ -86,12 +87,28 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Binds all required events for interaction between interfaces
+      */
+      void BindEvents();
+
+      /**
+      * @brief Creates the console after initialization of the main window
+      */
+      void CreateConsole();
+
+      /**
       * @brief Initializes the hierarchy inspector with the scene service
       *        to sync with
       *
       * @param[in] scene_service The current scene service to sync with
       */
-      void InitializeHierarchy(engine::SceneService* scene_service);
+      void CreateHierarchy(engine::SceneService* scene_service);
+
+      /**
+      * @brief Creates the inspector to inspect entities and their
+      *        components with
+      */
+      void CreateInspector();
 
       /**
       * @brief Loads the layout the user had during previous execution,
@@ -115,6 +132,13 @@ namespace snuffbox
       */
       void OpenProject();
 
+      /**
+      * @brief Called when an entity was selected in the hierarchy
+      *
+      * @param[in] entity The entity that was selected
+      */
+      void OnSelectEntity(engine::Entity* entity);
+
     public:
 
       /**
@@ -129,6 +153,7 @@ namespace snuffbox
 
       foundation::UniquePtr<Console> console_; //!< The console
       foundation::UniquePtr<HierarchyView> hierarchy_; //!< The hierarchy view
+      foundation::UniquePtr<Inspector> inspector_; //!< The inspector
 
       QString project_dir_; //!< The current project directory
 
