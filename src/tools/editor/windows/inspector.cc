@@ -56,13 +56,13 @@ namespace snuffbox
       widget->setLayout(layout);
 
       item->setSizeHint(0, widget->sizeHint());
-      item->setBackgroundColor(0, QColor(80, 80, 80));
+      item->setBackgroundColor(0, QColor(60, 66, 57));
 
       QTreeWidgetItem* top = new QTreeWidgetItem();
       top->setText(0, "Entity");
       top->addChild(item);
       top->setSizeHint(0, QSize(0, 24));
-      top->setBackgroundColor(0, QColor(90, 90, 90));
+      top->setBackgroundColor(0, QColor(110, 126, 103));
       tree_->setItemWidget(item, 0, widget);
 
       tree_->addTopLevelItem(top);
