@@ -5,6 +5,12 @@ SET(RootSources
   "main.cc"
 )
 
+SET(DefinitionsSources
+  "definitions/color_format.h"
+  "definitions/editor_colors.h"
+  "definitions/editor_colors.cc"
+)
+
 SET(WindowsSources
   "windows/main_window.ui"
   "windows/main_window.h"
@@ -15,6 +21,8 @@ SET(WindowsSources
   "windows/hierarchy_view.cc"
   "windows/inspector.h"
   "windows/inspector.cc"
+  "windows/gui.h"
+  "windows/gui.cc"
 )
 
 SET(ApplicationSources
@@ -23,11 +31,13 @@ SET(ApplicationSources
 )
 
 SOURCE_GROUP("\\"           FILES ${RootSources})
+SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
 SOURCE_GROUP("windows"      FILES ${WindowsSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
 
 SET(EditorSources
   ${RootSources}
+  ${DefinitionsSources}
   ${WindowsSources}
   ${ApplicationSources}
 )

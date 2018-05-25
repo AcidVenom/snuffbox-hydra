@@ -93,10 +93,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::AddEntity()
+    void HierarchyView::AddEntity(HierarchyViewItem* item)
     {
-      foundation::Memory::Construct<engine::Entity>(
+      engine::Entity* e = foundation::Memory::Construct<engine::Entity>(
         &foundation::Memory::default_allocator());
+
+      if (item != nullptr)
+      {
+        e->GetComponent<engine::TransformComponent>()->SetParent(
+          item->transform());
+
+        item->setExpanded(true);
+      }
 
       OnHierarchyChanged();
     }
@@ -246,15 +254,18 @@ namespace snuffbox
       QModelIndex index = tree_->indexAt(p);
       remove_entity_->setEnabled(index.isValid());
 
+      HierarchyViewItem* item = 
+        static_cast<HierarchyViewItem*>(tree_->itemAt(p));
+
       QAction* action = context_menu_->exec(tree_->viewport()->mapToGlobal(p));
 
       if (action == add_entity_)
       {
-        AddEntity();
+        AddEntity(item);
       }
       else if (action == remove_entity_)
       {
-        RemoveEntity(static_cast<HierarchyViewItem*>(tree_->itemAt(p)));
+        RemoveEntity(item);
       }
     }
 

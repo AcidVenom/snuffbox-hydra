@@ -1,4 +1,5 @@
 #include "tools/editor/windows/console.h"
+#include "tools/editor/definitions/editor_colors.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -11,60 +12,10 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    QColor Console::LogColor::kDefaultForeground = QColor(0, 0, 0, 255);
-    QColor Console::LogColor::kDefaultBackground = QColor(0, 0, 0, 0);
-
-    //--------------------------------------------------------------------------
     QString Console::kFontFamily_ = "Consolas";
     qreal Console::kFontSize_ = 10;
     qreal Console::kTabWidth_ = 2;
     qreal Console::kFatalFontWeight_ = 99;
-
-    //--------------------------------------------------------------------------
-    Console::LogColor Console::LogColor::SeverityToColor(
-      foundation::LogSeverity severity)
-    {
-      LogColor color;
-      color.foreground = kDefaultForeground;
-      color.background = kDefaultBackground;
-
-      switch (severity)
-      {
-
-      case foundation::LogSeverity::kDebug:
-        color.foreground = QColor(128, 128, 128);
-        color.background = QColor(0, 0, 0, 0);
-        break;
-
-      case foundation::LogSeverity::kInfo:
-        color.foreground = QColor(255, 255, 255);
-        color.background = QColor(30, 30, 30, 30);
-        break;
-
-      case foundation::LogSeverity::kWarning:
-        color.foreground = QColor(255, 185, 0);
-        color.background = QColor(70, 65, 15);
-        break;
-
-      case foundation::LogSeverity::kSuccess:
-        color.foreground = QColor(35, 255, 0);
-        color.background = QColor(70, 120, 55);
-        break;
-
-      case foundation::LogSeverity::kError:
-        color.foreground = QColor(255, 0, 0);
-        color.background = QColor(60, 0, 0);
-        break;
-
-      case foundation::LogSeverity::kFatal:
-        color.foreground = QColor(255, 255, 255);
-        color.background = QColor(255, 0, 0);
-        break;
-
-      }
-
-      return color;
-    }
 
     //--------------------------------------------------------------------------
     Console::Console(QTabWidget* tab, QTextBrowser** output_windows)
@@ -162,7 +113,7 @@ namespace snuffbox
 
       SetLogCount(ch, ++window.log_count);
 
-      LogColor color = LogColor::SeverityToColor(sev);
+      ColorFormat color = EditorColors::ConsoleColor(sev);
 
       QTextCursor cursor = output_window->textCursor();
 

@@ -95,11 +95,16 @@ namespace snuffbox
 
       /**
       * @brief Adds an entity to the current scene
+      *
+      * @param[in] item The item to parent the new entity to, or nullptr if
+      *                 created as a root
       */
-      void AddEntity();
+      void AddEntity(HierarchyViewItem* item);
 
       /**
-      * @brief Removes an entity from the current scene
+      * @brief Removes an entity from the current scene from a tree item
+      *
+      * @param[in] item The tree item to retrieve the entity from
       */
       void RemoveEntity(HierarchyViewItem* item);
 

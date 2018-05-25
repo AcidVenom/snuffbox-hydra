@@ -1,6 +1,7 @@
 #include "tools/editor/windows/main_window.h"
 #include "tools/editor/windows/console.h"
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/definitions/editor_colors.h"
 
 #include <qstylefactory.h>
 #include <qevent.h>
@@ -43,38 +44,28 @@ namespace snuffbox
     void MainWindow::ApplyStyle(QApplication* app)
     {
       app->setStyle(QStyleFactory::create("Fusion"));
+      app->setPalette(EditorColors::DefaultPalette());
 
-      QPalette steam;
-      steam.setColor(QPalette::Window, QColor(88, 106, 80));
-      steam.setColor(QPalette::WindowText, Qt::white);
-      steam.setColor(QPalette::Base, QColor(64, 70, 60));
-      steam.setColor(QPalette::AlternateBase, QColor(88, 106, 80));
-      steam.setColor(QPalette::ToolTipBase, Qt::white);
-      steam.setColor(QPalette::ToolTipText, Qt::white);
-      steam.setColor(QPalette::Text, Qt::white);
-      steam.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
-      steam.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
-      steam.setColor(QPalette::Disabled, QPalette::Light, QColor(64, 70, 60));
-      steam.setColor(QPalette::Button, QColor(88, 106, 80));
-      steam.setColor(QPalette::ButtonText, Qt::white);
-      steam.setColor(QPalette::BrightText, Qt::red);
-      steam.setColor(QPalette::Link, QColor(159, 164, 98));
+      const QColor& dock = EditorColors::DockColor();
+      int r, g, b;
+      dock.getRgb(&r, &g, &b);
 
-      steam.setColor(QPalette::Highlight, QColor(159, 164, 98));
-      steam.setColor(QPalette::HighlightedText, Qt::black);
+      std::string dock_col = 
+        "rgb(" 
+        + std::to_string(r) + ", " 
+        + std::to_string(g) + ", " 
+        + std::to_string(b) + ")";
 
-      app->setPalette(steam);
-
-      QString dock_col = "rgb(111, 134, 102)";
+      QString qdock_col = dock_col.c_str();
 
       app->setStyleSheet("                      \
         QMainWindow::separator                  \
         {                                       \
-          background-color: " + dock_col + ";   \
+          background-color: " + qdock_col + ";  \
         }                                       \
         QDockWidget::title                      \
         {                                       \
-          background-color: " + dock_col + ";   \
+          background-color: " + qdock_col + ";  \
           border: 1px solid rgb(88, 106, 80);   \
         }                                       \
         QDockWidget                             \

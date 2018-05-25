@@ -1,4 +1,6 @@
 #include "tools/editor/windows/inspector.h"
+#include "tools/editor/windows/gui.h"
+#include "tools/editor/definitions/editor_colors.h"
 
 #include <engine/ecs/entity.h>
 
@@ -29,43 +31,32 @@ namespace snuffbox
         return;
       }
 
-      QTreeWidgetItem* item = new QTreeWidgetItem();
+      GUI gui;
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
 
-      QWidget* widget = new QWidget();
-      QHBoxLayout* layout = new QHBoxLayout();
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
 
-      QLabel* label_name = new QLabel();
-      label_name->setText("Name: ");
+      gui.SetSpacing(10);
 
-      QLineEdit* name_field = new QLineEdit();
-      name_field->setText(entity->name().c_str());
+      gui.Label("Name: ");
+      gui.TextField(entity->name().c_str());
+      gui.ResetForegroundColor();
 
-      QLabel* lable_active = new QLabel();
-      lable_active->setText("Active: ");
+      gui.Label("Active: ");
+      gui.Checkbox(entity->active());
 
-      QCheckBox* is_active_field = new QCheckBox();
-      is_active_field->setChecked(entity->active());
+      gui.EndLayout();
 
-      layout->addWidget(label_name);
-      layout->addWidget(name_field);
-      layout->addWidget(lable_active);
-      layout->addWidget(is_active_field);
-      layout->addStretch();
-
-      layout->setSizeConstraint(QLayout::SetFixedSize);
-      widget->setLayout(layout);
-
-      item->setSizeHint(0, widget->sizeHint());
-      item->setBackgroundColor(0, QColor(60, 66, 57));
+      QLayout* layout = gui.EndLayout();
 
       QTreeWidgetItem* top = new QTreeWidgetItem();
-      top->setText(0, "Entity");
-      top->addChild(item);
-      top->setSizeHint(0, QSize(0, 24));
-      top->setBackgroundColor(0, QColor(110, 126, 103));
-      tree_->setItemWidget(item, 0, widget);
+      top->setBackgroundColor(0, EditorColors::DockColor());
+
+      QWidget* widget = new QWidget();
+      widget->setLayout(layout);
 
       tree_->addTopLevelItem(top);
+      tree_->setItemWidget(top, 0, widget);
     }
   }
 }

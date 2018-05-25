@@ -29,35 +29,6 @@ namespace snuffbox
     public:
 
       /**
-      * @brief A log color to format the logs with based on verbosity
-      *
-      * @author Daniel Konings
-      */
-      struct LogColor
-      {
-        QColor foreground; //!< The foreground color
-        QColor background; //!< The background color
-
-        /**
-        * @brief Converts a severity to a corresponding log color
-        *
-        * These colors are based on what I used in the oldest version of
-        * snuffbox.
-        *
-        * @see https://github.com/AcidVenom/snuffbox/blob/master/snuffbox/console/console_widget.cc
-        *
-        * @param[in] severity The severity to convert
-        *
-        * @return The converted color
-        */
-        static LogColor SeverityToColor(
-          foundation::LogSeverity severity);
-
-        static QColor kDefaultForeground; //!< The default foreground color
-        static QColor kDefaultBackground; //!< The default background color
-      };
-
-      /**
       * @brief Construct by specifying the output window this class
       *        correlates to
       *
