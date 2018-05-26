@@ -109,14 +109,6 @@ namespace snuffbox
       void RemoveEntity(HierarchyViewItem* item);
 
       /**
-      * @brief Updates the scene inspector with the current transform
-      *        hierarchy
-      *
-      * @see Scene::UpdateHierarchy
-      */
-      void OnHierarchyChanged();
-
-      /**
       * @brief Adds a transform component as a child item of the hierarchy
       *
       * @param[in] child The child to add
@@ -170,12 +162,20 @@ namespace snuffbox
       */
       void OnRenameItem(QTreeWidgetItem* item, int column);
 
+      /**
+      * @brief Updates the scene inspector with the current transform
+      *        hierarchy
+      *
+      * @see Scene::UpdateHierarchy
+      */
+      void OnHierarchyChanged();
+
     signals:
 
       /**
       * @brief Used to send a signal when the entity selection was changed
       */
-      void OnSelectEntity(engine::Entity*);
+      void SelectEntity(engine::Entity*);
 
     private:
 

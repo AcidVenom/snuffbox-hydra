@@ -43,6 +43,13 @@ namespace snuffbox
       */
       void ShowEntity(engine::Entity* entity);
 
+    signals:
+
+      /**
+      * @brief Used to refresh the hierarchy
+      */
+      void RefreshHierarchy();
+
     private:
 
       QTreeWidget* tree_; //!< The tree to append inspector fields to

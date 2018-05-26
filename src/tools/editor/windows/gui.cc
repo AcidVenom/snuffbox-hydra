@@ -8,6 +8,7 @@
 #include <qlabel.h>
 #include <qcheckbox.h>
 #include <qlineedit.h>
+#include <qpushbutton.h>
 
 namespace snuffbox
 {
@@ -143,7 +144,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void GUI::Checkbox(bool value)
+    void GUI::Checkbox(
+      bool value, 
+      ChangeCallback<bool>& on_changed)
     {
       if (current_layout_ == nullptr)
       {
@@ -153,11 +156,21 @@ namespace snuffbox
       QCheckBox* box = new QCheckBox();
       box->setChecked(value);
 
+      QObject::connect(box, &QCheckBox::stateChanged, [=](int)
+      {
+        if (on_changed != nullptr)
+        {
+          on_changed(box->isChecked());
+        }
+      });
+
       AddWidget(box);
     }
 
     //--------------------------------------------------------------------------
-    void GUI::TextField(const char* value)
+    void GUI::TextField(
+      const char* value,
+      ChangeCallback<const QString&>& on_changed)
     {
       if (current_layout_ == nullptr)
       {
@@ -167,7 +180,29 @@ namespace snuffbox
       QLineEdit* edit = new QLineEdit();
       edit->setText(value);
 
+      QObject::connect(edit, &QLineEdit::editingFinished, [=]()
+      {
+        if (on_changed != nullptr)
+        {
+          on_changed(edit->text());
+        }
+      });
+
       AddWidget(edit);
+    }
+
+    //--------------------------------------------------------------------------
+    void GUI::Button(const char* text)
+    {
+      if (current_layout_ == nullptr)
+      {
+        return;
+      }
+
+      QPushButton* button = new QPushButton();
+      button->setText(text);
+
+      AddWidget(button);
     }
 
     //--------------------------------------------------------------------------
@@ -186,6 +221,22 @@ namespace snuffbox
       widget->setPalette(palette);
 
       current_layout_->qlayout->addWidget(widget);
+    }
+
+    //--------------------------------------------------------------------------
+    QWidget* GUI::EndAsWidget()
+    {
+      QLayout* layout = EndLayout();
+
+      if (layout == nullptr)
+      {
+        return nullptr;
+      }
+
+      QWidget* widget = new QWidget();
+      widget->setLayout(layout);
+
+      return widget;
     }
 
     //--------------------------------------------------------------------------

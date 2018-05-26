@@ -157,9 +157,15 @@ namespace snuffbox
 
       connect(
         hierarchy_.get(),
-        SIGNAL(OnSelectEntity(engine::Entity*)),
+        SIGNAL(SelectEntity(engine::Entity*)),
         this,
         SLOT(OnSelectEntity(engine::Entity*)));
+
+      connect(
+        inspector_.get(),
+        SIGNAL(RefreshHierarchy()),
+        hierarchy_.get(),
+        SLOT(OnHierarchyChanged()));
     }
 
     //--------------------------------------------------------------------------

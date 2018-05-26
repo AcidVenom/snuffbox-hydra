@@ -2,6 +2,8 @@
 
 #include "tools/editor/definitions/color_format.h"
 
+#include <functional>
+
 class QLayout;
 class QWidget;
 
@@ -22,6 +24,12 @@ namespace snuffbox
     {
 
     protected:
+
+      /**
+      * @brief A short-hand for the on-changed callbacks
+      */
+      template <typename T>
+      using ChangeCallback = const std::function<void(typename T)>&;
 
       /**
       * @brief Used to keep track of the currently entered layout
@@ -133,15 +141,28 @@ namespace snuffbox
       * @brief Adds a checkbox to the current layout
       *
       * @param[in] value The checked value of the checkbox
+      * @param[in] on_changed The function to call when the value changed
       */
-      void Checkbox(bool value);
+      void Checkbox(
+        bool value, 
+        ChangeCallback<bool> on_changed = nullptr);
 
       /**
       * @brief Adds a text field to the current layout
       *
       * @param[in] value The text value of the text field
+      * @param[in] on_changed The function to call when the value changed
       */
-      void TextField(const char* value);
+      void TextField(
+        const char* value, 
+        ChangeCallback<const QString&> on_changed = nullptr);
+
+      /**
+      * @brief Creates a button with a text
+      *
+      * @param[in] text The text to display on the button
+      */
+      void Button(const char* text);
 
       /**
       * @brief Adds a raw widget to the layout, which the user can define
@@ -158,6 +179,12 @@ namespace snuffbox
       void AddWidget(QWidget* widget);
 
       /**
+      * @brief Ends the layout, but also adds the layout to a newly created
+      *        widget
+      */
+      QWidget* EndAsWidget();
+
+      /**
       * @brief Destructor, checks if all layouts were closed
       *
       * @see GUI::EndLayout
@@ -170,8 +197,6 @@ namespace snuffbox
 
       Layout* current_layout_; //!< The current layout
       int num_started_; //!< The number of layouts that were started
-
-      
     };
   }
 }

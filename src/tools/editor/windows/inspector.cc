@@ -31,6 +31,11 @@ namespace snuffbox
         return;
       }
 
+      const QPalette& palette = EditorColors::DefaultPalette();
+
+      QTreeWidgetItem* top = new QTreeWidgetItem();
+      top->setBackgroundColor(0, EditorColors::DockColor());
+
       GUI gui;
       gui.StartLayout(GUI::LayoutStyle::kVertical);
 
@@ -38,25 +43,39 @@ namespace snuffbox
 
       gui.SetSpacing(10);
 
-      gui.Label("Name: ");
-      gui.TextField(entity->name().c_str());
+      gui.Label("Name");
+      gui.TextField(entity->name().c_str(), [=](const QString& value)
+      {
+        entity->set_name(value.toStdString().c_str());
+        emit RefreshHierarchy();
+      });
       gui.ResetForegroundColor();
 
-      gui.Label("Active: ");
-      gui.Checkbox(entity->active());
+      gui.Label("Active");
+      gui.Checkbox(entity->active(), [=](bool value)
+      {
+        entity->set_active(value);
+        emit RefreshHierarchy();
+      });
 
       gui.EndLayout();
 
-      QLayout* layout = gui.EndLayout();
+      QWidget* top_widget = gui.EndAsWidget();
 
-      QTreeWidgetItem* top = new QTreeWidgetItem();
-      top->setBackgroundColor(0, EditorColors::DockColor());
-
-      QWidget* widget = new QWidget();
-      widget->setLayout(layout);
+      gui = GUI();
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
+      gui.SetBackgroundColor(palette.color(QPalette::ColorRole::Button));
+      gui.Button("Add component");
+      gui.ResetBackgroundColor();
+      
+      QWidget* comp_widget = gui.EndAsWidget();
 
       tree_->addTopLevelItem(top);
-      tree_->setItemWidget(top, 0, widget);
+      tree_->setItemWidget(top, 0, top_widget);
+
+      QTreeWidgetItem* components = new QTreeWidgetItem();
+      top->addChild(components);
+      tree_->setItemWidget(components, 0, comp_widget);
     }
   }
 }

@@ -1,6 +1,7 @@
 #include "tools/editor/windows/hierarchy_view.h"
 #include "tools/editor/windows/main_window.h"
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/definitions/editor_colors.h"
 
 #include <engine/ecs/entity.h>
 #include <engine/ecs/scene.h>
@@ -115,59 +116,9 @@ namespace snuffbox
       foundation::Memory::Destruct<engine::Entity>(item->transform()->entity());
       tree_->clearSelection();
 
-      emit OnSelectEntity(nullptr);
+      emit SelectEntity(nullptr);
 
       OnHierarchyChanged();
-    }
-
-    //--------------------------------------------------------------------------
-    void HierarchyView::OnHierarchyChanged()
-    {
-      engine::Scene* scene = CurrentScene();
-
-      QMap<engine::TransformComponent*, bool> was_expanded;
-
-      QTreeWidgetItemIterator it(tree_);
-      HierarchyViewItem* item;
-
-      while (*it) 
-      {
-        item = static_cast<HierarchyViewItem*>(*it);
-
-        was_expanded.insert(
-          item->transform(),
-          item->isExpanded()
-        );
-
-        ++it;
-      }
-
-      tree_->clear();
-
-      foundation::Vector<engine::TransformComponent*> hierarchy =
-        scene->TopLevelTransforms();
-
-      for (size_t i = 0; i < hierarchy.size(); ++i)
-      {
-        AddSceneChild(hierarchy.at(i));
-      }
-
-      it = QTreeWidgetItemIterator(tree_);
-      QMap<engine::TransformComponent*, bool>::iterator map_it;
-
-      while (*it) 
-      {
-        item = static_cast<HierarchyViewItem*>(*it);
-
-        if (
-          (map_it = was_expanded.find(item->transform())) 
-          != was_expanded.end())
-        {
-          item->setExpanded(map_it.value());
-        }
-
-        ++it;
-      }
     }
 
     //--------------------------------------------------------------------------
@@ -179,6 +130,13 @@ namespace snuffbox
       const foundation::String& name = ent->name();
 
       HierarchyViewItem* new_item = new HierarchyViewItem(child);
+
+      if (ent->active() == false)
+      {
+        new_item->setTextColor(0, EditorColors::DefaultPalette().color(
+          QPalette::Disabled, 
+          QPalette::Text));
+      }
 
       if (item == nullptr)
       {
@@ -237,7 +195,7 @@ namespace snuffbox
         static_cast<HierarchyViewItem*>(tree_->currentItem());
 
       engine::Entity* e = item->transform()->entity();
-      emit OnSelectEntity(e);
+      emit SelectEntity(e);
     }
 
     //--------------------------------------------------------------------------
@@ -282,6 +240,56 @@ namespace snuffbox
     {
       HierarchyViewItem* hvi = static_cast<HierarchyViewItem*>(item);
       hvi->transform()->entity()->set_name(item->text(0).toStdString().c_str());
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnHierarchyChanged()
+    {
+      engine::Scene* scene = CurrentScene();
+
+      QMap<engine::TransformComponent*, bool> was_expanded;
+
+      QTreeWidgetItemIterator it(tree_);
+      HierarchyViewItem* item;
+
+      while (*it) 
+      {
+        item = static_cast<HierarchyViewItem*>(*it);
+
+        was_expanded.insert(
+          item->transform(),
+          item->isExpanded()
+        );
+
+        ++it;
+      }
+
+      tree_->clear();
+
+      foundation::Vector<engine::TransformComponent*> hierarchy =
+        scene->TopLevelTransforms();
+
+      for (size_t i = 0; i < hierarchy.size(); ++i)
+      {
+        AddSceneChild(hierarchy.at(i));
+      }
+
+      it = QTreeWidgetItemIterator(tree_);
+      QMap<engine::TransformComponent*, bool>::iterator map_it;
+
+      while (*it) 
+      {
+        item = static_cast<HierarchyViewItem*>(*it);
+
+        if (
+          (map_it = was_expanded.find(item->transform())) 
+          != was_expanded.end())
+        {
+          item->setExpanded(map_it.value());
+        }
+
+        ++it;
+      }
     }
   }
 }
