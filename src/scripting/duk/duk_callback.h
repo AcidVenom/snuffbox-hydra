@@ -238,7 +238,9 @@ namespace snuffbox
       duk_context* ctx = state->context();
 
       duk_push_global_object(ctx);
-      if (duk_get_prop_string(ctx, -1, object.c_str()) <= 0)
+      if (
+        duk_get_prop_string(ctx, -1, object.c_str()) <= 0 || 
+        duk_is_object(ctx, -1) <= 0)
       {
         duk_pop_2(ctx);
         return false;
