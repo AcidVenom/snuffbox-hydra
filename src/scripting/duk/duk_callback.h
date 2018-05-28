@@ -230,6 +230,11 @@ namespace snuffbox
       const foundation::String& name,
       DukCallback<Args...>* func)
     {
+      if (object == "undefined")
+      {
+        return false;
+      }
+
       duk_context* ctx = state->context();
 
       duk_push_global_object(ctx);

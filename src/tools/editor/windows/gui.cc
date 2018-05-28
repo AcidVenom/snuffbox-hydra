@@ -45,7 +45,7 @@ namespace snuffbox
     void GUI::ResetBackgroundColor()
     {
       const QPalette& p = EditorColors::DefaultPalette();
-      current_color_.background = p.color(QPalette::ColorRole::Background);
+      current_color_.background = p.color(QPalette::ColorRole::Base);
     }
 
     //--------------------------------------------------------------------------
@@ -193,7 +193,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void GUI::Button(const char* text)
+    void GUI::Button(
+      const char* text,
+      const std::function<void()>& on_click)
     {
       if (current_layout_ == nullptr)
       {
@@ -203,7 +205,22 @@ namespace snuffbox
       QPushButton* button = new QPushButton();
       button->setText(text);
 
+      QObject::connect(button, &QPushButton::clicked, on_click);
+
       AddWidget(button);
+    }
+
+    //--------------------------------------------------------------------------
+    void GUI::HorizontalLine(const QColor& color)
+    {
+      QWidget* line = new QWidget();
+      line->setFixedHeight(1);
+      line->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+      QString scolor = EditorColors::ColorToCSS(color);
+      line->setStyleSheet("background-color: " + scolor + ";");
+
+      AddWidget(line);
     }
 
     //--------------------------------------------------------------------------

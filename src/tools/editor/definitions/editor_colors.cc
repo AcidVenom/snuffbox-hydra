@@ -96,5 +96,24 @@ namespace snuffbox
       static QColor blue(30, 75, 200);
       return blue;
     }
+
+    //--------------------------------------------------------------------------
+    QString EditorColors::ColorToCSS(const QColor& color)
+    {
+      int r, g, b;
+      color.getRgb(&r, &g, &b);
+
+      std::string rr = std::to_string(r);
+      std::string gg = std::to_string(g);
+      std::string bb = std::to_string(b);
+
+      const char* sr = rr.c_str();
+      const char* sg = gg.c_str();
+      const char* sb = bb.c_str();
+
+      QString scol = QString("rgb(") + sr + ", " + sg + ", " + sb + ")";
+
+      return scol;
+    }
   }
 }

@@ -35,6 +35,11 @@ namespace snuffbox
       */
       SCRIPT_FUNC() void SetBehavior(const foundation::String& behavior);
 
+      /**
+      * @return The behavior of this script
+      */
+      SCRIPT_FUNC() const foundation::String& behavior() const;
+
     protected:
 
       /**
@@ -46,6 +51,8 @@ namespace snuffbox
 
       scripting::ScriptCallback<> start_cb_; //!< The start callback
       scripting::ScriptCallback<float> update_cb_; //!< The update callback
+
+      foundation::String behavior_; //!< The behavior of this script
     };
 
     //--------------------------------------------------------------------------

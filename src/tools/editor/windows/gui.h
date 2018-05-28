@@ -166,8 +166,11 @@ namespace snuffbox
       * @brief Creates a button with a text
       *
       * @param[in] text The text to display on the button
+      * @param[in] on_click The function to call when the button is clicked
       */
-      void Button(const char* text);
+      void Button(
+        const char* text, 
+        const std::function<void()>& on_click = nullptr);
 
       /**
       * @brief Creates a vector field with x, y, z and w components up to
@@ -182,6 +185,13 @@ namespace snuffbox
       void VectorField(
         const glm::vec<N, float>& value, 
         ChangeCallback<const glm::vec<N, float>&> on_changed = nullptr);
+
+      /**
+      * @brief Creates a horizontal line
+      *
+      * @param[in] color The color of the line
+      */
+      void HorizontalLine(const QColor& color = QColor(0, 0, 0));
 
       /**
       * @brief Adds a raw widget to the layout, which the user can define

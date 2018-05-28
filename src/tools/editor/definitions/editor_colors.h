@@ -44,6 +44,15 @@ namespace snuffbox
       * @return The blue button color, used anywhere for blue buttons
       */
       static const QColor& BlueButton();
+
+      /**
+      * @brief Converts a color to an 'rgb(r, g, b)' string
+      *
+      * @param[in] color The color to convert
+      *
+      * @return The converted color
+      */
+      static QString ColorToCSS(const QColor& color);
     };
   }
 }

@@ -46,17 +46,7 @@ namespace snuffbox
       app->setStyle(QStyleFactory::create("Fusion"));
       app->setPalette(EditorColors::DefaultPalette());
 
-      const QColor& dock = EditorColors::DockColor();
-      int r, g, b;
-      dock.getRgb(&r, &g, &b);
-
-      std::string dock_col = 
-        "rgb(" 
-        + std::to_string(r) + ", " 
-        + std::to_string(g) + ", " 
-        + std::to_string(b) + ")";
-
-      QString qdock_col = dock_col.c_str();
+      QString qdock_col = EditorColors::ColorToCSS(EditorColors::DockColor());
 
       app->setStyleSheet("                      \
         QMainWindow::separator                  \

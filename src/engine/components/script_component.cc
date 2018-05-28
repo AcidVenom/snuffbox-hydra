@@ -12,7 +12,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     ScriptComponent::ScriptComponent(Entity* entity) :
-      ComponentBase<ScriptComponent, Components::kScript>(entity)
+      ComponentBase<ScriptComponent, Components::kScript>(entity),
+      behavior_("undefined")
     {
 
     }
@@ -20,6 +21,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptComponent::SetBehavior(const foundation::String& behavior)
     {
+      behavior_ = behavior;
+
       ScriptService* ss = Application::Instance()->GetService<ScriptService>();
       
       scripting::ScriptCallback<>::FromClass(
@@ -27,6 +30,12 @@ namespace snuffbox
 
       scripting::ScriptCallback<float>::FromClass(
         ss->state(), behavior, "Update", &update_cb_);
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::String& ScriptComponent::behavior() const
+    {
+      return behavior_;
     }
 
     //--------------------------------------------------------------------------

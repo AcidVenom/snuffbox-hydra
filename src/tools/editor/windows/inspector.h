@@ -67,11 +67,21 @@ namespace snuffbox
       * @tparam C The component type, specialize this to show the components
       *
       * @param[in] component The component to show
+      * @param[in] parent The parent widget for this component
       *
       * @return The created widget to be shown
       */
       template <engine::Components C>
-      QWidget* ShowComponent(engine::IComponent* component);
+      QWidget* ShowComponent(
+        engine::IComponent* component, 
+        QTreeWidgetItem* parent);
+
+    protected:
+
+      /**
+      * @brief Applies the style of the inspector
+      */
+      void ApplyStyle();
 
     signals:
 
@@ -82,6 +92,7 @@ namespace snuffbox
 
     private:
 
+      bool refreshing_; //!< Are we refreshing the inspector?
       QTreeWidget* tree_; //!< The tree to append inspector fields to
     };
 
@@ -92,34 +103,47 @@ namespace snuffbox
       QTreeWidgetItem* top)
     {
       QTreeWidgetItem* new_item = nullptr;
+      QTreeWidgetItem* sub_item = nullptr;
+      QWidget* widget = nullptr;
+      QSize size_hint{ -1, 24 };
+
+      QString name;
 
       const foundation::Vector<engine::IComponent*>& components = 
         entity->GetComponents(C);
 
-      QWidget* widget = nullptr;
-      QColor col = EditorColors::DockColor();
+      const QPalette& palette = EditorColors::DefaultPalette();
+      const QColor& bg_col_top = EditorColors::DockColor();
+      const QColor& bg_col_sub = palette.color(QPalette::Window);
 
       for (size_t j = 0; j < components.size(); ++j)
       {
         new_item = new QTreeWidgetItem();
-        new_item->setBackgroundColor(0, col);
-        widget = ShowComponent<C>(components.at(j));
+
+        widget = ShowComponent<C>(components.at(j), new_item);
+        new_item->setBackgroundColor(0, bg_col_top);
+        new_item->setSizeHint(0, size_hint);
 
         if (widget != nullptr)
         {
-          new_item->setSizeHint(0, widget->sizeHint());
+          sub_item = new QTreeWidgetItem();
+          sub_item->setSizeHint(0, widget->sizeHint());
+          sub_item->setBackgroundColor(0, bg_col_sub);
 
-          if (top == nullptr)
-          {
-            tree_->addTopLevelItem(new_item);
-          }
-          else
-          {
-            top->addChild(new_item);
-          }
-
-          tree_->setItemWidget(new_item, 0, widget);
+          new_item->addChild(sub_item);
+          tree_->setItemWidget(sub_item, 0, widget);
         }
+
+        if (top == nullptr)
+        {
+          tree_->addTopLevelItem(new_item);
+        }
+        else
+        {
+          top->addChild(new_item);
+        }
+
+        new_item->setExpanded(true);
       }
 
       const int next = static_cast<int>(C) + 1;
