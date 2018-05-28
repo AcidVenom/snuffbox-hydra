@@ -21,11 +21,12 @@ namespace snuffbox
         steam.setColor(QPalette::ToolTipBase, Qt::white);
         steam.setColor(QPalette::ToolTipText, Qt::white);
         steam.setColor(QPalette::Text, Qt::white);
+        steam.setColor(QPalette::ButtonText, Qt::white);
         steam.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
-        steam.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+        steam.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::black);
         steam.setColor(QPalette::Disabled, QPalette::Light, QColor(64, 70, 60));
         steam.setColor(QPalette::Button, QColor(88, 106, 80));
-        steam.setColor(QPalette::ButtonText, Qt::white);
+        steam.setColor(QPalette::Disabled, QPalette::Button, QColor(173, 181, 166));
         steam.setColor(QPalette::BrightText, Qt::red);
         steam.setColor(QPalette::Link, QColor(159, 164, 98));
 
