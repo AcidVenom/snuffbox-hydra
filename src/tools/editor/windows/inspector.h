@@ -1,8 +1,9 @@
 #pragma once
 
-#include <qobject.h>
+#include <engine/ecs/entity.h>
 
-class QTreeWidget;
+#include <qobject.h>
+#include <qtreewidget.h>
 
 namespace snuffbox
 {
@@ -43,6 +44,35 @@ namespace snuffbox
       */
       void ShowEntity(engine::Entity* entity);
 
+      /**
+      * @brief Shows all typed components of an entity in the inspector
+      *
+      * @remarks This method should be called with the first occurence
+      *          in the Components enumerator, as it is unrolled at compile-time
+      *
+      * The loop unrolls until Components::kCount is found
+      *
+      * @param[in] entity The entity to show the components of
+      * @param[in] top The top level widget to child the new entries to;
+      *                if nullptr they are added as a top level item
+      */
+      template <engine::Components C = engine::Components::kTransform>
+      void ShowComponents(
+        engine::Entity* entity, 
+        QTreeWidgetItem* top = nullptr);
+
+      /**
+      * @brief Shows a typed component of an entity in the inspector
+      *
+      * @tparam C The component type, specialize this to show the components
+      *
+      * @param[in] component The component to show
+      *
+      * @return The created widget to be shown
+      */
+      template <engine::Components C>
+      QWidget* ShowComponent(engine::IComponent* component);
+
     signals:
 
       /**
@@ -54,5 +84,55 @@ namespace snuffbox
 
       QTreeWidget* tree_; //!< The tree to append inspector fields to
     };
+
+    //--------------------------------------------------------------------------
+    template <engine::Components C>
+    inline void Inspector::ShowComponents(
+      engine::Entity* entity, 
+      QTreeWidgetItem* top)
+    {
+      QTreeWidgetItem* new_item = nullptr;
+
+      const foundation::Vector<engine::IComponent*>& components = 
+        entity->GetComponents(C);
+
+      QWidget* widget = nullptr;
+      QColor col = EditorColors::DockColor();
+
+      for (size_t j = 0; j < components.size(); ++j)
+      {
+        new_item = new QTreeWidgetItem();
+        new_item->setBackgroundColor(0, col);
+        widget = ShowComponent<C>(components.at(j));
+
+        if (widget != nullptr)
+        {
+          new_item->setSizeHint(0, widget->sizeHint());
+
+          if (top == nullptr)
+          {
+            tree_->addTopLevelItem(new_item);
+          }
+          else
+          {
+            top->addChild(new_item);
+          }
+
+          tree_->setItemWidget(new_item, 0, widget);
+        }
+      }
+
+      const int next = static_cast<int>(C) + 1;
+      ShowComponents<static_cast<engine::Components>(next)>(entity, top);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void Inspector::ShowComponents<engine::Components::kCount>(
+      engine::Entity* entity,
+      QTreeWidgetItem* top)
+    {
+
+    }
   }
 }

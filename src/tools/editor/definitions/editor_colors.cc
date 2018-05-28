@@ -89,5 +89,12 @@ namespace snuffbox
 
       return color;
     }
+
+    //--------------------------------------------------------------------------
+    const QColor& EditorColors::BlueButton()
+    {
+      static QColor blue(30, 75, 200);
+      return blue;
+    }
   }
 }

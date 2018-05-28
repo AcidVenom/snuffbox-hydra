@@ -39,6 +39,11 @@ namespace snuffbox
       * @return The color format in correspondance to the severity
       */
       static ColorFormat ConsoleColor(foundation::LogSeverity sev);
+
+      /**
+      * @return The blue button color, used anywhere for blue buttons
+      */
+      static const QColor& BlueButton();
     };
   }
 }

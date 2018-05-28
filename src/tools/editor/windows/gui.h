@@ -2,6 +2,8 @@
 
 #include "tools/editor/definitions/color_format.h"
 
+#include <glm/glm.hpp>
+
 #include <functional>
 
 class QLayout;
@@ -23,6 +25,17 @@ namespace snuffbox
     class GUI
     {
 
+    public:
+
+      /**
+      * @brief The different types of layout styles that exist
+      */
+      enum class LayoutStyle
+      {
+        kHorizontal, //!< A QHBoxLayout
+        kVertical //!< A QVBoxLayout
+      };
+
     protected:
 
       /**
@@ -38,20 +51,12 @@ namespace snuffbox
       */
       struct Layout
       {
+        LayoutStyle style; //!< The style of the layout
         QLayout* qlayout; //!< The underlying actual Qt layout
         Layout* prev; //!< The previous layout that we were at
       };
 
     public:
-
-      /**
-      * @brief The different types of layout styles that exist
-      */
-      enum class LayoutStyle
-      {
-        kHorizontal, //!< A QHBoxLayout
-        kVertical //!< A QVBoxLayout
-      };
 
       /**
       * @brief Default constructor, initializes all values to their
@@ -165,6 +170,20 @@ namespace snuffbox
       void Button(const char* text);
 
       /**
+      * @brief Creates a vector field with x, y, z and w components up to
+      *        the number N
+      *
+      * @tparam N The number of vector components
+      *
+      * @param[in] value The vector value to assign initially
+      * @param[in] on_changed The function to call when the value changed
+      */
+      template <glm::length_t N>
+      void VectorField(
+        const glm::vec<N, float>& value, 
+        ChangeCallback<const glm::vec<N, float>&> on_changed = nullptr);
+
+      /**
       * @brief Adds a raw widget to the layout, which the user can define
       *        themselves
       *
@@ -198,5 +217,24 @@ namespace snuffbox
       Layout* current_layout_; //!< The current layout
       int num_started_; //!< The number of layouts that were started
     };
+
+    //--------------------------------------------------------------------------
+    template <glm::length_t N>
+    void GUI::VectorField(
+      const glm::vec<N, float>& value,
+      ChangeCallback<const glm::vec<N, float>&> on_changed)
+    {
+      static const char* labels[] = { "X", "Y", "Z", "W" };
+
+      StartLayout(LayoutStyle::kHorizontal);
+      SetSpacing(5);
+
+      for (glm::length_t i = 0; i < N; ++i)
+      {
+        Label(labels[i]);
+        TextField(std::to_string(value[i]).c_str());
+      }
+      EndLayout();
+    }
   }
 }

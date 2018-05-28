@@ -2,9 +2,9 @@
 #include "tools/editor/windows/gui.h"
 #include "tools/editor/definitions/editor_colors.h"
 
-#include <engine/ecs/entity.h>
+#include <engine/components/transform_component.h>
+#include <engine/components/script_component.h>
 
-#include <qtreewidget.h>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
@@ -63,19 +63,67 @@ namespace snuffbox
       QWidget* top_widget = gui.EndAsWidget();
 
       gui = GUI();
+      
       gui.StartLayout(GUI::LayoutStyle::kVertical);
-      gui.SetBackgroundColor(palette.color(QPalette::ColorRole::Button));
+      gui.SetBackgroundColor(EditorColors::BlueButton());
       gui.Button("Add component");
       gui.ResetBackgroundColor();
       
-      QWidget* comp_widget = gui.EndAsWidget();
+      QWidget* add_comp = gui.EndAsWidget();
 
       tree_->addTopLevelItem(top);
       tree_->setItemWidget(top, 0, top_widget);
 
-      QTreeWidgetItem* components = new QTreeWidgetItem();
-      top->addChild(components);
-      tree_->setItemWidget(components, 0, comp_widget);
+      QTreeWidgetItem* comp = new QTreeWidgetItem();
+      tree_->addTopLevelItem(comp);
+      tree_->setItemWidget(comp, 0, add_comp);
+
+      ShowComponents(entity, top);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline QWidget* Inspector::ShowComponent<engine::Components::kTransform>(
+      engine::IComponent* component)
+    {
+      engine::TransformComponent* t = 
+        static_cast<engine::TransformComponent*>(component);
+
+      GUI gui;
+
+      auto LabeledVec = [&](const char* label)
+      {
+        gui.Label(label);
+        gui.VectorField<3>({0.0f, 0.0f, 0.0f});
+      };
+
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
+
+      gui.Label("Transform");
+
+      LabeledVec("Position");
+      LabeledVec("Rotation");
+      LabeledVec("Scale");
+
+      QWidget* widget = gui.EndAsWidget();
+
+      return widget;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline QWidget* Inspector::ShowComponent<engine::Components::kScript>(
+      engine::IComponent* component)
+    {
+      return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline QWidget* Inspector::ShowComponent<engine::Components::kMeshRenderer>(
+      engine::IComponent* component)
+    {
+      return nullptr;
     }
   }
 }

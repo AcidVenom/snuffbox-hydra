@@ -61,6 +61,7 @@ namespace snuffbox
       Layout* new_layout = foundation::Memory::Construct<Layout>(
           &foundation::Memory::default_allocator());
 
+      new_layout->style = layout;
       new_layout->prev = current_layout_;
       current_layout_ = new_layout;
       
