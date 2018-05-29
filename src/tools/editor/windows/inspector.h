@@ -5,6 +5,9 @@
 #include <qobject.h>
 #include <qtreewidget.h>
 
+class QMenu;
+class QAction;
+
 namespace snuffbox
 {
   namespace engine
@@ -14,6 +17,49 @@ namespace snuffbox
 
   namespace editor
   {
+    /**
+    * @brief A tree widget item that contains a reference to the corresponding
+    *        component
+    *
+    * This is used to poll the component data after it has been updated from
+    * within the engine (either in scripting or C++), so that the values can
+    * be synchronized without rebuilding the entire inspector window.
+    *
+    * Furthermore this is used to remove components that are on the entity
+    *
+    * @author Daniel Konings
+    */
+    class InspectorComponentItem : public QTreeWidgetItem
+    {
+      
+    public:
+
+      /**
+      * @brief Construct through an underlying type and component
+      *
+      * @param[in] type The component type to store
+      * @param[in] component The component to store
+      */
+      InspectorComponentItem(
+        engine::Components type, 
+        engine::IComponent* component);
+
+      /**
+      * @return The component type stored in this item
+      */
+      engine::Components type() const;
+
+      /**
+      * @return The component stored in this item
+      */
+      engine::IComponent* component() const;
+
+    private:
+
+      engine::Components type_; //!< The component type stored in this item
+      engine::IComponent* component_; //!< The component stored in this item
+    };
+
     /**
     * @brief The inspector window to inspect entities and their components with
     *
@@ -83,6 +129,18 @@ namespace snuffbox
       */
       void ApplyStyle();
 
+      /**
+      * @brief Adds the context menu to remove components
+      */
+      void AddContextMenu();
+
+    private slots:
+
+      /**
+      * @brief Called when the context menu is requested 
+      */
+      void OnCustomContextMenu(const QPoint& p);
+
     signals:
 
       /**
@@ -90,10 +148,20 @@ namespace snuffbox
       */
       void RefreshHierarchy();
 
+    public:
+
+      /**
+      * @brief Clean up the created context menu
+      */
+      ~Inspector();
+
     private:
 
       bool refreshing_; //!< Are we refreshing the inspector?
       QTreeWidget* tree_; //!< The tree to append inspector fields to
+
+      QMenu* context_menu_; //!< The context menu of the inspector
+      QAction* remove_component_; //!< The remove component action
     };
 
     //--------------------------------------------------------------------------
@@ -102,9 +170,10 @@ namespace snuffbox
       engine::Entity* entity, 
       QTreeWidgetItem* top)
     {
-      QTreeWidgetItem* new_item = nullptr;
-      QTreeWidgetItem* sub_item = nullptr;
-      QWidget* widget = nullptr;
+      InspectorComponentItem* new_item = nullptr;
+      InspectorComponentItem* sub_item = nullptr;
+      engine::IComponent* component = nullptr;
+      QWidget* sub_widget = nullptr;
       QSize size_hint{ -1, 24 };
 
       QString name;
@@ -118,20 +187,21 @@ namespace snuffbox
 
       for (size_t j = 0; j < components.size(); ++j)
       {
-        new_item = new QTreeWidgetItem();
+        component = components.at(j);
+        new_item = new InspectorComponentItem(C, component);
 
-        widget = ShowComponent<C>(components.at(j), new_item);
+        sub_widget = ShowComponent<C>(component, new_item);
         new_item->setBackgroundColor(0, bg_col_top);
         new_item->setSizeHint(0, size_hint);
 
-        if (widget != nullptr)
+        if (sub_widget != nullptr)
         {
-          sub_item = new QTreeWidgetItem();
-          sub_item->setSizeHint(0, widget->sizeHint());
+          sub_item = new InspectorComponentItem(C, component);
+          sub_item->setSizeHint(0, sub_widget->sizeHint());
           sub_item->setBackgroundColor(0, bg_col_sub);
 
           new_item->addChild(sub_item);
-          tree_->setItemWidget(sub_item, 0, widget);
+          tree_->setItemWidget(sub_item, 0, sub_widget);
         }
 
         if (top == nullptr)

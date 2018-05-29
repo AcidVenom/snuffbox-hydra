@@ -9,17 +9,45 @@
 #include <qlineedit.h>
 #include <qcheckbox.h>
 #include <qlayout.h>
+#include <qmenu.h>
+#include <qaction.h>
 
 namespace snuffbox
 {
   namespace editor
   {
     //--------------------------------------------------------------------------
+    InspectorComponentItem::InspectorComponentItem(
+      engine::Components type,
+      engine::IComponent* component)
+      :
+      type_(type),
+      component_(component)
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    engine::Components InspectorComponentItem::type() const
+    {
+      return type_;
+    }
+
+    //--------------------------------------------------------------------------
+    engine::IComponent* InspectorComponentItem::component() const
+    {
+      return component_;
+    }
+
+    //--------------------------------------------------------------------------
     Inspector::Inspector(QTreeWidget* widget) :
       refreshing_(false),
-      tree_(widget)
+      tree_(widget),
+      context_menu_(nullptr),
+      remove_component_(nullptr)
     {
       ApplyStyle();
+      AddContextMenu();
     }
 
     //--------------------------------------------------------------------------
@@ -141,10 +169,9 @@ namespace snuffbox
       gui.Label("Behavior");
       gui.TextField(s->behavior().c_str(), [=](const QString& behavior)
       {
-        s->SetBehavior(behavior.toStdString().c_str());
-
         if (refreshing_ == false)
         {
+          s->SetBehavior(behavior.toStdString().c_str());
           SetName();
         }
       });
@@ -166,8 +193,63 @@ namespace snuffbox
     void Inspector::ApplyStyle()
     {
       tree_->setIndentation(0);
+      tree_->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
       tree_->setSelectionMode(QAbstractItemView::NoSelection);
       tree_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
+    }
+
+    //--------------------------------------------------------------------------
+    void Inspector::AddContextMenu()
+    {
+      context_menu_ = new QMenu();
+
+      remove_component_ = new QAction("Remove component", context_menu_);
+      context_menu_->addAction(remove_component_);
+
+      connect(
+        tree_, 
+        &QTreeWidget::customContextMenuRequested,
+        this,
+        &Inspector::OnCustomContextMenu);
+    }
+
+    //--------------------------------------------------------------------------
+    void Inspector::OnCustomContextMenu(const QPoint& p)
+    {
+      QModelIndex index = tree_->indexAt(p);
+      remove_component_->setEnabled(index.isValid());
+
+      InspectorComponentItem* item = 
+        static_cast<InspectorComponentItem*>(tree_->itemAt(p));
+
+      engine::IComponent* component = nullptr;
+
+      if (
+        item == nullptr || 
+        (component = item->component()) == nullptr ||
+        item->type() == engine::Components::kTransform)
+      {
+        return;
+      }
+
+      QAction* action = context_menu_->exec(tree_->viewport()->mapToGlobal(p));
+
+      if (action == remove_component_)
+      {
+        engine::Entity* e = component->entity();
+        e->RemoveComponentByRef(component);
+        ShowEntity(e);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    Inspector::~Inspector()
+    {
+      if (context_menu_ != nullptr)
+      {
+        delete context_menu_;
+        context_menu_ = nullptr;
+      }
     }
   }
 }

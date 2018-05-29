@@ -94,6 +94,16 @@ namespace snuffbox
       SCRIPT_FUNC() void RemoveComponent(Components id);
 
       /**
+      * @brief Removes a component by reference
+      *
+      * @remarks This function loops through every component list in the entity
+      *          and thus might be slower than other removal options
+      *
+      * @param[in] component The component to remove
+      */
+      void RemoveComponentByRef(IComponent* component);
+
+      /**
       * @brief Removes all components of a certain type
       *
       * @tparam T The component type

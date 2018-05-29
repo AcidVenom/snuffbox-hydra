@@ -77,6 +77,34 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Entity::RemoveComponentByRef(IComponent* component)
+    {
+      int id = static_cast<int>(Components::kTransform) + 1;
+      const int last = static_cast<int>(Components::kCount);
+
+      IComponent* current = nullptr;
+      bool found = false;
+
+      while (id != last && found == false)
+      {
+        ComponentArray& arr = GetComponentArray(static_cast<Components>(id));
+        for (size_t i = 0; i < arr.size(); ++i)
+        {
+          current = arr.at(i).get();
+
+          if (current == component)
+          {
+            found = true;
+            arr.erase(arr.begin() + i);
+            break;
+          }
+        }
+
+        ++id;
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::RemoveComponents(Components id)
     {
       while (HasComponent(id) == true)
