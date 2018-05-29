@@ -295,5 +295,15 @@ namespace snuffbox
         ++it;
       }
     }
+
+    //--------------------------------------------------------------------------
+    HierarchyView::~HierarchyView()
+    {
+      if (context_menu_ != nullptr)
+      {
+        delete context_menu_;
+        context_menu_ = nullptr;
+      }
+    }
   }
 }

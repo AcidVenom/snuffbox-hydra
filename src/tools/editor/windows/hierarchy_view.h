@@ -177,6 +177,13 @@ namespace snuffbox
       */
       void SelectEntity(engine::Entity*);
 
+    public:
+
+      /**
+      * @brief Clean up the context menu
+      */
+      ~HierarchyView();
+
     private:
 
       QTreeWidget* tree_; //!< The underlying Qt tree widget
