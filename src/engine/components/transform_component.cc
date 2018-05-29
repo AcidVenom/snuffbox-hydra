@@ -357,6 +357,8 @@ namespace snuffbox
         return;
       }
 
+      bool updated = false;
+
       if ((is_dirty_ & DirtyFlags::kSelf) == DirtyFlags::kSelf)
       {
         local_to_world_ = glm::mat4x4(1.0f);
@@ -369,11 +371,15 @@ namespace snuffbox
         {
           local_to_world_ *= parent_->local_to_world_;
         }
+
+        updated = true;
       }
 
       if ((is_dirty_ & DirtyFlags::kParent) == DirtyFlags::kParent)
       {
         local_to_world_ = local_to_world_ * parent_->local_to_world_;
+
+        updated = true;
       }
 
       if ((is_dirty_ & DirtyFlags::kChild) == DirtyFlags::kChild == true)
@@ -382,6 +388,11 @@ namespace snuffbox
         {
           children_.at(i)->UpdateMatrices();
         }
+      }
+
+      if (updated == true)
+      {
+        world_to_local_ = glm::inverse(local_to_world_);
       }
 
       is_dirty_ = DirtyFlags::kNone;
