@@ -6,6 +6,10 @@
 #include <sparsed/transform_component.gen.cc>
 #endif
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace snuffbox
 {
   namespace engine
@@ -222,7 +226,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::TransformPoint(const glm::vec3& point)
     {
-      UpdateMatrices();
+      UpdateFromTop();
       glm::vec4 to_transform{ point.x, point.y, point.z, 1.0f };
       return local_to_world_ * to_transform;
     }
@@ -230,7 +234,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::InvTransformPoint(const glm::vec3& point)
     {
-      UpdateMatrices();
+      UpdateFromTop();
       glm::vec4 to_transform{ point.x, point.y, point.z, 1.0f };
       return world_to_local_ * to_transform;
     }
@@ -238,7 +242,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::TransformDirection(const glm::vec3& direction)
     {
-      UpdateMatrices();
+      UpdateFromTop();
       glm::vec4 to_transform{ direction.x, direction.y, direction.z, 0.0f };
       return local_to_world_ * to_transform;
     }
@@ -247,7 +251,7 @@ namespace snuffbox
     glm::vec3 TransformComponent::InvTransformDirection(
       const glm::vec3& direction)
     {
-      UpdateMatrices();
+      UpdateFromTop();
       glm::vec4 to_transform{ direction.x, direction.y, direction.z, 0.0f };
       return world_to_local_ * to_transform;
     }
@@ -255,28 +259,28 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::Up()
     {
-      UpdateMatrices();
+      UpdateFromTop();
       return TransformDirection(kWorldUp_);
     }
 
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::Forward()
     {
-      UpdateMatrices();
+      UpdateFromTop();
       return TransformDirection(kWorldForward_);
     }
 
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::Right()
     {
-      UpdateMatrices();
+      UpdateFromTop();
       return TransformDirection(kWorldRight_);
     }
 
     //--------------------------------------------------------------------------
     void TransformComponent::TranslateLocal(const glm::vec3& translation)
     {
-      UpdateMatrices();
+      UpdateFromTop();
 
       glm::vec3 up = TransformDirection(kWorldUp_) * translation;
       glm::vec3 forward = TransformDirection(kWorldForward_) * translation;
@@ -322,18 +326,63 @@ namespace snuffbox
           current->MarkDirty(DirtyFlags::kChild);
           current = current->parent_;
         }
+
+        for (size_t i = 0; i < children_.size(); ++i)
+        {
+          children_.at(i)->MarkDirty(DirtyFlags::kParent);
+        }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::UpdateFromTop()
+    {
+      TransformComponent* top = this;
+      TransformComponent* current = parent_;
+
+      while (current != nullptr)
+      {
+        top = current;
+        current = current->parent_;
+      }
+
+      top->UpdateMatrices();
     }
 
     //--------------------------------------------------------------------------
     void TransformComponent::UpdateMatrices()
     {
-      if ((is_dirty_ & DirtyFlags::kNone) == DirtyFlags::kNone)
+      if (is_dirty_ == DirtyFlags::kNone)
       {
         return;
       }
 
-      //!< @todo Implement this function to update all matrices
+      if ((is_dirty_ & DirtyFlags::kSelf) == DirtyFlags::kSelf)
+      {
+        local_to_world_ = glm::mat4x4(1.0f);
+
+        local_to_world_ = glm::translate(local_to_world_, position_);
+        local_to_world_ *= glm::toMat4(rotation_);
+        local_to_world_ = glm::scale(local_to_world_, scale_);
+
+        if (parent_ != nullptr)
+        {
+          local_to_world_ *= parent_->local_to_world_;
+        }
+      }
+
+      if ((is_dirty_ & DirtyFlags::kParent) == DirtyFlags::kParent)
+      {
+        local_to_world_ = local_to_world_ * parent_->local_to_world_;
+      }
+
+      if ((is_dirty_ & DirtyFlags::kChild) == DirtyFlags::kChild == true)
+      {
+        for (size_t i = 0; i < children_.size(); ++i)
+        {
+          children_.at(i)->UpdateMatrices();
+        }
+      }
     }
 
     //--------------------------------------------------------------------------

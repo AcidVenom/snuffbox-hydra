@@ -36,7 +36,8 @@ namespace snuffbox
       {
         kNone = 0, //!< No flags set
         kChild = 1 << 0, //!< A child is dirty
-        kSelf = 1 << 1 //!< The component itself is dirty
+        kParent = 1 << 1, //!< The parent is dirty
+        kSelf = 1 << 2 //!< The component itself is dirty
       };
 
     public:
@@ -293,6 +294,12 @@ namespace snuffbox
       * @param[in] flag The type of "dirtiness" to set
       */
       void MarkDirty(DirtyFlags flag);
+
+      /**
+      * @brief Updates the matrices of the entire parent hierarchy this
+      *        transform component belongs to
+      */
+      void UpdateFromTop();
 
       /**
       * @brief Updates the matrices of this component by traversing its parent
