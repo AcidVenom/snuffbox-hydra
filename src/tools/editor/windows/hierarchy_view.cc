@@ -239,7 +239,11 @@ namespace snuffbox
     void HierarchyView::OnRenameItem(QTreeWidgetItem* item, int column)
     {
       HierarchyViewItem* hvi = static_cast<HierarchyViewItem*>(item);
-      hvi->transform()->entity()->set_name(item->text(0).toStdString().c_str());
+      engine::Entity* e = hvi->transform()->entity();
+
+      e->set_name(item->text(0).toStdString().c_str());
+
+      emit SelectEntity(e);
     }
 
     //--------------------------------------------------------------------------
