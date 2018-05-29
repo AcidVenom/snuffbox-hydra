@@ -1,5 +1,7 @@
 #include "scripting/script_value.h"
 
+#include <glm/gtc/quaternion.hpp>
+
 namespace snuffbox
 {
   namespace scripting
@@ -134,6 +136,16 @@ namespace snuffbox
       if_n_script_handle<glm::vec4>*)
     {
       return FromVector<glm::vec4>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    ScriptHandle ScriptValue::FromImpl(
+      glm::quat value,
+      if_n_script_handle<glm::quat>*)
+    {
+      glm::vec4 vec{ value.x, value.y, value.z, value.w };
+      return FromVector<glm::vec4>(vec);;
     }
 
     //--------------------------------------------------------------------------

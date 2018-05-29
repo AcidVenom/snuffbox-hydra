@@ -7,6 +7,7 @@
 #include "scripting/script_value.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace snuffbox
 {
@@ -348,6 +349,50 @@ namespace snuffbox
       }
       
       return def;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline glm::vec2 ScriptArgs::Get(
+      uint8_t idx, 
+      glm::vec2 def, 
+      if_n_number_and_enum<glm::vec2>*) const
+    {
+      return GetVectorValue(idx, def);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline glm::vec3 ScriptArgs::Get(
+      uint8_t idx, 
+      glm::vec3 def, 
+      if_n_number_and_enum<glm::vec3>*) const
+    {
+      return GetVectorValue(idx, def);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline glm::vec4 ScriptArgs::Get(
+      uint8_t idx, 
+      glm::vec4 def, 
+      if_n_number_and_enum<glm::vec4>*) const
+    {
+      return GetVectorValue(idx, def);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline glm::quat ScriptArgs::Get(
+      uint8_t idx,
+      glm::quat def,
+      if_n_number_and_enum<glm::quat>*) const
+    {
+      glm::vec4 vec = GetVectorValue(
+        idx, 
+        glm::vec4{ def.x, def.y, def.z, def.w });
+
+      return glm::quat{ vec.w, vec.x, vec.y, vec.z };
     }
 
     //--------------------------------------------------------------------------

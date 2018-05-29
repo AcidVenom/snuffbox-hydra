@@ -11,9 +11,20 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
+    const glm::vec3 TransformComponent::kWorldUp_{ 0.0f, 1.0f, 0.0f };
+    const glm::vec3 TransformComponent::kWorldForward_{ 0.0f, 0.0f, 1.0f };
+    const glm::vec3 TransformComponent::kWorldRight_{ 1.0f, 0.0f, 0.0f };
+
+    //--------------------------------------------------------------------------
     TransformComponent::TransformComponent(Entity* entity) :
       ComponentBase<TransformComponent, Components::kTransform>(entity),
-      parent_(nullptr)
+      parent_(nullptr),
+      position_(glm::vec3{0.0f, 0.0f, 0.0f}),
+      rotation_(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)),
+      scale_(glm::vec3{1.0f, 1.0f, 1.0f}),
+      local_to_world_(glm::mat4x4(1.0f)),
+      world_to_local_(glm::mat4x4(1.0f)),
+      is_dirty_(DirtyFlags::kNone)
     {
 
     }
@@ -137,9 +148,192 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void TransformComponent::SetPosition(const glm::vec3& position)
+    {
+      position_ = InvTransformPoint(position);
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::SetLocalPosition(const glm::vec3& position)
+    {
+      position_ = position;
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::GetPosition()
+    {
+      return TransformPoint(glm::vec3{ 0.0f, 0.0f, 0.0f });
+    }
+
+    //--------------------------------------------------------------------------
+    const glm::vec3& TransformComponent::GetLocalPosition()
+    {
+      return position_;
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::SetRotation(const glm::quat& rotation)
+    {
+      rotation_ = rotation;
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::SetRotationEuler(const glm::vec3& rotation)
+    {
+      rotation_ = glm::quat(rotation);
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::RotateAxis(const glm::vec3& axis, float angle)
+    {
+      rotation_ = glm::angleAxis(angle, axis);
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    const glm::quat& TransformComponent::GetRotation() const
+    {
+      return rotation_;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::GetRotationEuler() const
+    {
+      return glm::eulerAngles(rotation_);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::SetScale(const glm::vec3& scale)
+    {
+      scale_ = scale;
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    const glm::vec3& TransformComponent::GetScale() const
+    {
+      return scale_;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::TransformPoint(const glm::vec3& point)
+    {
+      UpdateMatrices();
+      glm::vec4 to_transform{ point.x, point.y, point.z, 1.0f };
+      return local_to_world_ * to_transform;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::InvTransformPoint(const glm::vec3& point)
+    {
+      UpdateMatrices();
+      glm::vec4 to_transform{ point.x, point.y, point.z, 1.0f };
+      return world_to_local_ * to_transform;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::TransformDirection(const glm::vec3& direction)
+    {
+      UpdateMatrices();
+      glm::vec4 to_transform{ direction.x, direction.y, direction.z, 0.0f };
+      return local_to_world_ * to_transform;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::InvTransformDirection(
+      const glm::vec3& direction)
+    {
+      UpdateMatrices();
+      glm::vec4 to_transform{ direction.x, direction.y, direction.z, 0.0f };
+      return world_to_local_ * to_transform;
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::Up()
+    {
+      UpdateMatrices();
+      return TransformDirection(kWorldUp_);
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::Forward()
+    {
+      UpdateMatrices();
+      return TransformDirection(kWorldForward_);
+    }
+
+    //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::Right()
+    {
+      UpdateMatrices();
+      return TransformDirection(kWorldRight_);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::TranslateLocal(const glm::vec3& translation)
+    {
+      UpdateMatrices();
+
+      glm::vec3 up = TransformDirection(kWorldUp_) * translation;
+      glm::vec3 forward = TransformDirection(kWorldForward_) * translation;
+      glm::vec3 right = TransformDirection(kWorldRight_) * translation;
+
+      glm::vec3 movement = up + forward + right;
+
+      position_ += movement;
+      MarkDirty(DirtyFlags::kSelf);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::Translate(const glm::vec3& translation)
+    {
+      glm::vec3 position = GetPosition();
+      position += translation;
+
+      SetPosition(position);
+    }
+
+    //--------------------------------------------------------------------------
     void TransformComponent::SetParentRaw(TransformComponent* parent)
     {
       parent_ = parent;
+
+      if (parent_ != nullptr)
+      {
+        parent_->MarkDirty(DirtyFlags::kChild);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::MarkDirty(DirtyFlags flag)
+    {
+      is_dirty_ |= flag;
+
+      if (flag == DirtyFlags::kSelf)
+      {
+        TransformComponent* current = parent_;
+
+        while (current != nullptr)
+        {
+          current->MarkDirty(DirtyFlags::kChild);
+          current = current->parent_;
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::UpdateMatrices()
+    {
+      if ((is_dirty_ & DirtyFlags::kNone) == DirtyFlags::kNone)
+      {
+        return;
+      }
+
+      //!< @todo Implement this function to update all matrices
     }
 
     //--------------------------------------------------------------------------
@@ -149,6 +343,8 @@ namespace snuffbox
       {
         return;
       }
+
+      UpdateMatrices();
     }
 
     //--------------------------------------------------------------------------

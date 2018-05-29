@@ -131,17 +131,17 @@ namespace snuffbox
 
       GUI gui;
 
-      auto LabeledVec = [&](const char* label)
+      auto LabeledVec = [&](const char* label, const glm::vec3& value)
       {
         gui.Label(label);
-        gui.VectorField<3>({0.0f, 0.0f, 0.0f});
+        gui.VectorField<3>(value);
       };
 
       gui.StartLayout(GUI::LayoutStyle::kVertical);
 
-      LabeledVec("Position");
-      LabeledVec("Rotation");
-      LabeledVec("Scale");
+      LabeledVec("Position", t->GetLocalPosition());
+      LabeledVec("Rotation", t->GetRotationEuler());
+      LabeledVec("Scale", t->GetScale());
 
       return gui.EndAsWidget();
     }
