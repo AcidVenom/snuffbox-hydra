@@ -383,6 +383,8 @@ namespace snuffbox
           children_.at(i)->UpdateMatrices();
         }
       }
+
+      is_dirty_ = DirtyFlags::kNone;
     }
 
     //--------------------------------------------------------------------------
