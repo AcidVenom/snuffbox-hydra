@@ -34,6 +34,16 @@ namespace snuffbox
     public:
 
       /**
+      * @brief The different states the editor application can be in
+      */
+      enum class States
+      {
+        kEditing,
+        kPlaying,
+        kPaused
+      };
+
+      /**
       * @see Application::Application
       *
       * @remarks Apparently QApplication needs the argc argument
@@ -60,6 +70,19 @@ namespace snuffbox
       */
       bool SetProjectDirectory(const foundation::Path& path);
 
+      /**
+      * @brief Sets the state of the editor application and changes all
+      *        windows to reflect on that change
+      *
+      * @param[in] state The state to set
+      */
+      void SwitchState(States state);
+
+      /**
+      * @return The state of the editor
+      */
+      States state() const;
+
     protected:
 
       /**
@@ -71,6 +94,8 @@ namespace snuffbox
 
       builder::Builder builder_; //!< The builder service
       foundation::UniquePtr<MainWindow> window_; //!< The main window
+
+      States state_; //!< The state of the editor
     };
   }
 }

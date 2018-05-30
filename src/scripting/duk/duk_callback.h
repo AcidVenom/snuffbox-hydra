@@ -175,6 +175,11 @@ namespace snuffbox
       */
       bool PushCallback(uint8_t* nargs, duk_idx_t* top_args, Args... args);
 
+      /**
+      * @return Is this callback valid?
+      */
+      bool is_valid() const;
+
     private:
 
       foundation::String name_; //!< The name of this callback
@@ -423,6 +428,13 @@ namespace snuffbox
       }
 
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename ... Args>
+    inline bool DukCallback<Args...>::is_valid() const
+    {
+      return is_valid_;
     }
   }
 }

@@ -41,7 +41,18 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptComponent::Update(float dt)
     {
+      if (update_cb_.is_valid() == false)
+      {
+        Refresh();
+      }
+
       update_cb_.CallContext(this, dt);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptComponent::Refresh()
+    {
+      SetBehavior(behavior_);
     }
   }
 }

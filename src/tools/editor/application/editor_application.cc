@@ -2,9 +2,14 @@
 
 #include <engine/services/renderer_service.h>
 #include <engine/services/cvar_service.h>
+#include <engine/services/scene_service.h>
+
 #include <engine/ecs/entity.h>
 #include <engine/components/transform_component.h>
-#include <engine/services/scene_service.h>
+
+#include <engine/assets/script_asset.h>
+
+#include <foundation/auxiliary/timer.h>
 
 namespace snuffbox
 {
@@ -18,7 +23,8 @@ namespace snuffbox
       :
       Application(argc, argv, cfg),
       QApplication(argc, argv),
-      window_(nullptr)
+      window_(nullptr),
+      state_(States::kEditing)
     {
 
     }
@@ -57,11 +63,25 @@ namespace snuffbox
 
       window_->show();
 
+      foundation::Timer delta_time("delta_time");
+      float dt = 0.0f;
+
       while (should_quit() == false)
       {
+        delta_time.Start();
+
         processEvents();
+
+        if (state_ == States::kPlaying)
+        {
+          Update(dt);
+        }
+
         renderer->Render();
         builder_.IdleNotification();
+
+        delta_time.Stop();
+        dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
       }
 
       Shutdown();
@@ -97,6 +117,18 @@ namespace snuffbox
       }
 
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::SwitchState(States state)
+    {
+      state_ = state;
+    }
+
+    //--------------------------------------------------------------------------
+    EditorApplication::States EditorApplication::state() const
+    {
+      return state_;
     }
 
     //--------------------------------------------------------------------------

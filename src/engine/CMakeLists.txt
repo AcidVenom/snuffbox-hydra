@@ -75,6 +75,15 @@ SET(ComponentsSources
   "components/transform_component.cc"
 )
 
+SET(AssetsSources
+  "assets/asset.h"
+  "assets/asset.cc"
+  "assets/asset_manager.h"
+  "assets/asset_manager.cc"
+  "assets/script_asset.h"
+  "assets/script_asset.cc"
+)
+
 IF (NOT SNUFF_NSCRIPTING)
   SET(ComponentsSources
     ${ComponentsSources}
@@ -94,6 +103,7 @@ SOURCE_GROUP("cvar"         FILES ${CVarSources})
 SOURCE_GROUP("input"        FILES ${InputSources})
 SOURCE_GROUP("ecs"          FILES ${ECSSources})
 SOURCE_GROUP("components"   FILES ${ComponentsSources})
+SOURCE_GROUP("assets"       FILES ${AssetsSources})
 SOURCE_GROUP("rsc"          FILES ${Resources})
 
 SET(EngineSources
@@ -105,6 +115,7 @@ SET(EngineSources
   ${InputSources}
   ${ECSSources}
   ${ComponentsSources}
+  ${AssetsSources}
   ${Resources}
 )
 

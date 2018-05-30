@@ -131,7 +131,7 @@ namespace snuffbox
         renderer->Render();
 
         delta_time.Stop();
-        dt = delta_time.Elapsed(foundation::TimeUnits::kMillisecond);
+        dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
       }
 
       Shutdown();

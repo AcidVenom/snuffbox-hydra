@@ -122,6 +122,18 @@ namespace snuffbox
       */
       void SaveLayout();
 
+      /**
+      * @brief Marks a playback button that it is being used
+      *
+      * @remarks Changes the button's background color to 
+      *          EditorColors::BlueButton
+      *
+      * @param[in] button The button to change
+      * @param[in] enabled Should we enable the blue background or change
+      *                    it back?
+      */
+      void MarkPlaybackButton(QPushButton* button, bool enabled);
+
     private slots:
 
       /**
@@ -138,6 +150,12 @@ namespace snuffbox
       * @param[in] entity The entity that was selected
       */
       void OnSelectEntity(engine::Entity* entity);
+
+      /**
+      * @brief Called when the play button was pressed, changes the
+      *        EditorApplication state to EditorApplication::States::kPlaying
+      */
+      void OnPlay();
 
     public:
 

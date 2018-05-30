@@ -115,6 +115,12 @@ namespace snuffbox
         this,
         &MainWindow::OpenProject);
 
+      connect(
+        ui_.playButton,
+        &QPushButton::pressed,
+        this,
+        &MainWindow::OnPlay);
+
       ui_.gameWindow->installEventFilter(this);
     }
 
@@ -196,6 +202,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::MarkPlaybackButton(QPushButton* button, bool enabled)
+    {
+      const QString css = EditorColors::ColorToCSS(EditorColors::BlueButton());
+      const QString sheet_e = "QPushButton{ background-color: " + css + "; }";
+      const QString sheet = "QPushButton{}";
+
+      button->setStyleSheet(enabled == true ? sheet_e : sheet);
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::OpenProject()
     {
       QString dir = QFileDialog::getExistingDirectory(
@@ -214,6 +230,25 @@ namespace snuffbox
     void MainWindow::OnSelectEntity(engine::Entity* entity)
     {
       inspector_->ShowEntity(entity);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnPlay()
+    {
+      EditorApplication::States state = app_->state();
+
+      EditorApplication::States next = 
+        state == EditorApplication::States::kEditing ?
+      EditorApplication::States::kPlaying : EditorApplication::States::kEditing;
+
+      bool enabled = next == EditorApplication::States::kPlaying;
+
+      ui_.pauseButton->setEnabled(enabled);
+      ui_.speedDownButton->setEnabled(enabled);
+      ui_.speedUpButton->setEnabled(enabled);
+
+      app_->SwitchState(next);
+      MarkPlaybackButton(ui_.playButton, enabled);
     }
 
     //--------------------------------------------------------------------------

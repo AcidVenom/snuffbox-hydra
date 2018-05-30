@@ -44,8 +44,18 @@ namespace snuffbox
 
       /**
       * @see IComponent::Update
+      *
+      * @remarks If the callbacks that are set are not valid, we attempt
+      *          to relocate the callbacks
+      *
+      * @see ScriptComponent::Refresh
       */
       void Update(float dt) override;
+
+      /**
+      * @brief Attempts to relocate the callbacks if they do not exist
+      */
+      void Refresh();
 
     private:
 
