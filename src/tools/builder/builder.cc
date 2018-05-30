@@ -14,7 +14,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Builder::Builder() :
       is_ok_(false),
-      build_directory_("")
+      build_directory_(""),
+      on_finished_(nullptr)
     {
 
     }
@@ -79,7 +80,7 @@ namespace snuffbox
         build_directory_ /
         item.relative.NoExtension() + 
         "." + 
-        AssetTypesToExtension(item.type);
+        AssetTypesToBuildExtension(item.type);
 
       foundation::File fout(build, foundation::FileFlags::kWrite);
 
@@ -95,6 +96,11 @@ namespace snuffbox
       }
 
       fout.Write(buffer, size);
+      
+      if (on_finished_ != nullptr)
+      {
+        on_finished_(item);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -237,6 +243,7 @@ namespace snuffbox
       foundation::Path current = "";
       foundation::Path current_source = "";
       foundation::Path source_file = "";
+      foundation::String out_ext;
 
       for (size_t i = 0; i < build_items.size(); ++i)
       {
@@ -265,6 +272,20 @@ namespace snuffbox
           if (foundation::File::Exists(source_file) == false)
           {
             foundation::File::Remove(item_path);
+          }
+        }
+        else
+        {
+          if (BuildToSourceExtension(
+            item_path.extension().c_str(), 
+            &out_ext) == true)
+          {
+            source_file = current_source.NoExtension() + "." + out_ext;
+
+            if (foundation::File::Exists(source_file) == false)
+            {
+              foundation::File::Remove(item_path);
+            }
           }
         }
       }
@@ -336,7 +357,7 @@ namespace snuffbox
       }
 
       BuildItem item;
-      item.type = TypeFromExtension(path.extension());
+      item.type = AssetTypesFromSourceExtension(path.extension().c_str());
       item.in = path;
       item.relative = path.StripPath(source_directory_);
 
@@ -361,14 +382,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    AssetTypes Builder::TypeFromExtension(const foundation::String& ext)
+    void Builder::set_on_finished(const OnFinishedCallback& cb)
     {
-      if (ext == "js")
-      {
-        return AssetTypes::kScript;
-      }
-
-      return AssetTypes::kUnknown;
+      on_finished_ = cb;
     }
 
     //--------------------------------------------------------------------------

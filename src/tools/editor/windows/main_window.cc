@@ -26,14 +26,17 @@ namespace snuffbox
       console_(nullptr),
       hierarchy_(nullptr),
       inspector_(nullptr),
+      asset_browser_(nullptr),
       project_dir_(""),
       on_resize_(nullptr)
     {
       ui_.setupUi(this);
 
       ApplyStyle(app);
+
       CreateConsole();
       CreateInspector();
+      CreateAssetBrowser();
 
       BindEvents();
 
@@ -173,6 +176,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::CreateAssetBrowser()
+    {
+      asset_browser_ = foundation::Memory::ConstructUnique<AssetBrowser>(
+        &foundation::Memory::default_allocator(),
+        ui_.buildDirectoryBrowser,
+        ui_.assetLayout);
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::LoadLayout()
     {
       resizeDocks({ ui_.consoleDock }, { 100 }, Qt::Vertical);
@@ -182,10 +194,10 @@ namespace snuffbox
       restoreGeometry(settings.value(kSaveGeometry_).toByteArray());
       restoreState(settings.value(kSaveWindow_).toByteArray());
 
-      ui_.splitter->restoreState(
+      ui_.assetSplitter->restoreState(
         settings.value(kSaveSplitterA_).toByteArray());
 
-      ui_.splitter_2->restoreState(
+      ui_.consoleSplitter->restoreState(
         settings.value(kSaveSplitterB_).toByteArray());
     }
 
@@ -197,8 +209,8 @@ namespace snuffbox
       settings.setValue(kSaveGeometry_, saveGeometry());
       settings.setValue(kSaveWindow_, saveState());
 
-      settings.setValue(kSaveSplitterA_, ui_.splitter->saveState());
-      settings.setValue(kSaveSplitterB_, ui_.splitter_2->saveState());
+      settings.setValue(kSaveSplitterA_, ui_.assetSplitter->saveState());
+      settings.setValue(kSaveSplitterB_, ui_.consoleSplitter->saveState());
     }
 
     //--------------------------------------------------------------------------
@@ -223,6 +235,8 @@ namespace snuffbox
       if (app_->SetProjectDirectory(dir.toStdString().c_str()) == true)
       {
         project_dir_ = dir;
+        std::string str = (project_dir_ + "/.build").toStdString();
+        asset_browser_->Refresh(str.c_str());
       }
     }
 

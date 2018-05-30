@@ -5,6 +5,7 @@
 #include "tools/editor/windows/console.h"
 #include "tools/editor/windows/hierarchy_view.h"
 #include "tools/editor/windows/inspector.h"
+#include "tools/editor/windows/asset_browser.h"
 
 #include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
@@ -111,6 +112,12 @@ namespace snuffbox
       void CreateInspector();
 
       /**
+      * @brief Creates the asset browser to view the current build directory
+      *        with
+      */
+      void CreateAssetBrowser();
+
+      /**
       * @brief Loads the layout the user had during previous execution,
       *        using QSettings
       */
@@ -172,6 +179,7 @@ namespace snuffbox
       foundation::UniquePtr<Console> console_; //!< The console
       foundation::UniquePtr<HierarchyView> hierarchy_; //!< The hierarchy view
       foundation::UniquePtr<Inspector> inspector_; //!< The inspector
+      foundation::UniquePtr<AssetBrowser> asset_browser_; //!< The asset browser
 
       QString project_dir_; //!< The current project directory
 

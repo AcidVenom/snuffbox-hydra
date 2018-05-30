@@ -17,7 +17,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool IAsset::Load()
     {
-      if (path_.extension() != builder::AssetTypesToExtension(type_))
+      if (path_.extension() != builder::AssetTypesToBuildExtension(type_))
       {
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kEngine,

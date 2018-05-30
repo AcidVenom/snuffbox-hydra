@@ -1,5 +1,7 @@
 #pragma once
 
+#include <foundation/containers/string.h>
+
 namespace snuffbox
 {
   namespace builder
@@ -28,6 +30,45 @@ namespace snuffbox
     *
     * @return The converted extension
     */
-    const char* AssetTypesToExtension(AssetTypes type);
+    const char* AssetTypesToBuildExtension(AssetTypes type);
+
+    /**
+    * @brief Converts a build extension into its original asset type
+    *
+    * @param[in] ext The extension to convert
+    *
+    * @return The converted asset type
+    */
+    AssetTypes AssetTypesFromBuildExtension(const char* ext);
+
+    /**
+    * @brief Converts an asset type to its corresponding source extension
+    *
+    * @param[in] type The asset type
+    *
+    * @return The converted extension
+    */
+    const char* AssetTypesToSourceExtension(AssetTypes type);
+
+    /**
+    * @brief Converts a source extension into its original asset type
+    *
+    * @param[in] ext The extension to convert
+    *
+    * @return The converted asset type
+    */
+    AssetTypes AssetTypesFromSourceExtension(const char* ext);
+
+    /**
+    * @brief Converts a build extension into its source extension
+    *
+    * @param[in] ext_a The extension to convert 
+    * @param[out] ext_b The converted extension
+    *
+    * @return Was there an extension for this build directory extension?
+    */
+    bool BuildToSourceExtension(
+      const char* ext_a,
+      foundation::String* ext_b);
   }
 }

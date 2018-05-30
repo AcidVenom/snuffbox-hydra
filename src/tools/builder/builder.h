@@ -53,6 +53,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to call a callback when an item has finished building
+      */
+      using OnFinishedCallback = foundation::Function<void(const BuildItem&)>;
+
+      /**
       * @brief A short hand for DirectoryTreeItem listings
       */
       using ItemList = foundation::Vector<foundation::DirectoryTreeItem>;
@@ -182,18 +187,15 @@ namespace snuffbox
       */
       void QueueForBuild(const foundation::Path& path);
 
-      /**
-      * @brief Deduces a file type from an extension
-      *
-      * @param[in] ext The extension to convert from
-      *
-      * @return The found asset type
-      *
-      * @see AssetTypes
-      */
-      static AssetTypes TypeFromExtension(const foundation::String& ext);
-
     public:
+
+      /**
+      * @brief Sets the callback for when the builder has finished building
+      *        an item
+      *
+      * @param[in] cb The callback to set
+      */
+      void set_on_finished(const OnFinishedCallback& cb);
 
       /**
       * @brief Stops the builder if it was running
@@ -215,6 +217,12 @@ namespace snuffbox
       foundation::DirectoryListener listener_; //!< The directory listener
 
       BuildScheduler scheduler_; //!< The build scheduler to queue files in
+
+      /**
+      * @brief The callback to call when the builder has finished building
+      *        an item
+      */
+      OnFinishedCallback on_finished_;
 
       /**
       * @brief The name of the build directory folder

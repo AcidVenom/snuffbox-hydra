@@ -23,6 +23,8 @@ SET(WindowsSources
   "windows/inspector.cc"
   "windows/gui.h"
   "windows/gui.cc"
+  "windows/asset_browser.h"
+  "windows/asset_browser.cc"
 )
 
 SET(ApplicationSources
