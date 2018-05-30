@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include <qlineedit.h>
+
 #include <functional>
 
 class QLayout;
@@ -36,13 +38,13 @@ namespace snuffbox
         kVertical //!< A QVBoxLayout
       };
 
-    protected:
-
       /**
       * @brief A short-hand for the on-changed callbacks
       */
-      template <typename T>
-      using ChangeCallback = const std::function<void(typename T)>&;
+      template <typename ... Args>
+      using ChangeCallback = const std::function<void(typename Args...)>&;
+
+    protected:
 
       /**
       * @brief Used to keep track of the currently entered layout
@@ -163,6 +165,20 @@ namespace snuffbox
         ChangeCallback<const QString&> on_changed = nullptr);
 
       /**
+      * @brief Adds a text field which only accepts numerical values
+      *
+      * @param[in] value The number value of the text field
+      * @param[in] floor Should the value be floored?
+      * @param[in] on_changed The function to call when the value changed
+      *
+      * @return The created widget
+      */
+      QLineEdit* NumberField(
+        double value,
+        bool floor,
+        ChangeCallback<double> on_changed = nullptr);
+
+      /**
       * @brief Creates a button with a text
       *
       * @param[in] text The text to display on the button
@@ -184,7 +200,7 @@ namespace snuffbox
       template <glm::length_t N>
       void VectorField(
         const glm::vec<N, float>& value, 
-        ChangeCallback<const glm::vec<N, float>&> on_changed = nullptr);
+        ChangeCallback<int, float> on_changed = nullptr);
 
       /**
       * @brief Creates a horizontal line
@@ -232,7 +248,7 @@ namespace snuffbox
     template <glm::length_t N>
     void GUI::VectorField(
       const glm::vec<N, float>& value,
-      ChangeCallback<const glm::vec<N, float>&> on_changed)
+      ChangeCallback<int, float> on_changed)
     {
       static const char* labels[] = { "X", "Y", "Z", "W" };
 
@@ -242,8 +258,16 @@ namespace snuffbox
       for (glm::length_t i = 0; i < N; ++i)
       {
         Label(labels[i]);
-        TextField(std::to_string(value[i]).c_str());
+
+        NumberField(static_cast<double>(value[i]), false, [=](double dvalue)
+        {
+          if (on_changed != nullptr)
+          {
+            on_changed(i, static_cast<float>(dvalue));
+          }
+        });
       }
+
       EndLayout();
     }
   }

@@ -23,8 +23,8 @@ namespace snuffbox
     TransformComponent::TransformComponent(Entity* entity) :
       ComponentBase<TransformComponent, Components::kTransform>(entity),
       parent_(nullptr),
-      position_(glm::vec3{0.0f, 0.0f, 0.0f}),
-      rotation_(glm::quat(1.0f, 0.0f, 0.0f, 0.0f)),
+      position_(glm::vec3{ 0.0f, 0.0f, 0.0f }),
+      rotation_(glm::vec3{ 0.0f, 0.0f, 0.0f }),
       scale_(glm::vec3{1.0f, 1.0f, 1.0f}),
       local_to_world_(glm::mat4x4(1.0f)),
       world_to_local_(glm::mat4x4(1.0f)),
@@ -187,7 +187,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::SetRotationEuler(const glm::vec3& rotation)
     {
-      rotation_ = glm::quat(rotation);
+      rotation_ = glm::quat(glm::radians(rotation));
       MarkDirty(DirtyFlags::kSelf);
     }
 
@@ -207,7 +207,17 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::GetRotationEuler() const
     {
-      return glm::eulerAngles(rotation_);
+      glm::vec3 deg = glm::degrees(glm::eulerAngles(rotation_));
+      
+      for (glm::length_t n = 0; n < deg.length(); ++n)
+      {
+        if (deg[n] < 0.0f)
+        {
+          deg[n] += 360.0f;
+        }
+      }
+
+      return deg;
     }
 
     //--------------------------------------------------------------------------

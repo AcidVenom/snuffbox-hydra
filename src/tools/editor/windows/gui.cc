@@ -7,8 +7,8 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qcheckbox.h>
-#include <qlineedit.h>
 #include <qpushbutton.h>
+#include <qvalidator.h>
 
 namespace snuffbox
 {
@@ -147,7 +147,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void GUI::Checkbox(
       bool value, 
-      ChangeCallback<bool>& on_changed)
+      ChangeCallback<bool> on_changed)
     {
       if (current_layout_ == nullptr)
       {
@@ -171,7 +171,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void GUI::TextField(
       const char* value,
-      ChangeCallback<const QString&>& on_changed)
+      ChangeCallback<const QString&> on_changed)
     {
       if (current_layout_ == nullptr)
       {
@@ -190,6 +190,37 @@ namespace snuffbox
       });
 
       AddWidget(edit);
+    }
+
+    //--------------------------------------------------------------------------
+    QLineEdit* GUI::NumberField(
+      double value,
+      bool floor,
+      ChangeCallback<double> on_changed)
+    {
+      if (current_layout_ == nullptr)
+      {
+        return nullptr;
+      }
+
+      QLineEdit* edit = new QLineEdit();
+      edit->setValidator(new QDoubleValidator());
+
+      std::string snum = std::to_string(value);
+      edit->setText(snum.c_str());
+
+      QObject::connect(edit, &QLineEdit::editingFinished, [=]()
+      {
+        if (on_changed != nullptr)
+        {
+          std::string s = edit->text().toStdString();
+          on_changed(atof(s.c_str()));
+        }
+      });
+
+      AddWidget(edit);
+
+      return edit;
     }
 
     //--------------------------------------------------------------------------
