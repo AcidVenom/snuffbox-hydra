@@ -352,11 +352,38 @@
           <number>0</number>
          </property>
          <item>
-          <layout class="QGridLayout" name="assetLayout">
-           <property name="spacing">
-            <number>6</number>
+          <widget class="QScrollArea" name="assetScrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
            </property>
-          </layout>
+           <widget class="QWidget" name="assetScrollContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>69</width>
+              <height>456</height>
+             </rect>
+            </property>
+            <layout class="QGridLayout" name="assetLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <property name="spacing">
+              <number>2</number>
+             </property>
+            </layout>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
