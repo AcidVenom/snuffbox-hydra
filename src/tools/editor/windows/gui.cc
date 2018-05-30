@@ -207,6 +207,25 @@ namespace snuffbox
       edit->setValidator(new QDoubleValidator());
 
       std::string snum = std::to_string(value);
+
+      size_t pos = snum.find_first_of('.');
+      size_t erase_from = pos;
+
+      ++pos;
+
+      while (pos != snum.size())
+      {
+        if (snum.at(pos) != '0')
+        {
+          erase_from = ++pos;
+          continue;
+        }
+
+        ++pos;
+      }
+
+      snum.erase(snum.begin() + erase_from, snum.end());
+
       edit->setText(snum.c_str());
 
       QObject::connect(edit, &QLineEdit::editingFinished, [=]()
