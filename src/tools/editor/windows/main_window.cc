@@ -187,7 +187,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::LoadLayout()
     {
+#ifdef SNUFF_WIN32
+      /**
+      * @brief On Windows, the splitter within the console dock messes up
+      *        after the dock is resized, this is a workaround to "fix" that
+      *        issue
+      */
       resizeDocks({ ui_.consoleDock }, { 100 }, Qt::Vertical);
+#endif
 
       QSettings settings(kCompanyName_, kAppName_);
 

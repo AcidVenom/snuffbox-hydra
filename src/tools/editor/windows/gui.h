@@ -42,7 +42,7 @@ namespace snuffbox
       * @brief A short-hand for the on-changed callbacks
       */
       template <typename ... Args>
-      using ChangeCallback = const std::function<void(typename Args...)>&;
+      using ChangeCallback = const std::function<void(Args...)>&;
 
     protected:
 

@@ -209,6 +209,12 @@ namespace snuffbox
       std::string snum = std::to_string(value);
 
       size_t pos = snum.find_first_of('.');
+
+      if (pos == std::string::npos)
+      {
+        pos = snum.find_first_of(',');
+      }
+
       size_t erase_from = pos;
 
       ++pos;

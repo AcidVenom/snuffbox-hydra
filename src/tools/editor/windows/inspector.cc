@@ -1,6 +1,5 @@
 #include "tools/editor/windows/inspector.h"
 #include "tools/editor/windows/gui.h"
-#include "tools/editor/definitions/editor_colors.h"
 
 #include <engine/components/transform_component.h>
 #include <engine/components/script_component.h>

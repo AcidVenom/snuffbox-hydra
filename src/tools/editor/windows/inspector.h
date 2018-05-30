@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/editor/definitions/editor_colors.h"
+
 #include <engine/ecs/entity.h>
 
 #include <qobject.h>
