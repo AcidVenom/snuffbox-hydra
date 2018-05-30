@@ -10,6 +10,7 @@ class QGridLayout;
 class QFileSystemModel;
 class QFrame;
 class QLabel;
+class QModelIndex;
 
 namespace snuffbox
 {
@@ -93,21 +94,67 @@ namespace snuffbox
     protected:
 
       /**
-      * @brief Debug functionality to test the asset browser interface
+      * @brief Used to show the assets in a specified build directory,
+      *        called from the QTreeView when the selection changed
+      *
+      * @param[in] dir The directory to traverse
       */
-      void TestAssets();
+      void ShowDirectory(const foundation::Path& dir);
+
+      /**
+      * @brief Adds an asset to the asset browser by path
+      *
+      * @param[in] path The path to the file to add
+      */
+      void AddFromPath(const foundation::Path& path);
+
+      /**
+      * @brief Adds a new widget, incrementing the column and row count
+      *
+      * Columns go until AssetBrowser::kItemsPerRow_, after which the current
+      * row is also incremented.
+      *
+      * @param[in] widget The widget to add to the layout
+      */
+      void AddWidget(QWidget* widget);
+
+      /**
+      * @brief Clear the current asset browser layout
+      *
+      * @remarks This also resets the current row/column count
+      */
+      void Clear();
 
       /**
       * @brief Applies the styles for the asset browser
       */
       void ApplyStyle();
 
+      /**
+      * @brief Binds the events for when a new selection is made in the
+      *        directory browser
+      */
+      void BindEvents();
+
+    private slots:
+
+      /**
+      * @brief Called when the user changes the directory selection in the
+      *        directory tree
+      */
+      void OnSelectionChanged(const QModelIndex& index);
+
     private:
+
+      QString root_; //!< The root directory this asset browser runs in
 
       QTreeView* tree_; //!< The tree view to show the build directories in
       QGridLayout* assets_; //!< The assets browser layout
 
       QFileSystemModel* model_; //!< The file system model to show directories
+
+      unsigned int current_row_; //!< The current row we're at
+      unsigned int current_column_; //!< The current column we're at
 
       static const int kItemsPerRow_; //!< The number of items per row
       static const int kContentMargin_; //!< The margin between assets

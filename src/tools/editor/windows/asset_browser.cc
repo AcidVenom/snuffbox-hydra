@@ -1,6 +1,9 @@
 #include "tools/editor/windows/asset_browser.h"
 #include "tools/editor/definitions/editor_colors.h"
 
+#include <foundation/io/directory_tree.h>
+#include <foundation/auxiliary/string_utils.h>
+
 #include <qfilesystemmodel.h>
 #include <qtreeview.h>
 #include <qgridlayout.h>
@@ -74,12 +77,15 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     AssetBrowser::AssetBrowser(QTreeView* tree, QGridLayout* assets) :
+      root_(""),
       tree_(tree),
       assets_(assets),
-      model_(nullptr)
+      model_(nullptr),
+      current_row_(0),
+      current_column_(0)
     {
       ApplyStyle();
-      TestAssets();
+      BindEvents();
     }
 
     //--------------------------------------------------------------------------
@@ -101,30 +107,112 @@ namespace snuffbox
 
       tree_->setModel(model_);
       tree_->setRootIndex(model_->index(root));
+
+      root_ = root;
+
+      Clear();
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::TestAssets()
+    void AssetBrowser::ShowDirectory(const foundation::Path& path)
     {
-      //!< @todo Remove this function when I've implemented showing assets
+      Clear();
 
-      const int num_rows = 2;
+      foundation::DirectoryTree tree(path);
 
-      for (int r = 0; r < num_rows; ++r)
+      const foundation::Vector<foundation::DirectoryTreeItem>& items =
+        tree.items();
+
+      
+      for (size_t i = 0; i < items.size(); ++i)
       {
-        for (int c = 0; c < kItemsPerRow_; ++c)
+        const foundation::DirectoryTreeItem& item = items.at(i);
+
+        if (item.is_directory() == true || item.path().extension() == "time")
         {
-          assets_->addWidget(new AssetBrowserItem("test_item"), r, c);
+          continue;
         }
+
+        AddFromPath(item.path());
       }
 
-      assets_->setRowStretch(num_rows - 1, 1);
+      assets_->setRowStretch(current_row_ + 1, 1);
+
+      if (current_row_ == 0 && current_column_ < kItemsPerRow_)
+      {
+        assets_->setColumnStretch(current_column_ + 1, 1);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::AddFromPath(const foundation::Path& path)
+    {
+      foundation::Path stripped = path.NoExtension();
+
+      foundation::Vector<foundation::String> split = 
+        foundation::StringUtils::Split(stripped.ToString(), '/');
+
+      if (split.size() == 0)
+      {
+        return;
+      }
+
+      const foundation::String& name = split.at(split.size() - 1);
+      AddWidget(new AssetBrowserItem(name.c_str()));
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::AddWidget(QWidget* widget)
+    {
+      assets_->addWidget(widget, current_row_, current_column_);
+      ++current_column_;
+
+      if (current_column_ == kItemsPerRow_)
+      {
+        current_column_ = 0;
+        ++current_row_;
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::Clear()
+    {
+      assets_->setColumnStretch(current_column_, 0);
+      assets_->setRowStretch(current_row_ + 1, 0);
+
+      current_row_ = current_column_ = 0;
+
+      QLayoutItem* item;
+      while ((item = assets_->takeAt(0)) != nullptr)
+      {
+        delete item->widget();
+        delete item;
+      }
     }
 
     //--------------------------------------------------------------------------
     void AssetBrowser::ApplyStyle()
     {
       assets_->setMargin(kContentMargin_);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::BindEvents()
+    {
+      connect(
+        tree_,
+        &QTreeView::clicked,
+        this,
+        &AssetBrowser::OnSelectionChanged);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::OnSelectionChanged(const QModelIndex& index)
+    {
+      std::string path = model_->filePath(index).toStdString();
+      foundation::Path to_traverse = path.c_str();
+
+      ShowDirectory(to_traverse);
     }
   }
 }
