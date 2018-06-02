@@ -38,6 +38,7 @@ namespace snuffbox
       */
       enum class States
       {
+        kUninitialized,
         kEditing,
         kPlaying,
         kPaused
@@ -106,10 +107,22 @@ namespace snuffbox
       void OnReload(const builder::BuildItem& item);
 
       /**
-      * @brief Reloads scripted entities their callbacks so they use
-      *        any new versions of scripts if they are reloaded
+      * @brief Reloads all script-related content when a new script was added
+      *        or reloaded
+      *
+      * Entities have their callbacks assign anew, whereas the asset system
+      * recompiles all current scripts and checks them for errors.
+      *
+      * @remarks If there are any errors, the playback button will be disabled
+      *          until they have been fixed
       */
-      void ReloadScriptedEntities();
+      void ReloadScripts();
+
+      /**
+      * @brief Checks if we had errors during playmode and if so; disable
+      *        the play button until those errors are fixed
+      */
+      void OnStartEditing();
 
       /**
       * @brief Called when the editor state is initially switched to play mode
@@ -122,6 +135,7 @@ namespace snuffbox
       foundation::UniquePtr<MainWindow> window_; //!< The main window
 
       States state_; //!< The state of the editor
+      bool has_error_; //!< Are there any errors?
     };
   }
 }

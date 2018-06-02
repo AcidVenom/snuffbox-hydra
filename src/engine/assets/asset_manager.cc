@@ -103,20 +103,28 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetManager::LoadAll(builder::AssetTypes type)
+    bool AssetManager::LoadAll(builder::AssetTypes type)
     {
       AssetMap::iterator it = registered_.begin();
       
+      bool success = true;
       while (it != registered_.end())
       {
         foundation::SharedPtr<IAsset>& a = it->second;
         if (a->type() == type)
         {
-          Load(type, foundation::Path(it->first).NoExtension().ToString());
+          if (
+            Load(type, foundation::Path(it->first).NoExtension().ToString())
+            == false)
+          {
+            success = false;
+          }
         }
 
         ++it;
       }
+
+      return success;
     }
 
     //--------------------------------------------------------------------------
@@ -162,11 +170,6 @@ namespace snuffbox
 
       if (Exists(type, no_ext_s) == true)
       {
-        if (IsLoaded(type, no_ext_s) == true)
-        {
-          Load(type, no_ext_s);
-        }
-
         return;
       }
 
@@ -223,7 +226,7 @@ namespace snuffbox
     {
       foundation::String p = NoExtensionToBuildPath(type, path);
 
-      return registered_.at(p)->is_loaded();
+      return Exists(type, path) == true && registered_.at(p)->is_loaded();
     }
 
     //--------------------------------------------------------------------------

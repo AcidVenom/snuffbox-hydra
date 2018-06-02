@@ -70,8 +70,10 @@ namespace snuffbox
       * @brief Loads all assets of a specific type
       *
       * @param[in] type The type of the assets to load
+      *
+      * @return Were all assets loaded succesfully?
       */
-      void LoadAll(builder::AssetTypes type);
+      bool LoadAll(builder::AssetTypes type);
 
     protected:
 

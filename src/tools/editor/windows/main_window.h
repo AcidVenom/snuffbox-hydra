@@ -141,6 +141,14 @@ namespace snuffbox
       */
       void MarkPlaybackButton(QPushButton* button, bool enabled);
 
+      /**
+      * @brief Sets whether we're able to start the playback or not by
+      *        disabling the play button
+      *
+      * @param[in] enabled Is playback currently enabled?
+      */
+      void SetPlaybackEnabled(bool enabled);
+
     private slots:
 
       /**

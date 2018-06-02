@@ -233,6 +233,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::SetPlaybackEnabled(bool enabled)
+    {
+      ui_.playButton->setEnabled(enabled);
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::OpenProject()
     {
       QString dir = QFileDialog::getExistingDirectory(
@@ -270,8 +276,8 @@ namespace snuffbox
       ui_.speedDownButton->setEnabled(enabled);
       ui_.speedUpButton->setEnabled(enabled);
 
-      app_->SwitchState(next);
       MarkPlaybackButton(ui_.playButton, enabled);
+      app_->SwitchState(next);
     }
 
     //--------------------------------------------------------------------------

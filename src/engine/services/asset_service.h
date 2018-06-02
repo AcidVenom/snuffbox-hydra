@@ -62,7 +62,12 @@ namespace snuffbox
       /**
       * @see AssetManager::LoadAll
       */
-      void LoadAll(builder::AssetTypes type);
+      bool LoadAll(builder::AssetTypes type);
+
+      /**
+      * @see AssetManager::IsLoaded
+      */
+      bool IsLoaded(builder::AssetTypes type, const foundation::String& path);
 
     private:
 

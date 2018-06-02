@@ -56,9 +56,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetService::LoadAll(builder::AssetTypes type)
+    bool AssetService::LoadAll(builder::AssetTypes type)
     {
-      manager_.LoadAll(type);
+      return manager_.LoadAll(type);
+    }
+
+    //--------------------------------------------------------------------------
+    bool AssetService::IsLoaded(
+      builder::AssetTypes type,
+      const foundation::String& path)
+    {
+      return manager_.IsLoaded(type, path);
     }
   }
 }

@@ -27,7 +27,8 @@ namespace snuffbox
       Application(argc, argv, cfg),
       QApplication(argc, argv),
       window_(nullptr),
-      state_(States::kEditing)
+      state_(States::kUninitialized),
+      has_error_(false)
     {
 
     }
@@ -65,6 +66,8 @@ namespace snuffbox
       });
 
       window_->show();
+
+      SwitchState(States::kEditing);
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
@@ -131,6 +134,10 @@ namespace snuffbox
 
       switch (state)
       {
+      case States::kEditing:
+        OnStartEditing();
+        break;
+
       case States::kPlaying:
         Play();
         break;
@@ -156,6 +163,8 @@ namespace snuffbox
     void EditorApplication::InitializeAssets(const foundation::Path& build_dir)
     {
       GetService<engine::AssetService>()->Refresh(build_dir);
+      ReloadScripts();
+
       builder_.set_on_finished([=](const builder::BuildItem& item)
       {
         OnReload(item);
@@ -165,17 +174,28 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void EditorApplication::OnReload(const builder::BuildItem& item)
     {
-      GetService<engine::AssetService>()->
-        RegisterAsset(item.type, item.relative);
+      engine::AssetService* as = GetService<engine::AssetService>();
 
-      if (item.type == builder::AssetTypes::kScript)
+      builder::AssetTypes type = item.type;
+      const foundation::Path& relative = item.relative;
+
+      as->RegisterAsset(type, relative);
+
+      if (type == builder::AssetTypes::kScript)
       {
-        ReloadScriptedEntities();
+        ReloadScripts();
+        return;
+      }
+
+      foundation::String path = relative.NoExtension().ToString();
+      if (as->IsLoaded(type, path) == true)
+      {
+        as->Load(type, path);
       }
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::ReloadScriptedEntities()
+    void EditorApplication::ReloadScripts()
     {
 #ifndef SNUFF_NSCRIPTING
       engine::Scene* scene = 
@@ -193,7 +213,38 @@ namespace snuffbox
           c->SetBehavior(c->behavior());
         }
       });
+
+      engine::AssetService* a = GetService<engine::AssetService>();
+
+      if (a->LoadAll(builder::AssetTypes::kScript) == false)
+      {
+        has_error_ = true;
+
+        if (state_ == States::kEditing)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kEditor,
+            foundation::LogSeverity::kError,
+            "Please fix script compilation errors before entering play mode");
+
+          window_->SetPlaybackEnabled(false);
+        }
+
+        return;
+      }
+
+      window_->SetPlaybackEnabled(true);
+      has_error_ = false;
 #endif
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnStartEditing()
+    {
+      if (has_error_ == true)
+      {
+        window_->SetPlaybackEnabled(false);
+      }
     }
 
     //--------------------------------------------------------------------------
