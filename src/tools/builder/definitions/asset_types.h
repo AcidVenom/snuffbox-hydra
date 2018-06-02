@@ -70,5 +70,14 @@ namespace snuffbox
     bool BuildToSourceExtension(
       const char* ext_a,
       foundation::String* ext_b);
+
+    /**
+    * @brief Converts an asset type to its named value
+    *
+    * @param[in] type The type of the asset to convert
+    *
+    * @return The converted value
+    */
+    const char* AssetTypesToString(AssetTypes type);
   }
 }

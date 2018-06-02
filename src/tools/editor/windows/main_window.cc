@@ -86,6 +86,8 @@ namespace snuffbox
         {
           on_resize_(ui_.gameWindow->width(), ui_.gameWindow->height());
         }
+
+        return true;
       }
 
       return false;

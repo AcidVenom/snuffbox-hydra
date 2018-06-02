@@ -61,14 +61,15 @@ namespace snuffbox
       duk_push_string(context_, type);
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
 
-      duk_push_c_function(context_, &DukWrapper::Finalize, DUK_VARARGS);
-      duk_set_finalizer(context_, obj);
-
-      StashObject(ptr->id());
+      ptr->set_state(GetState());
+      StashObject(ptr->id(), ptr->is_from_script());
     }
 
     //--------------------------------------------------------------------------
-    void DukWrapper::StashObject(size_t id, duk_idx_t stack_idx) const
+    void DukWrapper::StashObject(
+      size_t id, 
+      bool from_script, 
+      duk_idx_t stack_idx) const
     {
       duk_push_global_stash(context_);
 
@@ -76,6 +77,12 @@ namespace snuffbox
       duk_push_object(context_);
       duk_push_pointer(context_, hptr);
       duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);
+
+      if (from_script == false)
+      {
+        duk_dup(context_, stack_idx - 2);
+        duk_put_prop_string(context_, -2, DUK_HIDDEN_REF);
+      }
       
       std::string string_id = std::to_string(id);
       duk_put_prop_string(context_, -2, string_id.c_str());
@@ -108,9 +115,24 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void DukWrapper::RemoveStashedObject(size_t id) const
     {
-      duk_push_global_stash(context_);
-
       std::string string_id = std::to_string(id);
+      
+      duk_push_global_stash(context_);
+      if (duk_get_prop_string(context_, -1, string_id.c_str()) <= 0)
+      {
+        duk_pop(context_);
+        return;
+      }
+
+      duk_get_prop_string(context_, -1, DUK_HIDDEN_PTR);
+      void* hptr = duk_get_pointer(context_, -1);
+
+      duk_push_heapptr(context_, hptr);
+      duk_push_pointer(context_, nullptr);
+      duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);
+
+      duk_pop_3(context_);
+
       duk_del_prop_string(context_, -1, string_id.c_str());
 
       duk_pop(context_);
@@ -259,25 +281,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    duk_ret_t DukWrapper::Finalize(duk_context* ctx)
-    {
-      DukWrapper wrapper(ctx);
-
-      duk_idx_t argc = duk_get_top(ctx);
-      foundation::Logger::Assert(argc > 0, "duktape finalizer invalid");
-
-      duk_get_prop_string(ctx, 0, DUK_HIDDEN_PTR);
-      ScriptClass* ptr = 
-        reinterpret_cast<ScriptClass*>(duk_get_pointer(ctx, -1));
-
-      wrapper.RemoveStashedObject(ptr->id());
-
-      duk_pop(ctx);
-
-      return 0;
-    }
-
-    //--------------------------------------------------------------------------
     ScriptHandle DukWrapper::GetValueAt(duk_idx_t stack_idx) const
     {
       duk_int_t type = duk_get_type(context_, stack_idx);
@@ -317,6 +320,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptHandle DukWrapper::GetObjectAt(duk_idx_t stack_idx) const
     {
+      if (duk_is_function(context_, stack_idx) > 0)
+      {
+        return foundation::Memory::ConstructShared<ScriptObject>(
+          &foundation::Memory::default_allocator());
+      }
+
       auto EnumerateArray = [=]()
       {
         duk_enum(
@@ -370,16 +379,16 @@ namespace snuffbox
 
       if (duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_PTR) > 0)
       {
-        duk_get_prop_string(context_, stack_idx, DUK_HIDDEN_NAME);
+        duk_get_prop_string(context_, -2, DUK_HIDDEN_NAME);
 
         obj->SetPointer(
           reinterpret_cast<ScriptClass*>(duk_get_pointer(context_, -2)),
           duk_get_string(context_, -1));
 
-        duk_pop(context_);
-      }
+        duk_pop_2(context_);
 
-      duk_pop(context_);
+        return foundation::Memory::MakeShared<ScriptObject>(obj);
+      }
 
       duk_enum(context_, stack_idx, 0);
 

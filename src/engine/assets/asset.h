@@ -38,19 +38,35 @@ namespace snuffbox
       *
       * This function calls IAsset::LoadImpl, which the derived asset implements
       *
+      * If the asset is already loaded, it is unloaded and loaded again to
+      * reload it.
+      *
       * @return Was the load a success?
       */
       bool Load();
+
+      /**
+      * @brief Unloads the asset if it has been loaded
+      *
+      * This function calls IAsset::UnloadImpl, which the derived asset 
+      * implements
+      */
+      void Unload();
 
       /**
       * @return The type of this asset
       */
       builder::AssetTypes type() const;
 
+      /**
+      * @return Has this asset been loaded?
+      */
+      bool is_loaded() const;
+
     protected:
 
       /**
-      * @brief Loads the asset from a buffer of raw data
+      * @brief Loads the asset from a path
       *
       * @param[in] path The path to the file to load
       *
@@ -58,10 +74,20 @@ namespace snuffbox
       */
       virtual bool LoadImpl(const foundation::Path& path) = 0;
 
+      /**
+      * @brief Unloads an already loaded asset
+      *
+      * @remarks This method does not have any parameters, as any data should
+      *          be managed by the derived asset itself
+      */
+      virtual void UnloadImpl() = 0;
+
     private:
 
       builder::AssetTypes type_; //!< The type of this asset
       foundation::Path path_; //!< The path to the file to load
+
+      bool is_loaded_; //!< Has this asset been loaded?
     };
   }
 }

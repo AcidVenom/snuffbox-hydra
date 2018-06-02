@@ -26,9 +26,17 @@ namespace snuffbox
     protected:
 
       /**
-      * @see IAsset::Load
+      * @see IAsset::LoadImpl
       */
       bool LoadImpl(const foundation::Path& path) override;
+
+      /**
+      * @see IAsset::UnloadImpl
+      *
+      * @remarks Doesn't really do anything, as the script state manages
+      *          the definitions made in the scripting environment
+      */
+      void UnloadImpl() override;
     };
   }
 }

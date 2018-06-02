@@ -76,11 +76,12 @@ namespace snuffbox
       const uint8_t* buffer, 
       size_t size)
     {
-      foundation::Path build = 
-        build_directory_ /
+      foundation::Path relative_build = 
         item.relative.NoExtension() + 
         "." + 
         AssetTypesToBuildExtension(item.type);
+
+      foundation::Path build = build_directory_ / relative_build;
 
       foundation::File fout(build, foundation::FileFlags::kWrite);
 
@@ -99,7 +100,10 @@ namespace snuffbox
       
       if (on_finished_ != nullptr)
       {
-        on_finished_(item);
+        BuildItem built = item;
+        built.relative = relative_build;
+
+        on_finished_(built);
       }
     }
 
@@ -385,6 +389,12 @@ namespace snuffbox
     void Builder::set_on_finished(const OnFinishedCallback& cb)
     {
       on_finished_ = cb;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::Path& Builder::build_directory() const
+    {
+      return build_directory_;
     }
 
     //--------------------------------------------------------------------------

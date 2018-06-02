@@ -47,7 +47,7 @@ namespace snuffbox
       /**
       * @see ScriptService::InitializeCallbacks
       */
-      void OnInitializeCallback();
+      void OnStartCallback();
 
       /**
       * @see ScriptService::InitializeCallbacks
@@ -112,13 +112,11 @@ namespace snuffbox
       *
       * The callbacks to be set are:
       *
-      * - OnInitialize, called when the application is initialized
+      * - OnStart, called when the application is started
       * - OnUpdate, called in the variable update
       * - OnFixedUpdate, called in the fixed update
       * - OnRender, called before a frame is rendered
       * - OnShutdown, called when the application is shut down
-      * - OnReload, called when a script file is reloaded
-      *
       */
       void InitializeCallbacks();
 
@@ -137,7 +135,7 @@ namespace snuffbox
       /**
       * @see ScriptService::InitializeCallbacks
       */
-      scripting::ScriptCallback<> on_initialize_;
+      scripting::ScriptCallback<> on_start_;
 
       /**
       * @see ScriptService::InitializeCallbacks

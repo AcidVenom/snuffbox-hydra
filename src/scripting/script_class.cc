@@ -11,7 +11,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptClass::ScriptClass() :
       is_from_script_(false),
-      id_(0)
+      id_(0),
+      state_(nullptr)
     {
       id_ = kCurrentID_;
       ++kCurrentID_;
@@ -24,9 +25,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void ScriptClass::set_state(ScriptState* state)
+    {
+      state_ = state;
+    }
+
+    //--------------------------------------------------------------------------
     ScriptClass::~ScriptClass()
     {
-      
+      if (state_ != nullptr && is_from_script_ == false)
+      {
+        state_->FinalizeClass(this);
+      }
     }
   }
 }

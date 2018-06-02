@@ -77,6 +77,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Scene::Start()
+    {
+      for (size_t i = 0; i < entities_.size(); ++i)
+      {
+        entities_.at(i)->Start();
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void Scene::Update(float dt)
     {
       for (size_t i = 0; i < entities_.size(); ++i)
@@ -103,6 +112,20 @@ namespace snuffbox
       }
 
       return result;
+    }
+
+    //--------------------------------------------------------------------------
+    void Scene::ForEachEntity(EntityDelegate del)
+    {
+      if (del == nullptr)
+      {
+        return;
+      }
+
+      for (size_t i = 0; i < entities_.size(); ++i)
+      {
+        del(entities_.at(i));
+      }
     }
 
     //--------------------------------------------------------------------------

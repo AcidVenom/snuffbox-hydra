@@ -1,6 +1,9 @@
 #include "engine/assets/script_asset.h"
 #include "engine/application/application.h"
+
+#ifndef SNUFF_NSCRIPTING
 #include "engine/services/script_service.h"
+#endif
 
 #include <tools/builder/compilers/script_compiler.h>
 
@@ -18,6 +21,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ScriptAsset::LoadImpl(const foundation::Path& path)
     {
+#ifndef SNUFF_NSCRIPTING
       builder::ScriptCompiler c;
       if (c.Decompile(path) == false)
       {
@@ -35,6 +39,15 @@ namespace snuffbox
         path.ToString().c_str(),
         src.c_str(),
         false);
+#endif
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptAsset::UnloadImpl()
+    {
+
     }
   }
 }

@@ -80,10 +80,17 @@ namespace snuffbox
       /**
       * @brief Stashes an object by ID
       *
+      * @remarks If the object is constructed C++-sided, a strong reference
+      *          is made in the global stash
+      *
       * @param[in] id The ID to stash the object at
+      * @param[in] from_script Is the object constructed from script?
       * @param[in] stack_idx The stack index of the object
       */
-      void StashObject(size_t id, duk_idx_t stack_idx = -1) const;
+      void StashObject(
+        size_t id, 
+        bool from_script,
+        duk_idx_t stack_idx = -1) const;
 
       /**
       * @brief Pushes a stashed object onto the stack if it exists
@@ -210,11 +217,11 @@ namespace snuffbox
 
       duk_push_this(ctx);
 
-      if (duk_get_prop_string(ctx, -1, DUK_HIDDEN_NAME) != 0)
+      if (duk_get_prop_string(ctx, -1, DUK_HIDDEN_NAME) > 0)
       {
         bool is_same = strcmp(duk_get_string(ctx, -1), T::ScriptName()) == 0;
 
-        if (is_same && duk_get_prop_string(ctx, -2, DUK_HIDDEN_PTR) != 0)
+        if (is_same && duk_get_prop_string(ctx, -2, DUK_HIDDEN_PTR) > 0)
         {
           callee = duk_get_pointer(ctx, -1);
           duk_pop(ctx);

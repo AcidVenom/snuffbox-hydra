@@ -23,6 +23,8 @@ SET(ServicesSources
   "services/renderer_service.cc"
   "services/scene_service.h"
   "services/scene_service.cc"
+  "services/asset_service.h"
+  "services/asset_service.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)

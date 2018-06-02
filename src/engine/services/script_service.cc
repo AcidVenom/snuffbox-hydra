@@ -44,9 +44,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void ScriptService::OnInitializeCallback()
+    void ScriptService::OnStartCallback()
     {
-      on_initialize_.Call();
+      on_start_.Call();
     }
 
     //--------------------------------------------------------------------------
@@ -139,59 +139,30 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptService::InitializeCallbacks()
     {
-      auto CheckError = [](bool f, const char* name)
-      {
-        if (f == false)
-        {
-          foundation::Logger::LogVerbosity<1>(
-            foundation::LogChannel::kScript,
-            foundation::LogSeverity::kWarning,
-            "Could not find '{0}' callback in main script",
-            name);
-        }
-      };
-
-      bool found = scripting::ScriptCallback<>::FromGlobal(
+      scripting::ScriptCallback<>::FromGlobal(
         state_.get(), 
-        "OnInitialize", 
-        &on_initialize_);
+        "OnStart", 
+        &on_start_);
 
-      CheckError(found, "OnInitialize");
-
-      found = scripting::ScriptCallback<float>::FromGlobal(
+      scripting::ScriptCallback<float>::FromGlobal(
         state_.get(), 
         "OnUpdate", 
         &on_update_);
 
-      CheckError(found, "OnUpdate");
-
-      found = scripting::ScriptCallback<float>::FromGlobal(
+      scripting::ScriptCallback<float>::FromGlobal(
         state_.get(), 
         "OnFixedUpdate", 
         &on_fixed_update_);
 
-      CheckError(found, "OnFixedUpdate");
-
-      found = scripting::ScriptCallback<float>::FromGlobal(
+      scripting::ScriptCallback<float>::FromGlobal(
         state_.get(), 
         "OnRender", 
         &on_render_);
 
-      CheckError(found, "OnRender");
-
-      found = scripting::ScriptCallback<>::FromGlobal(
+      scripting::ScriptCallback<>::FromGlobal(
         state_.get(), 
         "OnShutdown", 
         &on_shutdown_);
-
-      CheckError(found, "OnShutdown");
-
-      found = scripting::ScriptCallback<foundation::String>::FromGlobal(
-        state_.get(), 
-        "OnReload", 
-        &on_reload_);
-
-      CheckError(found, "OnReload");
     }
   }
 }

@@ -89,6 +89,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void DukState::FinalizeClass(ScriptClass* cl)
+    {
+      if (context_ == nullptr)
+      {
+        return;
+      }
+
+      DukWrapper wrapper(context_);
+      wrapper.RemoveStashedObject(cl->id());
+    }
+
+    //--------------------------------------------------------------------------
     void DukState::LogLastError(const char* format)
     {
       duk_get_prop_string(context_, -1, "fileName");

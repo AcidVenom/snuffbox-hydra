@@ -36,6 +36,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void SceneService::Start()
+    {
+      if (current_scene_ == nullptr)
+      {
+        return;
+      }
+
+      current_scene_->Start();
+    }
+
+    //--------------------------------------------------------------------------
     Scene* SceneService::current_scene() const
     {
       return current_scene_;

@@ -1,13 +1,16 @@
 #include "tools/editor/application/editor_application.h"
 
+#include <engine/ecs/entity.h>
+
 #include <engine/services/renderer_service.h>
 #include <engine/services/cvar_service.h>
 #include <engine/services/scene_service.h>
+#include <engine/services/asset_service.h>
 
-#include <engine/ecs/entity.h>
-#include <engine/components/transform_component.h>
-
-#include <engine/assets/script_asset.h>
+#ifndef SNUFF_NSCRIPTING
+#include <engine/components/script_component.h>
+#include <engine/services/script_service.h>
+#endif
 
 #include <foundation/auxiliary/timer.h>
 
@@ -116,6 +119,8 @@ namespace snuffbox
         return false;
       }
 
+      InitializeAssets(builder_.build_directory());
+
       return true;
     }
 
@@ -123,6 +128,16 @@ namespace snuffbox
     void EditorApplication::SwitchState(States state)
     {
       state_ = state;
+
+      switch (state)
+      {
+      case States::kPlaying:
+        Play();
+        break;
+
+      default:
+        break;
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -135,6 +150,59 @@ namespace snuffbox
     void EditorApplication::CreateRenderer()
     {
       CreateService<engine::RendererService>(window_->GetGraphicsWindow());
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::InitializeAssets(const foundation::Path& build_dir)
+    {
+      GetService<engine::AssetService>()->Refresh(build_dir);
+      builder_.set_on_finished([=](const builder::BuildItem& item)
+      {
+        OnReload(item);
+      });
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnReload(const builder::BuildItem& item)
+    {
+      GetService<engine::AssetService>()->
+        RegisterAsset(item.type, item.relative);
+
+      if (item.type == builder::AssetTypes::kScript)
+      {
+        ReloadScriptedEntities();
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::ReloadScriptedEntities()
+    {
+#ifndef SNUFF_NSCRIPTING
+      engine::Scene* scene = 
+        GetService<engine::SceneService>()->current_scene();
+
+      scene->ForEachEntity([](engine::Entity* ent)
+      {
+        foundation::Vector<engine::ScriptComponent*> comps =
+          ent->GetComponents<engine::ScriptComponent>();
+
+        engine::ScriptComponent* c = nullptr;
+        for (size_t i = 0; i < comps.size(); ++i)
+        {
+          c = comps.at(i);
+          c->SetBehavior(c->behavior());
+        }
+      });
+#endif
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::Play()
+    {
+      InitializeAssets(builder_.build_directory());
+      RunScripts();
+      SCRIPT_CALLBACK(Start);
+      GetService<engine::SceneService>()->Start();
     }
   }
 }

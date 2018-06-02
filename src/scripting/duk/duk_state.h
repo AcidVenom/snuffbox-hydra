@@ -48,6 +48,11 @@ namespace snuffbox
         bool print) override;
 
       /**
+      * @see IScriptState::FinalizeClass
+      */
+      void FinalizeClass(ScriptClass* cl);
+
+      /**
       * @brief Logs the last error that is on the stack
       *
       * The format should have atleast 4 arguments included, where:

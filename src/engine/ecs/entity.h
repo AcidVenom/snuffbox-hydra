@@ -304,6 +304,12 @@ namespace snuffbox
       IComponent* CreateComponentByID(Components id);
 
       /**
+      * @brief Called when the scene starts or when the scene is already
+      *        running and the entity is created
+      */
+      void Start();
+
+      /**
       * @brief Updates this entity and its components
       *
       * @remarks The entity is only updated if the entity itself is active

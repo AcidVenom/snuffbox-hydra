@@ -1,7 +1,8 @@
 #include "tools/editor/windows/asset_browser.h"
 #include "tools/editor/definitions/editor_colors.h"
 
-#include <foundation/io/directory_tree.h>
+#include <engine/assets/asset_manager.h>
+
 #include <foundation/auxiliary/string_utils.h>
 
 #include <qfilesystemmodel.h>
@@ -118,22 +119,15 @@ namespace snuffbox
     {
       Clear();
 
-      foundation::DirectoryTree tree(path);
+      const foundation::Vector<engine::AssetManager::AssetFile>& paths =
+        engine::AssetManager::EnumerateAssets(path);
 
-      const foundation::Vector<foundation::DirectoryTreeItem>& items =
-        tree.items();
-
-      
-      for (size_t i = 0; i < items.size(); ++i)
+      QString full_path;
+      for (size_t i = 0; i < paths.size(); ++i)
       {
-        const foundation::DirectoryTreeItem& item = items.at(i);
-
-        if (item.is_directory() == true || item.path().extension() == "time")
-        {
-          continue;
-        }
-
-        AddFromPath(item.path());
+        const engine::AssetManager::AssetFile& file = paths.at(i);
+        full_path = root_ + "/" + file.relative_path.ToString().c_str();
+        AddFromPath(full_path.toStdString().c_str());
       }
 
       assets_->setRowStretch(current_row_ + 1, 1);
@@ -177,7 +171,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetBrowser::Clear()
     {
-      assets_->setColumnStretch(current_column_, 0);
+      assets_->setColumnStretch(current_column_ + 1, 0);
       assets_->setRowStretch(current_row_ + 1, 0);
 
       current_row_ = current_column_ = 0;

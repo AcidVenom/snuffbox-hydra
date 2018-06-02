@@ -258,8 +258,9 @@ namespace snuffbox
       duk_push_string(ctx, name);
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_NAME);
 
-      wrapper.StashObject(ptr->id());
+      wrapper.StashObject(ptr->id(), true);
       ptr->set_is_from_script(true);
+      ptr->set_state(wrapper.GetState());
 
       return 0;
     }

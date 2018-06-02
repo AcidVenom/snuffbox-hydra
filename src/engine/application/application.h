@@ -10,6 +10,13 @@
 
 #include <cinttypes>
 
+#if !defined SNUFF_NSCRIPTING && !defined SCRIPT_CALLBACK
+#define SCRIPT_CALLBACK(x, ...)\
+GetService<snuffbox::engine::ScriptService>()->On##x##Callback(__VA_ARGS__)
+#elif !defined SCRIPT_CALLBACK
+#define SCRIPT_CALLBACK(x, ...)
+#endif
+
 namespace snuffbox
 {
   namespace engine
@@ -197,6 +204,11 @@ namespace snuffbox
       *        the CVars from the command-line
       */
       void RegisterCVars();
+
+      /**
+      * @brief Runs all scripts currently registered in the asset manager
+      */
+      void RunScripts();
 
       /**
       * @brief Calls the update functions, to update data real-time

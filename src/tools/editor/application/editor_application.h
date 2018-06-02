@@ -90,6 +90,32 @@ namespace snuffbox
       */
       void CreateRenderer() override;
 
+      /**
+      * @brief Initializes the asset handles when the build directory
+      *        changes
+      *
+      * @param[in] build_dir The path to the build directory
+      */
+      void InitializeAssets(const foundation::Path& build_dir);
+
+      /**
+      * @brief Called when an asset is reloaded
+      *
+      * @param[in] item The build item that finished building
+      */
+      void OnReload(const builder::BuildItem& item);
+
+      /**
+      * @brief Reloads scripted entities their callbacks so they use
+      *        any new versions of scripts if they are reloaded
+      */
+      void ReloadScriptedEntities();
+
+      /**
+      * @brief Called when the editor state is initially switched to play mode
+      */
+      void Play();
+
     private:
 
       builder::Builder builder_; //!< The builder service

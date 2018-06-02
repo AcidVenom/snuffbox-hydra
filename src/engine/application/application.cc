@@ -8,6 +8,7 @@
 #include "engine/services/window_service.h"
 #include "engine/services/input_service.h"
 #include "engine/services/renderer_service.h"
+#include "engine/services/asset_service.h"
 #include "engine/services/scene_service.h"
 
 #ifndef SNUFF_NSCRIPTING
@@ -15,11 +16,8 @@
 #include <scripting/scripting.h>
 
 #define CREATE_SCRIPT_SERVICE() CreateService<ScriptService>();
-#define SCRIPT_CALLBACK(x, ...)\
-GetService<ScriptService>()->On##x##Callback(__VA_ARGS__)
 #else
 #define CREATE_SCRIPT_SERVICE()
-#define SCRIPT_CALLBACK(x, ...)
 #endif
 
 #include <foundation/io/resources.h>
@@ -118,6 +116,8 @@ namespace snuffbox
 
       window->Show();
 
+      SCRIPT_CALLBACK(Start);
+
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
 
@@ -178,7 +178,6 @@ namespace snuffbox
       RegisterCVars();
 
       OnInitialize();
-      SCRIPT_CALLBACK(Initialize);
 
       return foundation::ErrorCodes::kSuccess;
     }
@@ -195,7 +194,9 @@ namespace snuffbox
         CreateService<WindowService>(input_service);
       }
 
+      CreateService<AssetService>();
       CreateService<SceneService>();
+
       CREATE_SCRIPT_SERVICE();
     }
 
@@ -269,6 +270,17 @@ namespace snuffbox
       }
 
       cvar->RegisterFromCLI(cli_);
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::RunScripts()
+    {
+#ifndef SNUFF_NSCRIPTING
+      AssetService* a = GetService<AssetService>();
+
+      a->Load(builder::AssetTypes::kScript, "main");
+      a->LoadAll(builder::AssetTypes::kScript);
+#endif
     }
 
     //--------------------------------------------------------------------------

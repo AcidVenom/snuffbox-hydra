@@ -81,5 +81,20 @@ namespace snuffbox
       *ext_b = AssetTypesToSourceExtension(a);
       return true;
     }
+
+    //--------------------------------------------------------------------------
+    const char* AssetTypesToString(AssetTypes type)
+    {
+      switch (type)
+      {
+      case AssetTypes::kScript:
+        return "Script";
+
+      default:
+        return "Unknown Asset";
+      }
+
+      return "Unknown Asset";
+    }
   }
 }

@@ -21,6 +21,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptComponent::SetBehavior(const foundation::String& behavior)
     {
+      bool call_start = false;
+      if (behavior_ != behavior)
+      {
+        call_start = true;
+      }
+
       behavior_ = behavior;
 
       ScriptService* ss = Application::Instance()->GetService<ScriptService>();
@@ -30,12 +36,36 @@ namespace snuffbox
 
       scripting::ScriptCallback<float>::FromClass(
         ss->state(), behavior, "Update", &update_cb_);
+
+      if (call_start == false)
+      {
+        return;
+      }
+
+      Start();
+    }
+
+    //--------------------------------------------------------------------------
+    Entity* ScriptComponent::GetEntity()
+    {
+      return entity();
     }
 
     //--------------------------------------------------------------------------
     const foundation::String& ScriptComponent::behavior() const
     {
       return behavior_;
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptComponent::Start()
+    {
+      if (start_cb_.is_valid() == false)
+      {
+        Refresh();
+      }
+
+      start_cb_.CallContext(this);
     }
 
     //--------------------------------------------------------------------------

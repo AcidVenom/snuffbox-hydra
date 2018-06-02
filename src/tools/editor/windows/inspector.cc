@@ -2,7 +2,10 @@
 #include "tools/editor/windows/gui.h"
 
 #include <engine/components/transform_component.h>
+
+#ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
+#endif
 
 #include <qlabel.h>
 #include <qlineedit.h>
@@ -97,7 +100,9 @@ namespace snuffbox
       gui.SetBackgroundColor(EditorColors::BlueButton());
       gui.Button("Add component", [=]()
       {
+#ifndef SNUFF_NSCRIPTING
         entity->AddComponent<engine::ScriptComponent>();
+#endif
         ShowEntity(entity);
       });
 
@@ -171,6 +176,7 @@ namespace snuffbox
       engine::IComponent* component,
       QTreeWidgetItem* parent)
     {
+#ifndef SNUFF_NSCRIPTING
       engine::ScriptComponent* s = 
         static_cast<engine::ScriptComponent*>(component);
 
@@ -196,6 +202,9 @@ namespace snuffbox
       });
 
       return gui.EndAsWidget();
+#else
+      return nullptr;
+#endif
     }
 
     //--------------------------------------------------------------------------

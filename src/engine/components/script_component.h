@@ -31,9 +31,17 @@ namespace snuffbox
       * @brief Sets the behavior table/object from the global table and assigns
       *        all corresponding callbacks
       *
+      * @remarks This function calls ScriptComponent::Start if the
+      *          behavior changed
+      *
       * @param[in] behavior The name of the behavior to set
       */
       SCRIPT_FUNC() void SetBehavior(const foundation::String& behavior);
+
+      /**
+      * @return The entity this script component belongs to
+      */
+      SCRIPT_FUNC() Entity* GetEntity();
 
       /**
       * @return The behavior of this script
@@ -41,6 +49,11 @@ namespace snuffbox
       SCRIPT_FUNC() const foundation::String& behavior() const;
 
     protected:
+
+      /**
+      * @see IComponent::Start
+      */
+      void Start() override;
 
       /**
       * @see IComponent::Update

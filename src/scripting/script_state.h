@@ -52,6 +52,19 @@ namespace snuffbox
         bool print) = 0;
 
       /**
+      * @brief Finalizes a C++-created class
+      *
+      * @remarks The implementation details for this method are unspecified,
+      *          as every scripting language finalizes objects differently.
+      *
+      * As of current, with the duktape implementation, the object gets its
+      * strong reference removed if it exists within the global stash
+      *
+      * @param[in] cl The script class to finalize
+      */
+      virtual void FinalizeClass(ScriptClass* cl) = 0;
+
+      /**
       * @brief Shuts down the native scripting API after usage
       */
       virtual void Shutdown() = 0;

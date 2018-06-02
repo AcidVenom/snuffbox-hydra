@@ -7,6 +7,7 @@ namespace snuffbox
 #define DUK_HIDDEN_CALLBACK DUK_HIDDEN_SYMBOL("__callback")
 #define DUK_HIDDEN_PTR DUK_HIDDEN_SYMBOL("__ptr")
 #define DUK_HIDDEN_NAME DUK_HIDDEN_SYMBOL("__name")
+#define DUK_HIDDEN_REF DUK_HIDDEN_SYMBOL("__ref")
 #define DUK_HIDDEN_STATE DUK_HIDDEN_SYMBOL("__state")
   }
 }

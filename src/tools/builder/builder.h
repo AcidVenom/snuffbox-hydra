@@ -198,6 +198,11 @@ namespace snuffbox
       void set_on_finished(const OnFinishedCallback& cb);
 
       /**
+      * @return The current build directory
+      */
+      const foundation::Path& build_directory() const;
+
+      /**
       * @brief Stops the builder if it was running
       *
       * @see Builder::Shutdown

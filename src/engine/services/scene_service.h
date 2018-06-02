@@ -46,6 +46,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Calls Entity::Start on every entity in the current scene
+      */
+      void Start();
+
+      /**
       * @return The current scene that is being updated
       */
       Scene* current_scene() const;

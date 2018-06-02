@@ -32,6 +32,13 @@ namespace snuffbox
       friend Entity;
       friend TransformComponent;
 
+    public:
+
+      /**
+      * @brief Used to call a function on each entity in the scene
+      */
+      using EntityDelegate = void(*)(Entity*);
+
     protected:
 
       /**
@@ -80,6 +87,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Starts all entities in the scene
+      */
+      void Start();
+
+      /**
       * @brief Updates all entities in the scene
       *
       * @param[in] dt The current delta-time of the application
@@ -90,6 +102,13 @@ namespace snuffbox
       * @return The transform hierarchy with the upper-level transforms
       */
       foundation::Vector<TransformComponent*> TopLevelTransforms() const;
+
+      /**
+      * @brief Call a function on each entity in the scene
+      *
+      * @param[in] del The delegate to call
+      */
+      void ForEachEntity(EntityDelegate del);
 
       /**
       * @brief Default destructor, calls Scene::Clear

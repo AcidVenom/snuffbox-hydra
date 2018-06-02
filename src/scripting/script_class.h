@@ -41,6 +41,9 @@ namespace snuffbox
   {
     class DukRegister;
     using ScriptRegister = DukRegister;
+
+    class DukState;
+    using ScriptState = DukState;
   }
 }
 #endif
@@ -124,6 +127,13 @@ namespace snuffbox
       size_t id() const;
 
       /**
+      * @brief Sets the script state this class was instantiated in
+      *
+      * @param[in] state The script state
+      */
+      void set_state(ScriptState* state);
+
+      /**
       * @brief Removes the script ID reference
       */
       virtual ~ScriptClass();
@@ -131,6 +141,7 @@ namespace snuffbox
     private:
 
       size_t id_; //!< The script ID of this class
+      ScriptState* state_; //!< The script state
 
       static size_t kCurrentID_; //!< The current ID to assign
 #endif

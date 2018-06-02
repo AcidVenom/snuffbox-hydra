@@ -48,6 +48,11 @@ namespace snuffbox
       virtual void Create();
 
       /**
+      * @brief Used to define behavior when Entity::Start is called
+      */
+      virtual void Start();
+
+      /**
       * @brief Used to define behavior when the component is updated from
       *        within the entity
       *

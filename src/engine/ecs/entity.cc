@@ -219,6 +219,23 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Entity::Start()
+    {
+      for (
+        int i = static_cast<int>(Components::kTransform);
+        i != static_cast<int>(Components::kCount);
+        ++i)
+      {
+        ComponentArray& arr = components_[i];
+
+        for (size_t j = 0; j < arr.size(); ++j)
+        {
+          arr.at(j)->Start();
+        }
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::Update(float dt)
     {
       if (active_ == false)
@@ -303,10 +320,10 @@ namespace snuffbox
       scripting::ScriptObjectHandle ent = 
         scripting::ScriptValue::CreateObject();
 
-      ent->SetPointer<Entity>(e);
+      //ent->SetPointer<Entity>(e);
 
       comp->SetPointer(c, c->GetScriptName());
-      comp->Insert("entity", ent);
+      /*comp->Insert("entity", ent);
 
       if (type != Components::kTransform)
       {
@@ -317,7 +334,7 @@ namespace snuffbox
             Components::kTransform);
 
         comp->Insert("transform", transform);
-      }
+      }*/
 
       return comp;
     }
