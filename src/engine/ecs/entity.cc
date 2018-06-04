@@ -317,25 +317,8 @@ namespace snuffbox
       scripting::ScriptObjectHandle comp = 
         scripting::ScriptValue::CreateObject();
 
-      scripting::ScriptObjectHandle ent = 
-        scripting::ScriptValue::CreateObject();
-
-      //ent->SetPointer<Entity>(e);
-
       comp->SetPointer(c, c->GetScriptName());
-      /*comp->Insert("entity", ent);
-
-      if (type != Components::kTransform)
-      {
-        scripting::ScriptObjectHandle transform = 
-          CreateScriptComponent(
-            e, 
-            e->GetComponent<TransformComponent>(),
-            Components::kTransform);
-
-        comp->Insert("transform", transform);
-      }*/
-
+      
       return comp;
     }
 

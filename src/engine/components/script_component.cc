@@ -46,12 +46,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Entity* ScriptComponent::GetEntity()
-    {
-      return entity();
-    }
-
-    //--------------------------------------------------------------------------
     const foundation::String& ScriptComponent::behavior() const
     {
       return behavior_;

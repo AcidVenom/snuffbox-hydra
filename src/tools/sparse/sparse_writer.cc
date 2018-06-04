@@ -128,6 +128,9 @@ namespace snuffbox
       output_ << "#include \"" << header << "\"" << std::endl;
       output_ << "#include <scripting/script_register.h>" << std::endl;
       output_ << "#include <engine/application/application.h>" << std::endl;
+      output_ << "#include <engine/ecs/entity.h>" << std::endl;
+      output_ << "#include <engine/components/transform_component.h>" 
+        << std::endl;
 
       WriteLine("");
 

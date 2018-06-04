@@ -1,4 +1,6 @@
 #include "engine/ecs/component.h"
+#include "engine/ecs/entity.h"
+#include "engine/components/transform_component.h"
 
 namespace snuffbox
 {
@@ -40,6 +42,12 @@ namespace snuffbox
     Entity* IComponent::entity() const
     {
       return entity_;
+    }
+
+    //--------------------------------------------------------------------------
+    TransformComponent* IComponent::transform() const
+    {
+      return entity_->GetComponent<TransformComponent>();
     }
 
     //--------------------------------------------------------------------------

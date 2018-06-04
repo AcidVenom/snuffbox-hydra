@@ -39,11 +39,6 @@ namespace snuffbox
       SCRIPT_FUNC() void SetBehavior(const foundation::String& behavior);
 
       /**
-      * @return The entity this script component belongs to
-      */
-      SCRIPT_FUNC() Entity* GetEntity();
-
-      /**
       * @return The behavior of this script
       */
       SCRIPT_FUNC() const foundation::String& behavior() const;

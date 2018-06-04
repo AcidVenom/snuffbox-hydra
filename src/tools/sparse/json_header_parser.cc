@@ -383,6 +383,16 @@ namespace snuffbox
       f.is_custom = false;
       f.is_static = false;
 
+      f.name = "entity";
+      f.ret_val = { "Entity", RefType::kPointer };
+
+      d->functions.push_back(f);
+
+      f.name = "transform";
+      f.ret_val = { "TransformComponent", RefType::kPointer };
+
+      d->functions.push_back(f);
+
       f.name = "set_active";
       f.ret_val = {"void", RefType::kLiteral};
 

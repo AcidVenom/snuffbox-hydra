@@ -21,6 +21,7 @@ namespace snuffbox
   namespace engine
   {
     class Entity;
+    class TransformComponent;
 
     /**
     * @brief The interface of every component, which can be attached to
@@ -88,6 +89,11 @@ namespace snuffbox
       * @return The entity parent of this component
       */
       Entity* entity() const;
+
+      /**
+      * @return The transform component of the parent entity
+      */
+      TransformComponent* transform() const;
 
       /**
       * @brief Sets if this component is currently active
