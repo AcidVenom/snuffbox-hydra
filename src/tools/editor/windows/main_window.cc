@@ -247,11 +247,18 @@ namespace snuffbox
         project_dir_,
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
+      if (dir.size() == 0)
+      {
+        return;
+      }
+
       if (app_->SetProjectDirectory(dir.toStdString().c_str()) == true)
       {
         project_dir_ = dir;
         std::string str = (project_dir_ + "/.build").toStdString();
         asset_browser_->Refresh(str.c_str());
+
+        setWindowTitle("Snuffbox Editor (" + dir + ")");
       }
     }
 
