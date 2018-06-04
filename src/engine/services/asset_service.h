@@ -1,12 +1,18 @@
 #pragma once
 
 #include "engine/services/service.h"
-#include "engine/assets/asset_manager.h"
+
+#include <tools/builder/definitions/asset_types.h>
+
+#include <foundation/io/path.h>
+#include <foundation/containers/map.h>
+#include <foundation/memory/memory.h>
 
 namespace snuffbox
 {
   namespace engine
   {
+    class IAsset;
     /**
     * @brief Used to manage loading and unloading of assets when required
     *        by the gameplay execution
@@ -19,11 +25,56 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to store asset information of an asset in the build
+      *        directory
+      *
+      * @author Daniel Konings
+      */
+      struct AssetFile
+      {
+        foundation::Path relative_path; //!< The relative path to the file
+        builder::AssetTypes type; //!< The asset type of the file
+      };
+
+      /**
+      * @brief Enumerates all files in a specified directory and returns
+      *        the valid asset paths
+      *
+      * @param[in] dir The directory to enumerate the assets from
+      * @param[in] recursive Should the assets be enumerated recursively?
+      *
+      * @return A list of asset file definitions with both type and path
+      */
+      static foundation::Vector<AssetFile> EnumerateAssets(
+        const foundation::Path& dir, 
+        bool recurisve = false);
+
+      /**
+      * @brief Converts a build path without an extension to a build path with
+      *        the respective extension of that asset type
+      *
+      * @param[in] type The type of the asset
+      * @param[in] path The path to the built file
+      */
+      static foundation::String NoExtensionToBuildPath(
+        builder::AssetTypes type,
+        const foundation::String& path);
+
+      /**
       * @see IService::IService
       */
       AssetService();
 
     protected:
+
+      /**
+      * @brief Checks if a path is not a directory and a valid asset type
+      *
+      * @param[in] path The path
+      *
+      * @return Is the path an asset?
+      */
+      static bool IsAsset(const foundation::Path& path);
 
       /**
       * @see IService::OnInitialize
@@ -38,40 +89,108 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Refreshes the underlying asset manager by unloading all assets
+      * @brief Refreshes the underlying asset service by unloading all assets
       *        and registering new ones from a provided path
       *
-      * @see AssetManager::Clear
+      * @see AssetService::Clear
       *
       * @param[in] path The path to the build directory
       */
       void Refresh(const foundation::Path& path);
 
       /**
-      * @see AssetManager::RegisterAsset
+      * @brief Clears every asset in the asset service and unloads them
+      */
+      void Clear();
+
+      /**
+      * @brief Registers an asset from a provided path
+      *
+      * When an asset has been registered, it can be loaded and unloaded
+      * when required. The data within the asset is the only thing that changes,
+      * whereas the handle to the asset is always valid during execution.
+      *
+      * @param[in] relative_path The relative path to the asset to register
+      */
+      void RegisterAsset(const foundation::Path& relative_path);
+
+      /**
+      * @see AssetService::RegisterAsset
+      *
+      * @remarks When we already know the type of an asset, we can register
+      *          it immediately
+      *
+      * This method will fail if the asset type is AssetTypes::kUnknown or
+      * AssetTypes::kCount
+      *
+      * @param[in] type The type of the asset
       */
       void RegisterAsset(
         builder::AssetTypes type, 
-        const foundation::Path& path);
+        const foundation::Path& relative_path);
 
       /**
-      * @see AssetManager::Load
+      * @brief Checks if an asset exists
+      *
+      * @param[in] type The type of the asset to check for
+      * @param[in] path The path to the asset, without an extension
+      *
+      * @return Does the asset exist?
+      */
+      bool Exists(
+        builder::AssetTypes type, 
+        const foundation::String& path) const;
+
+      /**
+      * @brief Loads an asset by type and relative path with no extension
+      *
+      * @param[in] type The type of the registered asset to load
+      * @param[in] path The relative path to the asset
+      *
+      * @return Were we able to load the asset?
       */
       bool Load(builder::AssetTypes type, const foundation::String& path);
 
       /**
-      * @see AssetManager::LoadAll
+      * @brief Loads all assets of a specific type
+      *
+      * @param[in] type The type of the assets to load
+      *
+      * @return Were all assets loaded succesfully?
       */
       bool LoadAll(builder::AssetTypes type);
 
       /**
-      * @see AssetManager::IsLoaded
+      * @brief Checks if an asset has already been loaded
+      *
+      * @param[in] type The type of the asset to check
+      * @param[in] path The path to the file without an extension
+      *
+      * @return Was the asset already loaded?
       */
-      bool IsLoaded(builder::AssetTypes type, const foundation::String& path);
+      bool IsLoaded(
+        builder::AssetTypes type, 
+        const foundation::String& path) const;
+
+      /**
+      * @brief Sets the build directory of the asset service, to append
+      *        to the relative file paths
+      *
+      * @param[in] path The path to the build directory
+      */
+      void set_build_directory(const foundation::Path& path);
 
     private:
 
-      AssetManager manager_; //!< The asset manager
+      using AssetMap =
+        foundation::UMap<foundation::String, foundation::SharedPtr<IAsset>>;
+
+      /**
+      * @brief The asset map for all known asset types that can be loaded
+      *        and unloaded
+      */
+      AssetMap registered_;
+      foundation::Path build_directory_; //!< The current build directory
     };
   }
 }

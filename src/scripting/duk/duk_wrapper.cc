@@ -84,7 +84,7 @@ namespace snuffbox
         duk_put_prop_string(context_, -2, DUK_HIDDEN_REF);
       }
       
-      std::string string_id = std::to_string(id);
+      foundation::String string_id = foundation::StringUtils::ToString(id);
       duk_put_prop_string(context_, -2, string_id.c_str());
       
       duk_pop(context_);
@@ -95,7 +95,7 @@ namespace snuffbox
     {
       duk_push_global_stash(context_);
 
-      std::string string_id = std::to_string(id);
+      foundation::String string_id = foundation::StringUtils::ToString(id);
       if (duk_get_prop_string(context_, -1, string_id.c_str()) > 0)
       {
         duk_get_prop_string(context_, -1, DUK_HIDDEN_PTR);
@@ -115,7 +115,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void DukWrapper::RemoveStashedObject(size_t id) const
     {
-      std::string string_id = std::to_string(id);
+      foundation::String string_id = foundation::StringUtils::ToString(id);
       
       duk_push_global_stash(context_);
       if (duk_get_prop_string(context_, -1, string_id.c_str()) <= 0)

@@ -122,8 +122,10 @@ namespace snuffbox
           \n\
           \tThe valid range is: {1} .. {2}",
           name(),
-          range_.has_min == true ? "x" : std::to_string(range_.min).c_str(),
-          range_.has_max == true ? "x" : std::to_string(range_.max).c_str());
+          range_.has_min == true ? "x" : 
+          foundation::StringUtils::ToString(range_.min),
+          range_.has_max == true ? "x" : 
+          foundation::StringUtils::ToString(range_.max));
 
         return false;
       }

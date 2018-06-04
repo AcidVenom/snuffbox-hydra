@@ -133,7 +133,7 @@ namespace snuffbox
 
       auto FormatTime = [](int time)
       {
-        String formatted = std::to_string(time).c_str();
+        String formatted = StringUtils::ToString(time);
         formatted = formatted.size() == 1 ? "0" + formatted : formatted;
 
         return formatted;

@@ -5,13 +5,9 @@
 #include "foundation/containers/string.h"
 #include "foundation/containers/vector.h"
 
-#include "foundation/io/path.h"
-
-#include <glm/glm.hpp>
+#include "foundation/auxiliary/string_utils.h"
 
 #include <iostream>
-#include <sstream>
-#include <cinttypes>
 
 namespace snuffbox
 {
@@ -167,18 +163,6 @@ namespace snuffbox
       static uint32_t GetArguments(Vector<String>& args);
 
       /**
-      * @brief Converts a value to a string
-      *
-      * @tparam T The value type to convert
-      *
-      * @param[in] value The value to convert
-      *
-      * @return The converted value
-      */
-      template <typename T>
-      static String ToString(const T& value);
-
-      /**
       * @brief Formats a string C#-style with given string arguments
       *
       * @param[in] format The format to format the arguments into
@@ -282,7 +266,7 @@ namespace snuffbox
       const T& value, 
       Args... args)
     {
-      stringified.push_back(ToString<T>(value));
+      stringified.push_back(StringUtils::ToString<T>(value));
       return GetArguments(stringified, eastl::forward<Args>(args)...) + 1;
     }
 
@@ -292,7 +276,7 @@ namespace snuffbox
       Vector<String>& stringified,
       const T& value)
     {
-      stringified.push_back(ToString<T>(value));
+      stringified.push_back(StringUtils::ToString<T>(value));
       return 1;
     }
 
@@ -300,73 +284,6 @@ namespace snuffbox
     inline uint32_t Logger::GetArguments(Vector<String>& formatted)
     {
       return 0;
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    inline String Logger::ToString(const T& value)
-    {
-      std::ostringstream stream;
-      stream << value;
-
-      return stream.str().c_str();
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const bool& value)
-    {
-      return value == true ? "true" : "false";
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const String& value)
-    {
-      return value;
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const Path& value)
-    {
-      return value.ToString();
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const glm::vec2& value)
-    {
-      return 
-        "[" + 
-        ToString<float>(value.x) + ", " + 
-        ToString<float>(value.y) + 
-        "]";
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const glm::vec3& value)
-    {
-      return
-        "[" +
-        ToString<float>(value.x) + ", " +
-        ToString<float>(value.y) + ", " +
-        ToString<float>(value.z) +
-        "]";
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline String Logger::ToString(const glm::vec4& value)
-    {
-      return
-        "[" +
-        ToString<float>(value.x) + ", " +
-        ToString<float>(value.y) + ", " +
-        ToString<float>(value.z) + ", " +
-        ToString<float>(value.w) +
-        "]";
     }
   }
 }

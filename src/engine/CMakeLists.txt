@@ -80,8 +80,6 @@ SET(ComponentsSources
 SET(AssetsSources
   "assets/asset.h"
   "assets/asset.cc"
-  "assets/asset_manager.h"
-  "assets/asset_manager.cc"
   "assets/script_asset.h"
   "assets/script_asset.cc"
 )

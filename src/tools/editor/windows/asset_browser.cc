@@ -1,7 +1,7 @@
 #include "tools/editor/windows/asset_browser.h"
 #include "tools/editor/definitions/editor_colors.h"
 
-#include <engine/assets/asset_manager.h>
+#include <engine/services/asset_service.h>
 
 #include <foundation/auxiliary/string_utils.h>
 
@@ -119,13 +119,13 @@ namespace snuffbox
     {
       Clear();
 
-      const foundation::Vector<engine::AssetManager::AssetFile>& paths =
-        engine::AssetManager::EnumerateAssets(path);
+      const foundation::Vector<engine::AssetService::AssetFile>& paths =
+        engine::AssetService::EnumerateAssets(path);
 
       QString full_path;
       for (size_t i = 0; i < paths.size(); ++i)
       {
-        const engine::AssetManager::AssetFile& file = paths.at(i);
+        const engine::AssetService::AssetFile& file = paths.at(i);
         full_path = root_ + "/" + file.relative_path.ToString().c_str();
         AddFromPath(full_path.toStdString().c_str());
       }

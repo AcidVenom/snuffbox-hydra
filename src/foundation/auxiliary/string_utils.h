@@ -1,7 +1,13 @@
 #pragma once
 
-#include <foundation/containers/string.h>
-#include <foundation/containers/vector.h>
+#include "foundation/containers/string.h"
+#include "foundation/containers/vector.h"
+#include "foundation/io/path.h"
+
+#include <glm/glm.hpp>
+
+#include <sstream>
+#include <cinttypes>
 
 namespace snuffbox
 {
@@ -63,6 +69,85 @@ namespace snuffbox
       * @return The number of occurences of the token in the string
       */
       static size_t NumberOf(const String& str, char token);
+
+      /**
+      * @brief Converts a value to a string
+      *
+      * @tparam T The value type to convert
+      *
+      * @param[in] value The value to convert
+      *
+      * @return The converted value
+      */
+      template <typename T>
+      static String ToString(const T& value);
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline String StringUtils::ToString(const T& value)
+    {
+      std::ostringstream stream;
+      stream << value;
+
+      return stream.str().c_str();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const bool& value)
+    {
+      return value == true ? "true" : "false";
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const String& value)
+    {
+      return value;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const Path& value)
+    {
+      return value.ToString();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const glm::vec2& value)
+    {
+      return 
+        "[" + 
+        ToString<float>(value.x) + ", " + 
+        ToString<float>(value.y) + 
+        "]";
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const glm::vec3& value)
+    {
+      return
+        "[" +
+        ToString<float>(value.x) + ", " +
+        ToString<float>(value.y) + ", " +
+        ToString<float>(value.z) +
+        "]";
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const glm::vec4& value)
+    {
+      return
+        "[" +
+        ToString<float>(value.x) + ", " +
+        ToString<float>(value.y) + ", " +
+        ToString<float>(value.z) + ", " +
+        ToString<float>(value.w) +
+        "]";
+    }
   }
 }
