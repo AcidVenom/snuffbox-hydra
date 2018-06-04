@@ -230,6 +230,11 @@ namespace snuffbox
       OnFinishedCallback on_finished_;
 
       /**
+      * @brief The name of the source directory folder
+      */
+      static const char* kSourceFolder_;
+
+      /**
       * @brief The name of the build directory folder
       */
       static const char* kBuildFolder_;

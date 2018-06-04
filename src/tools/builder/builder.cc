@@ -9,6 +9,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const char* Builder::kBuildFolder_ = ".build";
+    const char* Builder::kSourceFolder_ = "assets";
     const char* Builder::kStampExtension_ = "time";
 
     //--------------------------------------------------------------------------
@@ -30,14 +31,31 @@ namespace snuffbox
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kBuilder,
           foundation::LogSeverity::kError,
-          "Source directory '{0}' doesn't exist",
+          "Project directory '{0}' doesn't exist",
           source_dir);
 
         return false;
       }
 
-      source_directory_ = source_dir;
-      build_directory_ = source_directory_ / kBuildFolder_;
+      source_directory_ = source_dir / kSourceFolder_;
+
+      if (foundation::Directory::Exists(source_directory_) == false)
+      {
+        foundation::Directory dir(source_directory_);
+
+        if (dir.is_ok() == false)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kBuilder,
+            foundation::LogSeverity::kError,
+            "Could not create '{0}' directory in the project",
+            kSourceFolder_);
+
+          return false;
+        }
+      }
+
+      build_directory_ = source_dir / kBuildFolder_ / kSourceFolder_;
 
       if (CreateBuildDirectory() == false)
       {
