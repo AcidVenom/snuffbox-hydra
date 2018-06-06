@@ -2,6 +2,8 @@
 #include "engine/ecs/entity.h"
 #include "engine/components/transform_component.h"
 
+#include <foundation/serialization/archive.h>
+
 namespace snuffbox
 {
   namespace engine
@@ -126,6 +128,28 @@ namespace snuffbox
       {
         del(entities_.at(i));
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void Scene::Serialize(foundation::SaveArchive& archive) const
+    {
+      foundation::Vector<TransformComponent*> top = TopLevelTransforms();
+
+      foundation::Vector<Entity*> entities;
+      entities.resize(top.size());
+
+      for (size_t i = 0; i < top.size(); ++i)
+      {
+        entities.at(i) = top.at(i)->entity();
+      }
+
+      archive(entities);
+    }
+
+    //--------------------------------------------------------------------------
+    void Scene::Deserialize(foundation::LoadArchive& archive)
+    {
+
     }
 
     //--------------------------------------------------------------------------

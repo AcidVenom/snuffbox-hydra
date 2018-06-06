@@ -4,6 +4,7 @@
 
 #include <scripting/script_class.h>
 
+#include <foundation/serialization/serializable.h>
 #include <foundation/memory/memory.h>
 
 #define CREATE_COMPONENT(type, id)                                             \
@@ -29,7 +30,9 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class IComponent : public scripting::ScriptClass
+    class IComponent :
+      public scripting::ScriptClass, 
+      public foundation::ISerializable
     {
 
       friend Entity;
@@ -104,6 +107,9 @@ namespace snuffbox
       * @return Is this component currently active?
       */
       bool active() const;
+
+      virtual void Serialize(foundation::SaveArchive& archive) const override = 0;
+      virtual void Deserialize(foundation::LoadArchive& archive) override = 0;
 
       /**
       * @brief Virtual destructor

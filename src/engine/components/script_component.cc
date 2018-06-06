@@ -4,6 +4,8 @@
 #include "engine/application/application.h"
 #include "engine/services/script_service.h"
 
+#include <foundation/serialization/archive.h>
+
 #include <sparsed/script_component.gen.cc>
 
 namespace snuffbox
@@ -77,6 +79,18 @@ namespace snuffbox
     void ScriptComponent::Refresh()
     {
       SetBehavior(behavior_);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptComponent::Serialize(foundation::SaveArchive& archive) const
+    {
+      archive(behavior_);
+    }
+
+    //--------------------------------------------------------------------------
+    void ScriptComponent::Deserialize(foundation::LoadArchive& archive)
+    {
+
     }
   }
 }

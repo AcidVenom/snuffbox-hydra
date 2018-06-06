@@ -1,6 +1,7 @@
 #pragma once
 
 #include <foundation/containers/vector.h>
+#include <foundation/serialization/serializable.h>
 
 namespace snuffbox
 {
@@ -26,7 +27,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class Scene
+    class Scene : public foundation::ISerializable
     {
 
       friend Entity;
@@ -109,6 +110,10 @@ namespace snuffbox
       * @param[in] del The delegate to call
       */
       void ForEachEntity(EntityDelegate del);
+
+      void Serialize(foundation::SaveArchive& archive) const override;
+
+      void Deserialize(foundation::LoadArchive& archive) override;
 
       /**
       * @brief Default destructor, calls Scene::Clear

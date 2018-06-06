@@ -3,6 +3,7 @@
 #include "engine/ecs/component.h"
 #include <scripting/script_class.h>
 
+#include <foundation/serialization/serializable.h>
 #include <foundation/containers/vector.h>
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
@@ -21,7 +22,9 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    SCRIPT_CLASS() class Entity : public scripting::ScriptClass
+    SCRIPT_CLASS() class Entity : 
+      public scripting::ScriptClass, 
+      public foundation::ISerializable
     {
 
       friend Scene;
@@ -126,7 +129,7 @@ namespace snuffbox
       * @return Do we have more than 0 components of this type?
       */
       template <typename T>
-      bool HasComponent();
+      bool HasComponent() const;
 
       /**
       * @brief Checks if a typed component exists within this entity by ID
@@ -135,7 +138,7 @@ namespace snuffbox
       *
       * @return Do we have more than 0 components of this type?
       */
-      SCRIPT_FUNC() bool HasComponent(Components id);
+      SCRIPT_FUNC() bool HasComponent(Components id) const;
 
       /**
       * @brief Retrieves the first typed component found within this entity
@@ -145,7 +148,7 @@ namespace snuffbox
       * @return The found component, or nullptr if it doesn't exist
       */
       template <typename T>
-      T* GetComponent();
+      T* GetComponent() const;
 
       /**
       * @brief Retrieves the first typed component found within 
@@ -155,7 +158,7 @@ namespace snuffbox
       *
       * @return The found component, or nullptr if it doesn't exist
       */
-      SCRIPT_FUNC(custom) IComponent* GetComponent(Components id);
+      SCRIPT_FUNC(custom) IComponent* GetComponent(Components id) const;
 
       /**
       * @brief Retrieves all components of a certain component type
@@ -165,7 +168,7 @@ namespace snuffbox
       * @return The list of found components
       */
       template <typename T>
-      foundation::Vector<T*> GetComponents();
+      foundation::Vector<T*> GetComponents() const;
 
       /**
       * @brief Retrieves all components of a certain component type by ID
@@ -175,7 +178,7 @@ namespace snuffbox
       * @return The list of found components
       */
       SCRIPT_FUNC(custom) foundation::Vector<IComponent*> GetComponents(
-        Components id);
+        Components id) const;
 
       /**
       * @brief Destroys this entity and all its components
@@ -250,7 +253,7 @@ namespace snuffbox
       *
       * @return The underlying component array
       */
-      ComponentArray& GetComponentArray(Components id);
+      const ComponentArray& GetComponentArray(Components id) const;
 
       /**
       * @brief A type definition for the functions to create components
@@ -325,6 +328,10 @@ namespace snuffbox
       */
       Scene* scene() const;
 
+      void Serialize(foundation::SaveArchive& archive) const override;
+
+      void Deserialize(foundation::LoadArchive& archive) override;
+
       /**
       * @brief Destructs the entity and removes it from the scene
       */
@@ -373,7 +380,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline bool Entity::HasComponent()
+    inline bool Entity::HasComponent() const
     {
       TypeCheck<T>();
       return HasComponent(T::type_id);
@@ -381,7 +388,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline T* Entity::GetComponent()
+    inline T* Entity::GetComponent() const
     {
       TypeCheck<T>();
       return static_cast<T*>(GetComponent(T::type_id));
@@ -389,7 +396,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline foundation::Vector<T*> Entity::GetComponents()
+    inline foundation::Vector<T*> Entity::GetComponents() const
     {
       TypeCheck<T>();
 

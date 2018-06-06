@@ -51,6 +51,12 @@ SET(IOSources
   "io/resources.cc"
 )
 
+SET(SerializationSources
+  "serialization/archive.h"
+  "serialization/archive.cc"
+  "serialization/serializable.h"
+)
+
 IF (SNUFF_WIN32)
   SET(PlatformFilter "win32")
   SET(PlatformSources
@@ -84,6 +90,7 @@ SOURCE_GROUP("memory\\allocator"  FILES ${MemoryAllocatorSources})
 SOURCE_GROUP("containers"         FILES ${ContainerSources})
 SOURCE_GROUP("auxiliary"          FILES ${AuxiliarySources})
 SOURCE_GROUP("io"                 FILES ${IOSources})
+SOURCE_GROUP("serialization"      FILES ${SerializationSources})
 SOURCE_GROUP("encryption"         FILES ${EncryptionSources})
 
 SET(FoundationSources
@@ -94,8 +101,9 @@ SET(FoundationSources
   ${ContainerSources}
   ${AuxiliarySources}
   ${IOSources}
+  ${SerializationSources}
   ${EncryptionSources}
 )
 
 ADD_LIBRARY(snuffbox-foundation ${FoundationSources})
-TARGET_LINK_LIBRARIES(snuffbox-foundation PUBLIC eastl glm)
+TARGET_LINK_LIBRARIES(snuffbox-foundation PUBLIC eastl glm rapidjson)

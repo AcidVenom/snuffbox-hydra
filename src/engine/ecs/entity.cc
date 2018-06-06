@@ -6,6 +6,8 @@
 
 #include "engine/components/transform_component.h"
 
+#include <foundation/serialization/archive.h>
+
 #ifndef SNUFF_NSCRIPTING
 #include "engine/components/script_component.h"
 #include <sparsed/entity.gen.cc>
@@ -37,7 +39,8 @@ namespace snuffbox
       IComponent* ptr = CreateComponentByID(id);
       ptr->Create();
 
-      GetComponentArray(id).push_back(foundation::Memory::MakeUnique(ptr));
+      components_[static_cast<int>(id)]
+        .push_back(foundation::Memory::MakeUnique(ptr));
 
       return ptr;
     }
@@ -63,7 +66,7 @@ namespace snuffbox
         return;
       }
 
-      ComponentArray& arr = GetComponentArray(id);
+      ComponentArray& arr = components_[static_cast<int>(id)];
 
       if (arr.size() == 0)
       {
@@ -87,7 +90,7 @@ namespace snuffbox
 
       while (id != last && found == false)
       {
-        ComponentArray& arr = GetComponentArray(static_cast<Components>(id));
+        ComponentArray& arr = components_[id];
         for (size_t i = 0; i < arr.size(); ++i)
         {
           current = arr.at(i).get();
@@ -114,14 +117,14 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool Entity::HasComponent(Components id)
+    bool Entity::HasComponent(Components id) const
     {
-      ComponentArray& arr = GetComponentArray(id);
+      const ComponentArray& arr = GetComponentArray(id);
       return arr.size() > 0;
     }
 
     //--------------------------------------------------------------------------
-    IComponent* Entity::GetComponent(Components id)
+    IComponent* Entity::GetComponent(Components id) const
     {
       if (HasComponent(id) == false)
       {
@@ -132,11 +135,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    foundation::Vector<IComponent*> Entity::GetComponents(Components id)
+    foundation::Vector<IComponent*> Entity::GetComponents(Components id) const
     {
       foundation::Vector<IComponent*> result;
 
-      ComponentArray& arr = GetComponentArray(id);
+      const ComponentArray& arr = GetComponentArray(id);
       result.resize(arr.size());
 
       for (size_t i = 0; i < arr.size(); ++i)
@@ -191,7 +194,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Entity::ComponentArray& Entity::GetComponentArray(Components id)
+    const Entity::ComponentArray& Entity::GetComponentArray(Components id) const
     {
       IDCheck(id);
       return components_[static_cast<size_t>(id)];
@@ -292,6 +295,36 @@ namespace snuffbox
     bool Entity::active() const
     {
       return active_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::Serialize(foundation::SaveArchive& archive) const
+    {
+      archive(name_, active_);
+
+      foundation::Vector<IComponent*> components;
+
+      for (
+        int i = static_cast<int>(Components::kTransform);
+        i < static_cast<int>(Components::kCount);
+        ++i)
+      {
+        const ComponentArray& arr = components_[i];
+        components.resize(arr.size());
+
+        for (size_t j = 0; j < arr.size(); ++j)
+        {
+          components.at(j) = arr.at(j).get();
+        }
+
+        archive(components);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::Deserialize(foundation::LoadArchive& archive)
+    {
+
     }
 
     //--------------------------------------------------------------------------

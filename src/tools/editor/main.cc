@@ -1,6 +1,5 @@
 #include "tools/editor/application/editor_application.h"
-
-#include <foundation/memory/memory.h>
+#include <foundation/serialization/archive.h>
 
 using namespace snuffbox;
 using namespace foundation;

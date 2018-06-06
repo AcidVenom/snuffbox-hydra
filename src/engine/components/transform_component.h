@@ -317,6 +317,9 @@ namespace snuffbox
 
     public:
 
+      void Serialize(foundation::SaveArchive& archive) const override;
+      void Deserialize(foundation::LoadArchive& archive) override;
+
       /**
       * @brief Detaches this component from its parent if it has one
       */

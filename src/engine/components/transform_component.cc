@@ -2,6 +2,8 @@
 #include "engine/ecs/entity.h"
 #include "engine/ecs/scene.h"
 
+#include <foundation/serialization/archive.h>
+
 #ifndef SNUFF_NSCRIPTING
 #include <sparsed/transform_component.gen.cc>
 #endif
@@ -417,6 +419,28 @@ namespace snuffbox
       }
 
       UpdateMatrices();
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::Serialize(foundation::SaveArchive& archive) const
+    {
+      archive(position_, rotation_, scale_);
+
+      foundation::Vector<Entity*> children;
+      children.resize(children_.size());
+
+      for (size_t i = 0; i < children_.size(); ++i)
+      {
+        children.at(i) = children_.at(i)->entity();
+      }
+
+      archive(children);
+    }
+
+    //--------------------------------------------------------------------------
+    void TransformComponent::Deserialize(foundation::LoadArchive& archive)
+    {
+      //archive(&position_, &rotation_, &scale_);
     }
 
     //--------------------------------------------------------------------------

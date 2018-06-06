@@ -65,6 +65,11 @@ namespace snuffbox
       */
       void Refresh();
 
+    public:
+
+      void Serialize(foundation::SaveArchive& archive) const override;
+      void Deserialize(foundation::LoadArchive& archive) override;
+
     private:
 
       scripting::ScriptCallback<> start_cb_; //!< The start callback

@@ -7,6 +7,8 @@
 #include <engine/services/scene_service.h>
 #include <engine/services/asset_service.h>
 
+#include <foundation/serialization/archive.h>
+
 #ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
 #include <engine/services/script_service.h>
@@ -245,6 +247,10 @@ namespace snuffbox
       {
         window_->SetPlaybackEnabled(false);
       }
+
+      foundation::SaveArchive archive("G:/Programming/snuffbox-hydra-bin/test/test.json");
+      
+      archive(GetService<engine::SceneService>()->current_scene());
     }
 
     //--------------------------------------------------------------------------
