@@ -36,6 +36,7 @@ SET(AuxiliarySources
   "auxiliary/string_utils.cc"
   "auxiliary/timer.h"
   "auxiliary/timer.cc"
+  "auxiliary/type_traits.h"
 )
 
 SET(IOSources

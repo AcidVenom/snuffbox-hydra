@@ -300,9 +300,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Entity::Serialize(foundation::SaveArchive& archive) const
     {
-      archive(name_, active_);
+      archive(
+        ARCHIVE_PROP(name_), 
+        ARCHIVE_PROP(active_));
 
       foundation::Vector<IComponent*> components;
+
+      size_t off = 0;
 
       for (
         int i = static_cast<int>(Components::kTransform);
@@ -310,15 +314,16 @@ namespace snuffbox
         ++i)
       {
         const ComponentArray& arr = components_[i];
-        components.resize(arr.size());
+        off = components.size();
+        components.resize(components.size() + arr.size());
 
         for (size_t j = 0; j < arr.size(); ++j)
         {
-          components.at(j) = arr.at(j).get();
+          components.at(off + j) = arr.at(j).get();
         }
-
-        archive(components);
       }
+
+      archive(ARCHIVE_PROP(components));
     }
 
     //--------------------------------------------------------------------------

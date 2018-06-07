@@ -1,7 +1,10 @@
 #include "foundation/serialization/archive.h"
 #include "foundation/auxiliary/string_utils.h"
+#include "foundation/auxiliary/logger.h"
 
 #include "foundation/io/file.h"
+
+#include <memory>
 
 namespace snuffbox
 {
@@ -18,6 +21,22 @@ namespace snuffbox
     void SaveArchive::WriteIdentifier(Identifiers id)
     {
       buffer_.push_back(static_cast<uint8_t>(id));
+    }
+
+    //--------------------------------------------------------------------------
+    void SaveArchive::WriteName(const char* name)
+    {
+      WriteIdentifier(Identifiers::kName);
+
+      size_t size = strlen(name);
+      size_t off = Reserve<uint8_t>(size + 1);
+
+      for (size_t i = 0; i < size; ++i)
+      {
+        buffer_.at(off + i) = name[i];
+      }
+
+      buffer_.at(off + size) = '\0';
     }
 
     //--------------------------------------------------------------------------
@@ -122,7 +141,7 @@ namespace snuffbox
           continue;
         }
 
-        result += ",";
+        result += ", ";
       }
 
       result += "]";
@@ -137,24 +156,27 @@ namespace snuffbox
 
       Identifiers id = *reinterpret_cast<const Identifiers*>(buffer + i);
 
-      size_t count = 0;
+      auto GetName = [&i, id, buffer]()
+      {
+        Logger::Assert(id == Identifiers::kName, "Unexpected token in archive");
+        ++i;
+        return WriteJsonString(i, buffer);
+      };
 
       while (id != Identifiers::kObjectEnd)
       {
-        result += "\"" + StringUtils::ToString(count) + "\" : ";
-
+        result += GetName() + " : ";
         result += WriteJsonValue(i, buffer);
 
         id = *reinterpret_cast<const Identifiers*>(buffer + i);
 
-        ++count;
-
         if (id == Identifiers::kObjectEnd)
         {
+          ++i;
           continue;
         }
 
-        result += ",";
+        result += ", ";
       }
 
       result += "}";

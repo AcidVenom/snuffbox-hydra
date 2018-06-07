@@ -143,7 +143,7 @@ namespace snuffbox
         entities.at(i) = top.at(i)->entity();
       }
 
-      archive(entities);
+      archive(ARCHIVE_PROP(entities));
     }
 
     //--------------------------------------------------------------------------

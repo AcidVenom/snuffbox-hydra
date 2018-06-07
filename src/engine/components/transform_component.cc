@@ -424,7 +424,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::Serialize(foundation::SaveArchive& archive) const
     {
-      archive(position_, rotation_, scale_);
+      archive(
+        foundation::ArchiveName{ "type" },
+        Components::kTransform,
+        ARCHIVE_PROP(position_),
+        ARCHIVE_PROP(rotation_),
+        ARCHIVE_PROP(scale_));
 
       foundation::Vector<Entity*> children;
       children.resize(children_.size());
@@ -434,7 +439,7 @@ namespace snuffbox
         children.at(i) = children_.at(i)->entity();
       }
 
-      archive(children);
+      archive(ARCHIVE_PROP(children));
     }
 
     //--------------------------------------------------------------------------

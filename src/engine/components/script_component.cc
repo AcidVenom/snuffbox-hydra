@@ -84,7 +84,10 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptComponent::Serialize(foundation::SaveArchive& archive) const
     {
-      archive(behavior_);
+      archive(
+        foundation::ArchiveName{ "type" },
+        Components::kScript,
+        ARCHIVE_PROP(behavior_));
     }
 
     //--------------------------------------------------------------------------
