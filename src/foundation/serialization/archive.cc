@@ -40,34 +40,41 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    String SaveArchive::WriteJsonValue(size_t& i, const uint8_t* buffer)
+    String SaveArchive::WriteJsonValue(
+      size_t& i, 
+      const uint8_t* buffer,
+      int indent)
     {
       Identifiers id = *reinterpret_cast<const Identifiers*>(buffer + i);
       ++i;
+
+      String result;
 
       switch (id)
       {
 
       case Identifiers::kNumber:
-        return WriteJsonNumber(i, buffer);
+        result = WriteJsonNumber(i, buffer);
+        break;
 
       case Identifiers::kBoolean:
-        return WriteJsonBoolean(i, buffer);
+        result = WriteJsonBoolean(i, buffer);
+        break;
 
       case Identifiers::kString:
-        return WriteJsonString(i, buffer);
+        result = WriteJsonString(i, buffer);
+        break;
 
       case Identifiers::kArray:
-        return WriteJsonArray(i, buffer);
+        result = WriteJsonArray(i, buffer, indent);
+        break;
 
       case Identifiers::kObjectStart:
-        return WriteJsonObject(i, buffer);
-
-      default:
-        return "";
+        result = WriteJsonObject(i, buffer, indent);
+        break;
       }
 
-      return "";
+      return result;
     }
 
     //--------------------------------------------------------------------------
@@ -121,19 +128,37 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    String SaveArchive::WriteJsonArray(size_t& i, const uint8_t* buffer)
+    String SaveArchive::WriteJsonArray(
+      size_t& i, 
+      const uint8_t* buffer, 
+      int indent)
     {
-      foundation::String result = "[";
+      String result = IndentationString(indent) + "[";
+
+      ++indent;
 
       size_t size = *reinterpret_cast<const size_t*>(buffer + i);
+      Identifiers id;
       
       i += sizeof(size_t);
 
       size_t e = 0;
 
+      String indent_string = "\n" + IndentationString(indent);
+
       while (e < size)
       {
-        result += WriteJsonValue(i, buffer);
+        id = *reinterpret_cast<const Identifiers*>(buffer + i);
+
+        if (id == Identifiers::kObjectStart || id == Identifiers::kArray)
+        {
+          result += "\n" + WriteJsonValue(i, buffer, indent);
+        }
+        else
+        {
+          result += indent_string + WriteJsonValue(i, buffer, indent);
+        }
+
         ++e;
 
         if (e == size)
@@ -141,32 +166,45 @@ namespace snuffbox
           continue;
         }
 
-        result += ", ";
+        result += ",";
       }
 
-      result += "]";
+      result += "\n" + IndentationString(indent - 1) + "]";
 
       return result;
     }
 
     //--------------------------------------------------------------------------
-    String SaveArchive::WriteJsonObject(size_t& i, const uint8_t* buffer)
+    String SaveArchive::WriteJsonObject(
+      size_t& i, 
+      const uint8_t* buffer, 
+      int indent)
     {
-      foundation::String result = "{";
+      String result = IndentationString(indent) + "{";
+
+      ++indent;
 
       Identifiers id = *reinterpret_cast<const Identifiers*>(buffer + i);
 
-      auto GetName = [&i, id, buffer]()
+      auto GetName = [&i, &id, buffer]()
       {
         Logger::Assert(id == Identifiers::kName, "Unexpected token in archive");
         ++i;
-        return WriteJsonString(i, buffer);
+        String result = WriteJsonString(i, buffer);
+        id = *reinterpret_cast<const Identifiers*>(buffer + i);
+
+        return result;
       };
 
+      String indent_string = "\n" + IndentationString(indent);
       while (id != Identifiers::kObjectEnd)
       {
-        result += GetName() + " : ";
-        result += WriteJsonValue(i, buffer);
+        result += indent_string + GetName() + " : ";
+        if (id == Identifiers::kObjectStart || id == Identifiers::kArray)
+        {
+          result += "\n";
+        }
+        result += WriteJsonValue(i, buffer, indent);
 
         id = *reinterpret_cast<const Identifiers*>(buffer + i);
 
@@ -176,10 +214,23 @@ namespace snuffbox
           continue;
         }
 
-        result += ", ";
+        result += ",";
       }
 
-      result += "}";
+      result += "\n" + IndentationString(indent - 1) + "}";
+
+      return result;
+    }
+
+    //--------------------------------------------------------------------------
+    String SaveArchive::IndentationString(int indent)
+    {
+      String result = "";
+
+      for (int i = 0; i < indent; ++i)
+      {
+        result += '\t';
+      }
 
       return result;
     }

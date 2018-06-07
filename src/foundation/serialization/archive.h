@@ -260,10 +260,14 @@ namespace snuffbox
       *
       * @param[in] i The current index within the buffer
       * @param[in] buffer The current buffer
+      * @param[in] indent The amount of indentation
       *
       * @return The stringified JSON value
       */
-      static String WriteJsonValue(size_t& i, const uint8_t* buffer);
+      static String WriteJsonValue(
+        size_t& i, 
+        const uint8_t* buffer, 
+        int indent = 0);
 
       /**
       * @brief Writes a number value as a JSON string
@@ -302,20 +306,38 @@ namespace snuffbox
       *
       * @param[in] i The current index within the buffer
       * @param[in] buffer The current buffer
+      * @param[in] indent The amount of indentation
       *
       * @return The stringified JSON array
       */
-      static String WriteJsonArray(size_t& i, const uint8_t* buffer);
+      static String WriteJsonArray(
+        size_t& i, 
+        const uint8_t* buffer, 
+        int indent);
 
       /**
       * @brief Writes a number value as a JSON object
       *
       * @param[in] i The current index within the buffer
       * @param[in] buffer The current buffer
+      * @param[in] indent The amount of indentation
       *
       * @return The stringified JSON object
       */
-      static String WriteJsonObject(size_t& i, const uint8_t* buffer);
+      static String WriteJsonObject(
+        size_t& i, 
+        const uint8_t* buffer, 
+        int indent);
+
+      /**
+      * @brief Retrieves the indentation string to prepend based on the current
+      *        number of indentations
+      *
+      * @param[in] indent The number of indentations to do
+      *
+      * @return The resulting string
+      */
+      static String IndentationString(int indent);
 
       /**
       * @brief Flushes the contents of the archive to disk, as a JSON string

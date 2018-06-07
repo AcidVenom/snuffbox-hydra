@@ -247,6 +247,11 @@ namespace snuffbox
       {
         window_->SetPlaybackEnabled(false);
       }
+
+      /*foundation::SaveArchive archive("G:/Programming/snuffbox-hydra-bin/test/test.json");
+      
+      engine::Scene* scene = GetService<engine::SceneService>()->current_scene();
+      archive(scene);*/
     }
 
     //--------------------------------------------------------------------------
