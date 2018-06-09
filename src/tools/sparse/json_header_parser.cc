@@ -1,5 +1,7 @@
 #include "tools/sparse/json_header_parser.h"
 
+#include <rapidjson/error/en.h>
+
 #include <fstream>
 #include <iostream>
 
@@ -41,8 +43,10 @@ namespace snuffbox
             "Could not parse .json file, the contents might be invalid" <<
             std::endl << 
             "This happens when the input header contains invalid definitions" <<
-            std::endl << "Errors:" << std::endl <<
-            buffer << std::endl;
+            std::endl << "Error(s):" << std::endl <<
+            rapidjson::GetParseError_En(res.Code()) << 
+            " (" << res.Offset() << ")" << 
+            std::endl;
         }
 
         bool success = ParseDocument(d);

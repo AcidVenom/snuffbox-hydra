@@ -339,9 +339,12 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline void SaveArchive::WriteValue(const T& value, enable_if_number<T>*)
+    inline void SaveArchive::WriteValue(
+      const T& value, 
+      enable_if_number<T>*)
     {
-      Serialize<double>(*this, static_cast<double>(value));
+      WriteIdentifier(Identifiers::kNumber);
+      WriteRaw<double>(static_cast<double>(value));
     }
 
     //--------------------------------------------------------------------------
@@ -369,7 +372,7 @@ namespace snuffbox
 
       for (size_t i = 0; i < size; ++i)
       {
-        WriteValue<T::value_type>(value.at(i));
+        WriteValue<typename T::value_type>(value.at(i));
       }
     }
 
@@ -390,7 +393,38 @@ namespace snuffbox
       const T& value, 
       enable_if_n_serializable<T>*)
     {
+      WriteIdentifier(Identifiers::kObjectStart);
       Serialize<T>(*this, value);
+      WriteIdentifier(Identifiers::kObjectEnd);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::WriteValue( 
+      const bool& value,
+      enable_if_n_serializable<bool>*)
+    {
+      WriteIdentifier(Identifiers::kBoolean);
+      WriteRaw<bool>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::WriteValue(
+      const String& value,
+      enable_if_n_serializable<String>*)
+    {
+      WriteIdentifier(Identifiers::kString);
+      WriteRaw<char>(*value.c_str(), value.size() + 1);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::WriteValue(
+      const ArchiveName& value,
+      enable_if_n_serializable<ArchiveName>*)
+    {
+      WriteName(value.name);
     }
 
     //--------------------------------------------------------------------------
@@ -414,57 +448,14 @@ namespace snuffbox
     template <>
     inline void SaveArchive::Serialize(
       SaveArchive& archive,
-      const ArchiveName& value)
-    {
-      archive.WriteName(value.name);
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline void SaveArchive::Serialize(
-      SaveArchive& archive, 
-      const double& value)
-    {
-      archive.WriteIdentifier(Identifiers::kNumber);
-      archive.WriteRaw<double>(value);
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline void SaveArchive::Serialize(
-      SaveArchive& archive, 
-      const bool& value)
-    {
-      archive.WriteIdentifier(Identifiers::kBoolean);
-      archive.WriteRaw<bool>(value);
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline void SaveArchive::Serialize(
-      SaveArchive& archive, 
-      const String& value)
-    {
-      archive.WriteIdentifier(Identifiers::kString);
-      archive.WriteRaw<char>(*value.c_str(), value.size() + 1);
-    }
-
-    //--------------------------------------------------------------------------
-    template <>
-    inline void SaveArchive::Serialize(
-      SaveArchive& archive,
       const glm::vec2& value)
     {
       float x = value.x;
       float y = value.y;
 
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
-
       archive(
-        ARCHIVE_PROP(x), 
-        ARCHIVE_PROP(y));
-
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
+        SET_ARCHIVE_PROP(x), 
+        SET_ARCHIVE_PROP(y));
     }
 
     //--------------------------------------------------------------------------
@@ -477,14 +468,10 @@ namespace snuffbox
       float y = value.y;
       float z = value.z;
 
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
-
       archive(
-        ARCHIVE_PROP(x), 
-        ARCHIVE_PROP(y),
-        ARCHIVE_PROP(z));
-
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
+        SET_ARCHIVE_PROP(x), 
+        SET_ARCHIVE_PROP(y),
+        SET_ARCHIVE_PROP(z));
     }
 
     //--------------------------------------------------------------------------
@@ -498,15 +485,11 @@ namespace snuffbox
       float z = value.z;
       float w = value.w;
 
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
-
       archive(
-        ARCHIVE_PROP(x), 
-        ARCHIVE_PROP(y),
-        ARCHIVE_PROP(z),
-        ARCHIVE_PROP(w));
-
-      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
+        SET_ARCHIVE_PROP(x), 
+        SET_ARCHIVE_PROP(y),
+        SET_ARCHIVE_PROP(z),
+        SET_ARCHIVE_PROP(w));
     }
 
     //--------------------------------------------------------------------------
@@ -515,7 +498,7 @@ namespace snuffbox
       SaveArchive& archive, 
       const glm::quat& value)
     {
-      Serialize<glm::vec3>(archive, { value.x, value.y, value.z });
+      Serialize<glm::vec4>(archive, { value.x, value.y, value.z, value.w });
     }
   }
 }

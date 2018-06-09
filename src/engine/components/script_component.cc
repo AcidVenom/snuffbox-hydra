@@ -5,6 +5,7 @@
 #include "engine/services/script_service.h"
 
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 #include <sparsed/script_component.gen.cc>
 
@@ -84,16 +85,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ScriptComponent::Serialize(foundation::SaveArchive& archive) const
     {
-      archive(
-        foundation::ArchiveName{ "type" },
-        Components::kScript,
-        ARCHIVE_PROP(behavior_));
+      archive(SET_ARCHIVE_PROP(behavior_));
     }
 
     //--------------------------------------------------------------------------
     void ScriptComponent::Deserialize(foundation::LoadArchive& archive)
     {
-
+      archive(GET_ARCHIVE_PROP(behavior_));
     }
   }
 }

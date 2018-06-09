@@ -31,6 +31,12 @@ namespace snuffbox
 
     public:
 
+      struct SerializedComponent
+      {
+        Components type;
+        IComponent* data;
+      };
+
       SCRIPT_NAME(Entity);
 
       /**

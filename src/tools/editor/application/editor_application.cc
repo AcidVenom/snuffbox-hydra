@@ -8,6 +8,7 @@
 #include <engine/services/asset_service.h>
 
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
@@ -254,13 +255,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void EditorApplication::Play()
     {
-      foundation::SaveArchive archive;
-
-      engine::Scene* scene = GetService<engine::SceneService>()->current_scene();
-      archive(scene);
-
-      archive.WriteFile("G:/Programming/snuffbox-hydra-bin/test/test.json");
-
       InitializeAssets(builder_.build_directory());
       RunScripts();
       SCRIPT_CALLBACK(Start);

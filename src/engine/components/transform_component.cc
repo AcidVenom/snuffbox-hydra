@@ -3,6 +3,7 @@
 #include "engine/ecs/scene.h"
 
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <sparsed/transform_component.gen.cc>
@@ -424,12 +425,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::Serialize(foundation::SaveArchive& archive) const
     {
+      glm::vec3 rotation = GetRotationEuler();
+
       archive(
-        foundation::ArchiveName{ "type" },
-        Components::kTransform,
-        ARCHIVE_PROP(position_),
-        ARCHIVE_PROP(rotation_),
-        ARCHIVE_PROP(scale_));
+        SET_ARCHIVE_PROP(position_),
+        SET_ARCHIVE_PROP(rotation),
+        SET_ARCHIVE_PROP(scale_));
 
       foundation::Vector<Entity*> children;
       children.resize(children_.size());
@@ -439,13 +440,39 @@ namespace snuffbox
         children.at(i) = children_.at(i)->entity();
       }
 
-      archive(ARCHIVE_PROP(children));
+      archive(SET_ARCHIVE_PROP(children));
     }
 
     //--------------------------------------------------------------------------
     void TransformComponent::Deserialize(foundation::LoadArchive& archive)
     {
-      //archive(&position_, &rotation_, &scale_);
+      glm::vec3 rotation;
+
+      archive(
+        GET_ARCHIVE_PROP(position_),
+        GET_ARCHIVE_PROP(rotation),
+        GET_ARCHIVE_PROP(scale_));
+
+      foundation::Vector<Entity*> children;
+      size_t n = archive.GetArraySize("children");
+
+      children.resize(n);
+
+      foundation::IAllocator* alloc = &foundation::Memory::default_allocator();
+
+      Entity* ent = nullptr;
+
+      for (size_t i = 0; i < n; ++i)
+      {
+        ent = foundation::Memory::Construct<Entity>(alloc, entity()->scene());
+        ent->GetComponent<TransformComponent>()->SetParent(this);
+
+        children.at(i) = ent;
+      }
+
+      archive(GET_ARCHIVE_PROP(children));
+
+      SetRotationEuler(rotation);
     }
 
     //--------------------------------------------------------------------------

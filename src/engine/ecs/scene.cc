@@ -3,6 +3,7 @@
 #include "engine/components/transform_component.h"
 
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 namespace snuffbox
 {
@@ -196,13 +197,33 @@ namespace snuffbox
         entities.at(i) = top.at(i)->entity();
       }
 
-      archive(ARCHIVE_PROP(entities));
+      archive(SET_ARCHIVE_PROP(entities));
     }
 
     //--------------------------------------------------------------------------
     void Scene::Deserialize(foundation::LoadArchive& archive)
     {
+      size_t n = archive.GetArraySize("entities");
 
+      foundation::Vector<Entity*> entities;
+      foundation::IAllocator* alloc = &foundation::Memory::default_allocator();
+
+      for (size_t i = 0; i < n; ++i)
+      {
+        foundation::Memory::Construct<Entity>(alloc, this);
+      }
+
+      foundation::Vector<TransformComponent*> top = TopLevelTransforms();
+      entities.resize(top.size());
+
+      for (size_t i = 0; i < top.size(); ++i)
+      {
+        entities.at(i) = top.at(i)->entity();
+      }
+
+      archive(GET_ARCHIVE_PROP(entities));
+
+      current_id_ = GetNextAvailableID();
     }
 
     //--------------------------------------------------------------------------

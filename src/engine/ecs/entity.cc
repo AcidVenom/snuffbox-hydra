@@ -7,6 +7,7 @@
 #include "engine/components/transform_component.h"
 
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/components/script_component.h"
@@ -320,11 +321,11 @@ namespace snuffbox
     void Entity::Serialize(foundation::SaveArchive& archive) const
     {
       archive(
-        ARCHIVE_PROP(name_), 
-        ARCHIVE_PROP(active_),
-        ARCHIVE_PROP(id_));
+        SET_ARCHIVE_PROP(name_), 
+        SET_ARCHIVE_PROP(active_),
+        SET_ARCHIVE_PROP(id_));
 
-      foundation::Vector<IComponent*> components;
+      foundation::Vector<SerializedComponent> components;
 
       size_t off = 0;
 
@@ -339,17 +340,41 @@ namespace snuffbox
 
         for (size_t j = 0; j < arr.size(); ++j)
         {
-          components.at(off + j) = arr.at(j).get();
+          SerializedComponent& sc = components.at(off + j);
+          sc.type = static_cast<Components>(i);
+          sc.data = arr.at(j).get();
         }
       }
 
-      archive(ARCHIVE_PROP(components));
+      archive(SET_ARCHIVE_PROP(components));
     }
 
     //--------------------------------------------------------------------------
     void Entity::Deserialize(foundation::LoadArchive& archive)
     {
+      archive(
+        GET_ARCHIVE_PROP(name_), 
+        GET_ARCHIVE_PROP(active_),
+        GET_ARCHIVE_PROP(id_));
 
+      foundation::Vector<SerializedComponent> components;
+
+      size_t n = archive.GetArraySize("components");
+      components.resize(n);
+
+      SerializedComponent sc;
+
+      for (size_t i = 0; i < n; ++i)
+      {
+        sc.data = nullptr;
+        archive.GetArrayValue("components", i, &sc);
+        sc.data = AddComponent(sc.type);
+
+        components.at(i) = sc;
+      }
+
+      archive(
+        GET_ARCHIVE_PROP(components));
     }
 
     //--------------------------------------------------------------------------
@@ -456,6 +481,47 @@ namespace snuffbox
       return true;
     }
 #endif
+  }
 
+  namespace foundation
+  {
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::Serialize(
+      foundation::SaveArchive& archive, 
+      const engine::Entity::SerializedComponent& value)
+    {
+      engine::Components type = value.type;
+      engine::IComponent* data = value.data;
+
+      archive(
+        SET_ARCHIVE_PROP(type),
+        SET_ARCHIVE_PROP(data));
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void LoadArchive::Deserialize(
+      foundation::LoadArchive& archive,
+      engine::Entity::SerializedComponent* out)
+    {
+      engine::Components type;
+      engine::IComponent* data = out->data;
+
+      if (data == nullptr)
+      {
+        archive(
+          GET_ARCHIVE_PROP(type));
+      }
+      else
+      {
+        archive(
+          GET_ARCHIVE_PROP(type),
+          GET_ARCHIVE_PROP(data));
+      }
+
+      engine::Entity::SerializedComponent& sc = *out;
+      sc.type = type;
+    }
   }
 }
