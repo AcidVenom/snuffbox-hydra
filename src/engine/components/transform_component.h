@@ -317,7 +317,14 @@ namespace snuffbox
 
     public:
 
+      /**
+      * @see ISerializable::Serialize
+      */
       void Serialize(foundation::SaveArchive& archive) const override;
+
+      /**
+      * @see ISerializable::Deserialize
+      */
       void Deserialize(foundation::LoadArchive& archive) override;
 
       /**

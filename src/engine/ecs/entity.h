@@ -38,6 +38,13 @@ namespace snuffbox
       */
       Entity();
 
+      /**
+      * @brief Construct an entity within a specific scene
+      *
+      * @param[in] scene The scene to add this entity to
+      */
+      Entity(Scene* scene);
+
       SCRIPT_CONSTRUCTOR(Entity);
 
 #ifndef SNUFF_NSCRIPTING
@@ -321,6 +328,14 @@ namespace snuffbox
       */
       void Update(float dt);
 
+      /**
+      * @brief Sets the ID of this entity, used by the scene to initially
+      *        assign an ID, or when an entity is deserialized
+      *
+      * @param[in] id The ID to set
+      */
+      void set_id(size_t id);
+
     public:
 
       /**
@@ -328,8 +343,19 @@ namespace snuffbox
       */
       Scene* scene() const;
 
+      /**
+      * @return The ID of this entity
+      */
+      size_t id() const;
+
+      /**
+      * @see ISerializable::Serialize
+      */
       void Serialize(foundation::SaveArchive& archive) const override;
 
+      /**
+      * @see ISerializable::Deserialize
+      */
       void Deserialize(foundation::LoadArchive& archive) override;
 
       /**
@@ -350,6 +376,7 @@ namespace snuffbox
       bool active_; //!< Is this entity active?
 
       Scene* scene_; //!< The scene this entity was spawned in
+      size_t id_; //!< The ID of this entity, from within the current scene
 
       static const char* kDefaultName_; //!< The default name for entities
     };

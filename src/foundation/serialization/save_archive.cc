@@ -1,4 +1,4 @@
-#include "foundation/serialization/archive.h"
+#include "foundation/serialization/save_archive.h"
 #include "foundation/auxiliary/string_utils.h"
 #include "foundation/auxiliary/logger.h"
 
@@ -11,8 +11,8 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
-    SaveArchive::SaveArchive(const foundation::Path& path) :
-      path_(path)
+    SaveArchive::SaveArchive() :
+      archiving_(0)
     {
 
     }
@@ -112,7 +112,7 @@ namespace snuffbox
     {
       char current = buffer[i];
 
-      foundation::String result = "\"";
+      String result = "\"";
       while (current != '\0')
       {
         result += current;
@@ -236,25 +236,38 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void SaveArchive::Flush()
+    void SaveArchive::Clear()
+    {
+      Logger::Assert(archiving_ == 0, 
+        "Attempted to clear a SaveArchive while archiving");
+
+      buffer_.clear();
+    }
+
+    //--------------------------------------------------------------------------
+    bool SaveArchive::WriteFile(const Path& path) const
+    {
+      String json = ToMemory();
+
+      File file(path, FileFlags::kWrite);
+
+      if (file.is_ok() == false)
+      {
+        return false;
+      }
+
+      file.Write(reinterpret_cast<const uint8_t*>(json.c_str()), json.size());
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    String SaveArchive::ToMemory() const
     {
       size_t i = 0;
       String json = WriteJsonValue(i, buffer_.data());
 
-      File file(path_, FileFlags::kWrite);
-
-      if (file.is_ok() == false)
-      {
-        return;
-      }
-
-      file.Write(reinterpret_cast<const uint8_t*>(json.c_str()), json.size());
-    }
-
-    //--------------------------------------------------------------------------
-    SaveArchive::~SaveArchive()
-    {
-      Flush();
+      return json;
     }
   }
 }

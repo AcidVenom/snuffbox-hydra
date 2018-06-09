@@ -4,7 +4,7 @@
 #include "engine/application/application.h"
 #include "engine/services/script_service.h"
 
-#include <foundation/serialization/archive.h>
+#include <foundation/serialization/save_archive.h>
 
 #include <sparsed/script_component.gen.cc>
 

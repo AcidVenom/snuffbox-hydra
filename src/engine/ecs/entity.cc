@@ -6,7 +6,7 @@
 
 #include "engine/components/transform_component.h"
 
-#include <foundation/serialization/archive.h>
+#include <foundation/serialization/save_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/components/script_component.h"
@@ -22,14 +22,21 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     Entity::Entity() :
+      Entity(
+        Application::Instance()->GetService<SceneService>()->current_scene())
+    {
+      
+    }
+
+    //--------------------------------------------------------------------------
+    Entity::Entity(Scene* scene) :
       name_(kDefaultName_),
       destroyed_(false),
       active_(true),
-      scene_(
-        Application::Instance()->GetService<SceneService>()->current_scene())
+      scene_(scene),
+      id_(0)
     {
       AddComponentInternal(Components::kTransform);
-
       scene_->AddEntity(this);
     }
 
@@ -185,6 +192,30 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Entity::set_name(const foundation::String& name)
+    {
+      name_ = name;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::String& Entity::name() const
+    {
+      return name_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_active(bool active)
+    {
+      active_ = active;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Entity::active() const
+    {
+      return active_;
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::IDCheck(Components id)
     {
       foundation::Logger::Assert(
@@ -268,33 +299,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Entity::set_id(size_t id)
+    {
+      id_ = id;
+    }
+
+    //--------------------------------------------------------------------------
     Scene* Entity::scene() const
     {
       return scene_;
     }
 
     //--------------------------------------------------------------------------
-    void Entity::set_name(const foundation::String& name)
+    size_t Entity::id() const
     {
-      name_ = name;
-    }
-
-    //--------------------------------------------------------------------------
-    const foundation::String& Entity::name() const
-    {
-      return name_;
-    }
-
-    //--------------------------------------------------------------------------
-    void Entity::set_active(bool active)
-    {
-      active_ = active;
-    }
-
-    //--------------------------------------------------------------------------
-    bool Entity::active() const
-    {
-      return active_;
+      return id_;
     }
 
     //--------------------------------------------------------------------------
@@ -302,7 +321,8 @@ namespace snuffbox
     {
       archive(
         ARCHIVE_PROP(name_), 
-        ARCHIVE_PROP(active_));
+        ARCHIVE_PROP(active_),
+        ARCHIVE_PROP(id_));
 
       foundation::Vector<IComponent*> components;
 

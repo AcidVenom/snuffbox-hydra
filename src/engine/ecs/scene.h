@@ -2,6 +2,7 @@
 
 #include <foundation/containers/vector.h>
 #include <foundation/serialization/serializable.h>
+#include <foundation/containers/function.h>
 
 namespace snuffbox
 {
@@ -38,7 +39,12 @@ namespace snuffbox
       /**
       * @brief Used to call a function on each entity in the scene
       */
-      using EntityDelegate = void(*)(Entity*);
+      using EntityDelegate = foundation::Function<bool(Entity*)>;
+
+      /**
+      * @brief Default constructor
+      */
+      Scene();
 
     protected:
 
@@ -85,6 +91,13 @@ namespace snuffbox
       */
       int HasEntity(Entity* entity);
 
+      /**
+      * @brief Finds the highest ID in the entity list and increments it by 1
+      *
+      * @return The unique ID
+      */
+      size_t GetNextAvailableID();
+
     public:
 
       /**
@@ -108,11 +121,29 @@ namespace snuffbox
       * @brief Call a function on each entity in the scene
       *
       * @param[in] del The delegate to call
+      *
+      * @remarks The delegate should return whether to continue the loop or not,
+      *          where true = continue and false = break
       */
-      void ForEachEntity(EntityDelegate del);
+      void ForEachEntity(const EntityDelegate& del);
 
+      /**
+      * @brief Finds an entity by ID and returns it
+      *
+      * @param[in] id The ID to search for
+      *
+      * @return The found entity, or nullptr if it doesn't exist in this scene
+      */
+      Entity* FindEntityByID(size_t id);
+
+      /**
+      * @see ISerializable::Serialize
+      */
       void Serialize(foundation::SaveArchive& archive) const override;
 
+      /**
+      * @see ISerializable::Deserialize
+      */
       void Deserialize(foundation::LoadArchive& archive) override;
 
       /**
@@ -126,6 +157,7 @@ namespace snuffbox
       * @brief All current entities in this scene
       */
       foundation::Vector<Entity*> entities_;
+      size_t current_id_; //!< The next available ID for an entity
     };
   }
 }

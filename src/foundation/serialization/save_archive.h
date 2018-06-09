@@ -91,11 +91,9 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Construct a save archive with a path to flush the data to
-      *
-      * @param[in] path The path to store the data in
+      * @brief Default constructor 
       */
-      SaveArchive(const foundation::Path& path);
+      SaveArchive();
 
       /**
       * @brief Archives multiple values into the archive
@@ -339,61 +337,35 @@ namespace snuffbox
       */
       static String IndentationString(int indent);
 
-      /**
-      * @brief Flushes the contents of the archive to disk, as a JSON string
-      */
-      void Flush();
-
     public:
 
       /**
-      * @see SaveArchive::Flush
+      * @brief Clears the archive of all its contents
+      *
+      * @remarks This checks if we're currently archiving, as that might
+      *          cause undefined behavior due to the nature of the abstract
+      *          buffer
       */
-      ~SaveArchive();
+      void Clear();
+
+      /**
+      * @brief Flushes the contents of the archive to a file, as a JSON string
+      *
+      * @param[in] path The path to the file
+      *
+      * @return Were we able to save the file?
+      */
+      bool WriteFile(const Path& path) const;
+
+      /**
+      * @return Retrieves the contents of the archive as a JSON string
+      */
+      String ToMemory() const;
 
     private:
 
+      int archiving_; //!< Are we currently archiving?
       Vector<uint8_t> buffer_; //!< The buffer with data
-      foundation::Path path_; //!< The path where to save the data
-    };
-
-    /**
-    * @brief Used to load data archived by SaveArchive
-    *
-    * The load archive requires a JSON format, created from the SaveArchive.
-    * All values can then be retrieved by their original name within the
-    * SaveArchive. This is order-independent and thus compatible over multiple
-    * versions of serialized data.
-    *
-    * @author Daniel Konings
-    */
-    class LoadArchive
-    {
-
-    public:
-
-      /**
-      * @brief Load a value from the archive
-      *
-      * @remarks This is a recursive unroll to retrieve multiple values at once
-      *
-      * @tparam T The current type
-      * @tparam Args... The remaining types
-      *
-      * @param[out] value The value to store the found data in
-      * @param[out] args The other values to retrieve
-      */
-      template <typename T, typename ... Args>
-      void operator()(T* value, Args&&... args);
-
-      /**
-      * @see LoadArchive::operator()
-      *
-      * @remarks The last function of the unroll when there is only 
-      *          one item left
-      */
-      template <typename T>
-      void operator()(T* value);
     };
 
     //--------------------------------------------------------------------------
@@ -488,7 +460,9 @@ namespace snuffbox
     template <typename T>
     inline void SaveArchive::operator()(const T& value)
     {
+      ++archiving_;
       WriteValue<T>(value);
+      --archiving_;
     }
 
     //--------------------------------------------------------------------------
@@ -536,7 +510,16 @@ namespace snuffbox
       SaveArchive& archive,
       const glm::vec2& value)
     {
-      archive(foundation::Vector<float>({ value.x, value.y }));
+      float x = value.x;
+      float y = value.y;
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
+
+      archive(
+        ARCHIVE_PROP(x), 
+        ARCHIVE_PROP(y));
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
     }
 
     //--------------------------------------------------------------------------
@@ -545,7 +528,18 @@ namespace snuffbox
       SaveArchive& archive, 
       const glm::vec3& value)
     {
-      archive(foundation::Vector<float>({ value.x, value.y, value.z }));
+      float x = value.x;
+      float y = value.y;
+      float z = value.z;
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
+
+      archive(
+        ARCHIVE_PROP(x), 
+        ARCHIVE_PROP(y),
+        ARCHIVE_PROP(z));
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
     }
 
     //--------------------------------------------------------------------------
@@ -554,7 +548,20 @@ namespace snuffbox
       SaveArchive& archive, 
       const glm::vec4& value)
     {
-      archive(foundation::Vector<float>({ value.x, value.y, value.z, value.w}));
+      float x = value.x;
+      float y = value.y;
+      float z = value.z;
+      float w = value.w;
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectStart);
+
+      archive(
+        ARCHIVE_PROP(x), 
+        ARCHIVE_PROP(y),
+        ARCHIVE_PROP(z),
+        ARCHIVE_PROP(w));
+
+      archive.WriteIdentifier(SaveArchive::Identifiers::kObjectEnd);
     }
 
     //--------------------------------------------------------------------------
@@ -563,7 +570,7 @@ namespace snuffbox
       SaveArchive& archive, 
       const glm::quat& value)
     {
-      archive(foundation::Vector<float>({ value.x, value.y, value.z, value.w}));
+      Serialize<glm::vec3>(archive, { value.x, value.y, value.z });
     }
   }
 }

@@ -53,8 +53,10 @@ SET(IOSources
 )
 
 SET(SerializationSources
-  "serialization/archive.h"
-  "serialization/archive.cc"
+  "serialization/save_archive.h"
+  "serialization/save_archive.cc"
+  "serialization/load_archive.h"
+  "serialization/load_archive.cc"
   "serialization/serializable.h"
 )
 

@@ -7,7 +7,7 @@
 #include <engine/services/scene_service.h>
 #include <engine/services/asset_service.h>
 
-#include <foundation/serialization/archive.h>
+#include <foundation/serialization/save_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
@@ -214,6 +214,8 @@ namespace snuffbox
           c = comps.at(i);
           c->SetBehavior(c->behavior());
         }
+
+        return true;
       });
 
       engine::AssetService* a = GetService<engine::AssetService>();
@@ -247,16 +249,18 @@ namespace snuffbox
       {
         window_->SetPlaybackEnabled(false);
       }
-
-      /*foundation::SaveArchive archive("G:/Programming/snuffbox-hydra-bin/test/test.json");
-      
-      engine::Scene* scene = GetService<engine::SceneService>()->current_scene();
-      archive(scene);*/
     }
 
     //--------------------------------------------------------------------------
     void EditorApplication::Play()
     {
+      foundation::SaveArchive archive;
+
+      engine::Scene* scene = GetService<engine::SceneService>()->current_scene();
+      archive(scene);
+
+      archive.WriteFile("G:/Programming/snuffbox-hydra-bin/test/test.json");
+
       InitializeAssets(builder_.build_directory());
       RunScripts();
       SCRIPT_CALLBACK(Start);

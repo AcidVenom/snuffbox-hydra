@@ -2,7 +2,7 @@
 #include "engine/ecs/entity.h"
 #include "engine/ecs/scene.h"
 
-#include <foundation/serialization/archive.h>
+#include <foundation/serialization/save_archive.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <sparsed/transform_component.gen.cc>
