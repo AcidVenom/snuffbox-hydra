@@ -31,10 +31,19 @@ namespace snuffbox
 
     public:
 
+      /**
+      * @brief Used to store serialized, typed, component data
+      *
+      * @remarks Because we don't know exactly what component type we have
+      *          yet before deserialization, we store the component type first
+      *          and then deserialize again to retrieve the actual data.
+      *
+      * @author Daniel Konings
+      */
       struct SerializedComponent
       {
-        Components type;
-        IComponent* data;
+        Components type; //!< The type of the stored component
+        IComponent* data; //!< The data of the stored component
       };
 
       SCRIPT_NAME(Entity);
