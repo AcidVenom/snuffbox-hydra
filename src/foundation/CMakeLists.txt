@@ -3,6 +3,7 @@ SET(DefinitionsSources
   "definitions/logging.h"
   "definitions/io.h"
   "definitions/time_units.h"
+  "definitions/archive.h"
 )
 
 SET(MemorySources

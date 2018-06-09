@@ -1,5 +1,8 @@
 #pragma once
 
+#include "foundation/serialization/serializable.h"
+#include "foundation/definitions/archive.h"
+
 namespace snuffbox
 {
   namespace foundation
