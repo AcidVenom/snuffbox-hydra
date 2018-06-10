@@ -47,6 +47,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void SceneService::SwitchScene(Scene* scene)
+    {
+      if (scene == nullptr)
+      {
+        current_scene_ = &default_scene_;
+        return;
+      }
+
+      current_scene_ = scene;
+    }
+
+    //--------------------------------------------------------------------------
     Scene* SceneService::current_scene() const
     {
       return current_scene_;

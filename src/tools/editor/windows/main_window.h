@@ -172,6 +172,19 @@ namespace snuffbox
       */
       void OnPlay();
 
+      /**
+      * @brief Called when an asset in the asset browser has been double
+      *        clicked
+      */
+      void OnDoubleClickedAsset(QString relative, int type);
+
+    signals:
+
+      /**
+      * @brief A signal to emit when the scene changed
+      */
+      void SceneChanged();
+
     public:
 
       /**

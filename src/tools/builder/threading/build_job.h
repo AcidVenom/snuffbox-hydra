@@ -1,7 +1,8 @@
 #pragma once
 
-#include "tools/compilers/definitions/asset_types.h"
 #include "tools/builder/threading/build_item.h"
+
+#include <tools/compilers/definitions/asset_types.h>
 
 #include <foundation/memory/memory.h>
 

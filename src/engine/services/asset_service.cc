@@ -1,6 +1,7 @@
 #include "engine/services/asset_service.h"
 
 #include "engine/assets/script_asset.h"
+#include "engine/assets/scene_asset.h"
 
 #include <foundation/io/directory_tree.h>
 #include <foundation/auxiliary/logger.h>
@@ -25,7 +26,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetService::OnShutdown(Application& app)
     {
-      
+      Clear();
     }
 
     //--------------------------------------------------------------------------
@@ -225,6 +226,10 @@ namespace snuffbox
         ptr = foundation::Memory::Construct<ScriptAsset>(alloc, path);
         break;
 
+      case compilers::AssetTypes::kScene:
+        ptr = foundation::Memory::Construct<SceneAsset>(alloc, path);
+        break;
+
       default:
         foundation::Logger::Assert(false,
           "Attempted to register an unknown asset type");
@@ -280,6 +285,20 @@ namespace snuffbox
       foundation::String p = NoExtensionToBuildPath(type, path);
 
       return Exists(type, path) == true && registered_.at(p)->is_loaded();
+    }
+
+    //--------------------------------------------------------------------------
+    IAsset* AssetService::Get(
+      compilers::AssetTypes type,
+      const foundation::String& path)
+    {
+      if (Exists(type, path) == false)
+      {
+        return nullptr;
+      }
+
+      foundation::String p = NoExtensionToBuildPath(type, path);
+      return registered_.at(p).get();
     }
 
     //--------------------------------------------------------------------------

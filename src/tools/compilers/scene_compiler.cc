@@ -5,6 +5,12 @@ namespace snuffbox
   namespace compilers
   {
     //--------------------------------------------------------------------------
+    SceneCompiler::SceneCompiler()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     bool SceneCompiler::CompileImpl(foundation::File& file)
     {
       SourceFileData fd;

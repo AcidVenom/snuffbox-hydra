@@ -167,6 +167,12 @@ namespace snuffbox
         SIGNAL(RefreshHierarchy()),
         hierarchy_.get(),
         SLOT(OnHierarchyChanged()));
+
+      connect(
+        this,
+        SIGNAL(SceneChanged()),
+        hierarchy_.get(),
+        SLOT(OnHierarchyChanged()));
     }
 
     //--------------------------------------------------------------------------
@@ -184,6 +190,12 @@ namespace snuffbox
         &foundation::Memory::default_allocator(),
         ui_.buildDirectoryBrowser,
         ui_.assetLayout);
+
+      connect(
+        asset_browser_.get(),
+        SIGNAL(DoubleClickedAsset(QString, int)),
+        this,
+        SLOT(OnDoubleClickedAsset(QString, int)));
     }
 
     //--------------------------------------------------------------------------
@@ -285,6 +297,22 @@ namespace snuffbox
 
       MarkPlaybackButton(ui_.playButton, enabled);
       app_->SwitchState(next);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnDoubleClickedAsset(QString relative, int type)
+    {
+      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
+
+      switch (t)
+      {
+      case compilers::AssetTypes::kScene:
+        app_->OpenScene(relative.toStdString().c_str());
+        break;
+
+      default:
+        break;
+      }
     }
 
     //--------------------------------------------------------------------------

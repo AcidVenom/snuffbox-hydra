@@ -51,6 +51,16 @@ namespace snuffbox
       void Start();
 
       /**
+      * @brief Switches the current scene
+      *
+      * @param[in] scene The scene to switch to
+      *
+      * @remarks If the scene parameter is nullptr, the scene service will
+      *          switch back to the default scene
+      */
+      void SwitchScene(Scene* scene);
+
+      /**
       * @return The current scene that is being updated
       */
       Scene* current_scene() const;

@@ -186,6 +186,16 @@ namespace snuffbox
         const foundation::String& path) const;
 
       /**
+      * @brief Retrieves an asset by type and path
+      *
+      * @param[in] type The type of the asset to retrieve
+      * @param[in] path The path to the asset, with no extension
+      *
+      * @return The found asset, or nullptr if it doesn't exist
+      */
+      IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
+
+      /**
       * @brief Sets the build directory of the asset service, to append
       *        to the relative file paths
       *

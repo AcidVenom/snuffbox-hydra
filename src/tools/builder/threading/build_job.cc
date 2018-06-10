@@ -1,5 +1,7 @@
 #include "tools/builder/threading/build_job.h"
-#include "tools/compilers/script_compiler.h"
+
+#include <tools/compilers/script_compiler.h>
+#include <tools/compilers/scene_compiler.h>
 
 #include <foundation/auxiliary/logger.h>
 
@@ -96,6 +98,11 @@ namespace snuffbox
       case compilers::AssetTypes::kScript:
         ptr = foundation::Memory::ConstructShared<
           compilers::ScriptCompiler>(alloc);
+        break;
+
+      case compilers::AssetTypes::kScene:
+        ptr = foundation::Memory::ConstructShared<
+          compilers::SceneCompiler>(alloc);
         break;
 
       default:

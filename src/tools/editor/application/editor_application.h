@@ -80,6 +80,13 @@ namespace snuffbox
       void SwitchState(States state);
 
       /**
+      * @brief Opens a scene by relative path in the build directory
+      *
+      * @param[in] path The scene to open
+      */
+      void OpenScene(const foundation::Path& path);
+
+      /**
       * @return The state of the editor
       */
       States state() const;

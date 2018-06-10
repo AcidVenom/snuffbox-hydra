@@ -82,6 +82,8 @@ SET(AssetsSources
   "assets/asset.cc"
   "assets/script_asset.h"
   "assets/script_asset.cc"
+  "assets/scene_asset.h"
+  "assets/scene_asset.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)

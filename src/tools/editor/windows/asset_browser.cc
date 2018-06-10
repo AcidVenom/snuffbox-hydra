@@ -9,6 +9,7 @@
 #include <qtreeview.h>
 #include <qgridlayout.h>
 #include <qlabel.h>
+#include <qevent.h>
 
 namespace snuffbox
 {
@@ -22,7 +23,15 @@ namespace snuffbox
     const int AssetBrowser::kContentMargin_ = 10;
 
     //--------------------------------------------------------------------------
-    AssetBrowserItem::AssetBrowserItem(const QString& name) :
+    AssetBrowserItem::AssetBrowserItem(
+      AssetBrowser* browser,
+      const QString& name,
+      const foundation::Path& path,
+      compilers::AssetTypes type)
+      :
+      browser_(browser),
+      path_(path),
+      type_(type),
       icon_(nullptr),
       label_(nullptr)
     {
@@ -77,6 +86,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void AssetBrowserItem::mouseDoubleClickEvent(QMouseEvent* e)
+    {
+      if (e->button() == Qt::LeftButton)
+      {
+        emit browser_->DoubleClickedAsset(
+          path_.ToString().c_str(), 
+          static_cast<int>(type_));
+      }  
+    }
+
+    //--------------------------------------------------------------------------
     AssetBrowser::AssetBrowser(QTreeView* tree, QGridLayout* assets) :
       root_(""),
       tree_(tree),
@@ -119,15 +139,18 @@ namespace snuffbox
     {
       Clear();
 
+      foundation::Path asset_dir = (root_ + "/assets").toStdString().c_str();
+
       const foundation::Vector<engine::AssetService::AssetFile>& paths =
-        engine::AssetService::EnumerateAssets(path, path);
+        engine::AssetService::EnumerateAssets(path, asset_dir);
 
       QString full_path;
       for (size_t i = 0; i < paths.size(); ++i)
       {
         const engine::AssetService::AssetFile& file = paths.at(i);
         full_path = root_ + "/" + file.relative_path.ToString().c_str();
-        AddFromPath(full_path.toStdString().c_str());
+
+        AddFromPath(full_path.toStdString().c_str(), file.type);
       }
 
       assets_->setRowStretch(current_row_ + 1, 1);
@@ -139,20 +162,20 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::AddFromPath(const foundation::Path& path)
+    void AssetBrowser::AddFromPath(
+      const foundation::Path& path,
+      compilers::AssetTypes type)
     {
-      foundation::Path stripped = path.NoExtension();
+      foundation::Path relative = path.StripPath(root_.toStdString().c_str());
+      foundation::String name = relative.NoExtension().ToString();
 
       foundation::Vector<foundation::String> split = 
-        foundation::StringUtils::Split(stripped.ToString(), '/');
+        foundation::StringUtils::Split(name, '/');
 
-      if (split.size() == 0)
-      {
-        return;
-      }
+      name = split.at(split.size() - 1);
 
-      const foundation::String& name = split.at(split.size() - 1);
-      AddWidget(new AssetBrowserItem(name.c_str()));
+      AddWidget(
+        new AssetBrowserItem(this, name.c_str(), relative, type));
     }
 
     //--------------------------------------------------------------------------

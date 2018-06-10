@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/compilers/definitions/asset_types.h"
+#include <tools/compilers/definitions/asset_types.h>
 
 #include <foundation/io/path.h>
 #include <foundation/containers/queue.h>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tools/compilers/definitions/asset_types.h>
+
 #include <foundation/io/path.h>
 
 #include <qobject.h>
@@ -16,6 +18,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class AssetBrowser;
+
     /**
     * @brief An asset browser item to show in the asset browser
     *
@@ -35,9 +39,16 @@ namespace snuffbox
       /**
       * @brief Construct through a name
       *
+      * @param[in] browser The asset browser this asset belongs to
       * @param[in] name The name of the asset
+      * @param[in] path The relative path to the asset
+      * @param[in] type The type of the asset
       */
-      AssetBrowserItem(const QString& name);
+      AssetBrowserItem(
+        AssetBrowser* browser,
+        const QString& name,
+        const foundation::Path& path,
+        compilers::AssetTypes type);
 
     protected:
 
@@ -53,7 +64,17 @@ namespace snuffbox
       */
       void ApplyStyle();
 
+      /**
+      * @brief Overrides the double clicking behavior when clicking on an asset
+      */
+      void mouseDoubleClickEvent(QMouseEvent* e) override;
+
     private:
+
+      AssetBrowser* browser_; //!< The asset browser this asset belongs to
+
+      foundation::Path path_; //!< The relative path to the asset
+      compilers::AssetTypes type_; //!< The type of the asset
 
       QFrame* icon_; //!< The created icon
       QLabel* label_; //!< The created label
@@ -105,8 +126,11 @@ namespace snuffbox
       * @brief Adds an asset to the asset browser by path
       *
       * @param[in] path The path to the file to add
+      * @param[in] type The asset type of the file
       */
-      void AddFromPath(const foundation::Path& path);
+      void AddFromPath(
+        const foundation::Path& path, 
+        compilers::AssetTypes type);
 
       /**
       * @brief Adds a new widget, incrementing the column and row count
@@ -143,6 +167,17 @@ namespace snuffbox
       *        directory tree
       */
       void OnSelectionChanged(const QModelIndex& index);
+
+    signals:
+
+      /**
+      * @brief A signal to emit when an asset is double clicked
+      *
+      * @param[in] relative The relative path to the asset, 
+      *                     from the asset folder
+      * @param[in] type The type of the asset
+      */
+      void DoubleClickedAsset(QString relative, int type);
 
     private:
 

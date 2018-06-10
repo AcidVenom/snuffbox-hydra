@@ -6,9 +6,7 @@
 #include <engine/services/cvar_service.h>
 #include <engine/services/scene_service.h>
 #include <engine/services/asset_service.h>
-
-#include <foundation/serialization/save_archive.h>
-#include <foundation/serialization/load_archive.h>
+#include <engine/assets/scene_asset.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
@@ -148,6 +146,36 @@ namespace snuffbox
       default:
         break;
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OpenScene(const foundation::Path& path)
+    {
+      engine::AssetService* as = GetService<engine::AssetService>();
+      engine::SceneService* ss = GetService<engine::SceneService>();
+
+      foundation::String asset = path.NoExtension().ToString();
+
+      if (as->Load(compilers::AssetTypes::kScene, asset) == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kError,
+          "Could not open scene '{0}'",
+          asset);
+
+        ss->SwitchScene(nullptr);
+
+        return;
+      }
+
+      engine::SceneAsset* scene = 
+        static_cast<engine::SceneAsset*>(
+          as->Get(compilers::AssetTypes::kScene, asset));
+
+      ss->SwitchScene(scene->scene());
+
+      emit window_->SceneChanged();
     }
 
     //--------------------------------------------------------------------------
