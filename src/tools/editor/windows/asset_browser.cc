@@ -36,7 +36,7 @@ namespace snuffbox
       label_(nullptr)
     {
       CreateItem(name);
-      ApplyStyle();
+      SetSelected(false);
     }
 
     //--------------------------------------------------------------------------
@@ -69,20 +69,32 @@ namespace snuffbox
       widget_layout->addStretch();
 
       setLayout(widget_layout);
+
+      connect(
+        browser_,
+        SIGNAL(DeselectAll()),
+        this,
+        SLOT(Deselect()));
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowserItem::ApplyStyle()
+    void AssetBrowserItem::SetSelected(bool selected)
     {
-      QString bg_col = EditorColors::ColorToCSS(
-        EditorColors::DefaultPalette().color(QPalette::Base));
+      QPalette::ColorRole role = 
+        selected == true ? QPalette::Highlight : QPalette::Base;
+
+      QString icon_col = EditorColors::ColorToCSS(
+        EditorColors::DefaultPalette().color(role));
+
+      QString label_col = 
+        selected == true ? 
+        icon_col : EditorColors::ColorToCSS(EditorColors::DockColor());
 
       icon_->setStyleSheet(
-        "QFrame{ background-color: " + bg_col + "; border-radius: 4px; }");
+        "QFrame{ background-color: " + icon_col + "; border-radius: 4px; }");
 
-      bg_col = EditorColors::ColorToCSS(EditorColors::DockColor());
       label_->setStyleSheet(
-        "QLabel{ background-color: " + bg_col + "; border-radius: 4px; }");
+        "QLabel{ background-color: " + label_col + "; border-radius: 4px; }");
     }
 
     //--------------------------------------------------------------------------
@@ -94,6 +106,22 @@ namespace snuffbox
           path_.ToString().c_str(), 
           static_cast<int>(type_));
       }  
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowserItem::mousePressEvent(QMouseEvent* e)
+    {
+      if (e->button() == Qt::LeftButton)
+      {
+        emit browser_->DeselectAll();
+        SetSelected(true);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowserItem::Deselect()
+    {
+      SetSelected(false);
     }
 
     //--------------------------------------------------------------------------

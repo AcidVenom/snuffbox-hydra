@@ -149,6 +149,12 @@ namespace snuffbox
       */
       void SetPlaybackEnabled(bool enabled);
 
+      /**
+      * @brief Refreshes the current window title with project directory
+      *        and current scene information
+      */
+      void RefreshWindowTitle();
+
     private slots:
 
       /**
@@ -158,6 +164,21 @@ namespace snuffbox
       * @see EditorApplication::SetProjectDirectory
       */
       void OpenProject();
+
+      /**
+      * @brief Creates a new scene
+      */
+      void NewScene();
+
+      /**
+      * @brief Saves the current scene
+      */
+      void SaveScene();
+
+      /**
+      * @brief Saves the current scene but shows a save dialog
+      */
+      void SaveSceneAs();
 
       /**
       * @brief Called when an entity was selected in the hierarchy
@@ -203,6 +224,7 @@ namespace snuffbox
       foundation::UniquePtr<AssetBrowser> asset_browser_; //!< The asset browser
 
       QString project_dir_; //!< The current project directory
+      QString current_scene_; //!< The current scene
 
       /**
       * @see GraphicsWindow::SizeCallback

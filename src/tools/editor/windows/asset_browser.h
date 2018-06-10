@@ -34,6 +34,8 @@ namespace snuffbox
     class AssetBrowserItem : public QWidget
     {
 
+      Q_OBJECT
+
     public:
 
       /**
@@ -60,14 +62,27 @@ namespace snuffbox
       void CreateItem(const QString& name);
 
       /**
-      * @brief Applies the colors to the created label and icon
+      * @brief Applies the correct selection colors 
+      *        to the created label and icon
+      *
+      * @param[in] selected Is this item currently selected?
       */
-      void ApplyStyle();
+      void SetSelected(bool selected);
 
       /**
       * @brief Overrides the double clicking behavior when clicking on an asset
       */
       void mouseDoubleClickEvent(QMouseEvent* e) override;
+
+      /**
+      * @brief Changes the background color of the widget and deselects others
+      */
+      void mousePressEvent(QMouseEvent* e) override;
+
+    private slots:
+
+      void Deselect();
+
 
     private:
 
@@ -178,6 +193,11 @@ namespace snuffbox
       * @param[in] type The type of the asset
       */
       void DoubleClickedAsset(QString relative, int type);
+
+      /**
+      * @brief Deselects all assets in the asset browser
+      */
+      void DeselectAll();
 
     private:
 

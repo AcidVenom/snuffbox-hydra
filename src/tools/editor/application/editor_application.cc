@@ -14,6 +14,11 @@
 #endif
 
 #include <foundation/auxiliary/timer.h>
+#include <foundation/serialization/save_archive.h>
+#include <foundation/io/file.h>
+
+#include <qfiledialog.h>
+#include <qmessagebox.h>
 
 namespace snuffbox
 {
@@ -28,6 +33,9 @@ namespace snuffbox
       Application(argc, argv, cfg),
       QApplication(argc, argv),
       window_(nullptr),
+      project_dir_(""),
+      assets_dir_(""),
+      loaded_scene_(""),
       state_(States::kUninitialized),
       has_error_(false)
     {
@@ -123,6 +131,9 @@ namespace snuffbox
         return false;
       }
 
+      project_dir_ = path.ToString().c_str();
+      assets_dir_ = project_dir_ + "/assets";
+
       InitializeAssets(builder_.build_directory());
 
       return true;
@@ -149,33 +160,103 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool EditorApplication::NewScene()
+    {
+      if (ShowSceneSaveDialog() == false)
+      {
+        return false;
+      }
+
+      GetService<engine::SceneService>()->SwitchScene(nullptr);
+      loaded_scene_ = "";
+
+      emit window_->SceneChanged();
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
     void EditorApplication::OpenScene(const foundation::Path& path)
     {
-      engine::AssetService* as = GetService<engine::AssetService>();
-      engine::SceneService* ss = GetService<engine::SceneService>();
-
-      foundation::String asset = path.NoExtension().ToString();
-
-      if (as->Load(compilers::AssetTypes::kScene, asset) == false)
+      if (loaded_scene_ == path.ToString())
       {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kEditor,
-          foundation::LogSeverity::kError,
-          "Could not open scene '{0}'",
-          asset);
-
-        ss->SwitchScene(nullptr);
-
         return;
       }
 
-      engine::SceneAsset* scene = 
-        static_cast<engine::SceneAsset*>(
-          as->Get(compilers::AssetTypes::kScene, asset));
+      if (ShowSceneSaveDialog() == false)
+      {
+        return;
+      }
 
-      ss->SwitchScene(scene->scene());
+      loaded_scene_ = path.ToString();
+
+      foundation::String asset = path.NoExtension().ToString();
+      GetService<engine::SceneService>()->SwitchScene(asset);
 
       emit window_->SceneChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    bool EditorApplication::SaveCurrentScene(bool dialog)
+    {
+      engine::Scene* scene =
+        GetService<engine::SceneService>()->current_scene();
+
+      bool show_dialog = true;
+      QString path = "";
+
+      if (loaded_scene_.size() > 0)
+      {
+        foundation::Path dir = assets_dir_.toStdString().c_str();
+        dir = dir / loaded_scene_;
+
+        if (foundation::File::Exists(dir) == true)
+        {
+          path = dir.ToString().c_str();
+          show_dialog = false;
+        }
+      }
+
+      if (dialog == true || show_dialog == true)
+      {
+        path = QFileDialog::getSaveFileName(window_.get(),
+         "Save scene", assets_dir_, "Scene files (*.scene)");
+      }
+
+      if (path.size() > 0)
+      {
+        foundation::SaveArchive archive;
+        archive(scene);
+
+        std::string s_path = path.toStdString();
+        foundation::Path full_path = s_path.c_str();
+
+        if (archive.WriteFile(full_path) == false)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kEditor,
+            foundation::LogSeverity::kError,
+            "Could not save scene file '{0}'",
+            full_path);
+
+          return false;
+        }
+
+        std::string assets_path = assets_dir_.toStdString();
+
+        loaded_scene_ = full_path.StripPath(
+          foundation::Path(assets_path.c_str())).ToString();
+
+        return true;
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    QString EditorApplication::GetLoadedScene()
+    {
+      return loaded_scene_.c_str();
     }
 
     //--------------------------------------------------------------------------
@@ -303,6 +384,28 @@ namespace snuffbox
       RunScripts();
       SCRIPT_CALLBACK(Start);
       GetService<engine::SceneService>()->Start();
+    }
+
+    //--------------------------------------------------------------------------
+    bool EditorApplication::ShowSceneSaveDialog()
+    {
+      QMessageBox::StandardButton reply;
+
+      reply = QMessageBox::question(window_.get(), 
+        "Save current scene?",
+        "Do you want to save the current scene?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+      if (reply == QMessageBox::Yes)
+      {
+        SaveCurrentScene();
+      } 
+      else if (reply == QMessageBox::Cancel)
+      {
+        return false;
+      }
+
+      return true;
     }
   }
 }

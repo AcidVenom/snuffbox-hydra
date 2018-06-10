@@ -80,11 +80,34 @@ namespace snuffbox
       void SwitchState(States state);
 
       /**
+      * @brief Opens a new scene
+      *
+      * @return Was the action not cancelled?
+      */
+      bool NewScene();
+
+      /**
       * @brief Opens a scene by relative path in the build directory
       *
       * @param[in] path The scene to open
       */
       void OpenScene(const foundation::Path& path);
+
+      /**
+      * @brief Saves the current scene
+      *
+      * @param[in] dialog Do we want to force a file picker dialog?
+      *
+      * @remarks This opens a file dialog if the scene does not exist yet
+      *
+      * @return Was the scene actually saved?
+      */
+      bool SaveCurrentScene(bool dialog = false);
+
+      /**
+      * @return The currently loaded scene name
+      */
+      QString GetLoadedScene();
 
       /**
       * @return The state of the editor
@@ -143,10 +166,23 @@ namespace snuffbox
       */
       void Play();
 
+      /**
+      * @brief Shows a scene save dialog and asks the user whether they
+      *        want to cancel as well
+      *
+      * @return Should we continue?
+      */
+      bool ShowSceneSaveDialog();
+
     private:
 
       builder::Builder builder_; //!< The builder service
       foundation::UniquePtr<MainWindow> window_; //!< The main window
+
+      QString project_dir_; //!< The current project directory
+      QString assets_dir_; //!< The current assets directory
+
+      foundation::String loaded_scene_; //!< The currently loaded scene
 
       States state_; //!< The state of the editor
       bool has_error_; //!< Are there any errors?

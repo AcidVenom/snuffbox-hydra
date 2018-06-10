@@ -8,6 +8,7 @@ namespace snuffbox
   namespace engine
   {
     class Entity;
+    class SceneAsset;
 
     /**
     * @brief The scene service to manage all scenes that get created
@@ -55,10 +56,22 @@ namespace snuffbox
       *
       * @param[in] scene The scene to switch to
       *
-      * @remarks If the scene parameter is nullptr, the scene service will
-      *          switch back to the default scene
+      * If the scene parameter is nullptr, the scene service will
+      * switch back to the default scene. The default scene is then reset.
+      *
+      * @remarks This unloads the previously loaded scene
       */
       void SwitchScene(Scene* scene);
+
+      /**
+      * @brief Switches the current scene from a scene asset
+      *
+      *
+      * @param[in] path The path to the scene to switch to
+      *
+      * @see SceneService::SwitchScene
+      */
+      void SwitchScene(const foundation::String& path);
 
       /**
       * @return The current scene that is being updated
@@ -69,6 +82,7 @@ namespace snuffbox
 
       Scene default_scene_; //!< The default scene
       Scene* current_scene_; //!< The current scene that is being updated
+      SceneAsset* loaded_scene_; //!< The currently loaded scene
     };
   }
 }

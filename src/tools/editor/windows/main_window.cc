@@ -28,6 +28,7 @@ namespace snuffbox
       inspector_(nullptr),
       asset_browser_(nullptr),
       project_dir_(""),
+      current_scene_("New scene"),
       on_resize_(nullptr)
     {
       ui_.setupUi(this);
@@ -119,6 +120,24 @@ namespace snuffbox
         &QAction::triggered,
         this,
         &MainWindow::OpenProject);
+
+      connect(
+        ui_.actionNew_Scene,
+        &QAction::triggered,
+        this,
+        &MainWindow::NewScene);
+
+      connect(
+        ui_.actionSave_Scene,
+        &QAction::triggered,
+        this,
+        &MainWindow::SaveScene);
+
+      connect(
+        ui_.actionSave_Scene_As,
+        &QAction::triggered,
+        this,
+        &MainWindow::SaveSceneAs);
 
       connect(
         ui_.playButton,
@@ -251,6 +270,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::RefreshWindowTitle()
+    {
+      setWindowTitle(
+        "Snuffbox Editor - " + current_scene_ + " (" + project_dir_ + ")");
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::OpenProject()
     {
       QString dir = QFileDialog::getExistingDirectory(
@@ -270,8 +296,41 @@ namespace snuffbox
         std::string str = (project_dir_ + "/.build").toStdString();
         asset_browser_->Refresh(str.c_str());
 
-        setWindowTitle("Snuffbox Editor (" + dir + ")");
+        RefreshWindowTitle();
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::NewScene()
+    {
+      if (app_->NewScene() == true)
+      {
+        current_scene_ = "New scene";
+      }
+
+      RefreshWindowTitle();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::SaveScene()
+    {
+      if (app_->SaveCurrentScene() == true)
+      {
+        current_scene_ = app_->GetLoadedScene();
+      }
+
+      RefreshWindowTitle();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::SaveSceneAs()
+    {
+      if (app_->SaveCurrentScene(true) == true)
+      {
+        current_scene_ = app_->GetLoadedScene();
+      }
+
+      RefreshWindowTitle();
     }
 
     //--------------------------------------------------------------------------
@@ -313,6 +372,9 @@ namespace snuffbox
       default:
         break;
       }
+
+      current_scene_ = app_->GetLoadedScene();
+      RefreshWindowTitle();
     }
 
     //--------------------------------------------------------------------------
