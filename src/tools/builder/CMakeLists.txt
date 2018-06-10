@@ -23,6 +23,8 @@ SET(CompilersSources
   "compilers/compiler.cc"
   "compilers/script_compiler.h"
   "compilers/script_compiler.cc"
+  "compilers/scene_compiler.h"
+  "compilers/scene_compiler.cc"
 )
 
 SOURCE_GROUP("\\"           FILES ${RootSources})

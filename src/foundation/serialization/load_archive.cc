@@ -65,7 +65,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     size_t LoadArchive::GetArraySize(const char* name)
     {
-      const rapidjson::Value& current = (*CurrentScope())[name];
+      const JsonValue& current = (*CurrentScope())[name];
 
       if (current.IsArray() == false)
       {
@@ -84,9 +84,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const rapidjson::Value* LoadArchive::CurrentScope()
+    const LoadArchive::JsonValue* LoadArchive::CurrentScope()
     {
-      return rapidjson::Pointer(scope_.c_str()).Get(document_);
+      return rapidjson::GenericPointer<
+        JsonValue, 
+        RapidJsonStackAllocator>(scope_.c_str()).Get(document_);
     }
 
     //--------------------------------------------------------------------------

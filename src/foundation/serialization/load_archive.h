@@ -6,6 +6,8 @@
 #include "foundation/io/path.h"
 #include "foundation/containers/vector.h"
 
+#include "foundation/memory/allocators/rapidjson_allocator.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -29,6 +31,14 @@ namespace snuffbox
     */
     class LoadArchive
     {
+
+    private:
+
+      /**
+      * @brief Used to represent a rapidjson Value with a custom allocator
+      */
+      using JsonValue = 
+        rapidjson::GenericValue<rapidjson::UTF8<>, RapidJsonAllocator>;
 
     public:
 
@@ -130,7 +140,7 @@ namespace snuffbox
       */
       template <typename T>
       void ReadValue(
-        const rapidjson::Value& v, 
+        const JsonValue& v, 
         T* out, 
         enable_if_number<T>* = nullptr);
 
@@ -144,7 +154,7 @@ namespace snuffbox
       */
       template <typename T>
       void ReadValue(
-        const rapidjson::Value& v, 
+        const JsonValue& v, 
         T* out, 
         enable_if_enum<T>* = nullptr);
 
@@ -158,7 +168,7 @@ namespace snuffbox
       */
       template <typename T>
       void ReadValue(
-        const rapidjson::Value& v, 
+        const JsonValue& v, 
         T* out, 
         enable_if_vector<T>* = nullptr);
 
@@ -175,7 +185,7 @@ namespace snuffbox
       */
       template <typename T>
       void ReadValue(
-        const rapidjson::Value& v, 
+        const JsonValue& v, 
         T* out, 
         enable_if_serializable<T>* = nullptr);
 
@@ -192,7 +202,7 @@ namespace snuffbox
       */
       template <typename T>
       void ReadValue(
-        const rapidjson::Value& v, 
+        const JsonValue& v, 
         T* out, 
         enable_if_n_serializable<T>* = nullptr);
 
@@ -206,7 +216,7 @@ namespace snuffbox
       /**
       * @return The current JSON scope we're in
       */
-      const rapidjson::Value* CurrentScope();
+      const JsonValue* CurrentScope();
 
       /**
       * @brief Exit the current scope and pop one token off of the current
@@ -224,7 +234,11 @@ namespace snuffbox
     private:
 
       bool is_ok_; //!< Can we use this archive for deserialization?
-      rapidjson::Document document_; //!< The loaded Json document
+
+      rapidjson::GenericDocument<
+        rapidjson::UTF8<>, 
+        RapidJsonAllocator,
+        RapidJsonStackAllocator> document_; //!< The loaded Json document
 
       String scope_; //!< The current URI to the current JSON scope
     };
@@ -267,7 +281,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       T* out,
       enable_if_number<T>*)
     {
@@ -282,7 +296,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       T* out,
       enable_if_enum<T>*)
     {
@@ -292,7 +306,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       T* out,
       enable_if_vector<T>*)
     {
@@ -301,7 +315,7 @@ namespace snuffbox
         return;
       }
 
-      const rapidjson::GenericArray<true, rapidjson::Value::ValueType>& arr = 
+      const rapidjson::GenericArray<true, JsonValue::ValueType>& arr = 
         v.GetArray();
 
       rapidjson::SizeType size = arr.Size();
@@ -331,7 +345,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       T* out,
       enable_if_serializable<T>*)
     {
@@ -341,7 +355,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <typename T>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       T* out,
       enable_if_n_serializable<T>*)
     {
@@ -351,7 +365,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       bool* out,
       enable_if_n_serializable<bool>*)
     {
@@ -367,7 +381,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <>
     inline void LoadArchive::ReadValue(
-      const rapidjson::Value& v,
+      const JsonValue& v,
       String* out,
       enable_if_n_serializable<String>*)
     {
@@ -386,14 +400,14 @@ namespace snuffbox
     {
       EnterScope(name);
 
-      const rapidjson::Value& current = *CurrentScope();
+      const JsonValue& current = *CurrentScope();
       
       if (current.IsArray() == false)
       {
         return;
       }
 
-      const rapidjson::GenericArray<true, rapidjson::Value::ValueType>& arr =
+      const rapidjson::GenericArray<true, JsonValue::ValueType>& arr =
         current.GetArray();
 
       if (i > arr.Size())

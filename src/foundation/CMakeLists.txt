@@ -18,6 +18,8 @@ SET(MemoryAllocatorSources
   "memory/allocators/malloc_allocator.cc"
   "memory/allocators/eastl_allocator.h"
   "memory/allocators/eastl_allocator.cc"
+  "memory/allocators/rapidjson_allocator.h"
+  "memory/allocators/rapidjson_allocator.cc"
 )
 
 SET(ContainerSources
