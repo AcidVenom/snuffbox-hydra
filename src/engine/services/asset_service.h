@@ -2,7 +2,7 @@
 
 #include "engine/services/service.h"
 
-#include <tools/builder/definitions/asset_types.h>
+#include <tools/compilers/definitions/asset_types.h>
 
 #include <foundation/io/path.h>
 #include <foundation/containers/map.h>
@@ -33,7 +33,7 @@ namespace snuffbox
       struct AssetFile
       {
         foundation::Path relative_path; //!< The relative path to the file
-        builder::AssetTypes type; //!< The asset type of the file
+        compilers::AssetTypes type; //!< The asset type of the file
       };
 
       /**
@@ -57,7 +57,7 @@ namespace snuffbox
       * @param[in] path The path to the built file
       */
       static foundation::String NoExtensionToBuildPath(
-        builder::AssetTypes type,
+        compilers::AssetTypes type,
         const foundation::String& path);
 
       /**
@@ -126,7 +126,7 @@ namespace snuffbox
       * @param[in] type The type of the asset
       */
       void RegisterAsset(
-        builder::AssetTypes type, 
+        compilers::AssetTypes type, 
         const foundation::Path& relative_path);
 
       /**
@@ -138,7 +138,7 @@ namespace snuffbox
       * @return Does the asset exist?
       */
       bool Exists(
-        builder::AssetTypes type, 
+        compilers::AssetTypes type, 
         const foundation::String& path) const;
 
       /**
@@ -149,7 +149,7 @@ namespace snuffbox
       *
       * @return Were we able to load the asset?
       */
-      bool Load(builder::AssetTypes type, const foundation::String& path);
+      bool Load(compilers::AssetTypes type, const foundation::String& path);
 
       /**
       * @brief Loads all assets of a specific type
@@ -158,7 +158,7 @@ namespace snuffbox
       *
       * @return Were all assets loaded succesfully?
       */
-      bool LoadAll(builder::AssetTypes type);
+      bool LoadAll(compilers::AssetTypes type);
 
       /**
       * @brief Checks if an asset has already been loaded
@@ -169,7 +169,7 @@ namespace snuffbox
       * @return Was the asset already loaded?
       */
       bool IsLoaded(
-        builder::AssetTypes type, 
+        compilers::AssetTypes type, 
         const foundation::String& path) const;
 
       /**

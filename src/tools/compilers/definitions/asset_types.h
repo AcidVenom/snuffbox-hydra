@@ -4,7 +4,7 @@
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     /**
     * @brief The different asset types that can be built by the builder and
@@ -19,6 +19,7 @@ namespace snuffbox
     enum class AssetTypes
     {
       kScript,
+      kScene,
       kCount,
       kUnknown = kCount,
     };

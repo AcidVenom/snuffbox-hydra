@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/builder/definitions/asset_types.h"
+#include "tools/compilers/definitions/asset_types.h"
 
 #include <foundation/io/path.h>
 #include <foundation/containers/queue.h>
@@ -17,7 +17,7 @@ namespace snuffbox
     */
     struct BuildItem
     {
-      AssetTypes type; //!< The type of the build item
+      compilers::AssetTypes type; //!< The type of the build item
       foundation::Path in; //!< The path to the input source file
       foundation::Path relative; //!< The relative path to the source file
 

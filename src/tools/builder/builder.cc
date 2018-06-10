@@ -298,7 +298,7 @@ namespace snuffbox
         }
         else
         {
-          if (BuildToSourceExtension(
+          if (compilers::BuildToSourceExtension(
             item_path.extension().c_str(), 
             &out_ext) == true)
           {
@@ -379,11 +379,14 @@ namespace snuffbox
       }
 
       BuildItem item;
-      item.type = AssetTypesFromSourceExtension(path.extension().c_str());
+
+      item.type = 
+        compilers::AssetTypesFromSourceExtension(path.extension().c_str());
+
       item.in = path;
       item.relative = path.StripPath(source_directory_);
 
-      if (item.type == AssetTypes::kUnknown)
+      if (item.type == compilers::AssetTypes::kUnknown)
       {
         foundation::Logger::LogVerbosity<2>(
           foundation::LogChannel::kBuilder,

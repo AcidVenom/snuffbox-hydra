@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/builder/definitions/asset_types.h"
+#include "tools/compilers/definitions/asset_types.h"
 #include "tools/builder/threading/build_item.h"
 
 #include <foundation/memory/memory.h>
@@ -9,9 +9,13 @@
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     class ICompiler;
+  }
+
+  namespace builder
+  {
 
     /**
     * @brief A build job to compile or decompile a file with
@@ -104,7 +108,8 @@ namespace snuffbox
       * @return The created compiler, or nullptr if a compiler for the type
       *         does not exist
       */
-      static foundation::SharedPtr<ICompiler> CreateCompiler(AssetTypes type);
+      static foundation::SharedPtr<compilers::ICompiler> 
+        CreateCompiler(compilers::AssetTypes type);
 
     private:
 
@@ -116,7 +121,7 @@ namespace snuffbox
       /**
       * @brief The current compiler of this build job
       */
-      foundation::SharedPtr<ICompiler> compiler_;
+      foundation::SharedPtr<compilers::ICompiler> compiler_;
 
       BuildItem current_item_; //!< The current build item
       Result result_; //!< The result of the build job

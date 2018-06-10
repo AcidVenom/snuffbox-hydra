@@ -1,20 +1,19 @@
 #pragma once
 
-#include "tools/builder/compilers/compiler.h"
+#include "tools/compilers/compiler.h"
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     /**
-    * @brief Used to compile raw script files into either a binary format
-    *        or an RC4 encrypted version of the raw source string
-    *
-    * @see RC4
+    * @brief The scene compiler that compiles serialized JSON data into
+    *        a binary format, which the decompiler can convert back to
+    *        a usable scene
     *
     * @author Daniel Konings
     */
-    class ScriptCompiler : public ICompiler
+    class SceneCompiler : public ICompiler
     {
 
     public:
@@ -22,7 +21,7 @@ namespace snuffbox
       /**
       * @brief Default constructor
       */
-      ScriptCompiler();
+      SceneCompiler();
 
     protected:
 

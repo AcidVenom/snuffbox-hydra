@@ -45,5 +45,5 @@ SET(EditorSources
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})
-TARGET_LINK_LIBRARIES(snuffbox-editor Qt5::Widgets snuffbox-engine)
+TARGET_LINK_LIBRARIES(snuffbox-editor Qt5::Widgets snuffbox-engine snuffbox-builder)
 TARGET_INCLUDE_DIRECTORIES(snuffbox-editor PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

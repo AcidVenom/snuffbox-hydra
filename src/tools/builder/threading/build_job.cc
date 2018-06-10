@@ -1,5 +1,5 @@
 #include "tools/builder/threading/build_job.h"
-#include "tools/builder/compilers/script_compiler.h"
+#include "tools/compilers/script_compiler.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -85,15 +85,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    foundation::SharedPtr<ICompiler> BuildJob::CreateCompiler(AssetTypes type)
+    foundation::SharedPtr<compilers::ICompiler> 
+      BuildJob::CreateCompiler(compilers::AssetTypes type)
     {
-      foundation::SharedPtr<ICompiler> ptr = nullptr;
+      foundation::SharedPtr<compilers::ICompiler> ptr = nullptr;
       foundation::IAllocator* alloc = &foundation::Memory::default_allocator();
 
       switch (type)
       {
-      case AssetTypes::kScript:
-        ptr = foundation::Memory::ConstructShared<ScriptCompiler>(alloc);
+      case compilers::AssetTypes::kScript:
+        ptr = foundation::Memory::ConstructShared<
+          compilers::ScriptCompiler>(alloc);
         break;
 
       default:

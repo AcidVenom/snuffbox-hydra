@@ -1,11 +1,11 @@
-#include "tools/builder/compilers/script_compiler.h"
+#include "tools/compilers/script_compiler.h"
 
 #include <foundation/memory/memory.h>
 #include <foundation/encryption/rc4.h>
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     //--------------------------------------------------------------------------
     ScriptCompiler::ScriptCompiler()

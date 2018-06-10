@@ -3,12 +3,6 @@ SET(RootSources
   "builder.cc"
 )
 
-SET(DefinitionsSources
-  "definitions/magic.h"
-  "definitions/asset_types.h"
-  "definitions/asset_types.cc"
-)
-
 SET(ThreadingSources
   "threading/build_job.h"
   "threading/build_job.cc"
@@ -18,17 +12,7 @@ SET(ThreadingSources
   "threading/build_scheduler.cc"
 )
 
-SET(CompilersSources
-  "compilers/compiler.h"
-  "compilers/compiler.cc"
-  "compilers/script_compiler.h"
-  "compilers/script_compiler.cc"
-  "compilers/scene_compiler.h"
-  "compilers/scene_compiler.cc"
-)
-
 SOURCE_GROUP("\\"           FILES ${RootSources})
-SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
 SOURCE_GROUP("threading"    FILES ${ThreadingSources})
 SOURCE_GROUP("compilers"    FILES ${CompilersSources})
 
@@ -40,4 +24,4 @@ SET(BuilderSources
 )
 
 ADD_LIBRARY(snuffbox-builder ${BuilderSources})
-TARGET_LINK_LIBRARIES(snuffbox-builder snuffbox-foundation)
+TARGET_LINK_LIBRARIES(snuffbox-builder snuffbox-compilers)

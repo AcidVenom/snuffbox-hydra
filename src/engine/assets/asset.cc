@@ -7,7 +7,7 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    IAsset::IAsset(builder::AssetTypes type, const foundation::Path& path) :
+    IAsset::IAsset(compilers::AssetTypes type, const foundation::Path& path) :
       type_(type),
       path_(path),
       is_loaded_(false)
@@ -24,7 +24,7 @@ namespace snuffbox
         return Load();
       }
 
-      if (path_.extension() != builder::AssetTypesToBuildExtension(type_))
+      if (path_.extension() != compilers::AssetTypesToBuildExtension(type_))
       {
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kEngine,
@@ -53,7 +53,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    builder::AssetTypes IAsset::type() const
+    compilers::AssetTypes IAsset::type() const
     {
       return type_;
     }

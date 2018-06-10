@@ -1,10 +1,10 @@
-#include "tools/builder/definitions/asset_types.h"
+#include "tools/compilers/definitions/asset_types.h"
 
 #include <memory>
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     //--------------------------------------------------------------------------
     const char* AssetTypesToBuildExtension(AssetTypes type)
@@ -13,6 +13,8 @@ namespace snuffbox
       {
       case AssetTypes::kScript:
         return "script";
+      case AssetTypes::kScene:
+        return "scene";
       default:
         return "unknown";
       }
@@ -44,6 +46,8 @@ namespace snuffbox
       {
       case AssetTypes::kScript:
         return "js";
+      case AssetTypes::kScene:
+        return "scene";
       default:
         return "unknown";
       }
@@ -89,7 +93,8 @@ namespace snuffbox
       {
       case AssetTypes::kScript:
         return "Script";
-
+      case AssetTypes::kScene:
+        return "Scene";
       default:
         return "Unknown Asset";
       }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tools/builder/definitions/asset_types.h>
+#include <tools/compilers/definitions/asset_types.h>
 #include <foundation/io/path.h>
 
 #include <cinttypes>
@@ -28,7 +28,7 @@ namespace snuffbox
       *
       * @see IAsset::Load
       */
-      IAsset(builder::AssetTypes type, const foundation::Path& path);
+      IAsset(compilers::AssetTypes type, const foundation::Path& path);
 
       /**
       * @brief Loads a file as an asset
@@ -56,7 +56,7 @@ namespace snuffbox
       /**
       * @return The type of this asset
       */
-      builder::AssetTypes type() const;
+      compilers::AssetTypes type() const;
 
       /**
       * @return Has this asset been loaded?
@@ -84,7 +84,7 @@ namespace snuffbox
 
     private:
 
-      builder::AssetTypes type_; //!< The type of this asset
+      compilers::AssetTypes type_; //!< The type of this asset
       foundation::Path path_; //!< The path to the file to load
 
       bool is_loaded_; //!< Has this asset been loaded?

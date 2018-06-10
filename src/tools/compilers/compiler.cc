@@ -1,4 +1,4 @@
-#include "tools/builder/compilers/compiler.h"
+#include "tools/compilers/compiler.h"
 
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
@@ -8,7 +8,7 @@
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     //--------------------------------------------------------------------------
     ICompiler::ICompiler() :
@@ -152,6 +152,7 @@ namespace snuffbox
       size_t* block_size)
     {
       intptr_t header_size = static_cast<intptr_t>(sizeof(FileHeaderMagic));
+
       FileHeaderMagic magic = *reinterpret_cast<const FileHeaderMagic*>(buffer);
 
       if (block != nullptr)

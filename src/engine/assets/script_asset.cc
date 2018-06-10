@@ -5,7 +5,7 @@
 #include "engine/services/script_service.h"
 #endif
 
-#include <tools/builder/compilers/script_compiler.h>
+#include <tools/compilers/script_compiler.h>
 
 namespace snuffbox
 {
@@ -13,7 +13,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     ScriptAsset::ScriptAsset(const foundation::Path& path) :
-      IAsset(builder::AssetTypes::kScript, path)
+      IAsset(compilers::AssetTypes::kScript, path)
     {
 
     }
@@ -22,7 +22,7 @@ namespace snuffbox
     bool ScriptAsset::LoadImpl(const foundation::Path& path)
     {
 #ifndef SNUFF_NSCRIPTING
-      builder::ScriptCompiler c;
+      compilers::ScriptCompiler c;
       if (c.Decompile(path) == false)
       {
         return false;

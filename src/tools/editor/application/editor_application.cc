@@ -179,12 +179,12 @@ namespace snuffbox
     {
       engine::AssetService* as = GetService<engine::AssetService>();
 
-      builder::AssetTypes type = item.type;
+      compilers::AssetTypes type = item.type;
       const foundation::Path& relative = item.relative;
 
       as->RegisterAsset(type, relative);
 
-      if (type == builder::AssetTypes::kScript)
+      if (type == compilers::AssetTypes::kScript)
       {
         ReloadScripts();
         return;
@@ -221,7 +221,7 @@ namespace snuffbox
 
       engine::AssetService* a = GetService<engine::AssetService>();
 
-      if (a->LoadAll(builder::AssetTypes::kScript) == false)
+      if (a->LoadAll(compilers::AssetTypes::kScript) == false)
       {
         has_error_ = true;
 

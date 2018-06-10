@@ -51,7 +51,7 @@ namespace snuffbox
           ext = item_path.extension();
 
           af.relative_path = item_path.StripPath(path);
-          af.type = builder::AssetTypesFromBuildExtension(ext.c_str());
+          af.type = compilers::AssetTypesFromBuildExtension(ext.c_str());
 
           result.push_back(af);
           continue;
@@ -103,7 +103,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     bool AssetService::Load(
-      builder::AssetTypes type, 
+      compilers::AssetTypes type, 
       const foundation::String& path)
     {
       if (Exists(type, path) == false)
@@ -113,12 +113,12 @@ namespace snuffbox
           foundation::LogSeverity::kError,
           "Could not load asset '{0}' of type '{1}', it does not exist",
           path,
-          builder::AssetTypesToString(type));
+          compilers::AssetTypesToString(type));
 
         return false;
       }
 
-      foundation::String ext = builder::AssetTypesToBuildExtension(type);
+      foundation::String ext = compilers::AssetTypesToBuildExtension(type);
       AssetMap::iterator it = registered_.find(path + '.' + ext);
 
       if (it->second->Load() == false)
@@ -128,7 +128,7 @@ namespace snuffbox
           foundation::LogSeverity::kError,
           "Could not load asset '{0}' of type '{1}', loading failed",
           path,
-          builder::AssetTypesToString(type));
+          compilers::AssetTypesToString(type));
 
         return false;
       }
@@ -137,7 +137,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool AssetService::LoadAll(builder::AssetTypes type)
+    bool AssetService::LoadAll(compilers::AssetTypes type)
     {
       AssetMap::iterator it = registered_.begin();
 
@@ -171,16 +171,16 @@ namespace snuffbox
 
       foundation::String ext = path.extension();
 
-      return builder::AssetTypesFromBuildExtension(ext.c_str()) !=
-        builder::AssetTypes::kUnknown;
+      return compilers::AssetTypesFromBuildExtension(ext.c_str()) !=
+        compilers::AssetTypes::kUnknown;
     }
 
     //--------------------------------------------------------------------------
     foundation::String AssetService::NoExtensionToBuildPath(
-      builder::AssetTypes type,
+      compilers::AssetTypes type,
       const foundation::String& path)
     {
-      return path + '.' + builder::AssetTypesToBuildExtension(type);
+      return path + '.' + compilers::AssetTypesToBuildExtension(type);
     }
 
     //--------------------------------------------------------------------------
@@ -188,15 +188,15 @@ namespace snuffbox
     {
       foundation::String ext = path.extension();
 
-      builder::AssetTypes type = 
-        builder::AssetTypesFromBuildExtension(ext.c_str());
+      compilers::AssetTypes type = 
+        compilers::AssetTypesFromBuildExtension(ext.c_str());
 
       RegisterAsset(type, path);
     }
 
     //--------------------------------------------------------------------------
     void AssetService::RegisterAsset(
-      builder::AssetTypes type,
+      compilers::AssetTypes type,
       const foundation::Path& relative_path)
     {
       foundation::Path no_ext = relative_path.NoExtension();
@@ -208,8 +208,8 @@ namespace snuffbox
       }
 
       if (
-        type == builder::AssetTypes::kCount ||
-        type == builder::AssetTypes::kUnknown)
+        type == compilers::AssetTypes::kCount ||
+        type == compilers::AssetTypes::kUnknown)
       {
         return;
       }
@@ -220,7 +220,7 @@ namespace snuffbox
 
       switch (type)
       {
-      case builder::AssetTypes::kScript:
+      case compilers::AssetTypes::kScript:
         ptr = foundation::Memory::Construct<ScriptAsset>(alloc, path);
         break;
 
@@ -245,7 +245,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     bool AssetService::Exists(
-      builder::AssetTypes type,
+      compilers::AssetTypes type,
       const foundation::String& path) const
     {
       foundation::String p = NoExtensionToBuildPath(type, path);
@@ -255,7 +255,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     bool AssetService::IsLoaded(
-      builder::AssetTypes type,
+      compilers::AssetTypes type,
       const foundation::String& path) const
     {
       foundation::String p = NoExtensionToBuildPath(type, path);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tools/builder/definitions/magic.h"
+#include "tools/compilers/definitions/magic.h"
 
 #include <foundation/io/file.h>
 #include <foundation/containers/vector.h>
@@ -10,7 +10,7 @@
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     /**
     * @brief The compiler interface for every compiler to use

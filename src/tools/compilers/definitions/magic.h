@@ -4,7 +4,7 @@
 
 namespace snuffbox
 {
-  namespace builder
+  namespace compilers
   {
     /**
     * @brief The magic numbers to put in the header of a compiled file
@@ -12,7 +12,8 @@ namespace snuffbox
     */
     enum class FileHeaderMagic : int32_t
     {
-      kScript = 0x52435373 //!< "sSCR" As a hexadecimal value
+      kScript = 0x52435373, //!< "sSCR" As a hexadecimal value
+      kScene = 0x45435373 //!< "sSCE" As a hexadecimal value
     };
   }
 }

@@ -278,8 +278,8 @@ namespace snuffbox
 #ifndef SNUFF_NSCRIPTING
       AssetService* a = GetService<AssetService>();
 
-      a->Load(builder::AssetTypes::kScript, "main");
-      a->LoadAll(builder::AssetTypes::kScript);
+      a->Load(compilers::AssetTypes::kScript, "main");
+      a->LoadAll(compilers::AssetTypes::kScript);
 #endif
     }
 
