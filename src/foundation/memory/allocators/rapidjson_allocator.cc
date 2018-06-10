@@ -1,18 +1,16 @@
 #include "foundation/memory/allocators/rapidjson_allocator.h"
 
-#include "foundation/memory/memory.h"
-
 namespace snuffbox
 {
   namespace foundation
   {
     //--------------------------------------------------------------------------
     const bool RapidJsonStackAllocator::kNeedFree = true;
-    const size_t RapidJsonStackAllocator::kMaxSize_ = 1024ul * 1024ul * 4ul;
+    const size_t RapidJsonStackAllocator::kDefaultSize_ = 1024ul * 1024ul * 4ul;
 
     //--------------------------------------------------------------------------
-    RapidJsonStackAllocator::RapidJsonStackAllocator() :
-      MallocAllocator(kMaxSize_)
+    RapidJsonStackAllocator::RapidJsonStackAllocator(size_t size) :
+      Memory::DefaultAllocator(size)
     {
 
     }

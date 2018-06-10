@@ -1,6 +1,6 @@
 #pragma once
 
-#include <foundation/memory/allocators/malloc_allocator.h>
+#include <foundation/memory/memory.h>
 
 namespace snuffbox
 {
@@ -17,13 +17,13 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class DukAllocator : public foundation::MallocAllocator
+    class DukAllocator : public foundation::Memory::DefaultAllocator
     {
 
     public:
 
       /**
-      * @see MallocAllocator::MallocAllocator
+      * @see Memory::DefaultAllocator::DefaultAllocator
       *
       * The default size for the memory in the scripting environment is 512 MB
       */

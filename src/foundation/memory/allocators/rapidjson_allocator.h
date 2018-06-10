@@ -1,6 +1,6 @@
 #pragma once
 
-#include "foundation/memory/allocators/malloc_allocator.h"
+#include "foundation/memory/memory.h"
 
 #include <rapidjson/allocators.h>
 
@@ -16,15 +16,17 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class RapidJsonStackAllocator : public MallocAllocator
+    class RapidJsonStackAllocator : public Memory::DefaultAllocator
     {
 
     public:
 
       /**
-      * @see MallocAllocator::MallocAllocator
+      * @see Memory::DefaultAllocator::DefaultAllocator
+      *
+      * The default size of the memory is 4Mb
       */
-      RapidJsonStackAllocator();
+      RapidJsonStackAllocator(size_t size = kDefaultSize_);
 
       /**
       * @brief Allocate a block of memory
@@ -61,7 +63,7 @@ namespace snuffbox
 
     private:
 
-      static const size_t kMaxSize_; //!< The max bytes that can be allocated
+      static const size_t kDefaultSize_; //!< The default memory size
     };
 
     /**

@@ -1,6 +1,5 @@
 #include "scripting/duk/duk_allocator.h"
 
-#include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
 
 namespace snuffbox
@@ -12,7 +11,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     DukAllocator::DukAllocator(size_t max_size) :
-      MallocAllocator(max_size)
+      foundation::Memory::DefaultAllocator(max_size)
     {
 
     }
