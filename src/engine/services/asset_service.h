@@ -41,12 +41,14 @@ namespace snuffbox
       *        the valid asset paths
       *
       * @param[in] dir The directory to enumerate the assets from
+      * @param[in] root The root directory where the enumeration started
       * @param[in] recursive Should the assets be enumerated recursively?
       *
       * @return A list of asset file definitions with both type and path
       */
       static foundation::Vector<AssetFile> EnumerateAssets(
-        const foundation::Path& dir, 
+        const foundation::Path& dir,
+        const foundation::Path& root,
         bool recurisve = false);
 
       /**
@@ -127,6 +129,17 @@ namespace snuffbox
       */
       void RegisterAsset(
         compilers::AssetTypes type, 
+        const foundation::Path& relative_path);
+
+      /**
+      * @brief Removes an asset from the list of registered assets and unloads
+      *        it if it was loaded
+      *
+      * @param[in] type The type of the asset
+      * @param[in] relative_path The relative path to the asset to remove
+      */
+      void RemoveAsset(
+        compilers::AssetTypes type,
         const foundation::Path& relative_path);
 
       /**

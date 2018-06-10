@@ -145,27 +145,79 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    FileHeaderMagic ICompiler::GetMagic(
+    FileHeaderMagic ICompiler::AllocateWithoutMagic(
       const uint8_t* buffer, 
       size_t size,
-      const uint8_t** block,
+      uint8_t** block,
       size_t* block_size)
     {
       intptr_t header_size = static_cast<intptr_t>(sizeof(FileHeaderMagic));
-
+      size_t new_size = static_cast<size_t>(size) - header_size;
       FileHeaderMagic magic = *reinterpret_cast<const FileHeaderMagic*>(buffer);
-
-      if (block != nullptr)
-      {
-        *block = foundation::PointerMath::Offset(buffer, header_size);
-      }
 
       if (block_size != nullptr)
       {
-        *block_size = static_cast<size_t>(size) - header_size;
+        *block_size = new_size;
+      }
+
+      if (block != nullptr)
+      {
+        const uint8_t* data = 
+          foundation::PointerMath::Offset(buffer, header_size);
+
+        *block = 
+          reinterpret_cast<uint8_t*>(foundation::Memory::Allocate(new_size));
+
+        memcpy(*block, data, new_size);
       }
 
       return magic;
+    }
+
+    //--------------------------------------------------------------------------
+    bool ICompiler::ReadSourceFile(foundation::File& file, SourceFileData* fd)
+    {
+      if (fd == nullptr || file.is_ok() == false)
+      {
+        return false;
+      }
+
+      const uint8_t* buffer = file.ReadBuffer(&fd->length);
+
+      fd->data = AllocateWithMagic(
+        fd->magic, 
+        fd->length, 
+        &fd->block, 
+        &fd->total_size);
+
+      memcpy(fd->block, buffer, fd->length);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    bool ICompiler::ReadBuildFile(foundation::File& file, BuildFileData* fd)
+    {
+      if (fd == nullptr || file.is_ok() == false)
+      {
+        return false;
+      }
+
+      size_t len;
+      const uint8_t* buffer = file.ReadBuffer(&len);
+
+      FileHeaderMagic magic = AllocateWithoutMagic(
+        buffer, 
+        len, 
+        &fd->block,
+        &fd->length);
+
+      if (magic != fd->magic)
+      {
+        return false;
+      }
+
+      return true;
     }
 
     //--------------------------------------------------------------------------

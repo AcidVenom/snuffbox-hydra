@@ -147,11 +147,62 @@ namespace snuffbox
       *
       * @return The FileHeaderMagic value found at the start of the block
       */
-      static FileHeaderMagic GetMagic(
+      static FileHeaderMagic AllocateWithoutMagic(
         const uint8_t* buffer,
         size_t size,
-        const uint8_t** block,
+        uint8_t** block,
         size_t* block_size);
+
+      /**
+      * @brief Used to read source file data with a magic number in the header
+      *
+      * @author Daniel Konings
+      */
+      struct SourceFileData
+      {
+        FileHeaderMagic magic; //!< The expected magic number
+        uint8_t* block; //!< The pointer to the block after the header
+        uint8_t* data; //!< The pointer to all data, including the header
+        size_t length; //!< The length of block after the header
+        size_t total_size; //!< The length of the file
+      };
+
+      /**
+      * @brief Used to read build file data with a magic number in the header
+      *
+      * @author Daniel Konings
+      */
+      struct BuildFileData
+      {
+        FileHeaderMagic magic; //!< The magic number to write
+        uint8_t* block; //!< The pointer to the block after the header
+        size_t length; //!< The length of the block after the header
+      };
+
+      /**
+      * @brief Reads a source file with a magic number header as a file data
+      *        description
+      *
+      * @param[in] file The file to read
+      * @param[in|out] fd The file data
+      *
+      * @remarks The file data's "magic" value is used to check if the file
+      *          contents are of the right type
+      *
+      * @return Was the file valid and did the magic number match?
+      */
+      static bool ReadSourceFile(foundation::File& file, SourceFileData* fd);
+
+      /**
+      * @brief Reads a build file with a magic number header as a file data
+      *        description
+      *
+      * @param[in] file The file to read
+      * @param[out] fd The file data
+      *
+      * @return Were we able to open the file and read the data?
+      */
+      static bool ReadBuildFile(foundation::File& file, BuildFileData* fd);
 
       /**
       * @see ICompiler::Compile

@@ -172,6 +172,11 @@ namespace snuffbox
       {
         OnReload(item);
       });
+
+      builder_.set_on_removed([=](const builder::BuildItem& item)
+      {
+        OnRemoved(item);
+      });
     }
 
     //--------------------------------------------------------------------------
@@ -195,6 +200,17 @@ namespace snuffbox
       {
         as->Load(type, path);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnRemoved(const builder::BuildItem& item)
+    {
+      engine::AssetService* as = GetService<engine::AssetService>();
+
+      compilers::AssetTypes type = item.type;
+      const foundation::Path& relative = item.relative;
+
+      as->RemoveAsset(type, relative);
     }
 
     //--------------------------------------------------------------------------

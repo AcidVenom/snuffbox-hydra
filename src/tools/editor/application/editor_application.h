@@ -107,6 +107,13 @@ namespace snuffbox
       void OnReload(const builder::BuildItem& item);
 
       /**
+      * @brief Called when an asset is removed from the build directory
+      *
+      * @param[in] item The build item that was removed
+      */
+      void OnRemoved(const builder::BuildItem& item);
+
+      /**
       * @brief Reloads all script-related content when a new script was added
       *        or reloaded
       *

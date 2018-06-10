@@ -30,11 +30,12 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     foundation::Vector<AssetService::AssetFile> AssetService::EnumerateAssets(
-      const foundation::Path& path,
+      const foundation::Path& dir,
+      const foundation::Path& root,
       bool recursive)
     {
       foundation::Vector<AssetFile> result;
-      foundation::DirectoryTree tree(path);
+      foundation::DirectoryTree tree(dir);
 
       const foundation::Vector<foundation::DirectoryTreeItem>& items =
         tree.items();
@@ -50,7 +51,7 @@ namespace snuffbox
         {
           ext = item_path.extension();
 
-          af.relative_path = item_path.StripPath(path);
+          af.relative_path = item_path.StripPath(root);
           af.type = compilers::AssetTypesFromBuildExtension(ext.c_str());
 
           result.push_back(af);
@@ -60,7 +61,7 @@ namespace snuffbox
         if (recursive == true && item.is_directory() == true)
         {
           foundation::Vector<AssetFile> children =
-            EnumerateAssets(item.path(), recursive);
+            EnumerateAssets(item.path(), root, recursive);
 
           for (size_t j = 0; j < children.size(); ++j)
           {
@@ -78,7 +79,7 @@ namespace snuffbox
       Clear();
       build_directory_ = path;
 
-      foundation::Vector<AssetFile> files = EnumerateAssets(path, true);
+      foundation::Vector<AssetFile> files = EnumerateAssets(path, path, true);
 
       for (size_t i = 0; i < files.size(); ++i)
       {
@@ -238,9 +239,27 @@ namespace snuffbox
       registered_.emplace(
         eastl::pair<foundation::String, foundation::SharedPtr<IAsset>>
       {
-        relative_path.ToString(),
-          foundation::Memory::MakeShared(ptr)
+        relative_path.ToString(), foundation::Memory::MakeShared(ptr)
       });
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetService::RemoveAsset(
+      compilers::AssetTypes type,
+      const foundation::Path& relative_path)
+    {
+      AssetMap::iterator it = registered_.find(relative_path.ToString());
+
+      if (it != registered_.end())
+      {
+        IAsset* asset = it->second.get();
+        if (asset->is_loaded() == true)
+        {
+          asset->Unload();
+        }
+
+        registered_.erase(it);
+      }
     }
 
     //--------------------------------------------------------------------------

@@ -16,7 +16,8 @@ namespace snuffbox
     Builder::Builder() :
       is_ok_(false),
       build_directory_(""),
-      on_finished_(nullptr)
+      on_finished_(nullptr),
+      on_removed_(nullptr)
     {
 
     }
@@ -266,6 +267,7 @@ namespace snuffbox
       foundation::Path current_source = "";
       foundation::Path source_file = "";
       foundation::String out_ext;
+      BuildItem build_item;
 
       for (size_t i = 0; i < build_items.size(); ++i)
       {
@@ -307,6 +309,16 @@ namespace snuffbox
             if (foundation::File::Exists(source_file) == false)
             {
               foundation::File::Remove(item_path);
+              
+              if (on_removed_ != nullptr)
+              {
+                build_item.in = source_file;
+                build_item.relative = item_path.StripPath(build_directory_);
+                build_item.type = compilers::AssetTypesFromBuildExtension(
+                  item_path.extension().c_str());
+
+                on_removed_(build_item);
+              }
             }
           }
         }
@@ -410,6 +422,12 @@ namespace snuffbox
     void Builder::set_on_finished(const OnFinishedCallback& cb)
     {
       on_finished_ = cb;
+    }
+
+    //--------------------------------------------------------------------------
+    void Builder::set_on_removed(const OnFinishedCallback& cb)
+    {
+      on_removed_ = cb;
     }
 
     //--------------------------------------------------------------------------

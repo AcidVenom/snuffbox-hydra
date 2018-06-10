@@ -16,23 +16,18 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ScriptCompiler::CompileImpl(foundation::File& file)
     {
-      size_t len, total_size;
-      const uint8_t* buffer = file.ReadBuffer(&len);
+      SourceFileData fd;
+      fd.magic = FileHeaderMagic::kScript;
 
-      uint8_t* ptr = nullptr;
-
-      uint8_t* block = AllocateWithMagic(
-        FileHeaderMagic::kScript, 
-        len, 
-        &ptr, 
-        &total_size);
-
-      memcpy(ptr, buffer, len);
+      if (ReadSourceFile(file, &fd) == false)
+      {
+        return false;
+      }
 
       foundation::RC4 rc4;
-      rc4.Encrypt(reinterpret_cast<int8_t*>(ptr), len);
+      rc4.Encrypt(reinterpret_cast<int8_t*>(fd.block), fd.length);
 
-      SetData(block, total_size);
+      SetData(fd.data, fd.total_size);
 
       return true;
     }
@@ -40,30 +35,18 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ScriptCompiler::DecompileImpl(foundation::File& file)
     {
-      size_t len, block_size;
-      const void* buffer = file.ReadBuffer(&len);
+      BuildFileData fd;
+      fd.magic = FileHeaderMagic::kScript;
 
-      const uint8_t* data = nullptr;
-      FileHeaderMagic magic = GetMagic(
-          reinterpret_cast<const uint8_t*>(buffer), 
-          len, 
-          &data, 
-          &block_size);
-
-      if (magic != FileHeaderMagic::kScript)
+      if (ReadBuildFile(file, &fd) == false)
       {
-        set_error("File is not of a script type");
         return false;
       }
 
-      void* block = foundation::Memory::Allocate(block_size);
-      memcpy(block, data, block_size);
-
       foundation::RC4 rc4;
+      rc4.Decrypt(reinterpret_cast<int8_t*>(fd.block), fd.length);
 
-      rc4.Decrypt(reinterpret_cast<int8_t*>(block), block_size);
-
-      SetData(reinterpret_cast<uint8_t*>(block), block_size);
+      SetData(reinterpret_cast<uint8_t*>(fd.block), fd.length);
 
       return true;
     }

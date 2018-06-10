@@ -176,6 +176,7 @@ namespace snuffbox
     bool File::OpenFile(const Path& path, FileOpenMode mode)
     {
       const char* cpath = path.ToString().c_str();
+
       stream_ = std::fstream(
         cpath,
         FileFlagsToOpenMode(static_cast<FileFlags>(mode)));

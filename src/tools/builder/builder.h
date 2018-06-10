@@ -198,6 +198,14 @@ namespace snuffbox
       void set_on_finished(const OnFinishedCallback& cb);
 
       /**
+      * @brief Sets the callback for when the builder has removed a file
+      *        from the build directory
+      *
+      * @param[in] cb The callback to set
+      */
+      void set_on_removed(const OnFinishedCallback& cb);
+
+      /**
       * @return The current build directory
       */
       const foundation::Path& build_directory() const;
@@ -228,6 +236,12 @@ namespace snuffbox
       *        an item
       */
       OnFinishedCallback on_finished_;
+
+      /**
+      * @brief The callback for when the builder has removed a file
+      *        from the build directory
+      */
+      OnFinishedCallback on_removed_;
 
       /**
       * @brief The name of the source directory folder

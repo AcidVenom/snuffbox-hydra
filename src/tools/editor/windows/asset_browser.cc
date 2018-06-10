@@ -120,7 +120,7 @@ namespace snuffbox
       Clear();
 
       const foundation::Vector<engine::AssetService::AssetFile>& paths =
-        engine::AssetService::EnumerateAssets(path);
+        engine::AssetService::EnumerateAssets(path, path);
 
       QString full_path;
       for (size_t i = 0; i < paths.size(); ++i)
