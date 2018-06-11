@@ -182,12 +182,6 @@ namespace snuffbox
         SLOT(OnSelectEntity(engine::Entity*)));
 
       connect(
-        inspector_.get(),
-        SIGNAL(RefreshHierarchy()),
-        hierarchy_.get(),
-        SLOT(OnHierarchyChanged()));
-
-      connect(
         this,
         SIGNAL(SceneChanged()),
         hierarchy_.get(),

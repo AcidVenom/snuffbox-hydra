@@ -43,7 +43,6 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     Inspector::Inspector(QTreeWidget* widget) :
-      refreshing_(false),
       tree_(widget),
       context_menu_(nullptr),
       remove_component_(nullptr)
@@ -55,7 +54,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Inspector::ShowEntity(engine::Entity* entity)
     {
-      refreshing_ = true;
       tree_->clear();
 
       if (entity == nullptr)
@@ -79,7 +77,6 @@ namespace snuffbox
       gui.TextField(entity->name().c_str(), [=](const QString& value)
       {
         entity->set_name(value.toStdString().c_str());
-        emit RefreshHierarchy();
       });
       gui.ResetForegroundColor();
 
@@ -87,7 +84,6 @@ namespace snuffbox
       gui.Checkbox(entity->active(), [=](bool value)
       {
         entity->set_active(value);
-        emit RefreshHierarchy();
       });
 
       gui.EndLayout();
@@ -119,7 +115,6 @@ namespace snuffbox
 
       ShowComponents(entity, top);
       top->setExpanded(true);
-      refreshing_ = false;
     }
 
     //--------------------------------------------------------------------------
@@ -194,11 +189,8 @@ namespace snuffbox
       gui.Label("Behavior");
       gui.TextField(s->behavior().c_str(), [=](const QString& behavior)
       {
-        if (refreshing_ == false)
-        {
-          s->SetBehavior(behavior.toStdString().c_str());
-          SetName();
-        }
+        s->SetBehavior(behavior.toStdString().c_str());
+        SetName();
       });
 
       return gui.EndAsWidget();

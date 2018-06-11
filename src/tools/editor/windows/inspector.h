@@ -143,13 +143,6 @@ namespace snuffbox
       */
       void OnCustomContextMenu(const QPoint& p);
 
-    signals:
-
-      /**
-      * @brief Used to refresh the hierarchy
-      */
-      void RefreshHierarchy();
-
     public:
 
       /**
@@ -159,7 +152,6 @@ namespace snuffbox
 
     private:
 
-      bool refreshing_; //!< Are we refreshing the inspector?
       QTreeWidget* tree_; //!< The tree to append inspector fields to
 
       QMenu* context_menu_; //!< The context menu of the inspector

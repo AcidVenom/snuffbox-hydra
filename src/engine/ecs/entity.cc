@@ -178,11 +178,7 @@ namespace snuffbox
       for (size_t i = 0; i < children.size(); ++i)
       {
         child = children.at(i)->entity();
-
-        if (child->is_from_script() == false)
-        {
-          foundation::Memory::Destruct<Entity>(child);
-        }
+        child->Destroy();
       }
 
       scene_->RemoveEntity(this);
