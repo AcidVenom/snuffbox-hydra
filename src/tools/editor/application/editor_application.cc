@@ -17,6 +17,10 @@
 #include <foundation/serialization/save_archive.h>
 #include <foundation/io/file.h>
 
+#if defined(SNUFF_LINUX) && defined(Unsorted)
+#undef Unsorted
+#endif
+
 #include <qfiledialog.h>
 #include <qmessagebox.h>
 
@@ -380,7 +384,6 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void EditorApplication::Play()
     {
-      InitializeAssets(builder_.build_directory());
       RunScripts();
       SCRIPT_CALLBACK(Start);
       GetService<engine::SceneService>()->Start();

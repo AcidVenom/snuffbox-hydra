@@ -50,12 +50,12 @@ namespace snuffbox
       /**
       * @see IScriptState::FinalizeClass
       */
-      void FinalizeClass(ScriptClass* cl);
+      void FinalizeClass(ScriptClass* cl) override;
 
       /**
       * @brief Logs the last error that is on the stack
       *
-      * The format should have atleast 4 arguments included, where:
+      * The format should have atleast 3 arguments included, where:
       * {0} = The file name the error occurred in
       * {1} = The line the error occurred at
       * {2} = The error message, including stack

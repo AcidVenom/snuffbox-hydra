@@ -3,8 +3,8 @@
 #include "foundation/serialization/serializable.h"
 #include "foundation/auxiliary/type_traits.h"
 
-#define SET_ARCHIVE_PROP(x) snuffbox::foundation::ArchiveName{ #x }, ## x
-#define GET_ARCHIVE_PROP(x) snuffbox::foundation::ArchiveName{ #x }, & ## x
+#define SET_ARCHIVE_PROP(x) snuffbox::foundation::ArchiveName{ #x }, x
+#define GET_ARCHIVE_PROP(x) snuffbox::foundation::ArchiveName{ #x }, &x
 
 namespace snuffbox
 {

@@ -3,6 +3,7 @@
 #include "foundation/containers/vector.h"
 
 #include <EASTL/type_traits.h>
+#include <type_traits>
 
 namespace snuffbox
 {
@@ -60,7 +61,7 @@ namespace snuffbox
       */
       static const bool value = 
         eastl::is_same<char[
-          std::extent_v<std::remove_reference_t<T>>], T>::value;
+          std::extent<std::remove_reference_t<T>>::value], T>::value;
     };
 
     /**

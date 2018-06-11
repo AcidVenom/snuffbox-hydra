@@ -5,6 +5,7 @@
 
 #include "foundation/io/path.h"
 #include "foundation/containers/vector.h"
+#include "foundation/auxiliary/string_utils.h"
 
 #include "foundation/memory/allocators/rapidjson_allocator.h"
 

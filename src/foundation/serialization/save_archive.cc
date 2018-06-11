@@ -72,6 +72,9 @@ namespace snuffbox
       case Identifiers::kObjectStart:
         result = WriteJsonObject(i, buffer, indent);
         break;
+
+      default:
+        break;
       }
 
       return result;
