@@ -82,8 +82,9 @@ namespace snuffbox
       * case in-sensitive.
       *
       * @param[in] format The format to check
+      * @param[in] quiet Should any unexpected errors be logged?
       */
-      bool Check(const char* format) const;
+      bool Check(const char* format, bool quiet = false) const;
 
       /**
       * @return The number of arguments contained in this class
@@ -211,13 +212,15 @@ namespace snuffbox
       * @param[in] expected The expected type
       * @param[in] type The argument type
       * @param[in] idx The argument index
+      * @param[in] quiet Should the check be quiet and not log?
       *
       * @return Was the argument of a valid type?
       */
       static bool CheckArg(
         ScriptValueTypes expected, 
         ScriptValueTypes type,
-        uint8_t idx);
+        uint8_t idx,
+        bool quiet);
 
       /**
       * @brief Retrieves a certain argument as a certain type, but only if

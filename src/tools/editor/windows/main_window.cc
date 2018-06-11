@@ -355,6 +355,14 @@ namespace snuffbox
       ui_.speedUpButton->setEnabled(enabled);
 
       MarkPlaybackButton(ui_.playButton, enabled);
+
+      bool scene_controls = enabled == false;
+
+      ui_.actionOpen_Project->setEnabled(scene_controls);
+      ui_.actionSave_Scene->setEnabled(scene_controls);
+      ui_.actionSave_Scene_As->setEnabled(scene_controls);
+      ui_.actionNew_Scene->setEnabled(scene_controls);
+
       app_->SwitchState(next);
     }
 

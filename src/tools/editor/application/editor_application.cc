@@ -15,6 +15,7 @@
 
 #include <foundation/auxiliary/timer.h>
 #include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 #include <foundation/io/file.h>
 
 #if defined(SNUFF_LINUX) && defined(Unsorted)
@@ -40,6 +41,7 @@ namespace snuffbox
       project_dir_(""),
       assets_dir_(""),
       loaded_scene_(""),
+      scene_changed_(false),
       state_(States::kUninitialized),
       has_error_(false)
     {
@@ -70,8 +72,9 @@ namespace snuffbox
       }
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
+      engine::SceneService* scene_service = GetService<engine::SceneService>();
 
-      window_->CreateHierarchy(GetService<engine::SceneService>());
+      window_->CreateHierarchy(scene_service);
 
       window_->BindResizeCallback([&](uint16_t width, uint16_t height)
       {
@@ -79,6 +82,11 @@ namespace snuffbox
       });
 
       window_->show();
+
+      scene_service->set_on_scene_changed([=](engine::Scene* scene)
+      {
+        OnSceneChanged(scene);
+      });
 
       SwitchState(States::kEditing);
 
@@ -98,6 +106,8 @@ namespace snuffbox
 
         renderer->Render();
         builder_.IdleNotification();
+
+        CheckSceneChanged();
 
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
@@ -174,7 +184,7 @@ namespace snuffbox
       GetService<engine::SceneService>()->SwitchScene(nullptr);
       loaded_scene_ = "";
 
-      emit window_->SceneChanged();
+      scene_changed_ = true;
 
       return true;
     }
@@ -197,7 +207,7 @@ namespace snuffbox
       foundation::String asset = path.NoExtension().ToString();
       GetService<engine::SceneService>()->SwitchScene(asset);
 
-      emit window_->SceneChanged();
+      scene_changed_ = true;
     }
 
     //--------------------------------------------------------------------------
@@ -379,11 +389,15 @@ namespace snuffbox
       {
         window_->SetPlaybackEnabled(false);
       }
+
+      DeserializeCurrentScene();
     }
 
     //--------------------------------------------------------------------------
     void EditorApplication::Play()
     {
+      SerializeCurrentScene();
+
       RunScripts();
       SCRIPT_CALLBACK(Start);
       GetService<engine::SceneService>()->Start();
@@ -409,6 +423,48 @@ namespace snuffbox
       }
 
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::SerializeCurrentScene()
+    {
+      foundation::SaveArchive archive;
+      archive(GetService<engine::SceneService>()->current_scene());
+
+      serialized_scene_ = archive.ToMemory();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::DeserializeCurrentScene()
+    {
+      if (serialized_scene_.size() == 0)
+      {
+        return;
+      }
+
+      foundation::LoadArchive archive;
+      archive.FromJson(serialized_scene_);
+
+      engine::Scene* current = 
+        GetService<engine::SceneService>()->current_scene();
+
+      archive(&current);
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnSceneChanged(engine::Scene* scene)
+    {
+      scene_changed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::CheckSceneChanged()
+    {
+      if (scene_changed_ == true)
+      {
+        emit window_->SceneChanged();
+        scene_changed_ = false;
+      }
     }
   }
 }

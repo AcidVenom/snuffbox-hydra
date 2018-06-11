@@ -23,6 +23,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to call a function when the scene has changed
+      */
+      using SceneChanged = foundation::Function<void(Scene*)>;
+
+      /**
       * @see IService::IService
       */
       SceneService();
@@ -74,6 +79,23 @@ namespace snuffbox
       void SwitchScene(const foundation::String& path);
 
       /**
+      * @brief Called from a Scene when the respective scene has changed
+      *
+      * @param[in] scene The scene that was changed
+      *
+      * @remarks This calls the on_scene_changed_ callback, if the current
+      *          scene is the scene that changed
+      */
+      void OnSceneChanged(Scene* scene);
+
+      /**
+      * @brief Sets the callback for when the scene has changed
+      *
+      * @param[in] cb The callback to set
+      */
+      void set_on_scene_changed(const SceneChanged& cb);
+
+      /**
       * @return The current scene that is being updated
       */
       Scene* current_scene() const;
@@ -83,6 +105,7 @@ namespace snuffbox
       Scene default_scene_; //!< The default scene
       Scene* current_scene_; //!< The current scene that is being updated
       SceneAsset* loaded_scene_; //!< The currently loaded scene
+      SceneChanged on_scene_changed_; //!< The scene changed callback
     };
   }
 }

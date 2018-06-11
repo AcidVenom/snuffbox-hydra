@@ -30,7 +30,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ScriptArgs::Check(const char* format) const
+    bool ScriptArgs::Check(const char* format, bool quiet) const
     {
       size_t len = strlen(format);
 
@@ -74,6 +74,10 @@ namespace snuffbox
           expected = ScriptValueTypes::kArray;
           break;
 
+        case 'U':
+          expected = ScriptValueTypes::kNull;
+          break;
+
         default:
           foundation::Logger::LogVerbosity<2>(
             foundation::LogChannel::kScript,
@@ -84,7 +88,7 @@ namespace snuffbox
           return false;
         }
 
-        if (CheckArg(expected, type, static_cast<uint8_t>(i)) == false)
+        if (CheckArg(expected, type, static_cast<uint8_t>(i), quiet) == false)
         {
           return false;
         }
@@ -173,18 +177,23 @@ namespace snuffbox
     bool ScriptArgs::CheckArg(
       ScriptValueTypes expected, 
       ScriptValueTypes type,
-      uint8_t idx)
+      uint8_t idx,
+      bool quiet)
     {
       if (expected != type)
       {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kScript,
-          foundation::LogSeverity::kError,
-          "Expected argument of type '{0}', but got '{1}', for argument {2}",
-          ScriptValue::TypeToString(expected),
-          ScriptValue::TypeToString(type),
-          static_cast<uint32_t>(idx)
-          );
+        if (quiet == false)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kScript,
+            foundation::LogSeverity::kError,
+            "Expected argument of type '{0}', but got '{1}', for argument {2}",
+            ScriptValue::TypeToString(expected),
+            ScriptValue::TypeToString(type),
+            static_cast<uint32_t>(idx)
+            );
+        }
+        
         return false;
       }
 

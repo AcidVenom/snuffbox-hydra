@@ -101,7 +101,7 @@ namespace snuffbox
       /**
       * @brief Sets the parent transform of this component
       */
-      SCRIPT_FUNC() void SetParent(TransformComponent* parent);
+      SCRIPT_FUNC(custom) void SetParent(TransformComponent* parent);
 
       /**
       * @return The parent transform of this component

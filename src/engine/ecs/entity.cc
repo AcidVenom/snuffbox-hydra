@@ -39,6 +39,7 @@ namespace snuffbox
     {
       AddComponentInternal(Components::kTransform);
       scene_->AddEntity(this);
+      scene_->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -190,12 +191,15 @@ namespace snuffbox
       {
         components_[i].clear();
       }
+
+      scene_->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
     void Entity::set_name(const foundation::String& name)
     {
       name_ = name;
+      scene_->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -208,6 +212,7 @@ namespace snuffbox
     void Entity::set_active(bool active)
     {
       active_ = active;
+      scene_->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------

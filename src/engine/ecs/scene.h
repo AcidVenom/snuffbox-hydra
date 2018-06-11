@@ -72,17 +72,6 @@ namespace snuffbox
       void RemoveEntityAt(int idx);
 
       /**
-      * @brief Clears all entities in the scene
-      *
-      * The entities that were created from script are not destructed here,
-      * they are however removed from the list of entities and thus not
-      * updated anymore.
-      *
-      * Entities created from C++-side still get destructed appropriately.
-      */
-      void Clear();
-
-      /**
       * @brief Checks if an entity exists within the scene
       *
       * @param[in] entity The entity to check for
@@ -113,6 +102,17 @@ namespace snuffbox
       void Update(float dt);
 
       /**
+      * @brief Clears all entities in the scene
+      *
+      * The entities that were created from script are not destructed here,
+      * they are however removed from the list of entities and thus not
+      * updated anymore.
+      *
+      * Entities created from C++-side still get destructed appropriately.
+      */
+      void Clear();
+
+      /**
       * @return The transform hierarchy with the upper-level transforms
       */
       foundation::Vector<TransformComponent*> TopLevelTransforms() const;
@@ -137,6 +137,12 @@ namespace snuffbox
       Entity* FindEntityByID(size_t id);
 
       /**
+      * @brief Called from either the Entity or TransformComponent when
+      *        their scene properties/hierarchy have changed
+      */
+      void OnSceneChanged();
+
+      /**
       * @see ISerializable::Serialize
       */
       void Serialize(foundation::SaveArchive& archive) const override;
@@ -157,6 +163,7 @@ namespace snuffbox
       * @brief All current entities in this scene
       */
       foundation::Vector<Entity*> entities_;
+
       size_t current_id_; //!< The next available ID for an entity
     };
   }

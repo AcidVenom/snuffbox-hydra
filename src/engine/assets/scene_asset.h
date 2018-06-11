@@ -42,6 +42,13 @@ namespace snuffbox
       */
       void UnloadImpl() override;
 
+    public:
+
+      /**
+      * @brief Destructs the created scene
+      */
+      ~SceneAsset();
+
     private:
 
       Scene* scene_; //!< The scene contained by this asset

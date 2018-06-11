@@ -174,6 +174,32 @@ namespace snuffbox
       */
       bool ShowSceneSaveDialog();
 
+      /**
+      * @brief Serializes the current scene, called before playing
+      */
+      void SerializeCurrentScene();
+
+      /**
+      * @brief Deserializes the current scene, called after entering edit mode
+      */
+      void DeserializeCurrentScene();
+
+      /**
+      * @brief Called when a scene has been changed
+      *
+      * A flag is set to reload the hierarchy view within the editor after
+      * finishing the current frame.
+      *
+      * @param[in] scene The scene that has been changed
+      */
+      void OnSceneChanged(engine::Scene* scene);
+
+      /**
+      * @brief Checks if the scene changed this frame and if it did, updates
+      *        the hierarchy in the main window
+      */
+      void CheckSceneChanged();
+
     private:
 
       builder::Builder builder_; //!< The builder service
@@ -183,6 +209,9 @@ namespace snuffbox
       QString assets_dir_; //!< The current assets directory
 
       foundation::String loaded_scene_; //!< The currently loaded scene
+      foundation::String serialized_scene_; //!< The current scene, serialized
+
+      bool scene_changed_; //!< Has the current scene changed this frame?
 
       States state_; //!< The state of the editor
       bool has_error_; //!< Are there any errors?

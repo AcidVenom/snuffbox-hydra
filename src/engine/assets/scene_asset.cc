@@ -16,7 +16,8 @@ namespace snuffbox
       IAsset(compilers::AssetTypes::kScene, path),
       scene_(nullptr)
     {
-
+      scene_ = foundation::Memory::Construct<Scene>(
+        &foundation::Memory::default_allocator());
     }
 
     //--------------------------------------------------------------------------
@@ -39,9 +40,6 @@ namespace snuffbox
 
       foundation::String src(reinterpret_cast<const char*>(buffer), len);
 
-      scene_ = foundation::Memory::Construct<Scene>(
-        &foundation::Memory::default_allocator());
-
       foundation::LoadArchive archive;
       if (archive.FromJson(src) == false)
       {
@@ -61,6 +59,12 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     void SceneAsset::UnloadImpl()
+    {
+      scene_->Clear();
+    }
+
+    //--------------------------------------------------------------------------
+    SceneAsset::~SceneAsset()
     {
       if (scene_ != nullptr)
       {

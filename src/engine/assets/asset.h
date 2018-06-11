@@ -82,6 +82,13 @@ namespace snuffbox
       */
       virtual void UnloadImpl() = 0;
 
+    public:
+
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~IAsset();
+
     private:
 
       compilers::AssetTypes type_; //!< The type of this asset

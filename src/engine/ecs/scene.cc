@@ -1,6 +1,8 @@
 #include "engine/ecs/scene.h"
 #include "engine/ecs/entity.h"
 #include "engine/components/transform_component.h"
+#include "engine/application/application.h"
+#include "engine/services/scene_service.h"
 
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>
@@ -53,24 +55,14 @@ namespace snuffbox
         return;
       }
 
-      entities_.erase(entities_.begin() + idx);
-    }
+      Entity* e = entities_.at(idx);
 
-    //--------------------------------------------------------------------------
-    void Scene::Clear()
-    {
-      foundation::Vector<Entity*> copy = entities_;
-
-      Entity* e = nullptr;
-      for (int i = static_cast<int>(copy.size()) - 1; i >= 0; --i)
+      if (e->is_from_script() == false)
       {
-        if (HasEntity(copy.at(i)) == -1)
-        {
-          continue;
-        }
-
-        foundation::Memory::Destruct(copy.at(i));
+        foundation::Memory::Destruct(e);
       }
+
+      entities_.erase(entities_.begin() + idx);
     }
 
     //--------------------------------------------------------------------------
@@ -132,6 +124,23 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Scene::Clear()
+    {
+      foundation::Vector<Entity*> copy = entities_;
+
+      Entity* e = nullptr;
+      for (int i = static_cast<int>(copy.size()) - 1; i >= 0; --i)
+      {
+        if (HasEntity(copy.at(i)) == -1)
+        {
+          continue;
+        }
+
+        copy.at(i)->Destroy();
+      }
+    }
+
+    //--------------------------------------------------------------------------
     foundation::Vector<TransformComponent*> Scene::TopLevelTransforms() const
     {
       foundation::Vector<TransformComponent*> result;
@@ -185,6 +194,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Scene::OnSceneChanged()
+    {
+      Application::Instance()->GetService<SceneService>()->OnSceneChanged(this);
+    }
+
+    //--------------------------------------------------------------------------
     void Scene::Serialize(foundation::SaveArchive& archive) const
     {
       foundation::Vector<TransformComponent*> top = TopLevelTransforms();
@@ -203,6 +218,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::Deserialize(foundation::LoadArchive& archive)
     {
+      Clear();
+
       size_t n = archive.GetArraySize("entities");
 
       foundation::Vector<Entity*> entities;

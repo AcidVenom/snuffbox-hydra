@@ -113,7 +113,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::RemoveEntity(HierarchyViewItem* item)
     {
-      foundation::Memory::Destruct<engine::Entity>(item->transform()->entity());
+      item->transform()->entity()->Destroy();
       tree_->clearSelection();
 
       emit SelectEntity(nullptr);
@@ -193,6 +193,11 @@ namespace snuffbox
 
       HierarchyViewItem* item = 
         static_cast<HierarchyViewItem*>(tree_->currentItem());
+
+      if (item == nullptr)
+      {
+        return;
+      }
 
       engine::Entity* e = item->transform()->entity();
       emit SelectEntity(e);

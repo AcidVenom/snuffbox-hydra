@@ -323,6 +323,12 @@ namespace snuffbox
       {
         parent_->MarkDirty(DirtyFlags::kChild);
       }
+      else
+      {
+        is_dirty_ = is_dirty_ & ~DirtyFlags::kParent;
+      }
+
+      entity()->scene()->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -515,6 +521,35 @@ namespace snuffbox
       }
 
       args.AddReturnValue(a);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    SPARSE_CUSTOM(TransformComponent, SetParent)
+    {
+      TransformComponent* self = args.GetSelf<TransformComponent>();
+
+      if (self == nullptr)
+      {
+        return false;
+      }
+
+      if (args.Check("U", true) == true)
+      {
+        self->SetParent(nullptr);
+        return true;
+      }
+
+      TransformComponent* parent = nullptr;
+      if (
+        args.Check("O") == false || 
+        (parent = args.GetPointer<TransformComponent>(0)) == nullptr)
+      {
+        return false;
+      }
+
+      self->SetParent(parent);
 
       return true;
     }
