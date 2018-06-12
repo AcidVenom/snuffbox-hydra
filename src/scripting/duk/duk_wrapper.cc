@@ -30,7 +30,7 @@ namespace snuffbox
         return;
       }
 
-      if (PushStashedObject(ptr->id()) == true)
+      if (PushStashedObject(ptr->script_id()) == true)
       {
         return;
       }
@@ -62,7 +62,7 @@ namespace snuffbox
       duk_put_prop_string(context_, obj, DUK_HIDDEN_NAME);
 
       ptr->set_state(GetState());
-      StashObject(ptr->id(), ptr->is_from_script());
+      StashObject(ptr->script_id(), ptr->is_from_script());
     }
 
     //--------------------------------------------------------------------------
@@ -74,6 +74,7 @@ namespace snuffbox
       duk_push_global_stash(context_);
 
       void* hptr = duk_get_heapptr(context_, stack_idx - 1);
+
       duk_push_object(context_);
       duk_push_pointer(context_, hptr);
       duk_put_prop_string(context_, -2, DUK_HIDDEN_PTR);

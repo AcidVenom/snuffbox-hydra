@@ -11,17 +11,17 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ScriptClass::ScriptClass() :
       is_from_script_(false),
-      id_(0),
+      script_id_(0),
       state_(nullptr)
     {
-      id_ = kCurrentID_;
+      script_id_ = kCurrentID_;
       ++kCurrentID_;
     }
 
     //--------------------------------------------------------------------------
-    size_t ScriptClass::id() const
+    size_t ScriptClass::script_id() const
     {
-      return id_;
+      return script_id_;
     }
 
     //--------------------------------------------------------------------------

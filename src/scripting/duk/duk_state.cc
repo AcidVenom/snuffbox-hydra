@@ -97,7 +97,7 @@ namespace snuffbox
       }
 
       DukWrapper wrapper(context_);
-      wrapper.RemoveStashedObject(cl->id());
+      wrapper.RemoveStashedObject(cl->script_id());
     }
 
     //--------------------------------------------------------------------------

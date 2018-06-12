@@ -124,7 +124,7 @@ namespace snuffbox
       /**
       * @return The script ID of this class
       */
-      size_t id() const;
+      size_t script_id() const;
 
       /**
       * @brief Sets the script state this class was instantiated in
@@ -140,7 +140,7 @@ namespace snuffbox
 
     private:
 
-      size_t id_; //!< The script ID of this class
+      size_t script_id_; //!< The script ID of this class
       ScriptState* state_; //!< The script state
 
       static size_t kCurrentID_; //!< The current ID to assign

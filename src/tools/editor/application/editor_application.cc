@@ -343,21 +343,6 @@ namespace snuffbox
       engine::Scene* scene = 
         GetService<engine::SceneService>()->current_scene();
 
-      scene->ForEachEntity([](engine::Entity* ent)
-      {
-        foundation::Vector<engine::ScriptComponent*> comps =
-          ent->GetComponents<engine::ScriptComponent>();
-
-        engine::ScriptComponent* c = nullptr;
-        for (size_t i = 0; i < comps.size(); ++i)
-        {
-          c = comps.at(i);
-          c->SetBehavior(c->behavior());
-        }
-
-        return true;
-      });
-
       engine::AssetService* a = GetService<engine::AssetService>();
 
       if (a->LoadAll(compilers::AssetTypes::kScript) == false)
@@ -376,6 +361,21 @@ namespace snuffbox
 
         return;
       }
+
+      scene->ForEachEntity([](engine::Entity* ent)
+      {
+        foundation::Vector<engine::ScriptComponent*> comps =
+          ent->GetComponents<engine::ScriptComponent>();
+
+        engine::ScriptComponent* c = nullptr;
+        for (size_t i = 0; i < comps.size(); ++i)
+        {
+          c = comps.at(i);
+          c->SetBehavior(c->behavior());
+        }
+
+        return true;
+      });
 
       window_->SetPlaybackEnabled(true);
       has_error_ = false;

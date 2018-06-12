@@ -258,7 +258,7 @@ namespace snuffbox
       duk_push_string(ctx, name);
       duk_put_prop_string(ctx, -2, DUK_HIDDEN_NAME);
 
-      wrapper.StashObject(ptr->id(), true);
+      wrapper.StashObject(ptr->script_id(), true);
       ptr->set_is_from_script(true);
       ptr->set_state(wrapper.GetState());
 
@@ -277,8 +277,11 @@ namespace snuffbox
       duk_get_prop_string(ctx, 0, DUK_HIDDEN_PTR);
       T* ptr = reinterpret_cast<T*>(duk_get_pointer(ctx, -1));
 
-      wrapper.RemoveStashedObject(ptr->id());
-      foundation::Memory::Destruct<T>(ptr);
+      if (ptr != nullptr)
+      {
+        wrapper.RemoveStashedObject(ptr->script_id());
+        foundation::Memory::Destruct<T>(ptr);
+      }
 
       duk_pop(ctx);
 

@@ -224,8 +224,9 @@ namespace snuffbox
         if (is_same && duk_get_prop_string(ctx, -2, DUK_HIDDEN_PTR) > 0)
         {
           callee = duk_get_pointer(ctx, -1);
-          duk_pop(ctx);
         }
+
+        duk_pop(ctx);
       }
 
       duk_pop_2(ctx);
