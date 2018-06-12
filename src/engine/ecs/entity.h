@@ -231,6 +231,11 @@ namespace snuffbox
       */
       SCRIPT_FUNC() bool active() const;
 
+      /**
+      * @return The transform component of this entity
+      */
+      SCRIPT_FUNC() TransformComponent* transform() const;
+
     protected:
 
       /**

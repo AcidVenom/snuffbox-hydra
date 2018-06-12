@@ -55,19 +55,25 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::Attach(TransformComponent* child)
     {
-      if (HasChild(child) >= 0)
+      if (child == nullptr || child == this || HasChild(child) >= 0)
       {
         return;
       }
 
+      if (child->parent_ != nullptr)
+      {
+        child->parent_->Detach(child);
+      }
+
       children_.push_back(child);
+      child->SetParentRaw(this);
     }
 
     //--------------------------------------------------------------------------
     void TransformComponent::Detach(TransformComponent* child)
     {
       int idx;
-      if ((idx = HasChild(child)) < 0)
+      if (child == nullptr || child == this || (idx = HasChild(child)) < 0)
       {
         return;
       }
@@ -122,23 +128,14 @@ namespace snuffbox
     {
       if (parent != nullptr)
       {
-        if (parent->parent() == this || parent == this)
-        {
-          return;
-        }
+        parent->Attach(this);
+        return;
       }
 
       if (parent_ != nullptr)
       {
         parent_->Detach(this);
       }
-
-      if (parent != nullptr)
-      {
-        parent->Attach(this);
-      }
-
-      SetParentRaw(parent);
     }
 
     //--------------------------------------------------------------------------

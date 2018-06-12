@@ -218,6 +218,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    TransformComponent* Entity::transform() const
+    {
+      return GetComponent<TransformComponent>();
+    }
+
+    //--------------------------------------------------------------------------
     void Entity::IDCheck(Components id)
     {
       foundation::Logger::Assert(
