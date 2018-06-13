@@ -224,6 +224,13 @@ namespace snuffbox
       */
       void DeselectAll();
 
+    public:
+
+      /**
+      * @brief Frees up the loaded icons
+      */
+      ~AssetBrowser();
+
     private:
 
       QString root_; //!< The root directory this asset browser runs in

@@ -181,14 +181,13 @@ namespace snuffbox
         child->Destroy();
       }
 
-      scene_->RemoveEntity(this);
-
       for (size_t i = 0; i < static_cast<size_t>(Components::kCount); ++i)
       {
         components_[i].clear();
       }
 
       scene_->OnSceneChanged();
+      scene_->RemoveEntity(this);
     }
 
     //--------------------------------------------------------------------------

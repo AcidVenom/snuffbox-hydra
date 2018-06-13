@@ -6,6 +6,8 @@ SET(RootSources
 )
 
 SET(DefinitionsSources
+  "definitions/project.h"
+  "definitions/project.cc"
   "definitions/color_format.h"
   "definitions/editor_colors.h"
   "definitions/editor_colors.cc"

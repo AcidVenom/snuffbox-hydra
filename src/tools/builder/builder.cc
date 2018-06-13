@@ -8,8 +8,6 @@ namespace snuffbox
   namespace builder
   {
     //--------------------------------------------------------------------------
-    const char* Builder::kBuildFolder_ = ".build";
-    const char* Builder::kSourceFolder_ = "assets";
     const char* Builder::kStampExtension_ = "time";
 
     //--------------------------------------------------------------------------
@@ -23,9 +21,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool Builder::Initialize(const foundation::Path& source_dir)
+    bool Builder::Initialize(
+      const foundation::Path& source_dir,
+      const char* assets,
+      const char* build)
     {
       listener_.Stop();
+
+      assets_ = assets;
+      build_ = build;
 
       if (foundation::Directory::Exists(source_dir) == false)
       {
@@ -38,7 +42,7 @@ namespace snuffbox
         return false;
       }
 
-      source_directory_ = source_dir / kSourceFolder_;
+      source_directory_ = source_dir / assets_;
 
       if (foundation::Directory::Exists(source_directory_) == false)
       {
@@ -50,13 +54,13 @@ namespace snuffbox
             foundation::LogChannel::kBuilder,
             foundation::LogSeverity::kError,
             "Could not create '{0}' directory in the project",
-            kSourceFolder_);
+            assets_);
 
           return false;
         }
       }
 
-      build_directory_ = source_dir / kBuildFolder_ / kSourceFolder_;
+      build_directory_ = source_dir / build_ / assets_;
 
       if (CreateBuildDirectory() == false)
       {
@@ -205,7 +209,7 @@ namespace snuffbox
 
         current = item_path.StripPath(source_directory_);
 
-        if (current == kBuildFolder_)
+        if (current == build_)
         {
           continue;
         }
@@ -238,7 +242,7 @@ namespace snuffbox
         {
           current = item.path().StripPath(source_directory_);
 
-          if (current == kBuildFolder_)
+          if (current == build_)
           {
             continue;
           }

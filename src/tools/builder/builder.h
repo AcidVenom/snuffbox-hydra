@@ -74,18 +74,25 @@ namespace snuffbox
       * The directory tree of the source directory is created here and compared
       * against the build directory, if there is a mismatch it is reconstructed.
       *
-      * The build directory will be created at the source directory's level
-      * under ./build. The source directory will be scanned from the top level
+      * The build directory will be created at the source directory's level.
+      * The source directory will be scanned from the top level
       * for files.
       *
       * @remarks This method fails if the source directory is invalid or
       *          the build directory could not be created
       *
+      * @param[in] source_dir The source directory
+      * @param[in] assets The asset directory in the source directory
+      * @param[in] build The name to put the build directory under
+      *
       * @see BuildScheduler::Refresh
       *
       * @return Was the initialization succesful?
       */
-      bool Initialize(const foundation::Path& source_dir);
+      bool Initialize(
+        const foundation::Path& source_dir,
+        const char* assets,
+        const char* build);
 
       /**
       * @brief Notify the builder that the application is idle and that the
@@ -227,6 +234,9 @@ namespace snuffbox
       foundation::Path source_directory_; //!< The current source directory
       foundation::Path build_directory_; //!< The current build directory
 
+      foundation::String assets_; //!< The asset directory
+      foundation::String build_; //!< The build directory
+
       foundation::DirectoryListener listener_; //!< The directory listener
 
       BuildScheduler scheduler_; //!< The build scheduler to queue files in
@@ -242,16 +252,6 @@ namespace snuffbox
       *        from the build directory
       */
       OnFinishedCallback on_removed_;
-
-      /**
-      * @brief The name of the source directory folder
-      */
-      static const char* kSourceFolder_;
-
-      /**
-      * @brief The name of the build directory folder
-      */
-      static const char* kBuildFolder_;
 
       /**
       * @brief The extension for the time stamp files

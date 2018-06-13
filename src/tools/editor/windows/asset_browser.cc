@@ -1,5 +1,6 @@
 #include "tools/editor/windows/asset_browser.h"
 #include "tools/editor/definitions/editor_colors.h"
+#include "tools/editor/definitions/project.h"
 
 #include <engine/services/asset_service.h>
 
@@ -211,7 +212,8 @@ namespace snuffbox
     {
       Clear();
 
-      foundation::Path asset_dir = (root_ + "/assets").toStdString().c_str();
+      foundation::Path asset_dir = 
+        (root_ + "/" + Project::kAssetFolder).toStdString().c_str();
 
       const foundation::Vector<engine::AssetService::AssetFile>& paths =
         engine::AssetService::EnumerateAssets(path, asset_dir, false, true);
@@ -242,7 +244,7 @@ namespace snuffbox
       foundation::Path root = s.c_str();
 
       foundation::Path relative = path.StripPath(root);
-      foundation::Path full = root / "assets" / relative;
+      foundation::Path full = root / Project::kAssetFolder / relative;
 
       foundation::String name = relative.NoExtension().ToString();
 
@@ -360,6 +362,21 @@ namespace snuffbox
       foundation::Path to_traverse = path.c_str();
 
       ShowDirectory(to_traverse);
+    }
+
+    //--------------------------------------------------------------------------
+    AssetBrowser::~AssetBrowser()
+    {
+      QImage* ptr = nullptr;
+      for (int i = 0; i <= static_cast<int>(compilers::AssetTypes::kCount); ++i)
+      {
+         ptr = icons_[i];
+
+         if (ptr != nullptr)
+         {
+           delete ptr;
+         }
+      }
     }
   }
 }

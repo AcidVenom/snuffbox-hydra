@@ -1,4 +1,5 @@
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/definitions/project.h"
 
 #include <engine/ecs/entity.h>
 
@@ -133,7 +134,10 @@ namespace snuffbox
         return false;
       }
 
-      if (builder_.Initialize(path) == false)
+      if (builder_.Initialize(
+        path,
+        Project::kAssetFolder,
+        Project::kBuildFolder) == false)
       {
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kEditor,
@@ -146,7 +150,7 @@ namespace snuffbox
       }
 
       project_dir_ = path.ToString().c_str();
-      assets_dir_ = project_dir_ + "/assets";
+      assets_dir_ = project_dir_ + "/" + Project::kAssetFolder;
 
       InitializeAssets(builder_.build_directory());
 
