@@ -155,6 +155,11 @@ namespace snuffbox
       */
       void RefreshWindowTitle();
 
+      /**
+      * @brief Called when the scene has been changed
+      */
+      void OnSceneChanged();
+
     private slots:
 
       /**

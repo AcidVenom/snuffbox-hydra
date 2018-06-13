@@ -45,7 +45,8 @@ namespace snuffbox
     Inspector::Inspector(QTreeWidget* widget) :
       tree_(widget),
       context_menu_(nullptr),
-      remove_component_(nullptr)
+      remove_component_(nullptr),
+      selected_(nullptr)
     {
       ApplyStyle();
       AddContextMenu();
@@ -55,6 +56,8 @@ namespace snuffbox
     void Inspector::ShowEntity(engine::Entity* entity)
     {
       tree_->clear();
+
+      selected_ = entity;
 
       if (entity == nullptr)
       {
@@ -115,6 +118,12 @@ namespace snuffbox
 
       ShowComponents(entity, top);
       top->setExpanded(true);
+    }
+
+    //--------------------------------------------------------------------------
+    engine::Entity* Inspector::selected() const
+    {
+      return selected_;
     }
 
     //--------------------------------------------------------------------------

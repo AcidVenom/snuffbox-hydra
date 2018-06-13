@@ -75,6 +75,11 @@ namespace snuffbox
       void OnReloadCallback(const foundation::String& path);
 
       /**
+      * @brief Restarts the script service to clear the current script state
+      */
+      void Restart();
+
+      /**
       * @return The current scripting state
       */
       scripting::ScriptState* state() const;

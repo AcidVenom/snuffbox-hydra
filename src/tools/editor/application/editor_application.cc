@@ -394,6 +394,10 @@ namespace snuffbox
         window_->SetPlaybackEnabled(false);
       }
 
+#ifndef SNUFF_NSCRIPTING
+      GetService<engine::ScriptService>()->Restart();
+#endif
+
       DeserializeCurrentScene();
     }
 
@@ -466,7 +470,7 @@ namespace snuffbox
     {
       if (scene_changed_ == true)
       {
-        emit window_->SceneChanged();
+        window_->OnSceneChanged();
         scene_changed_ = false;
       }
     }

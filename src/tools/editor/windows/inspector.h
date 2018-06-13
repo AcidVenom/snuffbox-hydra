@@ -93,6 +93,11 @@ namespace snuffbox
       void ShowEntity(engine::Entity* entity);
 
       /**
+      * @return The selected entity
+      */
+      engine::Entity* selected() const;
+
+      /**
       * @brief Shows all typed components of an entity in the inspector
       *
       * @remarks This method should be called with the first occurence
@@ -156,6 +161,8 @@ namespace snuffbox
 
       QMenu* context_menu_; //!< The context menu of the inspector
       QAction* remove_component_; //!< The remove component action
+
+      engine::Entity* selected_; //!< The selected entity
     };
 
     //--------------------------------------------------------------------------

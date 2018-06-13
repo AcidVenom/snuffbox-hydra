@@ -3,6 +3,9 @@
 #include "tools/editor/application/editor_application.h"
 #include "tools/editor/definitions/editor_colors.h"
 
+#include <engine/services/scene_service.h>
+#include <engine/ecs/scene.h>
+
 #include <qstylefactory.h>
 #include <qevent.h>
 #include <qfiledialog.h>
@@ -268,6 +271,36 @@ namespace snuffbox
     {
       setWindowTitle(
         "Snuffbox Editor - " + current_scene_ + " (" + project_dir_ + ")");
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSceneChanged()
+    {
+      engine::SceneService* ss = app_->GetService<engine::SceneService>();
+      engine::Scene* scene = ss->current_scene();
+      engine::Entity* selected = inspector_->selected();
+
+      if (selected != nullptr)
+      {
+        bool found = false;
+        scene->ForEachEntity([&found, selected](engine::Entity* e)
+        {
+          if (e == selected)
+          {
+            found = true;
+            return false;
+          }
+
+          return true;
+        });
+
+        if (found == false)
+        {
+          inspector_->ShowEntity(nullptr);
+        }
+      }
+
+      emit SceneChanged();
     }
 
     //--------------------------------------------------------------------------

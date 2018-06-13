@@ -80,6 +80,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void ScriptService::Restart()
+    {
+      Application& app = *Application::Instance();
+
+      OnShutdown(app);
+      OnInitialize(app);
+    }
+
+    //--------------------------------------------------------------------------
     scripting::ScriptState* ScriptService::state() const
     {
       return state_.get();
