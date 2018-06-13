@@ -4,12 +4,18 @@
 #include <engine/services/asset_service.h>
 
 #include <foundation/auxiliary/string_utils.h>
+#include <foundation/io/resources.h>
+#include <foundation/io/file.h>
 
 #include <qfilesystemmodel.h>
 #include <qtreeview.h>
 #include <qgridlayout.h>
 #include <qlabel.h>
 #include <qevent.h>
+
+#include <resources/directory_icon.h>
+#include <resources/script_icon.h>
+#include <resources/scene_icon.h>
 
 namespace snuffbox
 {
@@ -26,11 +32,13 @@ namespace snuffbox
     AssetBrowserItem::AssetBrowserItem(
       AssetBrowser* browser,
       const QString& name,
-      const foundation::Path& path,
+      const foundation::Path& relative,
+      const foundation::Path& full_path,
       compilers::AssetTypes type)
       :
       browser_(browser),
-      path_(path),
+      relative_(relative),
+      full_path_(full_path),
       type_(type),
       icon_(nullptr),
       label_(nullptr)
@@ -44,16 +52,35 @@ namespace snuffbox
     {
       QWidget* icon_wrapper = new QWidget();
       QVBoxLayout* wrapper_layout = new QVBoxLayout();
+      QVBoxLayout* icon_layout = new QVBoxLayout();
 
       icon_wrapper->setLayout(wrapper_layout);
 
       icon_ = new QFrame();
       icon_->setSizePolicy({ QSizePolicy::Fixed, QSizePolicy::Fixed });
       icon_->setFixedSize(QSize{ kIconSize_, kIconSize_ });
+      icon_->setContentsMargins(0, 0, 0, 0);
+
+      QLabel* icon_img = new QLabel();
+      icon_img->setSizePolicy({ QSizePolicy::Fixed, QSizePolicy::Fixed });
+      icon_img->setFixedSize(QSize{ kIconSize_, kIconSize_ });
+
+      QImage* img = browser_->GetIcon(type_);
+      if (img != nullptr)
+      {
+        icon_img->setPixmap(QPixmap::fromImage(*img));
+      }
+
+      icon_img->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+      icon_layout->addWidget(icon_img);
+      icon_layout->setContentsMargins(0, 0, 0, 0);
+      icon_layout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+      icon_->setLayout(icon_layout);
 
       wrapper_layout->setAlignment(Qt::AlignHCenter);
       wrapper_layout->addWidget(icon_);
-      wrapper_layout->addStretch();
 
       label_ = new QLabel();
       label_->setText(name);
@@ -81,7 +108,7 @@ namespace snuffbox
     void AssetBrowserItem::SetSelected(bool selected)
     {
       QPalette::ColorRole role = 
-        selected == true ? QPalette::Highlight : QPalette::Base;
+        selected == true ? QPalette::Highlight : QPalette::Window;
 
       QString icon_col = EditorColors::ColorToCSS(
         EditorColors::DefaultPalette().color(role));
@@ -102,9 +129,19 @@ namespace snuffbox
     {
       if (e->button() == Qt::LeftButton)
       {
-        emit browser_->DoubleClickedAsset(
-          path_.ToString().c_str(), 
-          static_cast<int>(type_));
+        if (type_ != compilers::AssetTypes::kUnknown)
+        {
+          emit browser_->DoubleClickedAsset(
+            relative_.ToString().c_str(), 
+            static_cast<int>(type_));
+
+          return;
+        }
+
+        foundation::Path copy = full_path_;
+        AssetBrowser* browser = browser_;
+
+        browser->ShowDirectory(copy);
       }  
     }
 
@@ -134,6 +171,7 @@ namespace snuffbox
       current_column_(0)
     {
       ApplyStyle();
+      LoadIcons();
       BindEvents();
     }
 
@@ -163,6 +201,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    QImage* AssetBrowser::GetIcon(compilers::AssetTypes type)
+    {
+      return icons_[static_cast<int>(type)];
+    }
+
+    //--------------------------------------------------------------------------
     void AssetBrowser::ShowDirectory(const foundation::Path& path)
     {
       Clear();
@@ -170,7 +214,7 @@ namespace snuffbox
       foundation::Path asset_dir = (root_ + "/assets").toStdString().c_str();
 
       const foundation::Vector<engine::AssetService::AssetFile>& paths =
-        engine::AssetService::EnumerateAssets(path, asset_dir);
+        engine::AssetService::EnumerateAssets(path, asset_dir, false, true);
 
       QString full_path;
       for (size_t i = 0; i < paths.size(); ++i)
@@ -194,7 +238,12 @@ namespace snuffbox
       const foundation::Path& path,
       compilers::AssetTypes type)
     {
-      foundation::Path relative = path.StripPath(root_.toStdString().c_str());
+      std::string s = root_.toStdString();
+      foundation::Path root = s.c_str();
+
+      foundation::Path relative = path.StripPath(root);
+      foundation::Path full = root / "assets" / relative;
+
       foundation::String name = relative.NoExtension().ToString();
 
       foundation::Vector<foundation::String> split = 
@@ -203,7 +252,7 @@ namespace snuffbox
       name = split.at(split.size() - 1);
 
       AddWidget(
-        new AssetBrowserItem(this, name.c_str(), relative, type));
+        new AssetBrowserItem(this, name.c_str(), relative, full, type));
     }
 
     //--------------------------------------------------------------------------
@@ -239,6 +288,59 @@ namespace snuffbox
     void AssetBrowser::ApplyStyle()
     {
       assets_->setMargin(kContentMargin_);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::LoadIcons()
+    {
+      SNUFF_MAKE_RESOURCE(directory_icon);
+      SNUFF_MAKE_RESOURCE(script_icon);
+      SNUFF_MAKE_RESOURCE(scene_icon);
+
+      CreateIcons();
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::CreateIcons()
+    {
+      foundation::Path paths[] =
+      {
+        "snuff:/rsc/icons/script_icon.png",
+        "snuff:/rsc/icons/scene_icon.png",
+        "snuff:/rsc/icons/directory_icon.png"
+      };
+
+      int path_len = static_cast<int>(sizeof(paths) / sizeof(foundation::Path));
+
+      QImage* img = nullptr;
+      foundation::File fin;
+
+      size_t len;
+      const uint8_t* data;
+
+      for (int i = 0; i <= static_cast<int>(compilers::AssetTypes::kCount); ++i)
+      {
+        if (i >= path_len)
+        {
+          icons_[i] = nullptr;
+          continue;
+        }
+
+        fin.Open(paths[i]);
+
+        if (fin.is_ok() == false)
+        {
+          icons_[i] = nullptr;
+          continue;
+        }
+
+        data = fin.ReadBuffer(&len);
+
+        img = new QImage();
+        img->loadFromData(data, static_cast<int>(len), "PNG");
+
+        icons_[i] = img;
+      }
     }
 
     //--------------------------------------------------------------------------

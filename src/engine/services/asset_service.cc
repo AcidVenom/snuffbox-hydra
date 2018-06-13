@@ -33,7 +33,8 @@ namespace snuffbox
     foundation::Vector<AssetService::AssetFile> AssetService::EnumerateAssets(
       const foundation::Path& dir,
       const foundation::Path& root,
-      bool recursive)
+      bool recursive,
+      bool include_directories)
     {
       foundation::Vector<AssetFile> result;
       foundation::DirectoryTree tree(dir);
@@ -54,15 +55,25 @@ namespace snuffbox
 
           af.relative_path = item_path.StripPath(root);
           af.type = compilers::AssetTypesFromBuildExtension(ext.c_str());
+          af.is_directory = false;
 
           result.push_back(af);
           continue;
         }
 
+        if (include_directories == true && item.is_directory() == true)
+        {
+          af.relative_path = item_path.StripPath(root);
+          af.type = compilers::AssetTypes::kUnknown;
+          af.is_directory = true;
+
+          result.push_back(af);
+        }
+
         if (recursive == true && item.is_directory() == true)
         {
           foundation::Vector<AssetFile> children =
-            EnumerateAssets(item.path(), root, recursive);
+            EnumerateAssets(item.path(), root, recursive, include_directories);
 
           for (size_t j = 0; j < children.size(); ++j)
           {

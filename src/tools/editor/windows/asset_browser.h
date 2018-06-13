@@ -13,6 +13,7 @@ class QFileSystemModel;
 class QFrame;
 class QLabel;
 class QModelIndex;
+class QImage;
 
 namespace snuffbox
 {
@@ -43,13 +44,15 @@ namespace snuffbox
       *
       * @param[in] browser The asset browser this asset belongs to
       * @param[in] name The name of the asset
-      * @param[in] path The relative path to the asset
+      * @param[in] relative The relative path to the asset
+      * @param[in] full_path The full path to the asset
       * @param[in] type The type of the asset
       */
       AssetBrowserItem(
         AssetBrowser* browser,
         const QString& name,
-        const foundation::Path& path,
+        const foundation::Path& relative,
+        const foundation::Path& full_path,
         compilers::AssetTypes type);
 
     protected:
@@ -88,7 +91,9 @@ namespace snuffbox
 
       AssetBrowser* browser_; //!< The asset browser this asset belongs to
 
-      foundation::Path path_; //!< The relative path to the asset
+      foundation::Path relative_; //!< The relative path to the asset
+      foundation::Path full_path_; //!< The full path to the asset
+      
       compilers::AssetTypes type_; //!< The type of the asset
 
       QFrame* icon_; //!< The created icon
@@ -127,7 +132,15 @@ namespace snuffbox
       */
       void Refresh(const foundation::Path& path);
 
-    protected:
+      /**
+      * @brief Gets an icon for a specific asset type
+      *
+      * @param[in] type The type of the asset to retrieve
+      *
+      * @return The retrieved image, or nullptr if there is no icon for
+      *         the type
+      */
+      QImage* GetIcon(compilers::AssetTypes type);
 
       /**
       * @brief Used to show the assets in a specified build directory,
@@ -136,6 +149,8 @@ namespace snuffbox
       * @param[in] dir The directory to traverse
       */
       void ShowDirectory(const foundation::Path& dir);
+
+    protected:
 
       /**
       * @brief Adds an asset to the asset browser by path
@@ -168,6 +183,16 @@ namespace snuffbox
       * @brief Applies the styles for the asset browser
       */
       void ApplyStyle();
+
+      /**
+      * @brief Loads all icons
+      */
+      void LoadIcons();
+
+      /**
+      * @brief Creates all QImages out of the icons
+      */
+      void CreateIcons();
 
       /**
       * @brief Binds the events for when a new selection is made in the
@@ -210,6 +235,11 @@ namespace snuffbox
 
       unsigned int current_row_; //!< The current row we're at
       unsigned int current_column_; //!< The current column we're at
+
+      /**
+      * @brief The list of available image icons per asset type
+      */
+      QImage* icons_[static_cast<int>(compilers::AssetTypes::kCount) + 1];
 
       static const int kItemsPerRow_; //!< The number of items per row
       static const int kContentMargin_; //!< The margin between assets

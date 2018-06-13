@@ -34,6 +34,7 @@ namespace snuffbox
       {
         foundation::Path relative_path; //!< The relative path to the file
         compilers::AssetTypes type; //!< The asset type of the file
+        bool is_directory; //!< Is the path a directory?
       };
 
       /**
@@ -43,13 +44,15 @@ namespace snuffbox
       * @param[in] dir The directory to enumerate the assets from
       * @param[in] root The root directory where the enumeration started
       * @param[in] recursive Should the assets be enumerated recursively?
+      * @param[in] include_directories Should directories be included?
       *
       * @return A list of asset file definitions with both type and path
       */
       static foundation::Vector<AssetFile> EnumerateAssets(
         const foundation::Path& dir,
         const foundation::Path& root,
-        bool recurisve = false);
+        bool recursive = false,
+        bool include_directories = false);
 
       /**
       * @brief Converts a build path without an extension to a build path with

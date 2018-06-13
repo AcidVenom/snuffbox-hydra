@@ -77,7 +77,9 @@ namespace snuffbox
       *
       * @return The file contents as binary data
       */
-      const uint8_t* ReadBuffer(size_t* length, bool is_string = false);
+      const uint8_t* ReadBuffer(
+        size_t* length = nullptr, 
+        bool is_string = false);
 
       /**
       * @brief Writes data to an opened file

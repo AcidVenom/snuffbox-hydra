@@ -95,6 +95,9 @@ IF (NOT SNUFF_NSCRIPTING)
 ENDIF (NOT SNUFF_NSCRIPTING)
 
 SET(Resources
+  "rsc/icons/directory_icon.png"
+  "rsc/icons/script_icon.png"
+  "rsc/icons/scene_icon.png"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
@@ -133,7 +136,7 @@ FILE(MAKE_DIRECTORY ${WorkingDir}/resources)
 
 SNUFF_BIN2H("${Resources}" ${WorkingDir}/resources)
 
-TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PRIVATE ${WorkingDir})
+TARGET_INCLUDE_DIRECTORIES(snuffbox-engine PUBLIC ${WorkingDir})
 
 IF (NOT SNUFF_NSCRIPTING)
   TARGET_LINK_LIBRARIES(snuffbox-engine snuffbox-scripting)
