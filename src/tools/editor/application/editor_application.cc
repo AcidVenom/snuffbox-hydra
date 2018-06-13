@@ -399,6 +399,9 @@ namespace snuffbox
 #endif
 
       DeserializeCurrentScene();
+
+      window_->OnSceneChanged();
+      scene_changed_ = false;
     }
 
     //--------------------------------------------------------------------------
