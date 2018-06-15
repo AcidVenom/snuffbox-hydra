@@ -2,6 +2,8 @@
 
 #include <tools/compilers/definitions/asset_types.h>
 
+#include <engine/services/asset_service.h>
+
 #include <foundation/io/path.h>
 
 #include <qobject.h>
@@ -83,7 +85,10 @@ namespace snuffbox
       void mousePressEvent(QMouseEvent* e) override;
 
     private slots:
-
+      
+      /**
+      * @brief Called to deselect an asset
+      */
       void Deselect();
 
 
@@ -232,6 +237,22 @@ namespace snuffbox
       ~AssetBrowser();
 
     private:
+
+      /**
+      * @brief Sorts assets based on whether they are a directory and
+      *        alphabetical order
+      *
+      * @author Daniel Konings
+      */
+      struct AssetSorter
+      {
+        /**
+        * @brief The compare function
+        */
+        bool operator()(
+          const engine::AssetService::AssetFile& a, 
+          const engine::AssetService::AssetFile& b);
+      };
 
       QString root_; //!< The root directory this asset browser runs in
 

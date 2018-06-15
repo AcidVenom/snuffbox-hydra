@@ -2,8 +2,6 @@
 #include "tools/editor/definitions/editor_colors.h"
 #include "tools/editor/definitions/project.h"
 
-#include <engine/services/asset_service.h>
-
 #include <foundation/auxiliary/string_utils.h>
 #include <foundation/io/resources.h>
 #include <foundation/io/file.h>
@@ -13,6 +11,8 @@
 #include <qgridlayout.h>
 #include <qlabel.h>
 #include <qevent.h>
+
+#include <EASTL/sort.h>
 
 #include <resources/directory_icon.h>
 #include <resources/script_icon.h>
@@ -215,8 +215,10 @@ namespace snuffbox
       foundation::Path asset_dir = 
         (root_ + "/" + Project::kAssetFolder).toStdString().c_str();
 
-      const foundation::Vector<engine::AssetService::AssetFile>& paths =
+      foundation::Vector<engine::AssetService::AssetFile> paths =
         engine::AssetService::EnumerateAssets(path, asset_dir, false, true);
+
+      eastl::sort(paths.begin(), paths.end(), AssetSorter());
 
       QString full_path;
       for (size_t i = 0; i < paths.size(); ++i)
@@ -377,6 +379,27 @@ namespace snuffbox
            delete ptr;
          }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    bool AssetBrowser::AssetSorter::operator()(
+      const engine::AssetService::AssetFile& a, 
+      const engine::AssetService::AssetFile& b)
+    {
+      foundation::String as = a.relative_path.ToString();
+      foundation::String bs = b.relative_path.ToString();
+
+      if (a.is_directory == true && b.is_directory == false)
+      {
+        return true;
+      }
+
+      if (a.is_directory == false && b.is_directory == true)
+      {
+        return false;
+      }
+
+      return as < bs;
     }
   }
 }
