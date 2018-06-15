@@ -39,6 +39,14 @@ ELSEIF (SNUFF_OGL)
     "ogl/ogl_context.h"
     "ogl/ogl_renderer.h"
     "ogl/ogl_renderer.cc"
+    "ogl/ogl_utils.h" 
+    "ogl/ogl_utils.cc"
+    "ogl/ogl_vertex_buffer.h"
+    "ogl/ogl_vertex_buffer.cc"
+    "ogl/ogl_index_buffer.h"
+    "ogl/ogl_index_buffer.cc"
+    "ogl/ogl_mesh.h"
+    "ogl/ogl_mesh.cc"
   )
   
   IF (SNUFF_WIN32)
