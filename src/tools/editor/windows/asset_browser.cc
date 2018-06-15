@@ -399,6 +399,16 @@ namespace snuffbox
         return false;
       }
 
+      if (a.type < b.type)
+      {
+        return true;
+      }
+
+      if (a.type > b.type)
+      {
+        return false;
+      }
+
       return as < bs;
     }
   }
