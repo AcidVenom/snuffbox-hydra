@@ -10,6 +10,8 @@ SET(DefinitionsSources
   "definitions/vertex.h"
   "definitions/texture_formats.h"
   "definitions/render_target.h"
+  "definitions/frame_data.h"
+  "definitions/draw_command.h"
 )
 
 IF (SNUFF_WIN32)
@@ -47,6 +49,10 @@ ELSEIF (SNUFF_OGL)
     "ogl/ogl_index_buffer.cc"
     "ogl/ogl_mesh.h"
     "ogl/ogl_mesh.cc"
+    "ogl/ogl_shader.h"
+    "ogl/ogl_shader.cc"
+    "ogl/ogl_uniform_buffer.h"
+    "ogl/ogl_uniform_buffer.cc"
   )
   
   IF (SNUFF_WIN32)
