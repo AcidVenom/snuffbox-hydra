@@ -3,7 +3,7 @@
 #include "engine/application/application.h"
 #include "engine/ecs/scene.h"
 
-#include <tools/compilers/scene_compiler.h>
+#include <tools/compilers/compilers/scene_compiler.h>
 
 #include <foundation/serialization/load_archive.h>
 

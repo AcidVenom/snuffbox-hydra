@@ -1,7 +1,7 @@
 #include "tools/builder/threading/build_job.h"
 
-#include <tools/compilers/script_compiler.h>
-#include <tools/compilers/scene_compiler.h>
+#include <tools/compilers/compilers/script_compiler.h>
+#include <tools/compilers/compilers/scene_compiler.h>
 
 #include <foundation/auxiliary/logger.h>
 

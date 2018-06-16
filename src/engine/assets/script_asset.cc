@@ -5,7 +5,7 @@
 #include "engine/services/script_service.h"
 #endif
 
-#include <tools/compilers/script_compiler.h>
+#include <tools/compilers/compilers/script_compiler.h>
 
 namespace snuffbox
 {

@@ -1,10 +1,12 @@
-SET(RootSources
-  "compiler.h"
-  "compiler.cc"
-  "script_compiler.h"
-  "script_compiler.cc"
-  "scene_compiler.h"
-  "scene_compiler.cc"
+SET(CompilersSources
+  "compilers/compiler.h"
+  "compilers/compiler.cc"
+  "compilers/script_compiler.h"
+  "compilers/script_compiler.cc"
+  "compilers/scene_compiler.h"
+  "compilers/scene_compiler.cc"
+  "compilers/shader_compiler.h"
+  "compilers/shader_compiler.cc"
 )
 
 SET(DefinitionsSources
@@ -13,13 +15,20 @@ SET(DefinitionsSources
   "definitions/asset_types.cc"
 )
 
-SOURCE_GROUP("\\"          FILES ${RootSources})
-SOURCE_GROUP("definitions" FILES ${DefinitionsSources})
-
-SET(CompilersSources
-  ${RootSources}
-  ${DefinitionsSources}
+SET(UtilsSources
+  "utils/glslang.h"
+  "utils/glslang.cc"
 )
 
-ADD_LIBRARY(snuffbox-compilers ${CompilersSources})
-TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation)
+SOURCE_GROUP("compilers"    FILES ${CompilersSources})
+SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
+SOURCE_GROUP("utils"        FILES ${UtilsSources})
+
+SET(ProjectSources
+  ${CompilersSources}
+  ${DefinitionsSources}
+  ${UtilsSources}
+)
+
+ADD_LIBRARY(snuffbox-compilers ${ProjectSources})
+TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang spirv-cross-lib)

@@ -1,5 +1,7 @@
 # Disable warnings for all dependencies
 
+SET(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+
 IF (SNUFF_WIN32)
   IF (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
     STRING(REGEX REPLACE "/W[0-4]" "/W0" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -60,6 +62,19 @@ ENDIF (NOT SNUFF_NSCRIPTING)
 ADD_LIBRARY(rapidjson INTERFACE)
 TARGET_INCLUDE_DIRECTORIES(rapidjson INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/rapidjson/include")
 
+SET(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "" FORCE)
+ADD_SUBDIRECTORY("glslang")
+
+ADD_SUBDIRECTORY("spirv-cross")
+ADD_LIBRARY(spirv-cross-lib INTERFACE)
+TARGET_LINK_LIBRARIES(spirv-cross-lib INTERFACE 
+  spirv-cross-core 
+  spirv-cross-cpp 
+  spirv-cross-util 
+  spirv-cross-hlsl 
+  spirv-cross-glsl
+)
+
 SET_SOLUTION_FOLDER(
   "deps/eastl"
   EABase_ide
@@ -75,4 +90,25 @@ SET_SOLUTION_FOLDER(
   "deps/glfw3"
   glfw
   uninstall
+)
+
+SET_SOLUTION_FOLDER(
+  "deps/glslang"
+  glslang
+  OGLCompiler
+  OSDependent
+  SPIRV
+  SPVRemapper
+  HLSL
+)
+
+SET_SOLUTION_FOLDER(
+  "deps/spirv-cross"
+  spirv-cross
+  spirv-cross-core
+  spirv-cross-cpp
+  spirv-cross-glsl
+  spirv-cross-hlsl
+  spirv-cross-msl
+  spirv-cross-util
 )

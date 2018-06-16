@@ -1,4 +1,4 @@
-#include "tools/compilers/scene_compiler.h"
+#include "tools/compilers/compilers/scene_compiler.h"
 
 namespace snuffbox
 {
