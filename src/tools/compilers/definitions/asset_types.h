@@ -20,6 +20,9 @@ namespace snuffbox
     {
       kScript,
       kScene,
+      kVertexShader,
+      kPixelShader,
+      kGeometryShader,
       kCount,
       kUnknown = kCount,
     };

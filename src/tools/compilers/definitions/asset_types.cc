@@ -15,8 +15,12 @@ namespace snuffbox
         return "script";
       case AssetTypes::kScene:
         return "scene";
-      default:
-        return "unknown";
+      case AssetTypes::kVertexShader:
+        return "vsb";
+      case AssetTypes::kPixelShader:
+        return "psb";
+      case AssetTypes::kGeometryShader:
+        return "gsb";
       }
 
       return "unknown";
@@ -48,8 +52,12 @@ namespace snuffbox
         return "js";
       case AssetTypes::kScene:
         return "scene";
-      default:
-        return "unknown";
+      case AssetTypes::kVertexShader:
+        return "vs";
+      case AssetTypes::kPixelShader:
+        return "ps";
+      case AssetTypes::kGeometryShader:
+        return "gs";
       }
 
       return "unknown";
@@ -95,8 +103,12 @@ namespace snuffbox
         return "Script";
       case AssetTypes::kScene:
         return "Scene";
-      default:
-        return "Unknown Asset";
+      case AssetTypes::kVertexShader:
+        return "Vertex Shader";
+      case AssetTypes::kPixelShader:
+        return "Pixel Shader";
+      case AssetTypes::kGeometryShader:
+        return "Geometry Shader";
       }
 
       return "Unknown Asset";
