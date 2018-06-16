@@ -31,4 +31,4 @@ SET(ProjectSources
 )
 
 ADD_LIBRARY(snuffbox-compilers ${ProjectSources})
-TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang spirv-cross-lib)
+TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang-lib spirv-cross-lib)
