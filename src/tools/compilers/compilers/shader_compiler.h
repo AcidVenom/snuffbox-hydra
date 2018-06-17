@@ -49,6 +49,24 @@ namespace snuffbox
 
     private:
 
+      /**
+      * @brief The shader header to contain both HLSL bytecode and GLSL source
+      *        code
+      *
+      * The header contains offsets to reach the corresponding shader for
+      * the current renderer.
+      *
+      * @author Daniel Konings
+      */
+      struct ShaderHeader
+      {
+        bool has_hlsl; //!< Is there HLSL in this file?
+        size_t hlsl_size; //!< The HLSL size
+        size_t hlsl_offset; //!< The HLSL offset to reach its binary blob
+        size_t glsl_size; //!< The GLSL size
+        size_t glsl_offset; //!< The GLSL offset to reach its source code
+      };
+
       AssetTypes type_; //!< The shader type
     };
   }

@@ -1,6 +1,7 @@
 #include "tools/compilers/compilers/shader_compiler.h"
 
 #include "tools/compilers/utils/glslang.h"
+#include "tools/compilers/utils/spirv_cross.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -49,7 +50,45 @@ namespace snuffbox
         return false;
       }
 
-      if (AllocateSourceFile(spirv.data(), spirv.size(), &fd) == false)
+      SPIRVCross spv_cross;
+      SPIRVCross::ShaderData sh_data;
+      if (spv_cross.Compile(
+        spirv.data(), 
+        spirv.size(), 
+        type_, 
+        &sh_data) == false)
+      {
+        set_error(spv_cross.error());
+        return false;
+      }
+
+      foundation::Vector<uint8_t> buffer;
+
+      const size_t header_size = sizeof(ShaderHeader);
+      size_t glsl_size = sh_data.glsl.size();
+      size_t hlsl_size = sh_data.has_hlsl == true ? sh_data.hlsl.size() : 0;
+
+      size_t block_size = header_size + glsl_size + hlsl_size;
+
+      buffer.resize(block_size);
+      
+      ShaderHeader header;
+      header.has_hlsl = sh_data.has_hlsl;
+      header.hlsl_size = hlsl_size;
+      header.hlsl_offset = header_size;
+      header.glsl_size = glsl_size;
+      header.glsl_offset = header.hlsl_offset + hlsl_size;
+
+      memcpy(&buffer.at(0), &header, header_size);
+
+      if (header.has_hlsl == true)
+      {
+        memcpy(&buffer.at(header_size), sh_data.hlsl.data(), hlsl_size);
+      }
+
+      memcpy(&buffer.at(header.glsl_offset), sh_data.glsl.c_str(), glsl_size);
+
+      if (AllocateSourceFile(buffer.data(), buffer.size(), &fd) == false)
       {
         return false;
       }

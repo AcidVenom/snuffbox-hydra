@@ -18,6 +18,8 @@ SET(DefinitionsSources
 SET(UtilsSources
   "utils/glslang.h"
   "utils/glslang.cc"
+  "utils/spirv_cross.h"
+  "utils/spirv_cross.cc"
 )
 
 SOURCE_GROUP("compilers"    FILES ${CompilersSources})
@@ -32,3 +34,7 @@ SET(ProjectSources
 
 ADD_LIBRARY(snuffbox-compilers ${ProjectSources})
 TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang-lib spirv-cross-lib)
+
+IF (SNUFF_WIN32)
+  TARGET_LINK_LIBRARIES(snuffbox-compilers d3dcompiler)
+ENDIF (SNUFF_WIN32)
