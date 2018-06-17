@@ -38,6 +38,17 @@ namespace snuffbox
       default:
         return false;
       }
+
+      if (type_ == AssetTypes::kGeometryShader)
+      {
+        set_error(
+          "Currently,\
+          due to SPIRV-Cross not being able to compile HLSL geometry shaders;\
+          they are unimplemented");
+
+        return false;
+      }
+
       size_t len;
       const char* block = reinterpret_cast<const char*>(file.ReadBuffer(&len));
       foundation::String hlsl(block, len);
