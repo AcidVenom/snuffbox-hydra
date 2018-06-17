@@ -1,4 +1,4 @@
-#include "graphics/ogl/ogl_shader.h"
+#include "graphics/ogl/resources/ogl_shader.h"
 
 namespace snuffbox
 {

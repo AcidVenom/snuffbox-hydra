@@ -1,4 +1,4 @@
-#include "graphics/ogl/ogl_mesh.h"
+#include "graphics/ogl/resources/ogl_mesh.h"
 
 namespace snuffbox
 {

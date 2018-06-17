@@ -1,4 +1,4 @@
-#include "graphics/ogl/ogl_index_buffer.h"
+#include "graphics/ogl/resources/ogl_index_buffer.h"
 #include "graphics/ogl/ogl_utils.h"
 
 namespace snuffbox

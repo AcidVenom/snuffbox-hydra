@@ -45,16 +45,6 @@ ELSEIF (SNUFF_OGL)
     "ogl/ogl_renderer.cc"
     "ogl/ogl_utils.h" 
     "ogl/ogl_utils.cc"
-    "ogl/ogl_vertex_buffer.h"
-    "ogl/ogl_vertex_buffer.cc"
-    "ogl/ogl_index_buffer.h"
-    "ogl/ogl_index_buffer.cc"
-    "ogl/ogl_mesh.h"
-    "ogl/ogl_mesh.cc"
-    "ogl/ogl_shader.h"
-    "ogl/ogl_shader.cc"
-    "ogl/ogl_uniform_buffer.h"
-    "ogl/ogl_uniform_buffer.cc"
     "ogl/ogl_loader.h"
     "ogl/ogl_loader.cc"
   )
@@ -74,10 +64,21 @@ ELSEIF (SNUFF_OGL)
     
     SOURCE_GROUP("ogl\\linux"     FILES ${ContextSources})
   ENDIF ()
-    
-  SET(PlatformSources
-    ${PlatformSources}
+
+  SET(OGLResourcesSources
+    "ogl/resources/ogl_vertex_buffer.h"
+    "ogl/resources/ogl_vertex_buffer.cc"
+    "ogl/resources/ogl_index_buffer.h"
+    "ogl/resources/ogl_index_buffer.cc"
+    "ogl/resources/ogl_mesh.h"
+    "ogl/resources/ogl_mesh.cc"
+    "ogl/resources/ogl_shader.h"
+    "ogl/resources/ogl_shader.cc"
+    "ogl/resources/ogl_uniform_buffer.h"
+    "ogl/resources/ogl_uniform_buffer.cc"
   )
+
+  SOURCE_GROUP("ogl\\resources"   FILES ${OGLResourcesSources})
 ELSE ()
   MESSAGE(FATAL_ERROR "Unsupported renderer implementation")
 ENDIF ()
@@ -96,6 +97,7 @@ IF (SNUFF_OGL)
   SET(GraphicsSources
     ${GraphicsSources}
     ${ContextSources}
+    ${OGLResourcesSources}
   )
 ENDIF (SNUFF_OGL)
 

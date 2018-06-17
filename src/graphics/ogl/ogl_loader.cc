@@ -1,6 +1,6 @@
 #include "graphics/ogl/ogl_loader.h"
 
-#include "graphics/ogl/ogl_shader.h"
+#include "graphics/ogl/resources/ogl_shader.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/memory/memory.h>

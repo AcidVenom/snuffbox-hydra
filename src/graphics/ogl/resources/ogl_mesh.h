@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/ogl/ogl_vertex_buffer.h"
-#include "graphics/ogl/ogl_index_buffer.h"
+#include "graphics/ogl/resources/ogl_vertex_buffer.h"
+#include "graphics/ogl/resources/ogl_index_buffer.h"
 
 namespace snuffbox
 {
