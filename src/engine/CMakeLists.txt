@@ -84,6 +84,8 @@ SET(AssetsSources
   "assets/script_asset.cc"
   "assets/scene_asset.h"
   "assets/scene_asset.cc"
+  "assets/shader_asset.h"
+  "assets/shader_asset.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)
@@ -98,6 +100,9 @@ SET(Resources
   "rsc/icons/directory_icon.png"
   "rsc/icons/script_icon.png"
   "rsc/icons/scene_icon.png"
+  "rsc/icons/vertex_shader_icon.png"
+  "rsc/icons/pixel_shader_icon.png"
+  "rsc/icons/geometry_shader_icon.png"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})

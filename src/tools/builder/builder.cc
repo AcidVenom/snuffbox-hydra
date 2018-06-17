@@ -1,5 +1,7 @@
 #include "tools/builder/builder.h"
 
+#include <tools/compilers/utils/glslang.h>
+
 #include <foundation/io/file.h>
 #include <foundation/auxiliary/string_utils.h>
 
@@ -17,7 +19,7 @@ namespace snuffbox
       on_finished_(nullptr),
       on_removed_(nullptr)
     {
-
+      compilers::Glslang::Initialize();
     }
 
     //--------------------------------------------------------------------------
@@ -444,6 +446,7 @@ namespace snuffbox
     Builder::~Builder()
     {
       Shutdown();
+      compilers::Glslang::Shutdown();
     }
   }
 }

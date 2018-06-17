@@ -2,6 +2,7 @@
 
 #include "engine/assets/script_asset.h"
 #include "engine/assets/scene_asset.h"
+#include "engine/assets/shader_asset.h"
 
 #include <foundation/io/directory_tree.h>
 #include <foundation/auxiliary/logger.h>
@@ -239,6 +240,12 @@ namespace snuffbox
 
       case compilers::AssetTypes::kScene:
         ptr = foundation::Memory::Construct<SceneAsset>(alloc, path);
+        break;
+
+      case compilers::AssetTypes::kVertexShader:
+      case compilers::AssetTypes::kPixelShader:
+      case compilers::AssetTypes::kGeometryShader:
+        ptr = foundation::Memory::Construct<ShaderAsset>(alloc, path, type);
         break;
 
       default:

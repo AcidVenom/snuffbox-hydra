@@ -175,14 +175,33 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool ICompiler::ReadSourceFile(foundation::File& file, SourceFileData* fd)
+    bool ICompiler::AllocateSourceFile(
+      foundation::File& file, 
+      SourceFileData* fd)
     {
       if (fd == nullptr || file.is_ok() == false)
       {
         return false;
       }
 
-      const uint8_t* buffer = file.ReadBuffer(&fd->length);
+      size_t len;
+      const uint8_t* buffer = file.ReadBuffer(&len);
+
+      return AllocateSourceFile(buffer, len, fd);
+    }
+
+    //--------------------------------------------------------------------------
+    bool ICompiler::AllocateSourceFile(
+      const uint8_t* data, 
+      size_t len, 
+      SourceFileData* fd)
+    {
+      if (fd == nullptr || data == nullptr)
+      {
+        return false;
+      }
+
+      fd->length = len;
 
       fd->data = AllocateWithMagic(
         fd->magic, 
@@ -190,7 +209,12 @@ namespace snuffbox
         &fd->block, 
         &fd->total_size);
 
-      memcpy(fd->block, buffer, fd->length);
+      if (fd->data == nullptr)
+      {
+        return false;
+      }
+
+      memcpy(fd->block, data, fd->length);
 
       return true;
     }

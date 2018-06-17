@@ -26,6 +26,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     File::File(const Path& path, FileOpenMode mode) :
       is_ok_(false),
+      path_(""),
       virtual_buffer_(nullptr),
       buffer_(nullptr),
       length_(0)
@@ -137,6 +138,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const foundation::Path& File::path() const
+    {
+      return path_;
+    }
+
+    //--------------------------------------------------------------------------
     size_t File::length() const
     {
       return length_;
@@ -157,6 +164,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool File::OpenVirtual(const Path& path)
     {
+      path_ = path;
+
       const Resources::ResourceData* d = 
         Resources::GetResource(path.StripPath(Path::kVirtualPrefix));
 
@@ -175,6 +184,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool File::OpenFile(const Path& path, FileOpenMode mode)
     {
+      path_ = path;
+
       const char* cpath = path.ToString().c_str();
 
       stream_ = std::fstream(

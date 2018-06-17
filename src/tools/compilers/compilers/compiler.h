@@ -180,18 +180,32 @@ namespace snuffbox
       };
 
       /**
-      * @brief Reads a source file with a magic number header as a file data
-      *        description
+      * @brief Allocates the data of a file after a magic header using
+      *        a file data description
       *
       * @param[in] file The file to read
       * @param[in|out] fd The file data
       *
-      * @remarks The file data's "magic" value is used to check if the file
-      *          contents are of the right type
-      *
       * @return Was the file valid and did the magic number match?
       */
-      static bool ReadSourceFile(foundation::File& file, SourceFileData* fd);
+      static bool AllocateSourceFile(
+        foundation::File& file, 
+        SourceFileData* fd);
+
+      /**
+      * @brief Allocates user data after a magic header using a file
+      *        data description
+      *
+      * @param[in] data The data to allocate
+      * @param[in] len The length of the data
+      * @param[in|out] fd The file data
+      *
+      * @return Was the data allocated succesfully?
+      */
+      static bool AllocateSourceFile(
+        const uint8_t* data, 
+        size_t len, 
+        SourceFileData* fd);
 
       /**
       * @brief Reads a build file with a magic number header as a file data

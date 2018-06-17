@@ -19,7 +19,7 @@ namespace snuffbox
       SourceFileData fd;
       fd.magic = FileHeaderMagic::kScript;
 
-      if (ReadSourceFile(file, &fd) == false)
+      if (AllocateSourceFile(file, &fd) == false)
       {
         return false;
       }

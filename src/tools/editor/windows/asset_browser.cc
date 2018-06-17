@@ -17,6 +17,9 @@
 #include <resources/directory_icon.h>
 #include <resources/script_icon.h>
 #include <resources/scene_icon.h>
+#include <resources/vertex_shader_icon.h>
+#include <resources/pixel_shader_icon.h>
+#include <resources/geometry_shader_icon.h>
 
 namespace snuffbox
 {
@@ -300,6 +303,9 @@ namespace snuffbox
       SNUFF_MAKE_RESOURCE(directory_icon);
       SNUFF_MAKE_RESOURCE(script_icon);
       SNUFF_MAKE_RESOURCE(scene_icon);
+      SNUFF_MAKE_RESOURCE(vertex_shader_icon);
+      SNUFF_MAKE_RESOURCE(pixel_shader_icon);
+      SNUFF_MAKE_RESOURCE(geometry_shader_icon);
 
       CreateIcons();
     }
@@ -311,6 +317,9 @@ namespace snuffbox
       {
         "snuff:/rsc/icons/script_icon.png",
         "snuff:/rsc/icons/scene_icon.png",
+        "snuff:/rsc/icons/vertex_shader_icon.png",
+        "snuff:/rsc/icons/pixel_shader_icon.png",
+        "snuff:/rsc/icons/geometry_shader_icon.png",
         "snuff:/rsc/icons/directory_icon.png"
       };
 

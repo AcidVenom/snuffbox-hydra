@@ -113,6 +113,11 @@ namespace snuffbox
       bool is_ok() const;
 
       /**
+      * @return The path to this file 
+      */
+      const foundation::Path& path() const;
+
+      /**
       * @return The file length, excluding null-terminator 
       */
       size_t length() const;
@@ -166,6 +171,7 @@ namespace snuffbox
 
       std::fstream stream_; //!< The file stream for this file
       bool is_ok_; //!< Is the file open and able to be used?
+      foundation::Path path_; //!< The path to the file
 
       const uint8_t* virtual_buffer_; //!< The virtual buffer of this file
       uint8_t* buffer_; //!< The buffer of this file
