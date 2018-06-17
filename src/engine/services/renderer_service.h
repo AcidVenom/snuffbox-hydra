@@ -38,6 +38,11 @@ namespace snuffbox
       void Render();
 
       /**
+      * @return The renderer loader of the current rendering API
+      */
+      graphics::IRendererLoader* GetLoader();
+
+      /**
       * @see GraphicsWindow::SizeCallback
       */
       void OnResize(uint16_t width, uint16_t height);

@@ -113,8 +113,9 @@ namespace snuffbox
       *
       * @param[in] data The data to set
       * @param[in] size The size of the data
+      * @param[in] offset An offset to read data from an offset
       */
-      void SetData(uint8_t* data, size_t size);
+      void SetData(uint8_t* data, size_t size, size_t offset = 0);
 
       /**
       * @brief Clears the underlying buffer if there is currently data set
@@ -256,6 +257,7 @@ namespace snuffbox
 
       uint8_t* data_; //!< The data currently contained in the compiler
       size_t size_; //!< The size of the contained data
+      size_t offset_; //!< A binary offset to read file data at an offset
     };
   }
 }

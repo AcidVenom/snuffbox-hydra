@@ -16,7 +16,8 @@ namespace snuffbox
       kScene = 0x45435373, //!< "sSCE" As a hexadecimal value
       kVertexShader = 0x48535673, //!< "sVSH" As a hexadecimal value
       kPixelShader = 0x48535073, //!< "sPSH" As a hexadecimal value
-      kGeometryShader = 0x48534773 //!< "sGSH" As a hexadecimal value
+      kGeometryShader = 0x48534773, //!< "sGSH" As a hexadecimal value
+      kUnknown = 0
     };
   }
 }

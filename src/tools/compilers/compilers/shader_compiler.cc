@@ -20,25 +20,17 @@ namespace snuffbox
     bool ShaderCompiler::CompileImpl(foundation::File& file)
     {
       SourceFileData fd;
-      
-      switch (type_)
+      fd.magic = ShaderTypeToMagic(type_);
+
+      if (fd.magic == FileHeaderMagic::kUnknown)
       {
-      case AssetTypes::kVertexShader:
-        fd.magic = FileHeaderMagic::kVertexShader;
-        break;
-
-      case AssetTypes::kPixelShader:
-        fd.magic = FileHeaderMagic::kPixelShader;
-        break;
-
-      case AssetTypes::kGeometryShader:
-        fd.magic = FileHeaderMagic::kGeometryShader;
-        break;
-
-      default:
+        set_error("Unknown shader type");
         return false;
       }
 
+      /**
+      * @todo Revisit this sometime, when SPIRV-Cross supports them
+      */
       if (type_ == AssetTypes::kGeometryShader)
       {
         set_error(
@@ -112,7 +104,65 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ShaderCompiler::DecompileImpl(foundation::File& file)
     {
-      return false;
+      BuildFileData fd;
+      fd.magic = ShaderTypeToMagic(type_);
+
+      if (ReadBuildFile(file, &fd) == false)
+      {
+        return false;
+      }
+
+      const ShaderHeader* header = 
+        reinterpret_cast<const ShaderHeader*>(fd.block);
+
+      size_t offset = 0;
+      size_t size = 0;
+
+#if defined (SNUFF_D3D11) || defined (SNUFF_D3D12)
+
+      if (header->has_hlsl == false)
+      {
+        set_error("Requested a HLSL shader but it was never built");
+        return false;
+      }
+
+      size = header->hlsl_size;
+      offset = header->hlsl_offset;
+
+#elif defined (SNUFF_OGL)
+
+      size = header->glsl_size;
+      offset = header->glsl_offset;
+
+#else
+      static_assert(false, 
+        "Unknown shader format requested, no supported renderer");
+#endif
+
+      SetData(reinterpret_cast<uint8_t*>(fd.block), size, offset);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    FileHeaderMagic ShaderCompiler::ShaderTypeToMagic(AssetTypes type)
+    {
+      switch (type)
+      {
+      case AssetTypes::kVertexShader:
+        return FileHeaderMagic::kVertexShader;
+
+      case AssetTypes::kPixelShader:
+        return FileHeaderMagic::kPixelShader;
+
+      case AssetTypes::kGeometryShader:
+        return FileHeaderMagic::kGeometryShader;
+
+      default:
+        break;
+      }
+
+      return FileHeaderMagic::kUnknown;
     }
   }
 }

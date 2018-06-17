@@ -50,6 +50,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    graphics::IRendererLoader* RendererService::GetLoader()
+    {
+      return renderer_->GetLoader();
+    }
+
+    //--------------------------------------------------------------------------
     void RendererService::OnResize(uint16_t width, uint16_t height)
     {
       foundation::Logger::LogVerbosity<3>(

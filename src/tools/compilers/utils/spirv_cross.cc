@@ -168,7 +168,6 @@ namespace snuffbox
 
       spirv_cross::CompilerGLSL::Options glsl_op;
       glsl_op.version = kGLSLVersion_;
-      glsl_op.es = true;
       glsl.set_common_options(glsl_op);
 
       spirv_cross::CompilerHLSL::Options hlsl_op;

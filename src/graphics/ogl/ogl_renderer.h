@@ -2,6 +2,7 @@
 
 #include "graphics/renderer.h"
 #include "graphics/ogl/ogl_context.h"
+#include "graphics/ogl/ogl_loader.h"
 
 namespace snuffbox
 {
@@ -48,6 +49,11 @@ namespace snuffbox
       */
       void Present(bool vsync) override;
 
+      /**
+      * @see IRenderer::GetLoader
+      */
+      IRendererLoader* GetLoader() override;
+
     protected:
 
       /**
@@ -58,6 +64,7 @@ namespace snuffbox
     private:
 
       OGLContext context_; //!< The OpenGL context
+      OGLLoader loader_; //!< The renderer loader
     };
   }
 }

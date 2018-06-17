@@ -81,5 +81,11 @@ namespace snuffbox
     {
 
     }
+
+    //--------------------------------------------------------------------------
+    IRendererLoader* OGLRenderer::GetLoader()
+    {
+      return &loader_;
+    }
   }
 }

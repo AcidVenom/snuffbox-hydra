@@ -10,6 +10,8 @@ namespace snuffbox
 {
   namespace graphics
   {
+    class IRendererLoader;
+
     /**
     * @brief The renderer interface for every native rendering API to use
     *
@@ -77,6 +79,15 @@ namespace snuffbox
       * @param[in] height The new height of the window
       */
       void OnResize(uint16_t width, uint16_t height);
+
+      /**
+      * @brief Retrieves the renderer loader of this renderer
+      *
+      * @remarks Used to create GPU resources from outside of the API
+      *
+      * @return The renderer loader
+      */
+      virtual IRendererLoader* GetLoader() = 0;
 
     protected:
 

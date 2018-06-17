@@ -2,6 +2,7 @@ SET(RootSources
   "rendering.h"
   "renderer.h"
   "renderer.cc"
+  "renderer_loader.h"
 )
 
 SET(DefinitionsSources
@@ -12,6 +13,7 @@ SET(DefinitionsSources
   "definitions/render_target.h"
   "definitions/frame_data.h"
   "definitions/draw_command.h"
+  "definitions/shader_types.h"
 )
 
 IF (SNUFF_WIN32)
@@ -53,6 +55,8 @@ ELSEIF (SNUFF_OGL)
     "ogl/ogl_shader.cc"
     "ogl/ogl_uniform_buffer.h"
     "ogl/ogl_uniform_buffer.cc"
+    "ogl/ogl_loader.h"
+    "ogl/ogl_loader.cc"
   )
   
   IF (SNUFF_WIN32)

@@ -23,8 +23,7 @@ namespace snuffbox
       /**
       * @brief Construct through a shader type to compile
       *
-      * @param[in] type The type of the shader to compile
-      *                 Valid arguments are:
+      * @param[in] type The type of the shader to compile, valid arguments are:
       *                 - AssetTypes::kVertexShader
       *                 - AssetTypes::kPixelShader
       *                 - AssetTypes::kGeometryShader
@@ -46,6 +45,18 @@ namespace snuffbox
       * @see ICompiler::DecompileImpl
       */
       bool DecompileImpl(foundation::File& file) override;
+
+      /**
+      * @brief Converts a shader type to a file header magic value
+      *
+      * @param[in] type The type of the shader, valid arguments are:
+      *                 - AssetTypes::kVertexShader
+      *                 - AssetTypes::kPixelShader
+      *                 - AssetTypes::kGeometryShader
+      *
+      * @return The converted value
+      */
+      static FileHeaderMagic ShaderTypeToMagic(AssetTypes type);
 
     private:
 

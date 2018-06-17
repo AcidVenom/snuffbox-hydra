@@ -12,7 +12,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     ICompiler::ICompiler() :
-      data_(nullptr)
+      data_(nullptr),
+      offset_(0)
     {
 
     }
@@ -53,7 +54,7 @@ namespace snuffbox
         *size = data_ == nullptr ? 0 : size_;
       }
 
-      return data_;
+      return data_ + offset_;
     }
 
     //--------------------------------------------------------------------------
@@ -93,12 +94,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void ICompiler::SetData(uint8_t* data, size_t size)
+    void ICompiler::SetData(uint8_t* data, size_t size, size_t offset)
     {
       Clear();
 
       data_ = data;
       size_ = size;
+      offset_ = offset;
     }
 
     //--------------------------------------------------------------------------

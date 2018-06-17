@@ -42,6 +42,10 @@ namespace snuffbox
       * @see IAsset::UnloadImpl
       */
       void UnloadImpl() override;
+
+    private:
+
+      void* gpu_handle_; //!< The GPU handle for the created shader
     };
   }
 }
