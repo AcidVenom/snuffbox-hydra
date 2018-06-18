@@ -323,17 +323,8 @@ namespace snuffbox
         glslang::EShClient::EShClientVulkan, 
         kClientVersion_);
 
-      shader->setShiftSamplerBinding(0);
-      shader->setShiftTextureBinding(0);
-      shader->setShiftImageBinding(0);
-      shader->setShiftUboBinding(0);
-      shader->setShiftSsboBinding(0);
-      shader->setShiftUavBinding(0);
-      shader->setFlattenUniformArrays(false);
-      shader->setNoStorageFormat(false);
-
-      std::vector<std::string> rsb;
-      shader->setResourceSetBinding(rsb);
+      shader->setAutoMapLocations(true);
+      shader->setHlslIoMapping(true);
     }
 
     //--------------------------------------------------------------------------

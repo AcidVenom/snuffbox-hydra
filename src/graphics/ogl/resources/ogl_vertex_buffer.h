@@ -42,7 +42,7 @@ namespace snuffbox
       * @return The current number of float elements
       */
       template <typename T>
-      static GLuint SetAttributeFloat(GLuint i, GLuint n, GLuint prev);
+      static GLuint SetAttributeFloat(GLuint i, GLint n, GLint prev);
 
       /**
       * @brief Sets the attributes of a vertex array object
@@ -80,6 +80,12 @@ namespace snuffbox
       */
       template <typename T>
       bool Create(const foundation::Vector<T>& vertices);
+
+      /**
+      * @brief Sets this vertex buffer as the active vertex buffer, along
+      *        with its vertex array object
+      */
+      void Set();
 
       /**
       * @return Is this vertex buffer valid for use?
@@ -123,8 +129,8 @@ namespace snuffbox
     template <typename T>
     inline GLuint OGLVertexBuffer::SetAttributeFloat(
       GLuint i, 
-      GLuint n, 
-      GLuint prev)
+      GLint n, 
+      GLint prev)
     {
       glEnableVertexAttribArray(i);
       
@@ -133,8 +139,10 @@ namespace snuffbox
         n, 
         GL_FLOAT, 
         GL_FALSE, 
-        sizeof(T), 
+        static_cast<GLsizei>(sizeof(T)), 
         reinterpret_cast<void*>(prev * sizeof(float)));
+
+      OGLUtils::CheckError();
 
       return prev + n;
     }
@@ -228,13 +236,13 @@ namespace snuffbox
         return false;
       }
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-
       if (CreateVertexArray<T>(&vao_) == false)
       {
         Release();
         return false;
       }
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
 
       valid_ = true;
       size_ = vertices.size();

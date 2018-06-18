@@ -36,6 +36,11 @@ namespace snuffbox
       bool Create(const foundation::Vector<Index>& indices);
 
       /**
+      * @brief Sets this index buffer as the active index buffer
+      */
+      void Set();
+
+      /**
       * @return Is this index buffer valid for use?
       */
       bool valid() const;

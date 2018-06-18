@@ -15,6 +15,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void OGLVertexBuffer::Set()
+    {
+      if (valid_ == false)
+      {
+        return;
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+      glBindVertexArray(vao_);
+    }
+
+    //--------------------------------------------------------------------------
     bool OGLVertexBuffer::valid() const
     {
       return valid_;

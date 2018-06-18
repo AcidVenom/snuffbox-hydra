@@ -6,6 +6,8 @@ namespace snuffbox
 {
   namespace graphics
   {
+    class OGLShader;
+
     /**
     * @brief Used to load OpenGL specific GPU resources
     *
@@ -19,12 +21,22 @@ namespace snuffbox
     public:
 
       /**
+      * @see IRendererLoader::CreateShader
+      */
+      GPUHandle CreateShader(ShaderTypes type) override;
+
+      /**
       * @see IRendererLoader::LoadShader
       */
-      GPUHandle LoadShader(
-        ShaderTypes type,
+      bool LoadShader(
+        GPUHandle handle,
         const uint8_t* buffer,
         size_t len) override;
+
+      /**
+      * @see IRendererLoader::UnloadShader
+      */
+      void UnloadShader(GPUHandle handle) override;
 
       /**
       * @see IRendererLoader::ReleaseShader

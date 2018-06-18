@@ -16,6 +16,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool OGLShader::Load(const foundation::String& src)
     {
+      Release();
+
       error_ = "No errors";
 
       GLuint type = 0;
@@ -64,6 +66,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool OGLShader::IsValid(ShaderTypes requested) const
+    {
+      return type_ == requested && shader_ > 0;
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLShader::Release()
+    {
+      if (shader_ > 0)
+      {
+        glDeleteShader(shader_);
+        shader_ = 0;
+      }
+    }
+
+    //--------------------------------------------------------------------------
     const foundation::String& OGLShader::error() const
     {
       return error_;
@@ -76,13 +94,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void OGLShader::Release()
+    ShaderTypes OGLShader::type() const
     {
-      if (shader_ > 0)
-      {
-        glDeleteShader(shader_);
-        shader_ = 0;
-      }
+      return type_;
     }
 
     //--------------------------------------------------------------------------

@@ -76,6 +76,8 @@ ELSEIF (SNUFF_OGL)
     "ogl/resources/ogl_shader.cc"
     "ogl/resources/ogl_uniform_buffer.h"
     "ogl/resources/ogl_uniform_buffer.cc"
+    "ogl/resources/ogl_material.h"
+    "ogl/resources/ogl_material.cc"
   )
 
   SOURCE_GROUP("ogl\\resources"   FILES ${OGLResourcesSources})

@@ -48,9 +48,26 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void OGLIndexBuffer::Set()
+    {
+      if (valid_ == false)
+      {
+        return;
+      }
+
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+    }
+
+    //--------------------------------------------------------------------------
     bool OGLIndexBuffer::valid() const
     {
       return valid_;
+    }
+
+    //--------------------------------------------------------------------------
+    size_t OGLIndexBuffer::size() const
+    {
+      return size_;
     }
 
     //--------------------------------------------------------------------------

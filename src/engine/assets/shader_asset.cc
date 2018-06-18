@@ -18,32 +18,16 @@ namespace snuffbox
       compilers::AssetTypes type)
       :
       IAsset(type, path),
-      gpu_handle_(nullptr)
+      gpu_handle_(nullptr),
+      renderer_(Application::Instance()->GetService<RendererService>())
     {
-
+      CreateGPUHandle();
     }
 
     //--------------------------------------------------------------------------
-    bool ShaderAsset::LoadImpl(const foundation::Path& path)
+    void ShaderAsset::CreateGPUHandle()
     {
       compilers::AssetTypes t = type();
-      compilers::ShaderCompiler c(t);
-
-      if (c.Decompile(path) == false)
-      {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kEngine,
-          foundation::LogSeverity::kError,
-          "Could not decompile shader '{0}', errors:\n{1}",
-          path,
-          c.error());
-
-        return false;
-      }
-
-      size_t len;
-      const uint8_t* buffer = c.Data(&len);
-
       graphics::ShaderTypes shader = graphics::ShaderTypes::kUnknown;
 
       switch (t)
@@ -71,9 +55,9 @@ namespace snuffbox
           foundation::LogSeverity::kError,
           "Geometry shaders are currently unsupported");
 
-        return false;
+        return;
       }
-      
+
       if (shader == graphics::ShaderTypes::kUnknown)
       {
         foundation::Logger::LogVerbosity<1>(
@@ -81,18 +65,37 @@ namespace snuffbox
           foundation::LogSeverity::kError,
           "Could not load shader '{0}',\
           it was of an invalid shader type ({1})",
-          path,
+          path(),
           AssetTypesToString(t));
+
+        return;
+      }
+
+      gpu_handle_ = renderer_->GetLoader()->CreateShader(shader);
+    }
+
+    //--------------------------------------------------------------------------
+    bool ShaderAsset::LoadImpl(const foundation::Path& path)
+    {
+      compilers::AssetTypes t = type();
+      compilers::ShaderCompiler c(t);
+
+      if (c.Decompile(path) == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kError,
+          "Could not decompile shader '{0}', errors:\n{1}",
+          path,
+          c.error());
 
         return false;
       }
 
-      RendererService* renderer = 
-        Application::Instance()->GetService<RendererService>();
+      size_t len;
+      const uint8_t* buffer = c.Data(&len);
 
-      gpu_handle_ = renderer->GetLoader()->LoadShader(shader, buffer, len);
-
-      return gpu_handle_ != nullptr;
+      return renderer_->GetLoader()->LoadShader(gpu_handle_, buffer, len);
     }
 
     //--------------------------------------------------------------------------
@@ -103,10 +106,13 @@ namespace snuffbox
         return;
       }
 
-      RendererService* renderer = 
-        Application::Instance()->GetService<RendererService>();
+      renderer_->GetLoader()->UnloadShader(gpu_handle_);
+    }
 
-      renderer->GetLoader()->ReleaseShader(gpu_handle_);
+    //--------------------------------------------------------------------------
+    ShaderAsset::~ShaderAsset()
+    {
+      renderer_->GetLoader()->ReleaseShader(gpu_handle_);
     }
   }
 }

@@ -44,6 +44,8 @@ namespace snuffbox
         GLVersion.major,
         GLVersion.minor);
 
+      glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
+
       return true;
     }
 

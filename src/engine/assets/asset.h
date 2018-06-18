@@ -59,6 +59,11 @@ namespace snuffbox
       compilers::AssetTypes type() const;
 
       /**
+      * @return The path to the file to load
+      */
+      const foundation::Path& path() const;
+
+      /**
       * @return Has this asset been loaded?
       */
       bool is_loaded() const;

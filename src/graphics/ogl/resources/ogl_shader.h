@@ -36,6 +36,18 @@ namespace snuffbox
       bool Load(const foundation::String& src);
 
       /**
+      * @return Is the underlying shader loaded correctly?
+      *
+      * @param[in] requested The requested shader type
+      */
+      bool IsValid(ShaderTypes requested) const;
+
+      /**
+      * @brief Releases the underlying shader
+      */
+      void Release();
+
+      /**
       * @return The encountered errors
       */
       const foundation::String& error() const;
@@ -45,14 +57,10 @@ namespace snuffbox
       */
       GLuint shader() const;
 
-    protected:
-
       /**
-      * @brief Releases the underlying shader
+      * @retunr The type of this shader
       */
-      void Release();
-
-    public:
+      ShaderTypes type() const;
 
       /**
       * @brief Releases the shader

@@ -59,6 +59,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const foundation::Path& IAsset::path() const
+    {
+      return path_;
+    }
+
+    //--------------------------------------------------------------------------
     bool IAsset::is_loaded() const
     {
       return is_loaded_;

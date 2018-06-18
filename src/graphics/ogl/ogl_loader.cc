@@ -10,18 +10,26 @@ namespace snuffbox
   namespace graphics
   {
     //--------------------------------------------------------------------------
-    IRendererLoader::GPUHandle OGLLoader::LoadShader(
-      ShaderTypes type,
-      const uint8_t* buffer,
-      size_t len)
+    IRendererLoader::GPUHandle OGLLoader::CreateShader(ShaderTypes type)
     {
       OGLShader* shader = foundation::Memory::Construct<OGLShader>(
         &foundation::Memory::default_allocator(),
         type);
 
+      return shader;
+    }
+
+    //--------------------------------------------------------------------------
+    bool OGLLoader::LoadShader(
+      GPUHandle handle, 
+      const uint8_t* buffer, 
+      size_t len)
+    {
+      OGLShader* shader = reinterpret_cast<OGLShader*>(handle);
+
       if (shader->Load(foundation::String(
-          reinterpret_cast<const char*>(buffer),
-          len)) == false)
+        reinterpret_cast<const char*>(buffer),
+        len)) == false)
       {
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kEngine,
@@ -29,11 +37,17 @@ namespace snuffbox
           "Could not load shader, errors:\n{0}",
           shader->error());
 
-        foundation::Memory::Destruct(shader);
-        shader = nullptr;
+        return false;
       }
 
-      return shader;
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLLoader::UnloadShader(GPUHandle handle)
+    {
+      OGLShader* shader = reinterpret_cast<OGLShader*>(handle);
+      shader->Release();
     }
 
     //--------------------------------------------------------------------------

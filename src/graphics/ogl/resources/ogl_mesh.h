@@ -43,6 +43,16 @@ namespace snuffbox
       */
       bool IsValid() const;
 
+      /**
+      * @brief Sets this mesh for rendering of the current draw call
+      */
+      void Set();
+
+      /**
+      * @return The number of indices in this mesh
+      */
+      size_t NumIndices() const;
+
     private:
 
       OGLVertexBuffer vertex_buffer_; //!< The vertex buffer
