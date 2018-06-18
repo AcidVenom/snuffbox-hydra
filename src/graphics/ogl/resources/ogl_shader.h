@@ -29,11 +29,12 @@ namespace snuffbox
       OGLShader(ShaderTypes type);
 
       /**
-      * @brief Loads the shader from GLSL source code
+      * @brief Loads the shader from SPIRV binary code
       *
-      * @param[in] src The source code
+      * @param[in] buffer The binary buffer
+      * @param[in] len The length of the buffer
       */
-      bool Load(const foundation::String& src);
+      bool Load(const uint8_t* buffer, size_t len);
 
       /**
       * @return Is the underlying shader loaded correctly?

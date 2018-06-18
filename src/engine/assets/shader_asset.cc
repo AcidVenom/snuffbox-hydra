@@ -48,16 +48,6 @@ namespace snuffbox
         break;
       }
 
-      if (shader == graphics::ShaderTypes::kGeometry)
-      {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kEngine,
-          foundation::LogSeverity::kError,
-          "Geometry shaders are currently unsupported");
-
-        return;
-      }
-
       if (shader == graphics::ShaderTypes::kUnknown)
       {
         foundation::Logger::LogVerbosity<1>(

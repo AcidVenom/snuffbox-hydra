@@ -27,9 +27,7 @@ namespace snuffbox
     {
       OGLShader* shader = reinterpret_cast<OGLShader*>(handle);
 
-      if (shader->Load(foundation::String(
-        reinterpret_cast<const char*>(buffer),
-        len)) == false)
+      if (shader->Load(buffer,len) == false)
       {
         foundation::Logger::LogVerbosity<1>(
           foundation::LogChannel::kEngine,

@@ -18,9 +18,15 @@ SET(DefinitionsSources
 SET(UtilsSources
   "utils/glslang.h"
   "utils/glslang.cc"
-  "utils/spirv_cross.h"
-  "utils/spirv_cross.cc"
 )
+
+IF (SNUFF_WIN32)
+  SET(UtilsSources
+    ${UtilsSources}
+    "utils/hlsl_compiler.h"
+    "utils/hlsl_compiler.cc"
+  )
+ENDIF ()
 
 SOURCE_GROUP("compilers"    FILES ${CompilersSources})
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})

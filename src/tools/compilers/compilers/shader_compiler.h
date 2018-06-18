@@ -9,7 +9,7 @@ namespace snuffbox
   {
     /**
     * @brief Used to compile HLSL code to SPIRV and then back to renderer
-    *        specific bytecode (HLSL in Direct3D and GLSL in OpenGL)
+    *        specific bytecode (HLSL in Direct3D and it stays SPIRV in OpenGL)
     *
     * @see Glslang
     *
@@ -61,7 +61,7 @@ namespace snuffbox
     private:
 
       /**
-      * @brief The shader header to contain both HLSL bytecode and GLSL source
+      * @brief The shader header to contain both HLSL byte code and SPIRV byte
       *        code
       *
       * The header contains offsets to reach the corresponding shader for
@@ -74,8 +74,8 @@ namespace snuffbox
         bool has_hlsl; //!< Is there HLSL in this file?
         size_t hlsl_size; //!< The HLSL size
         size_t hlsl_offset; //!< The HLSL offset to reach its binary blob
-        size_t glsl_size; //!< The GLSL size
-        size_t glsl_offset; //!< The GLSL offset to reach its source code
+        size_t spirv_size; //!< The SPIRV size
+        size_t spirv_offset; //!< The SPIRV offset to reach its source code
       };
 
       AssetTypes type_; //!< The shader type

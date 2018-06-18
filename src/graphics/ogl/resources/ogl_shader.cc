@@ -1,4 +1,5 @@
 #include "graphics/ogl/resources/ogl_shader.h"
+#include "graphics/ogl/ogl_utils.h"
 
 namespace snuffbox
 {
@@ -14,7 +15,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool OGLShader::Load(const foundation::String& src)
+    bool OGLShader::Load(const uint8_t* buffer, size_t len)
     {
       Release();
 
@@ -45,10 +46,26 @@ namespace snuffbox
 
       shader_ = glCreateShader(type);
 
-      const char* c_src = src.c_str();
+      glShaderBinary(
+        1, 
+        &shader_, 
+        GL_SHADER_BINARY_FORMAT_SPIR_V, 
+        buffer, 
+        static_cast<GLsizei>(len));
 
-      glShaderSource(shader_, 1, &c_src, NULL);
-      glCompileShader(shader_);
+      if (OGLUtils::CheckError() == false)
+      {
+        Release();
+        return false;
+      }
+
+      glSpecializeShader(shader_, "main", 0, nullptr, nullptr);
+
+      if (OGLUtils::CheckError() == false)
+      {
+        Release();
+        return false;
+      }
 
       int success;
       char errors[512];

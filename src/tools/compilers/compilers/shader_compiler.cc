@@ -1,7 +1,10 @@
 #include "tools/compilers/compilers/shader_compiler.h"
 
 #include "tools/compilers/utils/glslang.h"
-#include "tools/compilers/utils/spirv_cross.h"
+
+#ifdef SNUFF_WIN32
+#include "tools/compilers/utils/hlsl_compiler.h"
+#endif
 
 #include <foundation/auxiliary/logger.h>
 
@@ -28,19 +31,6 @@ namespace snuffbox
         return false;
       }
 
-      /**
-      * @todo Revisit this sometime, when SPIRV-Cross supports them
-      */
-      if (type_ == AssetTypes::kGeometryShader)
-      {
-        set_error(
-          "Currently,\
-          due to SPIRV-Cross not being able to compile HLSL geometry shaders;\
-          they are unimplemented");
-
-        return false;
-      }
-
       size_t len;
       const char* block = reinterpret_cast<const char*>(file.ReadBuffer(&len));
       foundation::String hlsl(block, len);
@@ -53,43 +43,47 @@ namespace snuffbox
         return false;
       }
 
-      SPIRVCross spv_cross;
-      SPIRVCross::ShaderData sh_data;
-      if (spv_cross.Compile(
-        spirv.data(), 
-        spirv.size(), 
-        type_, 
-        &sh_data) == false)
+      bool has_hlsl = false;
+      const uint8_t* hlsl_buffer = nullptr;
+      size_t hlsl_buffer_size = 0;
+
+#ifdef SNUFF_WIN32
+      HLSLCompiler hlsl_c;
+      if (hlsl_c.Compile(hlsl, type_) == false)
       {
-        set_error(spv_cross.error());
+        set_error(hlsl_c.error());
         return false;
       }
+
+      has_hlsl = true;
+      hlsl_buffer = hlsl_c.GetBuffer(&hlsl_buffer_size);
+#endif
 
       foundation::Vector<uint8_t> buffer;
 
       const size_t header_size = sizeof(ShaderHeader);
-      size_t glsl_size = sh_data.glsl.size();
-      size_t hlsl_size = sh_data.has_hlsl == true ? sh_data.hlsl.size() : 0;
+      size_t spirv_size = spirv.size();
+      size_t hlsl_size = has_hlsl == true ? hlsl_buffer_size : 0;
 
-      size_t block_size = header_size + glsl_size + hlsl_size;
+      size_t block_size = header_size + spirv_size + hlsl_size;
 
       buffer.resize(block_size);
       
       ShaderHeader header;
-      header.has_hlsl = sh_data.has_hlsl;
+      header.has_hlsl = has_hlsl;
       header.hlsl_size = hlsl_size;
       header.hlsl_offset = header_size;
-      header.glsl_size = glsl_size;
-      header.glsl_offset = header.hlsl_offset + hlsl_size;
+      header.spirv_size = spirv_size;
+      header.spirv_offset = header.hlsl_offset + hlsl_size;
 
       memcpy(&buffer.at(0), &header, header_size);
 
       if (header.has_hlsl == true)
       {
-        memcpy(&buffer.at(header_size), sh_data.hlsl.data(), hlsl_size);
+        memcpy(&buffer.at(header_size), hlsl_buffer, hlsl_size);
       }
 
-      memcpy(&buffer.at(header.glsl_offset), sh_data.glsl.c_str(), glsl_size);
+      memcpy(&buffer.at(header.spirv_offset), spirv.data(), spirv_size);
 
       if (AllocateSourceFile(buffer.data(), buffer.size(), &fd) == false)
       {
@@ -131,8 +125,8 @@ namespace snuffbox
 
 #elif defined (SNUFF_OGL)
 
-      size = header->glsl_size;
-      offset = header->glsl_offset;
+      size = header->spirv_size;
+      offset = header->spirv_offset;
 
 #else
       static_assert(false, 
