@@ -1,4 +1,5 @@
 #include "graphics/ogl/ogl_renderer.h"
+#include "graphics/definitions/shader_constants.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <glad/glad.h>
@@ -79,15 +80,49 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void OGLRenderer::OnResizeImpl(uint16_t width, uint16_t height)
-    {
-
-    }
-
-    //--------------------------------------------------------------------------
     IRendererLoader* OGLRenderer::GetLoader()
     {
       return &loader_;
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::InitializeUBOs()
+    {
+      PerFrameData pfd;
+      memset(&pfd, 0, sizeof(PerFrameData));
+      SetFrameData(pfd);
+
+      PerObjectData pod;
+      memset(&pod, 0, sizeof(PerObjectData));
+      SetFrameData(pod);
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::OnStartFrame()
+    {
+      per_frame_ubo_.Set(
+        ShaderConstants::GetUniformLocation(ShaderUniforms::kPerFrameData));
+
+      per_object_ubo_.Set(
+        ShaderConstants::GetUniformLocation(ShaderUniforms::kPerObjectData));
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::SetFrameData(const PerFrameData& pfd)
+    {
+      per_frame_ubo_.Update(&pfd, sizeof(PerFrameData));
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::SetFrameData(const PerObjectData& pod)
+    {
+      per_object_ubo_.Update(&pod, sizeof(PerObjectData));
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::OnResizeImpl(uint16_t width, uint16_t height)
+    {
+
     }
   }
 }

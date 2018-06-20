@@ -5,10 +5,82 @@ namespace snuffbox
   namespace graphics
   {
     //--------------------------------------------------------------------------
-    IRenderer::IRenderer(const GraphicsWindow& window) :
-      window_(window)
-    {
+    const size_t IRenderer::kDefaultQueueSize_ = 4096;
 
+    //--------------------------------------------------------------------------
+    IRenderer::IRenderer(const GraphicsWindow& window) :
+      window_(window),
+      time_(0.0f),
+      num_commands_(0)
+    {
+      static_assert(kDefaultQueueSize_ > 0,
+        "The queue size of the renderer must be greater than 0");
+
+      commands_.resize(kDefaultQueueSize_);
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Queue(const Camera& camera)
+    {
+      cameras_.push(camera);
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Queue(const DrawCommand& cmd)
+    {
+      if (num_commands_ >= commands_.size())
+      {
+        commands_.resize(commands_.size() * 2);
+      }
+
+      commands_.at(num_commands_) = cmd;
+      ++num_commands_;
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Tick(float dt)
+    {
+      time_ += dt;
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Render()
+    {
+      OnStartFrame();
+
+      while (cameras_.empty() == false)
+      {
+        Draw(cameras_.front());
+        cameras_.pop();
+      }
+
+      num_commands_ = 0;
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Draw(const Camera& camera)
+    {
+      PerFrameData pfd;
+
+      pfd.view = camera.view;
+      pfd.projection = camera.projection;
+      pfd.inv_view_projection = glm::inverse(camera.projection * camera.view);
+      pfd.eye_position = camera.eye_position;
+      pfd.time = time_;
+
+      SetFrameData(pfd);
+
+      for (size_t i = 0; i < num_commands_; ++i)
+      {
+        //!< @todo Set render targets and such here
+        Draw(commands_.at(i), camera);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void IRenderer::Draw(const DrawCommand& cmd, const Camera& camera)
+    {
+      SetFrameData(cmd.data);
     }
 
     //--------------------------------------------------------------------------

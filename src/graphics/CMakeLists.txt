@@ -14,6 +14,9 @@ SET(DefinitionsSources
   "definitions/frame_data.h"
   "definitions/draw_command.h"
   "definitions/shader_types.h"
+  "definitions/camera.h"
+  "definitions/shader_constants.h"
+  "definitions/shader_constants.cc"
 )
 
 IF (SNUFF_WIN32)

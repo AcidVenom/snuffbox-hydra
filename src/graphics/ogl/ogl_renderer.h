@@ -4,6 +4,8 @@
 #include "graphics/ogl/ogl_context.h"
 #include "graphics/ogl/ogl_loader.h"
 
+#include "graphics/ogl/resources/ogl_uniform_buffer.h"
+
 namespace snuffbox
 {
   namespace graphics
@@ -57,6 +59,26 @@ namespace snuffbox
     protected:
 
       /**
+      * @brief Initializes the default UBOs for use by memsetting them to 0
+      */
+      void InitializeUBOs();
+
+      /**
+      * @see IRenderer::OnStartFrame
+      */
+      void OnStartFrame() override;
+
+      /**
+      * @see IRenderer::SetFrameData
+      */
+      void SetFrameData(const PerFrameData& pfd) override;
+
+      /**
+      * @see IRenderer::SetFrameData
+      */
+      void SetFrameData(const PerObjectData& pod) override;
+
+      /**
       * @see IRenderer::OnResizeImpl
       */
       void OnResizeImpl(uint16_t width, uint16_t height) override;
@@ -65,6 +87,8 @@ namespace snuffbox
 
       OGLContext context_; //!< The OpenGL context
       OGLLoader loader_; //!< The renderer loader
+      OGLUniformBuffer per_frame_ubo_; //!< The per-frame uniform buffer
+      OGLUniformBuffer per_object_ubo_; //!< The per-object uniform buffer
     };
   }
 }

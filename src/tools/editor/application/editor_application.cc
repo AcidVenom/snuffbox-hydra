@@ -105,7 +105,7 @@ namespace snuffbox
           Update(dt);
         }
 
-        renderer->Render();
+        renderer->Render(dt);
         builder_.IdleNotification();
 
         CheckSceneChanged();

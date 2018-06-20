@@ -1,5 +1,6 @@
 #include "graphics/ogl/resources/ogl_material.h"
 #include "graphics/ogl/resources/ogl_shader.h"
+#include "graphics/definitions/shader_constants.h"
 
 #include <foundation/auxiliary/logger.h>
 

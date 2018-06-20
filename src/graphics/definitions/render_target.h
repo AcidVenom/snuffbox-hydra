@@ -12,10 +12,15 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class RenderTarget
+    struct RenderTarget
     {
       TextureFormats format; //!< The format of this render target
       void* native_handle; //!< The native handle within the renderers
+
+      /**
+      * @brief The maximum render targets that can be bound to a shader
+      */
+      static const int kMaxBoundTargets = 8;
     };
   }
 }

@@ -33,7 +33,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void RendererService::Render()
+    void RendererService::Render(float dt)
     {
       if (renderer_ == nullptr)
       {
@@ -44,6 +44,7 @@ namespace snuffbox
       float w = cvar_->Get<float>("r_width");
       float h = cvar_->Get<float>("r_height");
 
+      renderer_->Tick(dt);
       renderer_->SetViewport(graphics::Viewport{ 0.0f, 0.0f, w, h });
       renderer_->Clear(glm::vec4{ 0.0f, 0.5, 1.0f, 1.0f });
       renderer_->Present(sync);

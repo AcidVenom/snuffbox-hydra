@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/definitions/frame_data.h"
+#include "graphics/renderer_loader.h"
 
 namespace snuffbox
 {
@@ -11,9 +12,11 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class DrawCommand
+    struct DrawCommand
     {
       PerObjectData data; //!< The per-object data
+      IRendererLoader::GPUHandle mesh; //!< The mesh to render
+      IRendererLoader::GPUHandle material; //!< The material to render with
     };
   }
 }

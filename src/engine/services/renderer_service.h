@@ -34,8 +34,10 @@ namespace snuffbox
 
       /**
       * @brief Presents the renderer and its data to the bound graphics window
+      *
+      * @param[in] dt The current delta time of the application
       */
-      void Render();
+      void Render(float dt);
 
       /**
       * @return The renderer loader of the current rendering API

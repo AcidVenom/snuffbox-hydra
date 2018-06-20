@@ -11,7 +11,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class PerFrameData
+    struct PerFrameData
     {
       glm::mat4x4 view; //!< The current camera's view matrix
       glm::mat4x4 projection; //!< The current camera's projection matrix
@@ -25,7 +25,7 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class PerObjectData
+    struct PerObjectData
     {
       glm::mat4x4 world; //!< The world matrix
       glm::mat4x4 inv_world; //!< The inverse world matrix
