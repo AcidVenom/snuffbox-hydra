@@ -100,6 +100,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void* ShaderAsset::gpu_handle() const
+    {
+      return gpu_handle_;
+    }
+
+    //--------------------------------------------------------------------------
     ShaderAsset::~ShaderAsset()
     {
       renderer_->GetLoader()->ReleaseShader(gpu_handle_);

@@ -62,6 +62,41 @@ namespace snuffbox
       * @param[in] shader The shader to release
       */
       virtual void ReleaseShader(GPUHandle shader) = 0;
+
+      /**
+      * @return A newly created material 
+      */
+      virtual GPUHandle CreateMaterial() = 0;
+
+      /**
+      * @brief Loads a material from a set of shader handles
+      *
+      * @param[in] handle The material to load data into
+      * @param[in] vs The vertex shader handle
+      * @param[in] ps The pixel shader handle
+      * @param[in] gs The geometry shader handle, or nullptr if unused
+      *
+      * @return Was the loading a success?
+      */
+      virtual bool LoadMaterial(
+        GPUHandle handle,
+        GPUHandle vs,
+        GPUHandle ps,
+        GPUHandle gs) = 0;
+
+      /**
+      * @brief Unloads a loaded material
+      *
+      * @param[in] handle The material handle to load
+      */
+      virtual void UnloadMaterial(GPUHandle handle) = 0;
+
+      /**
+      * @brief Releases a created material
+      *
+      * @param[in] handle The material handle to release
+      */
+      virtual void ReleaseMaterial(GPUHandle handle) = 0;
     };
   }
 }

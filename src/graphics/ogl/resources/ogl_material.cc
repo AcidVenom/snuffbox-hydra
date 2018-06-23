@@ -12,13 +12,14 @@ namespace snuffbox
     OGLMaterial::OGLMaterial() :
       program_(0),
       vs_(nullptr),
-      ps_(nullptr)
+      ps_(nullptr),
+      gs_(nullptr)
     {
 
     }
 
     //--------------------------------------------------------------------------
-    bool OGLMaterial::Load(OGLShader* vs, OGLShader* ps)
+    bool OGLMaterial::Load(OGLShader* vs, OGLShader* ps, OGLShader* gs)
     {
       Release();
 
@@ -36,13 +37,29 @@ namespace snuffbox
         return false;
       }
 
+      if (gs != nullptr && gs->IsValid(ShaderTypes::kGeometry) == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kError,
+          "Attempted to create a material with an invalid geometry shader");
+
+        return false;
+      }
+
       vs_ = vs;
       ps_ = ps;
+      gs_ = gs;
 
       program_ = glCreateProgram();
 
       glAttachShader(program_, vs_->shader());
       glAttachShader(program_, ps_->shader());
+
+      if (gs_ != nullptr)
+      {
+        glAttachShader(program_, gs_->shader());
+      }
 
       glLinkProgram(program_);
 
@@ -69,12 +86,18 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool OGLMaterial::IsValid() const
     {
-      return 
+      bool check_a =  
         program_ > 0 && 
         vs_ != nullptr && 
         ps_ != nullptr && 
-        vs_->IsValid(ShaderTypes::kVertex) && 
-        ps_->IsValid(ShaderTypes::kPixel);
+        vs_->IsValid(ShaderTypes::kVertex) == true && 
+        ps_->IsValid(ShaderTypes::kPixel) == true;
+
+      bool check_b = 
+        gs_ == nullptr || 
+        gs_->IsValid(ShaderTypes::kGeometry) == true;
+
+      return check_a == true && check_b == true;
     }
 
     //--------------------------------------------------------------------------
@@ -98,6 +121,7 @@ namespace snuffbox
 
         vs_ = nullptr;
         ps_ = nullptr;
+        gs_ = nullptr;
       }
     }
 

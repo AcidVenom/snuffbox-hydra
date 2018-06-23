@@ -41,7 +41,31 @@ namespace snuffbox
       /**
       * @see IRendererLoader::ReleaseShader
       */
-      void ReleaseShader(GPUHandle shader) override;
+      void ReleaseShader(GPUHandle handle) override;
+
+      /**
+      * @see IRendererLoader::CreateMaterial
+      */
+      GPUHandle CreateMaterial() override;
+
+      /**
+      * @see IRendererLoader::LoadMaterial
+      */
+      bool LoadMaterial(
+        GPUHandle handle,
+        GPUHandle vs,
+        GPUHandle ps,
+        GPUHandle gs) override;
+
+      /**
+      * @see IRendererLoader::UnloadMaterial
+      */
+      void UnloadMaterial(GPUHandle handle) override;
+
+      /**
+      * @see IRendererLoader::ReleaseMaterial
+      */
+      void ReleaseMaterial(GPUHandle handle) override;
     };
   }
 }

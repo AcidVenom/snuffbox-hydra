@@ -23,6 +23,7 @@ namespace snuffbox
       kVertexShader,
       kPixelShader,
       kGeometryShader,
+      kMaterial,
       kCount,
       kUnknown = kCount,
     };

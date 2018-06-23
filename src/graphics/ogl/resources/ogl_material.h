@@ -29,10 +29,11 @@ namespace snuffbox
       *
       * @param[in] vs The vertex shader
       * @param[in] ps The pixel shader
+      * @param[in] gs The geometry shader, or nullptr if unused
       *
       * @return Were we able to link the shader program correctly?
       */
-      bool Load(OGLShader* vs, OGLShader* ps);
+      bool Load(OGLShader* vs, OGLShader* ps, OGLShader* gs);
 
       /**
       * @return Is this material valid?
@@ -61,8 +62,9 @@ namespace snuffbox
 
       GLuint program_; //!< The shader program of this material
 
-      OGLShader* vs_; //!< The vertex shader of the material
+      OGLShader* vs_; //!< The vertex shader of the 
       OGLShader* ps_; //!< The pixel shader of the material
+      OGLShader* gs_; //!< The geometry shader of the material
     };
   }
 }

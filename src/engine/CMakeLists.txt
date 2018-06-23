@@ -4,6 +4,7 @@ SET(DefinitionsSources
   "definitions/input.h"
   "definitions/components.h"
   "definitions/camera.h"
+  "definitions/material_data.h"
 )
 
 SET(AuxiliarySources
@@ -93,6 +94,8 @@ SET(AssetsSources
   "assets/scene_asset.cc"
   "assets/shader_asset.h"
   "assets/shader_asset.cc"
+  "assets/material_asset.h"
+  "assets/material_asset.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)
@@ -110,6 +113,7 @@ SET(Resources
   "rsc/icons/vertex_shader_icon.png"
   "rsc/icons/pixel_shader_icon.png"
   "rsc/icons/geometry_shader_icon.png"
+  "rsc/icons/material_icon.png"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})

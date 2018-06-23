@@ -17,6 +17,7 @@ namespace snuffbox
       kVertexShader = 0x48535673, //!< "sVSH" As a hexadecimal value
       kPixelShader = 0x48535073, //!< "sPSH" As a hexadecimal value
       kGeometryShader = 0x48534773, //!< "sGSH" As a hexadecimal value
+      kMaterial = 0x5441D473, //!< "sMAT" As a hexadecimal value
       kUnknown = 0
     };
   }

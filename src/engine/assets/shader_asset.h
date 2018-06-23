@@ -7,6 +7,7 @@ namespace snuffbox
   namespace engine
   {
     class RendererService;
+    class MaterialAsset;
 
     /**
     * @brief Used to load vertex, pixel and geometry shaders from
@@ -18,6 +19,8 @@ namespace snuffbox
     */
     class ShaderAsset : public IAsset
     {
+
+      friend MaterialAsset;
 
     public:
 
@@ -49,6 +52,11 @@ namespace snuffbox
       * @see IAsset::UnloadImpl
       */
       void UnloadImpl() override;
+
+      /**
+      * @return The GPU handle of this shader
+      */
+      void* gpu_handle() const;
 
     public:
 

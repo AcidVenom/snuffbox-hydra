@@ -3,6 +3,7 @@
 #include <tools/compilers/compilers/script_compiler.h>
 #include <tools/compilers/compilers/scene_compiler.h>
 #include <tools/compilers/compilers/shader_compiler.h>
+#include <tools/compilers/compilers/material_compiler.h>
 
 #include <foundation/auxiliary/logger.h>
 
@@ -111,6 +112,11 @@ namespace snuffbox
       case compilers::AssetTypes::kGeometryShader:
         ptr = foundation::Memory::ConstructShared<
           compilers::ShaderCompiler>(alloc, type);
+        break;
+
+      case compilers::AssetTypes::kMaterial:
+        ptr = foundation::Memory::ConstructShared<
+          compilers::MaterialCompiler>(alloc);
         break;
 
       default:

@@ -7,6 +7,8 @@ SET(CompilersSources
   "compilers/scene_compiler.cc"
   "compilers/shader_compiler.h"
   "compilers/shader_compiler.cc"
+  "compilers/material_compiler.h"
+  "compilers/material_compiler.cc"
 )
 
 SET(DefinitionsSources

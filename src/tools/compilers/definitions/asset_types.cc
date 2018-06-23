@@ -21,6 +21,8 @@ namespace snuffbox
         return "psb";
       case AssetTypes::kGeometryShader:
         return "gsb";
+      case AssetTypes::kMaterial:
+        return "mat";
       }
 
       return "unknown";
@@ -58,6 +60,8 @@ namespace snuffbox
         return "ps";
       case AssetTypes::kGeometryShader:
         return "gs";
+      case AssetTypes::kMaterial:
+        return "mat";
       }
 
       return "unknown";
@@ -109,6 +113,8 @@ namespace snuffbox
         return "Pixel Shader";
       case AssetTypes::kGeometryShader:
         return "Geometry Shader";
+      case AssetTypes::kMaterial:
+        return "Material";
       }
 
       return "Unknown Asset";

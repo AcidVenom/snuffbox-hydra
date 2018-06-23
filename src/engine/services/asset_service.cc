@@ -3,6 +3,7 @@
 #include "engine/assets/script_asset.h"
 #include "engine/assets/scene_asset.h"
 #include "engine/assets/shader_asset.h"
+#include "engine/assets/material_asset.h"
 
 #include <foundation/io/directory_tree.h>
 #include <foundation/auxiliary/logger.h>
@@ -246,6 +247,10 @@ namespace snuffbox
       case compilers::AssetTypes::kPixelShader:
       case compilers::AssetTypes::kGeometryShader:
         ptr = foundation::Memory::Construct<ShaderAsset>(alloc, path, type);
+        break;
+
+      case compilers::AssetTypes::kMaterial:
+        ptr = foundation::Memory::Construct<MaterialAsset>(alloc, path);
         break;
 
       default:
