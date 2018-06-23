@@ -37,20 +37,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool MaterialAsset::LoadImpl(const foundation::Path& path)
     {
-      if (vs_ != nullptr)
-      {
-        vs_->RemoveDependency(this);
-      }
-
-      if (ps_ != nullptr)
-      {
-        ps_->RemoveDependency(this);
-      }
-
-      if (gs_ != nullptr)
-      {
-        gs_->RemoveDependency(this);
-      }
+      RemoveDependencies();
 
       compilers::MaterialCompiler c;
       if (c.Decompile(path) == false)
@@ -138,6 +125,8 @@ namespace snuffbox
       {
         renderer_->GetLoader()->UnloadMaterial(gpu_handle_);
       }
+
+      RemoveDependencies();
     }
 
     //--------------------------------------------------------------------------
@@ -146,6 +135,25 @@ namespace snuffbox
       if (gpu_handle_ != nullptr)
       {
         renderer_->GetLoader()->ReleaseMaterial(gpu_handle_);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void MaterialAsset::RemoveDependencies()
+    {
+      if (vs_ != nullptr)
+      {
+        vs_->RemoveDependency(this);
+      }
+
+      if (ps_ != nullptr)
+      {
+        ps_->RemoveDependency(this);
+      }
+
+      if (gs_ != nullptr)
+      {
+        gs_->RemoveDependency(this);
       }
     }
 

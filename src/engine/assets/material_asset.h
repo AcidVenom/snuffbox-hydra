@@ -50,6 +50,11 @@ namespace snuffbox
       */
       void Release();
 
+      /**
+      * @brief Removes shader dependencies if they are unused
+      */
+      void RemoveDependencies();
+
     public:
 
       /**
