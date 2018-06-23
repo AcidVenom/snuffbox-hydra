@@ -265,9 +265,12 @@ namespace snuffbox
         "Out parameters for a LoadArchive should be of a de-referencable\
          pointer type");
 
-      ReadValue<typename eastl::remove_pointer<T>::type>(
-        *CurrentScope(),
-        value);
+      if (CurrentScope() != nullptr)
+      {
+        ReadValue<typename eastl::remove_pointer<T>::type>(
+          *CurrentScope(),
+          value);
+      }
 
       ExitScope();
     }

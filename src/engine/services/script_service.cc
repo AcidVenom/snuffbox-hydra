@@ -6,6 +6,9 @@
 #include "engine/services/input_service.h"
 #include "engine/ecs/entity.h"
 #include "engine/components/transform_component.h"
+#include "engine/components/mesh_component.h"
+#include "engine/components/mesh_renderer_component.h"
+#include "engine/components/camera_component.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include "engine/components/script_component.h"
@@ -137,6 +140,9 @@ namespace snuffbox
       register_->RegisterClass<Entity, true>();
       register_->RegisterClass<TransformComponent>();
       register_->RegisterClass<ScriptComponent>();
+      register_->RegisterClass<MeshComponent>();
+      register_->RegisterClass<MeshRendererComponent>();
+      register_->RegisterClass<CameraComponent>();
 
       register_->RegisterEnum<Keys>();
       register_->RegisterEnum<MouseButtons>();

@@ -42,7 +42,7 @@ namespace snuffbox
       * @brief A short-hand for the on-changed callbacks
       */
       template <typename ... Args>
-      using ChangeCallback = const std::function<void(Args...)>&;
+      using ChangeCallback = const std::function<void(QWidget*, Args...)>&;
 
     protected:
 
@@ -182,11 +182,14 @@ namespace snuffbox
       * @brief Creates a button with a text
       *
       * @param[in] text The text to display on the button
-      * @param[in] on_click The function to call when the button is clicked
+      * @param[in] options The options that appear when the button is clicked
+      * @param[in] on_click The function to call when the button or its options
+      *                     have been clicked
       */
       void Button(
         const char* text, 
-        const std::function<void()>& on_click = nullptr);
+        const std::vector<QString>& options,
+        ChangeCallback<int> on_click = nullptr);
 
       /**
       * @brief Creates a vector field with x, y, z and w components up to
@@ -259,11 +262,12 @@ namespace snuffbox
       {
         Label(labels[i]);
 
-        NumberField(static_cast<double>(value[i]), false, [=](double dvalue)
+        NumberField(static_cast<double>(value[i]), false,
+        [=](QWidget* self, double dvalue)
         {
           if (on_changed != nullptr)
           {
-            on_changed(i, static_cast<float>(dvalue));
+            on_changed(self, i, static_cast<float>(dvalue));
           }
         });
       }

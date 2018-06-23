@@ -13,7 +13,9 @@ namespace snuffbox
     {
       kTransform,
       kScript,
+      kMesh,
       kMeshRenderer,
+      kCamera,
       kCount
     };
   }

@@ -200,24 +200,33 @@ namespace snuffbox
       };
 
       String indent_string = "\n" + IndentationString(indent);
-      while (id != Identifiers::kObjectEnd)
+      Identifiers next = *reinterpret_cast<const Identifiers*>(buffer + i + 1);
+
+      if (next == Identifiers::kObjectEnd)
       {
-        result += indent_string + GetName() + " : ";
-        if (id == Identifiers::kObjectStart || id == Identifiers::kArray)
+        ++i;
+      }
+      else
+      {
+        while (id != Identifiers::kObjectEnd)
         {
-          result += "\n";
+          result += indent_string + GetName() + " : ";
+          if (id == Identifiers::kObjectStart || id == Identifiers::kArray)
+          {
+            result += "\n";
+          }
+          result += WriteJsonValue(i, buffer, indent);
+
+          id = *reinterpret_cast<const Identifiers*>(buffer + i);
+
+          if (id == Identifiers::kObjectEnd)
+          {
+            ++i;
+            continue;
+          }
+
+          result += ",";
         }
-        result += WriteJsonValue(i, buffer, indent);
-
-        id = *reinterpret_cast<const Identifiers*>(buffer + i);
-
-        if (id == Identifiers::kObjectEnd)
-        {
-          ++i;
-          continue;
-        }
-
-        result += ",";
       }
 
       result += "\n" + IndentationString(indent - 1) + "}";

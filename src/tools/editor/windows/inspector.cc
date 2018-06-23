@@ -2,6 +2,7 @@
 #include "tools/editor/windows/gui.h"
 
 #include <engine/components/transform_component.h>
+#include <engine/components/camera_component.h>
 
 #ifndef SNUFF_NSCRIPTING
 #include <engine/components/script_component.h>
@@ -10,6 +11,7 @@
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qcheckbox.h>
+#include <qpushbutton.h>
 #include <qlayout.h>
 #include <qmenu.h>
 #include <qaction.h>
@@ -77,14 +79,14 @@ namespace snuffbox
       gui.SetSpacing(10);
 
       gui.Label("Name");
-      gui.TextField(entity->name().c_str(), [=](const QString& value)
+      gui.TextField(entity->name().c_str(), [=](QWidget*, const QString& value)
       {
         entity->set_name(value.toStdString().c_str());
       });
       gui.ResetForegroundColor();
 
       gui.Label("Active");
-      gui.Checkbox(entity->active(), [=](bool value)
+      gui.Checkbox(entity->active(), [=](QWidget*, bool value)
       {
         entity->set_active(value);
       });
@@ -97,11 +99,23 @@ namespace snuffbox
       
       gui.StartLayout(GUI::LayoutStyle::kVertical);
       gui.SetBackgroundColor(EditorColors::BlueButton());
-      gui.Button("Add component", [=]()
+      gui.Button(
+        "Add component", 
+        {
+          "Script",
+          "Mesh",
+          "Mesh renderer",
+          "Camera"
+        }, 
+      [=](QWidget* self, int option)
       {
-#ifndef SNUFF_NSCRIPTING
-        entity->AddComponent<engine::ScriptComponent>();
+#ifdef SNUFF_NSCRIPTING
+        if (option == 0)
+        {
+          return;
+        }
 #endif
+        entity->AddComponent(static_cast<engine::Components>(option + 1));
         ShowEntity(entity);
       });
 
@@ -150,21 +164,24 @@ namespace snuffbox
 
       gui.StartLayout(GUI::LayoutStyle::kVertical);
 
-      LabeledVec("Position", t->GetLocalPosition(), [=](int n, float v)
+      LabeledVec("Position", t->GetLocalPosition(),
+      [=](QWidget*, int n, float v)
       {
         glm::vec3 p = t->GetLocalPosition();
         p[n] = v;
         t->SetLocalPosition(p);
       });
 
-      LabeledVec("Rotation", t->GetRotationEuler(), [=](int n, float v)
+      LabeledVec("Rotation", t->GetRotationEuler(),
+      [=](QWidget*, int n, float v)
       {
         glm::vec3 r = t->GetRotationEuler();
         r[n] = v;
         t->SetRotationEuler(r);
       });
 
-      LabeledVec("Scale", t->GetScale(), [=](int n, float v)
+      LabeledVec("Scale", t->GetScale(),
+      [=](QWidget*, int n, float v)
       {
         glm::vec3 s = t->GetScale();
         s[n] = v;
@@ -180,26 +197,21 @@ namespace snuffbox
       engine::IComponent* component,
       QTreeWidgetItem* parent)
     {
+      parent->setText(0, "Script");
+
 #ifndef SNUFF_NSCRIPTING
       engine::ScriptComponent* s = 
         static_cast<engine::ScriptComponent*>(component);
-
-      auto SetName = [=]()
-      {
-        parent->setText(0, QString("Script (") + s->behavior().c_str() + ")");
-      };
-
-      SetName();
 
       GUI gui;
 
       gui.StartLayout(GUI::LayoutStyle::kVertical);
 
       gui.Label("Behavior");
-      gui.TextField(s->behavior().c_str(), [=](const QString& behavior)
+      gui.TextField(s->behavior().c_str(),
+      [=](QWidget*, const QString& behavior)
       {
         s->SetBehavior(behavior.toStdString().c_str());
-        SetName();
       });
 
       return gui.EndAsWidget();
@@ -216,6 +228,52 @@ namespace snuffbox
     {
       parent->setText(0, "Mesh Renderer");
       return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline QWidget* Inspector::ShowComponent<engine::Components::kMesh>(
+      engine::IComponent* component,
+      QTreeWidgetItem* parent)
+    {
+      parent->setText(0, "Mesh");
+      return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline QWidget* Inspector::ShowComponent<engine::Components::kCamera>(
+      engine::IComponent* component,
+      QTreeWidgetItem* parent)
+    {
+      parent->setText(0, "Camera");
+
+      engine::CameraComponent* c = 
+        static_cast<engine::CameraComponent*>(component);
+
+      GUI gui;
+
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
+
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      gui.Label("Near plane ");
+      gui.NumberField(static_cast<double>(c->near()), false,
+      [=](QWidget*, double val)
+      {
+        c->set_near(static_cast<float>(val));
+      });
+
+      gui.Label(" Far plane ");
+      gui.NumberField(static_cast<double>(c->far()), false,
+      [=](QWidget*, double val)
+      {
+        c->set_far(static_cast<float>(val));
+      });
+
+      gui.EndLayout();
+
+      return gui.EndAsWidget();
     }
 
     //--------------------------------------------------------------------------
@@ -249,7 +307,7 @@ namespace snuffbox
       remove_component_->setEnabled(index.isValid());
 
       InspectorComponentItem* item = 
-        static_cast<InspectorComponentItem*>(tree_->itemAt(p));
+        dynamic_cast<InspectorComponentItem*>(tree_->itemAt(p));
 
       engine::IComponent* component = nullptr;
 

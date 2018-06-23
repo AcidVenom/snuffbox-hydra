@@ -5,6 +5,9 @@
 #include "engine/application/application.h"
 
 #include "engine/components/transform_component.h"
+#include "engine/components/mesh_component.h"
+#include "engine/components/mesh_renderer_component.h"
+#include "engine/components/camera_component.h"
 
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>

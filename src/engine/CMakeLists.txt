@@ -3,6 +3,7 @@ SET(DefinitionsSources
   "definitions/keycodes.h"
   "definitions/input.h"
   "definitions/components.h"
+  "definitions/camera.h"
 )
 
 SET(AuxiliarySources
@@ -75,6 +76,12 @@ SET(ECSSources
 SET(ComponentsSources
   "components/transform_component.h"
   "components/transform_component.cc"
+  "components/mesh_component.h"
+  "components/mesh_component.cc"
+  "components/mesh_renderer_component.h"
+  "components/mesh_renderer_component.cc"
+  "components/camera_component.h"
+  "components/camera_component.cc"
 )
 
 SET(AssetsSources
@@ -155,6 +162,9 @@ IF (NOT SNUFF_NSCRIPTING)
     "ecs/entity.h"
     "components/transform_component.h"
     "components/script_component.h"
+    "components/mesh_component.h"
+    "components/mesh_renderer_component.h"
+    "components/camera_component.h"
   )
   
   FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)

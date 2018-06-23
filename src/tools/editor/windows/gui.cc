@@ -9,6 +9,7 @@
 #include <qcheckbox.h>
 #include <qpushbutton.h>
 #include <qvalidator.h>
+#include <qmenu.h>
 
 namespace snuffbox
 {
@@ -161,7 +162,7 @@ namespace snuffbox
       {
         if (on_changed != nullptr)
         {
-          on_changed(box->isChecked());
+          on_changed(box, box->isChecked());
         }
       });
 
@@ -185,7 +186,7 @@ namespace snuffbox
       {
         if (on_changed != nullptr)
         {
-          on_changed(edit->text());
+          on_changed(edit, edit->text());
         }
       });
 
@@ -239,7 +240,7 @@ namespace snuffbox
         if (on_changed != nullptr)
         {
           std::string s = edit->text().toStdString();
-          on_changed(atof(s.c_str()));
+          on_changed(edit, atof(s.c_str()));
         }
       });
 
@@ -251,7 +252,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void GUI::Button(
       const char* text,
-      const std::function<void()>& on_click)
+      const std::vector<QString>& options,
+      ChangeCallback<int> on_click)
     {
       if (current_layout_ == nullptr)
       {
@@ -261,7 +263,35 @@ namespace snuffbox
       QPushButton* button = new QPushButton();
       button->setText(text);
 
-      QObject::connect(button, &QPushButton::clicked, on_click);
+      if (options.size() > 0)
+      {
+        QMenu *menu = new QMenu(button);
+        for (size_t i = 0; i < options.size(); ++i)
+        {
+          QObject::connect(
+            menu->addAction(options.at(i)), 
+            &QAction::triggered,
+            [=]()
+          {
+            if (on_click != nullptr)
+            {
+              on_click(button, static_cast<int>(i));
+            }
+          });
+        }
+
+        button->setMenu(menu);
+      }
+      else
+      {
+        QObject::connect(button, &QPushButton::clicked, [=]()
+        {
+          if (on_click != nullptr)
+          {
+            on_click(button, -1);
+          }
+        });
+      }
 
       AddWidget(button);
     }
