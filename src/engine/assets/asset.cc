@@ -37,6 +37,12 @@ namespace snuffbox
       }
 
       is_loaded_ = LoadImpl(path_);
+
+      for (size_t i = 0; i < dependencies_.size(); ++i)
+      {
+        dependencies_.at(i)->Load();
+      }
+
       return is_loaded_;
     }
 
@@ -50,6 +56,33 @@ namespace snuffbox
 
       UnloadImpl();
       is_loaded_ = false;
+    }
+
+    //--------------------------------------------------------------------------
+    void IAsset::AddDependency(IAsset* asset)
+    {
+      for (size_t i = 0; i < dependencies_.size(); ++i)
+      {
+        if (dependencies_.at(i) == asset)
+        {
+          return;
+        }
+      }
+
+      dependencies_.push_back(asset);
+    }
+
+    //--------------------------------------------------------------------------
+    void IAsset::RemoveDependency(IAsset* asset)
+    {
+      for (size_t i = 0; i < dependencies_.size(); ++i)
+      {
+        if (dependencies_.at(i) == asset)
+        {
+          dependencies_.erase(dependencies_.begin() + i);
+          return;
+        }
+      }
     }
 
     //--------------------------------------------------------------------------

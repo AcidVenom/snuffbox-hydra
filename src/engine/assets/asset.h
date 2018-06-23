@@ -1,7 +1,9 @@
 #pragma once
 
 #include <tools/compilers/definitions/asset_types.h>
+
 #include <foundation/io/path.h>
+#include <foundation/containers/vector.h>
 
 #include <cinttypes>
 
@@ -87,6 +89,23 @@ namespace snuffbox
       */
       virtual void UnloadImpl() = 0;
 
+      /**
+      * @brief Adds a dependent asset to this asset
+      *
+      * @remarks We first check if the dependency was not added yet,
+      *          to avoid duplicate dependencies
+      *
+      * @param[in] asset The dependency to add
+      */
+      void AddDependency(IAsset* asset);
+
+      /**
+      * @brief Removes a dependency from this asset
+      *
+      * @param[in] asset The dependency to remove
+      */
+      void RemoveDependency(IAsset* asset);
+
     public:
 
       /**
@@ -100,6 +119,15 @@ namespace snuffbox
       foundation::Path path_; //!< The path to the file to load
 
       bool is_loaded_; //!< Has this asset been loaded?
+
+      /**
+      * @brief A list of dependencies to load when
+      *        this asset has been loaded
+      *
+      * @remarks When a dependency is unloaded, so is the asset that
+      *          depends on it
+      */
+      foundation::Vector<IAsset*> dependencies_;
     };
   }
 }

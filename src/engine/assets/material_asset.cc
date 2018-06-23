@@ -37,7 +37,20 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool MaterialAsset::LoadImpl(const foundation::Path& path)
     {
-      vs_ = ps_ = gs_ = nullptr;
+      if (vs_ != nullptr)
+      {
+        vs_->RemoveDependency(this);
+      }
+
+      if (ps_ != nullptr)
+      {
+        ps_->RemoveDependency(this);
+      }
+
+      if (gs_ != nullptr)
+      {
+        gs_->RemoveDependency(this);
+      }
 
       compilers::MaterialCompiler c;
       if (c.Decompile(path) == false)
@@ -88,6 +101,9 @@ namespace snuffbox
         return false;
       }
 
+      vs_->AddDependency(this);
+      ps_->AddDependency(this);
+
       if (data.has_gs == true)
       {
         gs_ = static_cast<ShaderAsset*>(asset_service_->Get(
@@ -104,6 +120,8 @@ namespace snuffbox
 
           return false;
         }
+
+        gs_->AddDependency(this);
       }
 
       return renderer_->GetLoader()->LoadMaterial(
