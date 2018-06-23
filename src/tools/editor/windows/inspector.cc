@@ -2,6 +2,7 @@
 #include "tools/editor/windows/gui.h"
 
 #include <engine/components/transform_component.h>
+#include <engine/components/mesh_renderer_component.h>
 #include <engine/components/camera_component.h>
 
 #ifndef SNUFF_NSCRIPTING
@@ -227,7 +228,24 @@ namespace snuffbox
       QTreeWidgetItem* parent)
     {
       parent->setText(0, "Mesh Renderer");
-      return nullptr;
+
+      engine::MeshRendererComponent* c = 
+        static_cast<engine::MeshRendererComponent*>(component);
+
+      GUI gui;
+
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
+
+      gui.Label("Material");
+
+      gui.TextField(
+        c->material_path().c_str(),
+        [=](QWidget*, const QString& value)
+      {
+        c->SetMaterial(value.toStdString().c_str());
+      });
+
+      return gui.EndAsWidget();
     }
 
     //--------------------------------------------------------------------------

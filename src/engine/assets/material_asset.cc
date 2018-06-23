@@ -158,6 +158,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void* MaterialAsset::gpu_handle() const
+    {
+      return gpu_handle_;
+    }
+
+    //--------------------------------------------------------------------------
     MaterialAsset::~MaterialAsset()
     {
       Release();

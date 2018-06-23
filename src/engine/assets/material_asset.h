@@ -58,6 +58,11 @@ namespace snuffbox
     public:
 
       /**
+      * @return The GPU handle of this material
+      */
+      void* gpu_handle() const;
+
+      /**
       * @see MaterialAsset::Release
       */
       ~MaterialAsset();
