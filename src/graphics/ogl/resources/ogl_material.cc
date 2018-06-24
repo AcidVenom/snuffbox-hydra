@@ -80,6 +80,16 @@ namespace snuffbox
         return false;
       }
 
+      glUniformBlockBinding(
+        program_, 
+        ShaderConstants::GetUniformLocation(ShaderUniforms::kPerFrameData),
+        0);
+
+      glUniformBlockBinding(
+        program_, 
+        ShaderConstants::GetUniformLocation(ShaderUniforms::kPerObjectData),
+        1);
+
       return true;
     }
 

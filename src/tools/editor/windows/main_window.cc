@@ -330,6 +330,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::NewScene()
     {
+      inspector_->ShowEntity(nullptr);
       if (app_->NewScene() == true)
       {
         current_scene_ = "New scene";
@@ -341,6 +342,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::SaveScene()
     {
+      inspector_->ShowEntity(nullptr);
       if (app_->SaveCurrentScene() == true)
       {
         current_scene_ = app_->GetLoadedScene();
@@ -352,6 +354,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::SaveSceneAs()
     {
+      inspector_->ShowEntity(nullptr);
       if (app_->SaveCurrentScene(true) == true)
       {
         current_scene_ = app_->GetLoadedScene();

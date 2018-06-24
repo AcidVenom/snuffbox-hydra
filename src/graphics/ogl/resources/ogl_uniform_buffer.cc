@@ -69,6 +69,7 @@ namespace snuffbox
         return;
       }
 
+      glBindBuffer(GL_UNIFORM_BUFFER, ubo_);
       glBindBufferBase(GL_UNIFORM_BUFFER, location, ubo_);
     }
 

@@ -1,6 +1,9 @@
 #include "graphics/ogl/ogl_renderer.h"
 #include "graphics/definitions/shader_constants.h"
 
+#include "graphics/ogl/resources/ogl_mesh.h"
+#include "graphics/ogl/resources/ogl_material.h"
+
 #include <foundation/auxiliary/logger.h>
 #include <glad/glad.h>
 
@@ -45,7 +48,7 @@ namespace snuffbox
         GLVersion.major,
         GLVersion.minor);
 
-      glClipControl(GL_UPPER_LEFT, GL_ZERO_TO_ONE);
+      glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 
       return true;
     }
@@ -117,6 +120,55 @@ namespace snuffbox
     void OGLRenderer::SetFrameData(const PerObjectData& pod)
     {
       per_object_ubo_.Update(&pod, sizeof(PerObjectData));
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLRenderer::DrawMesh(
+      IRendererLoader::GPUHandle mesh,
+      IRendererLoader::GPUHandle material)
+    {
+      if (mesh == nullptr)
+      {
+        //!< @todo Remove this when mesh loading is implemented
+        static bool initialized = false;
+        static OGLMesh m;
+
+        if (initialized == false)
+        {
+
+          glm::vec3 n(0.0f, 0.0f, -1.0f);
+          glm::vec3 t(1.0f, 0.0f, 0.0f);
+          glm::vec3 b(0.0f, -1.0f, 0.0f);
+
+          foundation::Vector<Vertex3D> verts =
+          {
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, n, t, b, {0.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, n, t, b, {1.0f, 0.0f}},
+            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, n, t, b, {0.0f, 1.0f}},
+            {{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, n, t, b, {1.0f, 1.0f}}
+          };
+
+          foundation::Vector<Index> indices = {0, 1, 2, 2, 1, 3};
+
+          m.Create(verts, indices);
+
+          initialized = true;
+        }
+
+        mesh = &m;
+      }
+
+      OGLMesh* gpu_mesh = reinterpret_cast<OGLMesh*>(mesh);
+      OGLMaterial* gpu_mat = reinterpret_cast<OGLMaterial*>(material);
+
+      gpu_mesh->Set();
+      gpu_mat->Set();
+
+      glDrawElements(
+        GL_TRIANGLES, 
+        static_cast<GLsizei>(gpu_mesh->NumIndices()),
+        GL_UNSIGNED_INT,
+        0);
     }
 
     //--------------------------------------------------------------------------

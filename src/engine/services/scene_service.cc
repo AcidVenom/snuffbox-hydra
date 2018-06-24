@@ -43,6 +43,27 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void SceneService::UnloadAssets()
+    {
+      AssetService* as = Application::Instance()->GetService<AssetService>();
+
+      compilers::AssetTypes type;
+      for (int i = 0; i < static_cast<int>(compilers::AssetTypes::kCount); ++i)
+      {
+        type = static_cast<compilers::AssetTypes>(i);
+
+        if (
+          type == compilers::AssetTypes::kScript || 
+          type == compilers::AssetTypes::kScene)
+        {
+          continue;
+        }
+
+        as->UnloadAll(type);
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void SceneService::Start()
     {
       if (current_scene_ == nullptr)
@@ -56,6 +77,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SceneService::SwitchScene(Scene* scene)
     {
+      UnloadAssets();
+
       if (loaded_scene_ != nullptr && loaded_scene_->scene() != scene)
       {
         loaded_scene_->Unload();

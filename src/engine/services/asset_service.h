@@ -165,7 +165,28 @@ namespace snuffbox
       *
       * @return Were we able to load the asset?
       */
-      bool Load(compilers::AssetTypes type, const foundation::String& path);
+      bool Load(
+        compilers::AssetTypes type, 
+        const foundation::String& path);
+      
+      /**
+      * @brief Reloads an asset if it was already loaded
+      *
+      * @see AssetService::Load
+      */
+      bool Reload(
+        compilers::AssetTypes type,
+        const foundation::String& path);
+
+      /**
+      * @brief Unlaods an asset by type and relative path with no extension
+      *
+      * @param[in] type The type of the registered asset to unload
+      * @param[in] path The relative path to the asset
+      */
+      void Unload(
+        compilers::AssetTypes type,
+        const foundation::String& path);
 
       /**
       * @brief Loads all assets of a specific type
@@ -175,6 +196,13 @@ namespace snuffbox
       * @return Were all assets loaded succesfully?
       */
       bool LoadAll(compilers::AssetTypes type);
+
+      /**
+      * @brief Unloads all assets of a specific type
+      *
+      * @param[in] type The type of the assets to unload
+      */
+      void UnloadAll(compilers::AssetTypes type);
 
       /**
       * @brief Checks if an asset has already been loaded

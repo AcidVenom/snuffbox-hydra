@@ -12,6 +12,10 @@ namespace snuffbox
   namespace engine
   {
     class CVarService;
+    class MeshComponent;
+    class TransformComponent;
+    class MeshRendererComponent;
+    class CameraComponent;
 
     /**
     * @brief Used to interface the native rendering implementations and display
@@ -48,6 +52,29 @@ namespace snuffbox
       * @see GraphicsWindow::SizeCallback
       */
       void OnResize(uint16_t width, uint16_t height);
+
+      /**
+      * @brief Queues a camera for rendering
+      *
+      * @param[in] transform The transformation of the camera
+      * @param[in] camera The camera to render with
+      */
+      void Queue(
+        TransformComponent* transform,
+        CameraComponent* camera);
+
+      /**
+      * @brief Queues a mesh renderer component for rendering of an entity's
+      *        MeshComponent
+      *
+      * @param[in] mesh The mesh to render
+      * @param[in] transform The transformation to apply
+      * @param[in] renderer The mesh renderer to render the mesh with
+      */
+      void Queue(
+        MeshComponent* mesh, 
+        TransformComponent* transform, 
+        MeshRendererComponent* renderer);
 
     protected:
 

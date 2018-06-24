@@ -49,6 +49,11 @@ namespace snuffbox
       */
       void OnShutdown(Application& app) override;
 
+      /**
+      * @brief Unloads all assets, but scripts and scenes
+      */
+      void UnloadAssets();
+
     public:
 
       /**
@@ -58,6 +63,9 @@ namespace snuffbox
 
       /**
       * @brief Switches the current scene
+      *
+      * @remarks This calls SceneService::UnloadAssets to make sure all assets
+      *          of the previous scene are unloaded
       *
       * @param[in] scene The scene to switch to
       *
@@ -70,7 +78,6 @@ namespace snuffbox
 
       /**
       * @brief Switches the current scene from a scene asset
-      *
       *
       * @param[in] path The path to the scene to switch to
       *

@@ -176,6 +176,16 @@ namespace snuffbox
       virtual void SetFrameData(const PerObjectData& pod) = 0;
 
       /**
+      * @brief Draws a mesh with a specified material
+      *
+      * @param[in] mesh The handle to the mesh to render
+      * @param[in] material The material of the mesh
+      */
+      virtual void DrawMesh(
+        IRendererLoader::GPUHandle mesh, 
+        IRendererLoader::GPUHandle material) = 0;
+
+      /**
       * @see IRenderer::OnResize
       */
       virtual void OnResizeImpl(uint16_t width, uint16_t height) = 0;

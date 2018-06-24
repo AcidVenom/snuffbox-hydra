@@ -13,9 +13,9 @@ namespace snuffbox
     */
     struct PerFrameData
     {
-      glm::mat4x4 view; //!< The current camera's view matrix
       glm::mat4x4 projection; //!< The current camera's projection matrix
-      glm::mat4x4 inv_view_projection; //!< The inverse of the view * projection
+      glm::mat4x4 view; //!< The current camera's view matrix
+      glm::mat4x4 inv_projection_view; //!< The inverse of the projection * view
       glm::vec3 eye_position; //!< The eye position of the camera
       float time; //!< The currently elapsed application time
     };
@@ -28,6 +28,7 @@ namespace snuffbox
     struct PerObjectData
     {
       glm::mat4x4 world; //!< The world matrix
+      glm::mat4x4 pvw; //!< The projection * view * world matrix
       glm::mat4x4 inv_world; //!< The inverse world matrix
     };
   }

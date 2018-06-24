@@ -1,6 +1,13 @@
 #include "engine/services/renderer_service.h"
 #include "engine/services/cvar_service.h"
 
+#include "engine/components/camera_component.h"
+#include "engine/components/mesh_component.h"
+#include "engine/components/transform_component.h"
+#include "engine/components/mesh_renderer_component.h"
+
+#include "engine/assets/material_asset.h"
+
 #include <foundation/auxiliary/logger.h>
 
 namespace snuffbox
@@ -47,6 +54,7 @@ namespace snuffbox
       renderer_->Tick(dt);
       renderer_->SetViewport(graphics::Viewport{ 0.0f, 0.0f, w, h });
       renderer_->Clear(glm::vec4{ 0.0f, 0.5, 1.0f, 1.0f });
+      renderer_->Render();
       renderer_->Present(sync);
     }
 
@@ -68,6 +76,45 @@ namespace snuffbox
         );
 
       renderer_->OnResize(width, height);
+    }
+
+    //--------------------------------------------------------------------------
+    void RendererService::Queue(
+      TransformComponent* transform, 
+      CameraComponent* camera)
+    {
+      graphics::Camera data;
+      data.projection = camera->projection_matrix();
+      data.view = camera->view_matrix();
+      data.eye_position = transform->GetPosition();
+      data.num_targets = 0;
+
+      renderer_->Queue(data);
+    }
+
+    //--------------------------------------------------------------------------
+    void RendererService::Queue(
+      MeshComponent* mesh,
+      TransformComponent* transform,
+      MeshRendererComponent* renderer)
+    {
+      graphics::DrawCommand cmd;
+      graphics::PerObjectData& data = cmd.data;
+
+      data.world = transform->local_to_world();
+      data.inv_world = transform->world_to_local();
+
+      MaterialAsset* mat = renderer->material();
+
+      if (mat != nullptr && mat->is_loaded() == false)
+      {
+        mat->Load();
+      }
+
+      cmd.material = mat == nullptr ? nullptr : mat->gpu_handle();
+      cmd.mesh = nullptr;
+
+      renderer_->Queue(cmd);
     }
 
     //--------------------------------------------------------------------------

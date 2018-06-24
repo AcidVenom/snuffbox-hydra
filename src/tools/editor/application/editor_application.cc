@@ -323,10 +323,7 @@ namespace snuffbox
       }
 
       foundation::String path = relative.NoExtension().ToString();
-      if (as->IsLoaded(type, path) == true)
-      {
-        as->Load(type, path);
-      }
+      as->Reload(type, path);
     }
 
     //--------------------------------------------------------------------------

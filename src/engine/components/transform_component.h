@@ -37,8 +37,7 @@ namespace snuffbox
       {
         kNone = 0, //!< No flags set
         kChild = 1 << 0, //!< A child is dirty
-        kParent = 1 << 1, //!< The parent is dirty
-        kSelf = 1 << 2 //!< The component itself is dirty
+        kSelf = 1 << 1 //!< The component itself is dirty
       };
 
     public:
@@ -277,6 +276,16 @@ namespace snuffbox
       * @param[in] translation The translation to apply
       */
       SCRIPT_FUNC() void Translate(const glm::vec3& translation);
+
+      /**
+      * @return The local to world matrix
+      */
+      const glm::mat4x4& local_to_world() const;
+
+      /**
+      * @return The world to local matrix
+      */
+      const glm::mat4x4& world_to_local() const;
 
     protected:
 

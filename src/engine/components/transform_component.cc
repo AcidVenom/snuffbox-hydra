@@ -312,19 +312,22 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const glm::mat4x4& TransformComponent::local_to_world() const
+    {
+      return local_to_world_;
+    }
+
+    //--------------------------------------------------------------------------
+    const glm::mat4x4& TransformComponent::world_to_local() const
+    {
+      return world_to_local_;
+    }
+
+    //--------------------------------------------------------------------------
     void TransformComponent::SetParentRaw(TransformComponent* parent)
     {
       parent_ = parent;
-
-      if (parent_ != nullptr)
-      {
-        parent_->MarkDirty(DirtyFlags::kChild);
-      }
-      else
-      {
-        is_dirty_ = is_dirty_ & ~DirtyFlags::kParent;
-      }
-
+      MarkDirty(DirtyFlags::kSelf);
       entity()->scene()->OnSceneChanged();
     }
 
@@ -335,17 +338,12 @@ namespace snuffbox
 
       if (flag == DirtyFlags::kSelf)
       {
-        TransformComponent* current = parent_;
+        TransformComponent* p = parent_;
 
-        while (current != nullptr)
+        while (p != nullptr)
         {
-          current->MarkDirty(DirtyFlags::kChild);
-          current = current->parent_;
-        }
-
-        for (size_t i = 0; i < children_.size(); ++i)
-        {
-          children_.at(i)->MarkDirty(DirtyFlags::kParent);
+          p->MarkDirty(DirtyFlags::kChild);
+          p = p->parent();
         }
       }
     }
@@ -379,26 +377,25 @@ namespace snuffbox
       {
         local_to_world_ = glm::mat4x4(1.0f);
 
+        if (parent_ != nullptr)
+        {
+          local_to_world_ = parent_->local_to_world();
+        }
+
         local_to_world_ = glm::translate(local_to_world_, position_);
         local_to_world_ *= glm::toMat4(rotation_);
         local_to_world_ = glm::scale(local_to_world_, scale_);
 
-        if (parent_ != nullptr)
+        for (size_t i = 0; i < children_.size(); ++i)
         {
-          local_to_world_ *= parent_->local_to_world_;
+          children_.at(i)->MarkDirty(DirtyFlags::kSelf);
+          children_.at(i)->UpdateMatrices();
         }
 
         updated = true;
       }
-
-      if ((is_dirty_ & DirtyFlags::kParent) == DirtyFlags::kParent)
-      {
-        local_to_world_ = local_to_world_ * parent_->local_to_world_;
-
-        updated = true;
-      }
-
-      if ((is_dirty_ & DirtyFlags::kChild) == DirtyFlags::kChild == true)
+      
+      if ((is_dirty_ & DirtyFlags::kChild) == DirtyFlags::kChild)
       {
         for (size_t i = 0; i < children_.size(); ++i)
         {

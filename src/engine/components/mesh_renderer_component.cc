@@ -1,5 +1,8 @@
 #include "engine/components/mesh_renderer_component.h"
+#include "engine/components/mesh_component.h"
+
 #include "engine/assets/material_asset.h"
+#include "engine/services/renderer_service.h"
 
 #include "engine/application/application.h"
 #include "engine/services/asset_service.h"
@@ -19,9 +22,24 @@ namespace snuffbox
     MeshRendererComponent::MeshRendererComponent(Entity* entity) :
       ComponentBase<MeshRendererComponent, Components::kMeshRenderer>(entity),
       material_path_(""),
-      material_(nullptr)
+      material_(nullptr),
+      renderer_(Application::Instance()->GetService<RendererService>())
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    void MeshRendererComponent::Update(float dt)
+    {
+      if (material_ == nullptr)
+      {
+        return;
+      }
+
+      MeshComponent* m = entity()->GetComponent<MeshComponent>();
+      TransformComponent* t = entity()->GetComponent<TransformComponent>();
+
+      renderer_->Queue(m, t, this);
     }
 
     //--------------------------------------------------------------------------

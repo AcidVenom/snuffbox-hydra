@@ -7,6 +7,7 @@ namespace snuffbox
   namespace engine
   {
     class MaterialAsset;
+    class RendererService;
 
     /**
     * @brief Used to render meshes within the scene, based on an entity's
@@ -28,6 +29,14 @@ namespace snuffbox
       * @see IComponent::IComponent
       */
       MeshRendererComponent(Entity* entity);
+
+      /**
+      * @see IComponent::Update
+      *
+      * Updates the renderer component to send a render queue message to
+      * the RendererService
+      */
+      void Update(float dt) override;
 
       /**
       * @brief Sets the material of this component
@@ -60,6 +69,7 @@ namespace snuffbox
 
       foundation::String material_path_; //!< The current material path
       MaterialAsset* material_; //!< The material to use for rendering
+      RendererService* renderer_; //!< The renderer service
     };
 
     //--------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 #include "graphics/renderer.h"
-
+#include <stdio.h>
 namespace snuffbox
 {
   namespace graphics
@@ -62,9 +62,9 @@ namespace snuffbox
     {
       PerFrameData pfd;
 
-      pfd.view = camera.view;
       pfd.projection = camera.projection;
-      pfd.inv_view_projection = glm::inverse(camera.projection * camera.view);
+      pfd.view = camera.view;
+      pfd.inv_projection_view = glm::inverse(camera.projection * camera.view);
       pfd.eye_position = camera.eye_position;
       pfd.time = time_;
 
@@ -80,7 +80,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void IRenderer::Draw(const DrawCommand& cmd, const Camera& camera)
     {
-      SetFrameData(cmd.data);
+      PerObjectData data = cmd.data;
+      data.pvw = camera.projection * camera.view * data.world;
+
+      SetFrameData(data);
+      DrawMesh(cmd.mesh, cmd.material);
     }
 
     //--------------------------------------------------------------------------

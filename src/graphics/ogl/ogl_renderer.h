@@ -79,6 +79,13 @@ namespace snuffbox
       void SetFrameData(const PerObjectData& pod) override;
 
       /**
+      * @see IRenderer::DrawMesh
+      */
+      void DrawMesh(
+        IRendererLoader::GPUHandle mesh, 
+        IRendererLoader::GPUHandle material);
+
+      /**
       * @see IRenderer::OnResizeImpl
       */
       void OnResizeImpl(uint16_t width, uint16_t height) override;

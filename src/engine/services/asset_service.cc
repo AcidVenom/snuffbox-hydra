@@ -152,14 +152,44 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool AssetService::Reload(
+      compilers::AssetTypes type,
+      const foundation::String& path)
+    {
+      if (IsLoaded(type, path) == true)
+      {
+        return Load(type, path);
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetService::Unload(
+      compilers::AssetTypes type,
+      const foundation::String& path)
+    {
+      IAsset* ptr = Get(type, path);
+
+      if (ptr == nullptr || ptr->is_loaded() == false)
+      {
+        return;
+      }
+
+      ptr->Unload();
+    }
+
+    //--------------------------------------------------------------------------
     bool AssetService::LoadAll(compilers::AssetTypes type)
     {
       AssetMap::iterator it = registered_.begin();
 
       bool success = true;
+      foundation::SharedPtr<IAsset> a;
+
       while (it != registered_.end())
       {
-        foundation::SharedPtr<IAsset>& a = it->second;
+        a = it->second;
         if (a->type() == type)
         {
           if (
@@ -174,6 +204,25 @@ namespace snuffbox
       }
 
       return success;
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetService::UnloadAll(compilers::AssetTypes type)
+    {
+      AssetMap::iterator it = registered_.begin();
+      foundation::SharedPtr<IAsset> a;
+
+      while (it != registered_.end())
+      {
+        a = it->second;
+
+        if (a->type() == type && a->is_loaded() == true)
+        {
+          a->Unload();
+        }
+
+        ++it;
+      }
     }
 
     //--------------------------------------------------------------------------
