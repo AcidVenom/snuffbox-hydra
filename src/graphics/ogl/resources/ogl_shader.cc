@@ -55,6 +55,7 @@ namespace snuffbox
 
       if (OGLUtils::CheckError() == false)
       {
+        error_ = "SPIRV unsupported in OpenGL versions lower than 4.6";
         Release();
         return false;
       }

@@ -48,9 +48,19 @@ namespace snuffbox
         GLVersion.major,
         GLVersion.minor);
 
+      if (GLVersion.major < 4 || GLVersion.minor < 6)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kFatal,
+          "OpenGL version 4.6 is required for SPIRV support");
+
+        return false;
+      }
+
       glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 
-      return true;
+      return OGLUtils::CheckError();
     }
 
     //--------------------------------------------------------------------------

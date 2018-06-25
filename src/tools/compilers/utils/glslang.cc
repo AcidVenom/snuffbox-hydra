@@ -122,7 +122,7 @@ namespace snuffbox
     const glslang::EShTargetClientVersion Glslang::kClientVersion_ =
       glslang::EShTargetClientVersion::EShTargetVulkan_1_0;
 
-    const int Glslang::kDesktopVersion_ = 110;
+    const int Glslang::kDesktopVersion_ = 460;
 
     const char* Glslang::kEntryPoint_ = "main";
 
