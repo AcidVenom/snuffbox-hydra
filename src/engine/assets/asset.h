@@ -68,7 +68,14 @@ namespace snuffbox
       /**
       * @return The type of this asset
       */
-      SCRIPT_FUNC() compilers::AssetTypes type() const;
+      compilers::AssetTypes type() const;
+
+      /**
+      * @see Asset::type
+      *
+      * @remarks The integer value for the type
+      */
+      SCRIPT_FUNC() int GetType() const;
 
       /**
       * @return The path to the file to load

@@ -96,6 +96,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    int IAsset::GetType() const
+    {
+      return static_cast<int>(type_);
+    }
+
+    //--------------------------------------------------------------------------
     const foundation::Path& IAsset::path() const
     {
       return path_;
