@@ -161,9 +161,12 @@ IF (NOT SNUFF_NSCRIPTING)
   SET(ScriptingBinds
     "auxiliary/debug.h"
     "services/input_service.h"
+    "services/asset_service.h"
     "definitions/keycodes.h"
     "definitions/components.h"
     "ecs/entity.h"
+    "assets/asset.h"
+    "../tools/compilers/definitions/asset_types.h"
     "components/transform_component.h"
     "components/script_component.h"
     "components/mesh_component.h"

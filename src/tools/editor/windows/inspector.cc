@@ -236,14 +236,25 @@ namespace snuffbox
 
       gui.StartLayout(GUI::LayoutStyle::kVertical);
 
-      gui.Label("Material");
+      gui.Label("Material(s)");
 
-      gui.TextField(
-        c->material_path().c_str(),
-        [=](QWidget*, const QString& value)
+      foundation::Vector<engine::SerializableAsset>& mats = c->materials();
+
+      engine::SerializableAsset* a = nullptr;
+      for (size_t i = 0; i < mats.size(); ++i)
       {
-        c->SetMaterial(value.toStdString().c_str());
-      });
+        gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+        gui.Label(std::string(std::to_string(i + 1) + ". ").c_str());
+
+        a = &mats.at(i);
+        gui.AssetField(a, [=](QWidget*, const QString& value)
+        {
+          c->SetMaterial(static_cast<int>(i), a->handle);
+        });
+
+        gui.EndLayout();
+      }
 
       return gui.EndAsWidget();
     }

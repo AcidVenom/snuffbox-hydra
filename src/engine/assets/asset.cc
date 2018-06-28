@@ -2,6 +2,10 @@
 
 #include <foundation/auxiliary/logger.h>
 
+#ifndef SNUFF_NSCRIPTING
+#include <sparsed/asset.gen.cc>
+#endif
+
 namespace snuffbox
 {
   namespace engine

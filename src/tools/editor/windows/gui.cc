@@ -1,6 +1,8 @@
 #include "tools/editor/windows/gui.h"
 #include "tools/editor/definitions/editor_colors.h"
 
+#include <engine/assets/asset.h>
+
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
 
@@ -170,13 +172,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void GUI::TextField(
+    QLineEdit* GUI::TextField(
       const char* value,
       ChangeCallback<const QString&> on_changed)
     {
       if (current_layout_ == nullptr)
       {
-        return;
+        return nullptr;
       }
 
       QLineEdit* edit = new QLineEdit();
@@ -191,6 +193,7 @@ namespace snuffbox
       });
 
       AddWidget(edit);
+      return edit;
     }
 
     //--------------------------------------------------------------------------
@@ -294,6 +297,50 @@ namespace snuffbox
       }
 
       AddWidget(button);
+    }
+
+    //--------------------------------------------------------------------------
+    void GUI::AssetField(
+      engine::SerializableAsset* asset,
+      ChangeCallback<const QString&> on_changed)
+    {
+      auto CheckExists = [=](QWidget* line)
+      {
+        engine::AssetService* as = 
+          engine::Application::Instance()->GetService<engine::AssetService>();
+
+        engine::IAsset* handle = nullptr;
+        if ((handle = as->Get(asset->type, asset->name)) == nullptr)
+        {
+          line->setStyleSheet("background: rgb(30, 0, 0);");
+          asset->handle = nullptr;
+          return false;
+        }
+
+        line->setStyleSheet("");
+        asset->handle = handle;
+        return true;
+      };
+
+      QLineEdit* edit = TextField(asset->name.c_str(),
+      [=](QWidget* widget, const QString& value)
+      {
+        std::string val = value.toStdString();
+        asset->name = val.c_str();
+
+        if (widget != nullptr)
+        {
+          if (CheckExists(widget) == true)
+          {
+            if (on_changed != nullptr)
+            {
+              on_changed(widget, value);
+            }
+          }
+        }
+      });
+
+      CheckExists(edit);
     }
 
     //--------------------------------------------------------------------------

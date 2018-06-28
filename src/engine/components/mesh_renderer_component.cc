@@ -19,19 +19,26 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
+    const int MeshRendererComponent::kMaxMaterials_ = 8;
+
+    //--------------------------------------------------------------------------
     MeshRendererComponent::MeshRendererComponent(Entity* entity) :
       ComponentBase<MeshRendererComponent, Components::kMeshRenderer>(entity),
-      material_path_(""),
-      material_(nullptr),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
-
+      materials_.resize(kMaxMaterials_);
+      
+      for (size_t i = 0; i < materials_.size(); ++i)
+      {
+        materials_.at(i).type = compilers::AssetTypes::kMaterial;
+        materials_.at(i).handle = nullptr;
+      }
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Update(float dt)
     {
-      if (material_ == nullptr)
+      if (materials_.size() == 0)
       {
         return;
       }
@@ -43,42 +50,51 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void MeshRendererComponent::SetMaterial(const foundation::String& path)
+    void MeshRendererComponent::SetMaterial(
+      int idx, 
+      IAsset* material)
     {
-      AssetService* as = Application::Instance()->GetService<AssetService>();
+      if (material->type() != compilers::AssetTypes::kMaterial)
+      {
+        return;
+      }
 
-      material_path_ = path;
+      if (idx >= kMaxMaterials_ || idx < 0)
+      {
+        return;
+      }
 
-      material_ = static_cast<MaterialAsset*>(as->Get(
-        compilers::AssetTypes::kMaterial, 
-        path));
+      materials_.at(idx).handle = material;
     }
 
     //--------------------------------------------------------------------------
-    const foundation::String& MeshRendererComponent::material_path() const
+    IAsset* MeshRendererComponent::GetMaterial(int idx)
     {
-      return material_path_;
+      if (idx >= kMaxMaterials_ || idx < 0)
+      {
+        return nullptr;
+      }
+
+      return materials_.at(idx).handle;
     }
 
     //--------------------------------------------------------------------------
-    MaterialAsset* MeshRendererComponent::material() const
+    foundation::Vector<SerializableAsset>& MeshRendererComponent::materials()
     {
-      return material_;
+      return materials_;
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Serialize(
       foundation::SaveArchive& archive) const
     {
-      archive(SET_ARCHIVE_PROP(material_path_));
+      archive(SET_ARCHIVE_PROP(materials_));
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Deserialize(foundation::LoadArchive& archive)
     {
-      archive(GET_ARCHIVE_PROP(material_path_));
-
-      SetMaterial(material_path_);
+      archive(GET_ARCHIVE_PROP(materials_));
     }
   }
 }

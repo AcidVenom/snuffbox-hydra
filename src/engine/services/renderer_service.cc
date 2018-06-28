@@ -104,7 +104,8 @@ namespace snuffbox
       data.world = transform->local_to_world();
       data.inv_world = transform->world_to_local();
 
-      MaterialAsset* mat = renderer->material();
+      MaterialAsset* mat = 
+        static_cast<MaterialAsset*>(renderer->GetMaterial(0));
 
       if (mat != nullptr && mat->is_loaded() == false)
       {

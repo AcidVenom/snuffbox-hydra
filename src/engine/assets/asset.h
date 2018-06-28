@@ -1,9 +1,17 @@
 #pragma once
 
+#include "engine/application/application.h"
+#include "engine/services/asset_service.h"
+
 #include <tools/compilers/definitions/asset_types.h>
+
+#include <scripting/script_class.h>
 
 #include <foundation/io/path.h>
 #include <foundation/containers/vector.h>
+
+#include <foundation/serialization/load_archive.h>
+#include <foundation/serialization/save_archive.h>
 
 #include <cinttypes>
 
@@ -17,10 +25,12 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
-    class IAsset
+    SCRIPT_CLASS() class IAsset : public scripting::ScriptClass
     {
 
     public:
+
+      SCRIPT_NAME(Asset);
 
       /**
       * @brief Construct through an asset type
@@ -129,5 +139,65 @@ namespace snuffbox
       */
       foundation::Vector<IAsset*> dependencies_;
     };
+
+    /**
+    * @brief A serializable asset handle
+    *
+    * @author Daniel Konings
+    */
+    struct SerializableAsset
+    {
+      compilers::AssetTypes type; //!< The type of the asset
+      foundation::String name; //!< The name of the asset
+      IAsset* handle; //!< The handle to the asset
+    };
+  }
+
+  namespace foundation
+  {
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::Serialize<engine::SerializableAsset>(
+      SaveArchive& archive, 
+      const engine::SerializableAsset& asset)
+    {
+      compilers::AssetTypes type = 
+        asset.handle == nullptr ? compilers::AssetTypes::kCount : asset.type;
+      
+      foundation::String name = 
+        asset.handle == nullptr ? "" : asset.name;
+
+      archive(
+        SET_ARCHIVE_PROP(type),
+        SET_ARCHIVE_PROP(name));
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void LoadArchive::Deserialize<engine::SerializableAsset>(
+      LoadArchive& archive, 
+      engine::SerializableAsset* out)
+    {
+      compilers::AssetTypes type;
+      foundation::String name;
+
+      archive(
+        GET_ARCHIVE_PROP(type),
+        GET_ARCHIVE_PROP(name));
+
+      out->type = type;
+      out->name = name;
+
+      if (out->type == compilers::AssetTypes::kCount)
+      {
+        out->handle = nullptr;
+        return;
+      }
+
+      engine::AssetService* as = 
+        engine::Application::Instance()->GetService<engine::AssetService>();
+
+      out->handle = as->Get(type, name);
+    }
   }
 }

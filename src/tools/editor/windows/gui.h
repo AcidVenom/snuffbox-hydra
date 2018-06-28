@@ -13,6 +13,11 @@ class QWidget;
 
 namespace snuffbox
 {
+  namespace engine
+  {
+    struct SerializableAsset;
+  }
+
   namespace editor
   {
     /**
@@ -159,8 +164,10 @@ namespace snuffbox
       *
       * @param[in] value The text value of the text field
       * @param[in] on_changed The function to call when the value changed
+      *
+      * @return The created field
       */
-      void TextField(
+      QLineEdit* TextField(
         const char* value, 
         ChangeCallback<const QString&> on_changed = nullptr);
 
@@ -190,6 +197,19 @@ namespace snuffbox
         const char* text, 
         const std::vector<QString>& options,
         ChangeCallback<int> on_click = nullptr);
+
+      /**
+      * @brief Creates a field to specify an asset from serialized asset data
+      *
+      * @param[in] asset The serializable asset
+      * @param[in] on_changed The callback for when the value has changed
+      *
+      * @remarks The field will get a red backdrop if the asset does not exist,
+      *          else it will have its regular color.
+      */
+      void AssetField(
+        engine::SerializableAsset* asset,
+        ChangeCallback<const QString&> on_changed = nullptr);
 
       /**
       * @brief Creates a vector field with x, y, z and w components up to

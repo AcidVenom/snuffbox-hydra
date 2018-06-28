@@ -8,6 +8,10 @@
 #include <foundation/io/directory_tree.h>
 #include <foundation/auxiliary/logger.h>
 
+#ifndef SNUFF_NSCRIPTING
+#include <sparsed/asset_service.gen.cc>
+#endif
+
 namespace snuffbox
 {
   namespace engine
@@ -66,7 +70,7 @@ namespace snuffbox
         if (include_directories == true && item.is_directory() == true)
         {
           af.relative_path = item_path.StripPath(root);
-          af.type = compilers::AssetTypes::kUnknown;
+          af.type = compilers::AssetTypes::kCount;
           af.is_directory = true;
 
           result.push_back(af);
@@ -236,7 +240,7 @@ namespace snuffbox
       foundation::String ext = path.extension();
 
       return compilers::AssetTypesFromBuildExtension(ext.c_str()) !=
-        compilers::AssetTypes::kUnknown;
+        compilers::AssetTypes::kCount;
     }
 
     //--------------------------------------------------------------------------
@@ -272,8 +276,7 @@ namespace snuffbox
       }
 
       if (
-        type == compilers::AssetTypes::kCount ||
-        type == compilers::AssetTypes::kUnknown)
+        type == compilers::AssetTypes::kCount)
       {
         return;
       }

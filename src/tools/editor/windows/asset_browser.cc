@@ -134,7 +134,7 @@ namespace snuffbox
     {
       if (e->button() == Qt::LeftButton)
       {
-        if (type_ != compilers::AssetTypes::kUnknown)
+        if (type_ != compilers::AssetTypes::kCount)
         {
           emit browser_->DoubleClickedAsset(
             relative_.ToString().c_str(), 

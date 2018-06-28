@@ -1,5 +1,6 @@
 #pragma once
 
+#include <scripting/script_class.h>
 #include <foundation/containers/string.h>
 
 namespace snuffbox
@@ -16,7 +17,7 @@ namespace snuffbox
     *
     * @see BuildScheduler
     */
-    enum class AssetTypes
+    SCRIPT_ENUM() enum class AssetTypes
     {
       kScript,
       kScene,
@@ -24,8 +25,7 @@ namespace snuffbox
       kPixelShader,
       kGeometryShader,
       kMaterial,
-      kCount,
-      kUnknown = kCount,
+      kCount
     };
 
     /**
@@ -86,3 +86,5 @@ namespace snuffbox
     const char* AssetTypesToString(AssetTypes type);
   }
 }
+
+SCRIPT_ENUM_DECL(snuffbox::compilers::AssetTypes);

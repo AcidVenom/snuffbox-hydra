@@ -72,6 +72,11 @@ namespace snuffbox
 
       for (size_t i = 0; i < num_commands_; ++i)
       {
+        if (commands_.at(i).material == nullptr)
+        {
+          return;
+        }
+
         //!< @todo Set render targets and such here
         Draw(commands_.at(i), camera);
       }

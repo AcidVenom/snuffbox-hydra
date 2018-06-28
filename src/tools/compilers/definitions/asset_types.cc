@@ -42,7 +42,7 @@ namespace snuffbox
         }
       }
 
-      return AssetTypes::kUnknown;
+      return AssetTypes::kCount;
     }
 
     //--------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace snuffbox
         }
       }
 
-      return AssetTypes::kUnknown;
+      return AssetTypes::kCount;
     }
 
     //--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ namespace snuffbox
     {
       AssetTypes a = AssetTypesFromBuildExtension(ext_a);
       
-      if (a == AssetTypes::kUnknown)
+      if (a == AssetTypes::kCount)
       {
         return false;
       }

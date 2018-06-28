@@ -4,7 +4,9 @@
 #include "engine/definitions/keycodes.h"
 #include "engine/definitions/components.h"
 #include "engine/services/input_service.h"
+#include "engine/services/asset_service.h"
 #include "engine/ecs/entity.h"
+#include "engine/assets/asset.h"
 #include "engine/components/transform_component.h"
 #include "engine/components/mesh_component.h"
 #include "engine/components/mesh_renderer_component.h"
@@ -137,7 +139,9 @@ namespace snuffbox
     {
       register_->RegisterClass<Debug>();
       register_->RegisterClass<InputService>();
+      register_->RegisterClass<AssetService>();
       register_->RegisterClass<Entity, true>();
+      register_->RegisterClass<IAsset>();
       register_->RegisterClass<TransformComponent>();
       register_->RegisterClass<ScriptComponent>();
       register_->RegisterClass<MeshComponent>();

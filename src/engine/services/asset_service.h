@@ -4,6 +4,8 @@
 
 #include <tools/compilers/definitions/asset_types.h>
 
+#include <scripting/script_class.h>
+
 #include <foundation/io/path.h>
 #include <foundation/containers/map.h>
 #include <foundation/memory/memory.h>
@@ -13,16 +15,21 @@ namespace snuffbox
   namespace engine
   {
     class IAsset;
+
     /**
     * @brief Used to manage loading and unloading of assets when required
     *        by the gameplay execution
     *
     * @author Daniel Konings
     */
-    class AssetService : public ServiceBase<AssetService>
+    SCRIPT_CLASS() class AssetService : 
+      public ServiceBase<AssetService>,
+      public scripting::ScriptClass
     {
 
     public:
+
+      SCRIPT_NAME(AssetService);
 
       /**
       * @brief Used to store asset information of an asset in the build
@@ -153,7 +160,7 @@ namespace snuffbox
       *
       * @return Does the asset exist?
       */
-      bool Exists(
+      SCRIPT_FUNC() bool Exists(
         compilers::AssetTypes type, 
         const foundation::String& path) const;
 
@@ -165,7 +172,7 @@ namespace snuffbox
       *
       * @return Were we able to load the asset?
       */
-      bool Load(
+      SCRIPT_FUNC() bool Load(
         compilers::AssetTypes type, 
         const foundation::String& path);
       
@@ -184,7 +191,7 @@ namespace snuffbox
       * @param[in] type The type of the registered asset to unload
       * @param[in] path The relative path to the asset
       */
-      void Unload(
+      SCRIPT_FUNC() void Unload(
         compilers::AssetTypes type,
         const foundation::String& path);
 
@@ -224,7 +231,8 @@ namespace snuffbox
       *
       * @return The found asset, or nullptr if it doesn't exist
       */
-      IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
+      SCRIPT_FUNC() 
+        IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
 
       /**
       * @brief Sets the build directory of the asset service, to append

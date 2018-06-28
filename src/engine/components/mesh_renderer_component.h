@@ -1,6 +1,7 @@
 #pragma once
 
 #include "engine/ecs/component.h"
+#include "engine/assets/asset.h"
 
 namespace snuffbox
 {
@@ -39,21 +40,26 @@ namespace snuffbox
       void Update(float dt) override;
 
       /**
-      * @brief Sets the material of this component
+      * @brief Sets a material of this component
       *
-      * @param[in] path The path to the material to set
+      * @param[in] idx The index of the material to set
+      * @param[in] material The material asset to set
       */
-      SCRIPT_FUNC() void SetMaterial(const foundation::String& path);
+      SCRIPT_FUNC() void SetMaterial(int idx, IAsset* material);
 
       /**
-      * @return The material path of this component
+      * @brief Retrieves a material of this component
+      *
+      * @param[in] idx The index of the material to retrieve
+      *
+      * @return The material, or nullptr if it does not exist
       */
-      SCRIPT_FUNC() const foundation::String& material_path() const;
+      SCRIPT_FUNC() IAsset* GetMaterial(int idx);
 
       /**
-      * @return The material to use for rendering
+      * @return The full list of serializable assets
       */
-      MaterialAsset* material() const;
+      foundation::Vector<SerializableAsset>& materials();
 
       /**
       * @see ISerializable::Serialize
@@ -67,9 +73,13 @@ namespace snuffbox
 
     private:
 
-      foundation::String material_path_; //!< The current material path
-      MaterialAsset* material_; //!< The material to use for rendering
+      /**
+      * @brief The materials per sub-mesh
+      */
+      foundation::Vector<SerializableAsset> materials_;
       RendererService* renderer_; //!< The renderer service
+
+      static const int kMaxMaterials_; //!< The maximum number of materials
     };
 
     //--------------------------------------------------------------------------

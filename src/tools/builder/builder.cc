@@ -404,7 +404,7 @@ namespace snuffbox
       item.in = path;
       item.relative = path.StripPath(source_directory_);
 
-      if (item.type == compilers::AssetTypes::kUnknown)
+      if (item.type == compilers::AssetTypes::kCount)
       {
         foundation::Logger::LogVerbosity<2>(
           foundation::LogChannel::kBuilder,
