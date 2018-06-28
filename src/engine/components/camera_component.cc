@@ -1,4 +1,8 @@
 #include "engine/components/camera_component.h"
+#include "engine/components/transform_component.h"
+
+#include "engine/ecs/entity.h"
+#include "engine/application/application.h"
 #include "engine/services/renderer_service.h"
 
 #include <foundation/serialization/save_archive.h>

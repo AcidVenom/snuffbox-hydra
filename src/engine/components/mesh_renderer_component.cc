@@ -1,5 +1,8 @@
 #include "engine/components/mesh_renderer_component.h"
 #include "engine/components/mesh_component.h"
+#include "engine/components/transform_component.h"
+
+#include "engine/ecs/entity.h"
 
 #include "engine/assets/material_asset.h"
 #include "engine/services/renderer_service.h"

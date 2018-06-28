@@ -3,6 +3,8 @@
 #include "engine/ecs/component.h"
 #include "engine/definitions/camera.h"
 
+#include <glm/glm.hpp>
+
 #ifdef near
 #undef near
 #endif
