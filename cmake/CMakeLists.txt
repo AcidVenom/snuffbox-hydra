@@ -15,7 +15,7 @@ FUNCTION (CREATE_SCRIPT_BINDS arg1 arg2)
 
       SET(InputFile "${CMAKE_CURRENT_SOURCE_DIR}/${Relative}")
       
-      MESSAGE(STATUS "Adding 'sparse' step for ${InputFile}")
+      MESSAGE(STATUS "Adding 'sparse' step for ${Relative}")
       
       STRING(REGEX REPLACE ".*\\/" "" RelativePath ${InputFile})
       STRING(REGEX REPLACE "\\.h" "" NoExtension ${RelativePath})
