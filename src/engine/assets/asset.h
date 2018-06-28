@@ -55,7 +55,7 @@ namespace snuffbox
       *
       * @return Was the load a success?
       */
-      bool Load();
+      SCRIPT_FUNC() bool Load();
 
       /**
       * @brief Unloads the asset if it has been loaded
@@ -63,12 +63,12 @@ namespace snuffbox
       * This function calls IAsset::UnloadImpl, which the derived asset 
       * implements
       */
-      void Unload();
+      SCRIPT_FUNC() void Unload();
 
       /**
       * @return The type of this asset
       */
-      compilers::AssetTypes type() const;
+      SCRIPT_FUNC() compilers::AssetTypes type() const;
 
       /**
       * @return The path to the file to load
@@ -78,7 +78,7 @@ namespace snuffbox
       /**
       * @return Has this asset been loaded?
       */
-      bool is_loaded() const;
+      SCRIPT_FUNC() bool is_loaded() const;
 
     protected:
 

@@ -160,7 +160,7 @@ namespace snuffbox
       *
       * @return Does the asset exist?
       */
-      SCRIPT_FUNC() bool Exists(
+      bool Exists(
         compilers::AssetTypes type, 
         const foundation::String& path) const;
 
@@ -172,7 +172,7 @@ namespace snuffbox
       *
       * @return Were we able to load the asset?
       */
-      SCRIPT_FUNC() bool Load(
+      bool Load(
         compilers::AssetTypes type, 
         const foundation::String& path);
       
@@ -191,7 +191,7 @@ namespace snuffbox
       * @param[in] type The type of the registered asset to unload
       * @param[in] path The relative path to the asset
       */
-      SCRIPT_FUNC() void Unload(
+      void Unload(
         compilers::AssetTypes type,
         const foundation::String& path);
 
@@ -231,8 +231,35 @@ namespace snuffbox
       *
       * @return The found asset, or nullptr if it doesn't exist
       */
-      SCRIPT_FUNC() 
-        IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
+      IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
+
+      /**
+      * @see AssetService::Get
+      *
+      * @remarks Integer overload for script function generation
+      */
+      SCRIPT_FUNC() IAsset* Get(int type, const foundation::String& path);
+
+      /**
+      * @see AssetService::Exists
+      *
+      * @remarks Integer overload for script function generation
+      */
+      SCRIPT_FUNC() bool Exists(int type, const foundation::String& path);
+
+      /**
+      * @see AssetService::Load
+      *
+      * @remarks Integer overload for script function generation
+      */
+      SCRIPT_FUNC() bool Load(int type, const foundation::String& path);
+
+      /**
+      * @see AssetService::Unload
+      *
+      * @remarks Integer overload for script function generation
+      */
+      SCRIPT_FUNC() void Unload(int type, const foundation::String& path);
 
       /**
       * @brief Sets the build directory of the asset service, to append

@@ -166,7 +166,6 @@ IF (NOT SNUFF_NSCRIPTING)
     "definitions/components.h"
     "ecs/entity.h"
     "assets/asset.h"
-    "../tools/compilers/definitions/asset_types.h"
     "components/transform_component.h"
     "components/script_component.h"
     "components/mesh_component.h"

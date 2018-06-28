@@ -16,6 +16,7 @@
 #include "engine/components/script_component.h"
 #include <sparsed/keycodes.gen.cc>
 #include <sparsed/components.gen.cc>
+#include <sparsed/asset_types.gen.cc>
 #endif
 
 namespace snuffbox
@@ -153,6 +154,7 @@ namespace snuffbox
       register_->RegisterEnum<JoystickButtons>();
       register_->RegisterEnum<JoystickAxes>();
       register_->RegisterEnum<Components>();
+      register_->RegisterEnum<compilers::AssetTypes>();
     }
 
     //--------------------------------------------------------------------------

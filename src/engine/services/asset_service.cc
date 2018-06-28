@@ -381,5 +381,61 @@ namespace snuffbox
     {
       build_directory_ = path;
     }
+
+    //--------------------------------------------------------------------------
+    IAsset* AssetService::Get(int type, const foundation::String& path)
+    {
+      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
+      if (
+        t < compilers::AssetTypes::kScript || 
+        t >= compilers::AssetTypes::kCount)
+      {
+        return nullptr;
+      }
+
+      return Get(t, path);
+    }
+
+    //--------------------------------------------------------------------------
+    bool AssetService::Exists(int type, const foundation::String& path)
+    {
+      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
+      if (
+        t < compilers::AssetTypes::kScript || 
+        t >= compilers::AssetTypes::kCount)
+      {
+        return false;
+      }
+
+      return Exists(t, path);
+    }
+
+    //--------------------------------------------------------------------------
+    bool AssetService::Load(int type, const foundation::String& path)
+    {
+      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
+      if (
+        t < compilers::AssetTypes::kScript || 
+        t >= compilers::AssetTypes::kCount)
+      {
+        return false;
+      }
+
+      return Load(t, path);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetService::Unload(int type, const foundation::String& path)
+    {
+      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
+      if (
+        t < compilers::AssetTypes::kScript || 
+        t >= compilers::AssetTypes::kCount)
+      {
+        return;
+      }
+
+      return Unload(t, path);
+    }
   }
 }

@@ -46,3 +46,20 @@ TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang-lib spirv-c
 IF (SNUFF_WIN32)
   TARGET_LINK_LIBRARIES(snuffbox-compilers d3dcompiler)
 ENDIF (SNUFF_WIN32)
+
+IF (NOT SNUFF_NSCRIPTING)
+
+  SET(WorkingDir ${PROJECT_BINARY_DIR}/generated)
+  FILE(MAKE_DIRECTORY ${WorkingDir})
+  TARGET_INCLUDE_DIRECTORIES(snuffbox-compilers PRIVATE ${WorkingDir})
+
+  ADD_DEPENDENCIES(snuffbox-compilers snuffbox-sparse)
+  
+  SET(ScriptingBinds
+    "definitions/asset_types.h"
+  )
+  
+  FILE(MAKE_DIRECTORY ${WorkingDir}/sparsed)
+  
+  CREATE_SCRIPT_BINDS("${ScriptingBinds}" ${WorkingDir}/sparsed)
+ENDIF (NOT SNUFF_NSCRIPTING)
