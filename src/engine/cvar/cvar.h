@@ -122,6 +122,11 @@ namespace snuffbox
       */
       const foundation::String& description() const;
 
+      /**
+      * @brief Virtual destructor
+      */
+      virtual ~CVarValue();
+
     private:
 
       foundation::String name_; //!< The name of this CVar value
