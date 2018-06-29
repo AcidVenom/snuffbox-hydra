@@ -1,6 +1,8 @@
 #include "graphics/ogl/resources/ogl_uniform_buffer.h"
 #include "graphics/ogl/ogl_utils.h"
 
+#include <cstring>
+
 namespace snuffbox
 {
   namespace graphics

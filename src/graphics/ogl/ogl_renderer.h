@@ -83,7 +83,7 @@ namespace snuffbox
       */
       void DrawMesh(
         IRendererLoader::GPUHandle mesh, 
-        IRendererLoader::GPUHandle material);
+        IRendererLoader::GPUHandle material) override;
 
       /**
       * @see IRenderer::OnResizeImpl

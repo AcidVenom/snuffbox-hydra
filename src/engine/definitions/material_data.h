@@ -38,10 +38,9 @@ namespace snuffbox
       archive(
         SET_ARCHIVE_PROP(vs_path),
         SET_ARCHIVE_PROP(ps_path),
-        SET_ARCHIVE_PROP(has_gs)
-      );
+        SET_ARCHIVE_PROP(has_gs));
 
-      if (has_gs = true)
+      if (has_gs == true)
       {
         archive(SET_ARCHIVE_PROP(gs_path));
       }
@@ -61,8 +60,7 @@ namespace snuffbox
       archive(
         GET_ARCHIVE_PROP(vs_path),
         GET_ARCHIVE_PROP(ps_path),
-        GET_ARCHIVE_PROP(has_gs)
-      );
+        GET_ARCHIVE_PROP(has_gs));
 
       if (has_gs == true)
       {

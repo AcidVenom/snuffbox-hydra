@@ -12,6 +12,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#ifdef SNUFF_LINUX
+#ifdef Bool
+#undef Bool
+#endif
+#endif
+
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>

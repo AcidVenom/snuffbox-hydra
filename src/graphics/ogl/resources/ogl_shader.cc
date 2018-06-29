@@ -36,6 +36,9 @@ namespace snuffbox
       case ShaderTypes::kGeometry:
         type = GL_GEOMETRY_SHADER;
         break;
+
+      default:
+        break;
       }
 
       if (type == 0)
