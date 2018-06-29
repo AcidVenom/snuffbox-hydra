@@ -40,6 +40,14 @@ in the preprocessor, compiling away all scripting definitions. CMake will make s
 related source files in the engine (apart from *src/scripting/script_class.h*). It is advised to do a full rebuild
 when switching the scripting environment.
 
+# Cross-platform status
+
+Currently only OpenGL is implemented, OpenGL version **4.6** is required for SPIR-V support. The DirectX 11 implementation will soon follow. Please note that Intel's current integrated graphics drivers only support OpenGL **4.5** on Windows-based systems.
+
+# Linux/Ubuntu
+
+Snuffbox has been tested on both **Ubuntu 16.04 LTS** and **Ubuntu 18.04 LTS**, which both seem to be functioning correctly.
+
 # CVars
 
 The current available CVars are the following:
@@ -49,3 +57,35 @@ The current available CVars are the following:
 |r_vsync  |Should VSync be enabled?              |true       |
 |r_width  |The width of the renderer in pixels   |1280       |
 |r_height |The height of the renderer in pixels  |720        |
+
+# Shader constants
+
+The current shader implementation uses the following buffers (which will later be put into a *defines* shader)
+
+**Available constant buffers**
+
+|Constant buffer index |Description    |
+|----------------------|---------------|
+|b0                    |Per-frame data |
+|b1                    |Per-object data|
+
+**Constant buffer data**
+
+*b0*
+
+|Binding location     |Type     |Description                            |
+|---------------------|---------|---------------------------------------|
+|0                    |float4x4 |The projection matrix of the camera    |
+|1                    |float4x4 |The view matrix of the camera          |
+|2                    |float4x4 |The inverse of the projection * view   |
+|3                    |float3   |The eye position of the camera         |
+|4                    |float    |The current application time in seconds|
+
+*b1*
+
+|Binding location     |Type     |Description                            |
+|---------------------|---------|---------------------------------------|
+|0                    |float4x4 |The local-to-world matrix              |
+|1                    |float4x4 |The projection * view * world matrix   |
+|2                    |float4x4 |The world-to-local matrix              |
+
