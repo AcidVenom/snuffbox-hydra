@@ -238,7 +238,8 @@ namespace snuffbox
 
       gui.Label("Material(s)");
 
-      foundation::Vector<engine::SerializableAsset>& mats = c->materials();
+      foundation::Vector<engine::SerializableAsset>& mats = 
+        c->shared_materials();
 
       engine::SerializableAsset* a = nullptr;
       for (size_t i = 0; i < mats.size(); ++i)
@@ -250,7 +251,7 @@ namespace snuffbox
         a = &mats.at(i);
         gui.AssetField(a, [=](QWidget*, const QString& value)
         {
-          c->SetMaterial(static_cast<int>(i), a->handle);
+          c->SetMaterial(static_cast<int>(i), &engine::Material(a->handle));
         });
 
         gui.EndLayout();

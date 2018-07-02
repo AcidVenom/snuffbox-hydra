@@ -19,3 +19,6 @@
 [submodule "deps/spirv-cross"]
 	path = deps/spirv-cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "deps/tinygltf"]
+	path = deps/tinygltf
+	url = https://github.com/syoyo/tinygltf

@@ -29,19 +29,23 @@ namespace snuffbox
       ComponentBase<MeshRendererComponent, Components::kMeshRenderer>(entity),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
-      materials_.resize(kMaxMaterials_);
+      shared_materials_.resize(kMaxMaterials_);
       
-      for (size_t i = 0; i < materials_.size(); ++i)
+      for (size_t i = 0; i < shared_materials_.size(); ++i)
       {
-        materials_.at(i).type = compilers::AssetTypes::kMaterial;
-        materials_.at(i).handle = nullptr;
+        SerializableAsset& shared = shared_materials_.at(i);
+
+        shared.type = compilers::AssetTypes::kMaterial;
+        shared.handle = nullptr;
       }
+
+      materials_.resize(shared_materials_.size());
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Update(float dt)
     {
-      if (materials_.size() == 0)
+      if (shared_materials_.size() == 0)
       {
         return;
       }
@@ -55,9 +59,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MeshRendererComponent::SetMaterial(
       int idx, 
-      IAsset* material)
+      Material* material)
     {
-      if (material->type() != compilers::AssetTypes::kMaterial)
+      if (material == nullptr || material->asset() == nullptr)
       {
         return;
       }
@@ -67,37 +71,49 @@ namespace snuffbox
         return;
       }
 
-      materials_.at(idx).handle = material;
+      shared_materials_.at(idx).handle = material->asset();
+      materials_.at(idx) = *material;
     }
 
     //--------------------------------------------------------------------------
-    IAsset* MeshRendererComponent::GetMaterial(int idx)
+    Material* MeshRendererComponent::GetMaterial(int idx)
     {
       if (idx >= kMaxMaterials_ || idx < 0)
       {
         return nullptr;
       }
 
-      return materials_.at(idx).handle;
+      return &materials_.at(idx);
     }
 
     //--------------------------------------------------------------------------
-    foundation::Vector<SerializableAsset>& MeshRendererComponent::materials()
+    foundation::Vector<SerializableAsset>& 
+      MeshRendererComponent::shared_materials()
     {
-      return materials_;
+      return shared_materials_;
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Serialize(
       foundation::SaveArchive& archive) const
     {
-      archive(SET_ARCHIVE_PROP(materials_));
+      archive(SET_ARCHIVE_PROP(shared_materials_));
     }
 
     //--------------------------------------------------------------------------
     void MeshRendererComponent::Deserialize(foundation::LoadArchive& archive)
     {
-      archive(GET_ARCHIVE_PROP(materials_));
+      archive(GET_ARCHIVE_PROP(shared_materials_));
+
+      for (size_t i = 0; i < shared_materials_.size(); ++i)
+      {
+        SerializableAsset& a = shared_materials_.at(i);
+
+        if (a.handle != nullptr)
+        {
+          materials_.at(i) = Material(a.handle);
+        }
+      }
     }
   }
 }

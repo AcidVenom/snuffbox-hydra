@@ -14,6 +14,8 @@ namespace snuffbox
 {
   namespace graphics
   {
+    class OGLMesh;
+
     /**
     * @brief Used to create vertex buffers in OpenGL 
     *
@@ -21,6 +23,8 @@ namespace snuffbox
     */
     class OGLVertexBuffer
     {
+
+      friend OGLMesh;
 
     public:
 

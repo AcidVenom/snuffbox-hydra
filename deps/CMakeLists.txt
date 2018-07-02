@@ -83,6 +83,9 @@ TARGET_LINK_LIBRARIES(spirv-cross-lib INTERFACE
   spirv-cross-glsl
 )
 
+ADD_LIBRARY(tinygltf INTERFACE)
+TARGET_INCLUDE_DIRECTORIES(tinygltf INTERFACE "tinygltf")
+
 SET_SOLUTION_FOLDER(
   "deps/eastl"
   EABase_ide

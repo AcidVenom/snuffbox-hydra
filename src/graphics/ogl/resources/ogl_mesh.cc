@@ -29,6 +29,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void OGLMesh::Release()
+    {
+      vertex_buffer_.Release();
+      index_buffer_.Release();
+    }
+
+    //--------------------------------------------------------------------------
     size_t OGLMesh::NumIndices() const
     {
       if (IsValid() == false)
@@ -37,6 +44,12 @@ namespace snuffbox
       }
 
       return index_buffer_.size();
+    }
+
+    //--------------------------------------------------------------------------
+    OGLMesh::~OGLMesh()
+    {
+      Release();
     }
   }
 }

@@ -13,11 +13,15 @@ namespace snuffbox
 {
   namespace graphics
   {
+    class OGLMesh;
+
     /**
     * @brief Used to create index buffers in OpenGL, from a list of indices
     */
     class OGLIndexBuffer
     {
+
+      friend OGLMesh;
 
     public:
 

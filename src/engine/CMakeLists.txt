@@ -85,6 +85,13 @@ SET(ComponentsSources
   "components/camera_component.cc"
 )
 
+SET(GraphicsSources
+  "graphics/material.h"
+  "graphics/material.cc"
+  "graphics/mesh.h"
+  "graphics/mesh.cc"
+)
+
 SET(AssetsSources
   "assets/asset.h"
   "assets/asset.cc"
@@ -114,6 +121,7 @@ SET(Resources
   "rsc/icons/pixel_shader_icon.png"
   "rsc/icons/geometry_shader_icon.png"
   "rsc/icons/material_icon.png"
+  "rsc/icons/model_icon.png"
 )
 
 SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
@@ -124,6 +132,7 @@ SOURCE_GROUP("cvar"         FILES ${CVarSources})
 SOURCE_GROUP("input"        FILES ${InputSources})
 SOURCE_GROUP("ecs"          FILES ${ECSSources})
 SOURCE_GROUP("components"   FILES ${ComponentsSources})
+SOURCE_GROUP("graphics"     FILES ${GraphicsSources})
 SOURCE_GROUP("assets"       FILES ${AssetsSources})
 SOURCE_GROUP("rsc"          FILES ${Resources})
 
@@ -136,6 +145,7 @@ SET(EngineSources
   ${InputSources}
   ${ECSSources}
   ${ComponentsSources}
+  ${GraphicsSources}
   ${AssetsSources}
   ${Resources}
 )
@@ -165,6 +175,8 @@ IF (NOT SNUFF_NSCRIPTING)
     "definitions/keycodes.h"
     "definitions/components.h"
     "ecs/entity.h"
+    "graphics/material.h"
+    "graphics/mesh.h"
     "assets/asset.h"
     "components/transform_component.h"
     "components/script_component.h"

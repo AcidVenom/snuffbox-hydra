@@ -25,6 +25,7 @@ namespace snuffbox
       kPixelShader,
       kGeometryShader,
       kMaterial,
+      kModel,
       kCount
     };
 

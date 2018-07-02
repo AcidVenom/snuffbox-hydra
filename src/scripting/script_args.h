@@ -171,6 +171,15 @@ namespace snuffbox
       T* GetSelf() const;
 
       /**
+      * @brief Retrieves the pointer to the argument at an index
+      *
+      * @param[in] idx The argument index to retrieve the value from
+      *
+      * @return The value at the given index, or nullptr if it doesn't exist
+      */
+      ScriptValue* GetArgument(uint8_t idx) const;
+
+      /**
       * @return The callee that called this function from scripting
       *
       * @remarks This callee will be nullptr if the function call was non-static
@@ -185,6 +194,29 @@ namespace snuffbox
       */
       ScriptValue* return_value() const;
 
+      /**
+      * @brief Retrieves a glm vector value from a script handle
+      *
+      * @tparam T The vector type to convert to
+      *
+      * @param[in] value The script value
+      * @param[in] def The default value if conversion failed
+      *
+      * @return The converted vector value
+      */
+      template <typename T>
+      T GetVectorValue(ScriptValue* value, T def) const;
+
+      /**
+      * @brief Retrieves a glm vector value from an argument index
+      *
+      * @tparam T The vector type to convert to
+      *
+      * @see ScriptArgs::GetVectorValue
+      */
+      template <typename T>
+      T GetVectorValue(uint8_t idx, T def) const;
+
     protected:
 
       /**
@@ -195,15 +227,6 @@ namespace snuffbox
       * @return Is the index within the valid argument range?
       */
       bool HasArgument(uint8_t idx) const;
-
-      /**
-      * @brief Retrieves the pointer to the argument at an index
-      *
-      * @param[in] idx THe argument index to retrieve the value from
-      *
-      * @return The value at the given index, or nullptr if it doesn't exist
-      */
-      ScriptValue* GetArgument(uint8_t idx) const;
 
       /**
       * @brief Checks an argument and logs an error if the expected argument
@@ -236,19 +259,6 @@ namespace snuffbox
       */
       template <typename T, typename Y, ScriptValueTypes U>
       T GetImpl(uint8_t idx, T def) const;
-
-      /**
-      * @brief Retrieves a glm vector value from a script handle
-      *
-      * @tparam T The vector type to convert to
-      *
-      * @param[in] idx The argument index to retrieve the value from
-      * @param[in] def The default value if conversion failed
-      *
-      * @return The converted vector value
-      */
-      template <typename T>
-      T GetVectorValue(uint8_t idx, T def) const;
 
     private:
 
@@ -400,16 +410,14 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline T ScriptArgs::GetVectorValue(uint8_t idx, T def) const
+    inline T ScriptArgs::GetVectorValue(ScriptValue* value, T def) const
     {
-      ScriptHandle handle = arguments_.at(idx);
-
-      if (handle->type() != ScriptValueTypes::kObject)
+      if (value->type() != ScriptValueTypes::kObject)
       {
         return def;
       }
 
-      ScriptObject* obj = static_cast<ScriptObject*>(handle.get());
+      ScriptObject* obj = static_cast<ScriptObject*>(value);
 
       static const char* keys[] =
       {
@@ -446,6 +454,14 @@ namespace snuffbox
       }
 
       return ret;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline T ScriptArgs::GetVectorValue(uint8_t idx, T def) const
+    {
+      ScriptHandle handle = arguments_.at(idx);
+      return GetVectorValue(handle.get(), def);
     }
   }
 }

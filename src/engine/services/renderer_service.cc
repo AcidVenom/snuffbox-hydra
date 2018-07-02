@@ -104,15 +104,18 @@ namespace snuffbox
       data.world = transform->local_to_world();
       data.inv_world = transform->world_to_local();
 
-      MaterialAsset* mat = 
-        static_cast<MaterialAsset*>(renderer->GetMaterial(0));
+      Material* mat = renderer->GetMaterial(0);
+      MaterialAsset* mat_asset = nullptr;
 
-      if (mat != nullptr && mat->is_loaded() == false)
+      if (mat != nullptr && (mat_asset = mat->asset()) != nullptr)
       {
-        mat->Load();
+        if (mat_asset->is_loaded() == false)
+        {
+          mat_asset->Load();
+        }
       }
 
-      cmd.material = mat == nullptr ? nullptr : mat->gpu_handle();
+      cmd.material = mat_asset == nullptr ? nullptr : mat_asset->gpu_handle();
       cmd.mesh = nullptr;
 
       renderer_->Queue(cmd);

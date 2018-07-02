@@ -331,7 +331,7 @@ namespace snuffbox
       {
         duk_enum(
           context_, 
-          -1, 
+          stack_idx, 
           DUK_ENUM_ARRAY_INDICES_ONLY | DUK_ENUM_SORT_ARRAY_INDICES);
       };
       
@@ -391,6 +391,7 @@ namespace snuffbox
         return foundation::Memory::MakeShared<ScriptObject>(obj);
       }
 
+      duk_pop(context_);
       duk_enum(context_, stack_idx, 0);
 
       const char* key;

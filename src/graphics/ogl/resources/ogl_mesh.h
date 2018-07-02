@@ -49,9 +49,19 @@ namespace snuffbox
       void Set();
 
       /**
+      * @brief Releases a created vertex and index buffer
+      */
+      void Release();
+
+      /**
       * @return The number of indices in this mesh
       */
       size_t NumIndices() const;
+
+      /**
+      * @see OGLMesh::Release
+      */
+      ~OGLMesh();
 
     private:
 

@@ -140,6 +140,17 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    ScriptValue* ScriptArgs::GetArgument(uint8_t idx) const
+    {
+      if (HasArgument(idx) == false)
+      {
+        return nullptr;
+      }
+
+      return arguments_.at(idx).get();
+    }
+
+    //--------------------------------------------------------------------------
     void* ScriptArgs::callee() const
     {
       return callee_;
@@ -160,17 +171,6 @@ namespace snuffbox
     bool ScriptArgs::HasArgument(uint8_t idx) const
     {
       return idx < static_cast<uint8_t>(arguments_.size());
-    }
-
-    //--------------------------------------------------------------------------
-    ScriptValue* ScriptArgs::GetArgument(uint8_t idx) const
-    {
-      if (HasArgument(idx) == false)
-      {
-        return nullptr;
-      }
-
-      return arguments_.at(idx).get();
     }
 
     //--------------------------------------------------------------------------

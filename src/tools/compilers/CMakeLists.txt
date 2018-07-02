@@ -41,7 +41,7 @@ SET(ProjectSources
 )
 
 ADD_LIBRARY(snuffbox-compilers ${ProjectSources})
-TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang-lib spirv-cross-lib)
+TARGET_LINK_LIBRARIES(snuffbox-compilers snuffbox-foundation glslang-lib spirv-cross-lib tinygltf)
 
 IF (SNUFF_WIN32)
   TARGET_LINK_LIBRARIES(snuffbox-compilers d3dcompiler)

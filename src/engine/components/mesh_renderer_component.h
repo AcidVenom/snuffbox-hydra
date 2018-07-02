@@ -3,6 +3,8 @@
 #include "engine/ecs/component.h"
 #include "engine/assets/asset.h"
 
+#include "engine/graphics/material.h"
+
 namespace snuffbox
 {
   namespace engine
@@ -43,9 +45,9 @@ namespace snuffbox
       * @brief Sets a material of this component
       *
       * @param[in] idx The index of the material to set
-      * @param[in] material The material asset to set
+      * @param[in] material The material to set
       */
-      SCRIPT_FUNC() void SetMaterial(int idx, IAsset* material);
+      SCRIPT_FUNC() void SetMaterial(int idx, Material* material);
 
       /**
       * @brief Retrieves a material of this component
@@ -54,12 +56,12 @@ namespace snuffbox
       *
       * @return The material, or nullptr if it does not exist
       */
-      SCRIPT_FUNC() IAsset* GetMaterial(int idx);
+      SCRIPT_FUNC() Material* GetMaterial(int idx);
 
       /**
       * @return The full list of serializable assets
       */
-      foundation::Vector<SerializableAsset>& materials();
+      foundation::Vector<SerializableAsset>& shared_materials();
 
       /**
       * @see ISerializable::Serialize
@@ -74,9 +76,15 @@ namespace snuffbox
     private:
 
       /**
-      * @brief The materials per sub-mesh
+      * @brief The shared material assets per sub-mesh
       */
-      foundation::Vector<SerializableAsset> materials_;
+      foundation::Vector<SerializableAsset> shared_materials_;
+
+      /**
+      * @brief The actual material instances
+      */
+      foundation::Vector<Material> materials_;
+
       RendererService* renderer_; //!< The renderer service
 
       static const int kMaxMaterials_; //!< The maximum number of materials

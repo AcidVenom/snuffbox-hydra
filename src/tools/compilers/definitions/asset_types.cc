@@ -23,7 +23,8 @@ namespace snuffbox
         return "gsb";
       case AssetTypes::kMaterial:
         return "mat";
-
+      case AssetTypes::kModel:
+        return "model";
       default:
         break;
       }
@@ -65,7 +66,8 @@ namespace snuffbox
         return "gs";
       case AssetTypes::kMaterial:
         return "mat";
-
+      case AssetTypes::kModel:
+        return "gltf";
       default:
         break;
       }
@@ -121,7 +123,8 @@ namespace snuffbox
         return "Geometry Shader";
       case AssetTypes::kMaterial:
         return "Material";
-
+      case AssetTypes::kModel:
+        return "Model";
       default:
         break;
       }

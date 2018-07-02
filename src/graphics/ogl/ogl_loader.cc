@@ -2,6 +2,7 @@
 
 #include "graphics/ogl/resources/ogl_shader.h"
 #include "graphics/ogl/resources/ogl_material.h"
+#include "graphics/ogl/resources/ogl_mesh.h"
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/memory/memory.h>
@@ -90,6 +91,46 @@ namespace snuffbox
     void OGLLoader::ReleaseMaterial(IRendererLoader::GPUHandle handle)
     {
       foundation::Memory::Destruct(reinterpret_cast<OGLMaterial*>(handle));
+    }
+
+    //--------------------------------------------------------------------------
+    IRendererLoader::GPUHandle OGLLoader::CreateMesh()
+    {
+      return foundation::Memory::Construct<OGLMesh>(
+        &foundation::Memory::default_allocator());
+    }
+
+    //--------------------------------------------------------------------------
+    bool OGLLoader::LoadMesh(
+      IRendererLoader::GPUHandle handle,
+      const foundation::Vector<Vertex2D>& verts,
+      const foundation::Vector<Index>& indices)
+    {
+      OGLMesh* mesh = reinterpret_cast<OGLMesh*>(handle);
+      return mesh->Create(verts, indices);
+    }
+
+    //--------------------------------------------------------------------------
+    bool OGLLoader::LoadMesh(
+      IRendererLoader::GPUHandle handle,
+      const foundation::Vector<Vertex3D>& verts,
+      const foundation::Vector<Index>& indices)
+    {
+      OGLMesh* mesh = reinterpret_cast<OGLMesh*>(handle);
+      return mesh->Create(verts, indices);
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLLoader::UnloadMesh(IRendererLoader::GPUHandle handle)
+    {
+      OGLMesh* mesh = reinterpret_cast<OGLMesh*>(handle);
+      mesh->Release();
+    }
+
+    //--------------------------------------------------------------------------
+    void OGLLoader::ReleaseMesh(IRendererLoader::GPUHandle handle)
+    {
+      foundation::Memory::Destruct(reinterpret_cast<OGLMesh*>(handle));
     }
   }
 }

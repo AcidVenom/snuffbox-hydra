@@ -21,6 +21,7 @@
 #include <resources/pixel_shader_icon.h>
 #include <resources/geometry_shader_icon.h>
 #include <resources/material_icon.h>
+#include <resources/model_icon.h>
 
 namespace snuffbox
 {
@@ -308,6 +309,7 @@ namespace snuffbox
       SNUFF_MAKE_RESOURCE(pixel_shader_icon);
       SNUFF_MAKE_RESOURCE(geometry_shader_icon);
       SNUFF_MAKE_RESOURCE(material_icon);
+      SNUFF_MAKE_RESOURCE(model_icon);
 
       CreateIcons();
     }
@@ -323,6 +325,7 @@ namespace snuffbox
         "snuff:/rsc/icons/pixel_shader_icon.png",
         "snuff:/rsc/icons/geometry_shader_icon.png",
         "snuff:/rsc/icons/material_icon.png",
+        "snuff:/rsc/icons/model_icon.png",
         "snuff:/rsc/icons/directory_icon.png"
       };
 

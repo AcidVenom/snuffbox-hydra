@@ -168,8 +168,7 @@ namespace snuffbox
       SaveArchive& archive, 
       const engine::SerializableAsset& asset)
     {
-      compilers::AssetTypes type = 
-        asset.handle == nullptr ? compilers::AssetTypes::kCount : asset.type;
+      compilers::AssetTypes type = asset.type;
       
       foundation::String name = 
         asset.handle == nullptr ? "" : asset.name;
@@ -194,12 +193,6 @@ namespace snuffbox
 
       out->type = type;
       out->name = name;
-
-      if (out->type == compilers::AssetTypes::kCount)
-      {
-        out->handle = nullptr;
-        return;
-      }
 
       engine::AssetService* as = 
         engine::Application::Instance()->GetService<engine::AssetService>();

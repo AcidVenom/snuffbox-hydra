@@ -66,6 +66,37 @@ namespace snuffbox
       * @see IRendererLoader::ReleaseMaterial
       */
       void ReleaseMaterial(GPUHandle handle) override;
+
+      /**
+      * @see IRendererLoader::CreateMesh
+      */
+      GPUHandle CreateMesh() override;
+
+      /**
+      * @see IRendererLoader::LoadMesh
+      */
+      bool LoadMesh(
+        GPUHandle handle,
+        const foundation::Vector<Vertex2D>& verts,
+        const foundation::Vector<Index>& indices) override;
+
+      /**
+      * @see IRendererLoader::LoadMesh
+      */
+      bool LoadMesh(
+        GPUHandle handle,
+        const foundation::Vector<Vertex3D>& verts,
+        const foundation::Vector<Index>& indices) override;
+
+      /**
+      * @see IRendererLoader::UnloadMesh
+      */
+      void UnloadMesh(GPUHandle handle) override;
+
+      /**
+      * @see IRendererLoader::ReleaseMesh
+      */
+      void ReleaseMesh(GPUHandle handle) override;
     };
   }
 }
