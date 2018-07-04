@@ -305,6 +305,20 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    Path Path::GetBaseDirectory() const
+    {
+      Vector<String> split = StringUtils::Split(path_, '/');
+      Path ret;
+
+      for (size_t i = 0; i < split.size() - 1; ++i)
+      {
+        ret /= split.at(i);
+      }
+
+      return ret;
+    }
+
+    //--------------------------------------------------------------------------
     bool Path::is_virtual() const
     {
       return is_virtual_;

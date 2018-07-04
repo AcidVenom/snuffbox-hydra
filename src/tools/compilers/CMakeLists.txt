@@ -9,6 +9,8 @@ SET(CompilersSources
   "compilers/shader_compiler.cc"
   "compilers/material_compiler.h"
   "compilers/material_compiler.cc"
+  "compilers/model_compiler.h"
+  "compilers/model_compiler.cc"
 )
 
 SET(DefinitionsSources
@@ -20,6 +22,8 @@ SET(DefinitionsSources
 SET(UtilsSources
   "utils/glslang.h"
   "utils/glslang.cc"
+  "utils/gltf_compiler.h"
+  "utils/gltf_compiler.cc"
 )
 
 IF (SNUFF_WIN32)

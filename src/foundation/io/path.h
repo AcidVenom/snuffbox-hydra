@@ -214,6 +214,12 @@ namespace snuffbox
       Vector<Path> GetDirectories(const Path& strip = "") const;
 
       /**
+      * @return The base directory of this path, stripping the last directory
+      *         or file
+      */
+      Path GetBaseDirectory() const;
+
+      /**
       * @return Is this path a virtual path into the virtual file system?
       */
       bool is_virtual() const;
