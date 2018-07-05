@@ -42,7 +42,6 @@ namespace snuffbox
         kColor, //!< A float4 color
         kNormal, //!< A float3 normal
         kTangent, //!< A float3 tangent
-        kBitangent, //!< A float3 bitangent
         kUV, //!< A float2 texcoord
         kUnknown //!< An unknown vertex attribute
       };
@@ -63,9 +62,21 @@ namespace snuffbox
       * @return Was the compilation a success?
       */
       template <typename T>
-      bool Compile(const foundation::File& file);
+      bool Compile(foundation::File& file);
 
     protected:
+
+      /**
+      * @brief Creates the default vertex for when certain attributes are not
+      *        set with the compiler
+      *
+      * @tparam T The vertex format
+      *
+      * This function should be specialized like 
+      * GLTFCompiler::SetVertexAttribute
+      */
+      template <typename T>
+      static T CreateDefaultVertex();
 
       /**
       * @brief This method is to be specialized to fill in a vertex format's
@@ -86,7 +97,7 @@ namespace snuffbox
       template <typename T>
       static void SetVertexAttribute(
         VertexAttribute attr, 
-        const uint8_t* buffer, 
+        const float* buffer, 
         T* out);
 
       /**
@@ -120,16 +131,14 @@ namespace snuffbox
       *
       * @param[in] model The model to retrieve the binary data from
       * @param[in] accessor The accessor to where the binary data is located
-      * @param[out] len The length of the found attribute
-      * @param[out] out The buffer to write the data to
-      *
-      * @remarks The buffer should be big enough to contain the attribute data
+      * @param[out] len The length of the found attributes
+      * @param[out] count The number of attributes in the accessor
       */
-      static void GetAttributeData(
+      static const float* GetAttributeData(
         const tinygltf::Model& model,
         int accessor,
         size_t* len,
-        uint8_t** out);
+        size_t* count);
 
       /**
       * @brief Converts a vertex attribute name to the corresponding
@@ -137,6 +146,7 @@ namespace snuffbox
       *
       * Possible attribute names are:
       * - POSITION: The vertex's position
+      * - COLOR_0: The vertex's color
       * - NORMAL: The vertex's normal
       * - TANGENT: The vertex's tangent
       * - TEXCOORD_0: The vertex's UV coordinates
@@ -148,6 +158,31 @@ namespace snuffbox
       */
       static VertexAttribute GetVertexAttribute(const std::string& name);
 
+      /**
+      * @brief Assigns the indices of a model's primitive to the a list of
+      *        indices
+      *
+      * @param[in] model The model to assign the indices from
+      * @param[in] primitive The primitive in the model to assign indices from
+      * @param[out] out The list of indices to fill
+      */
+      static void AssignIndices(
+        const tinygltf::Model& model, 
+        const tinygltf::Primitive& primitive, 
+        foundation::Vector<uint32_t>* out);
+
+    public:
+
+      /**
+      * @return The compiled meshes
+      */
+      const foundation::Vector<Mesh>& meshes() const;
+
+      /**
+      * @return The current error message
+      */
+      const foundation::String& error() const;
+
     private:
 
       tinygltf::TinyGLTF ctx_; //!< The curent tinygltf context
@@ -157,7 +192,7 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline bool GLTFCompiler::Compile(const foundation::File& file)
+    inline bool GLTFCompiler::Compile(foundation::File& file)
     {
       if (file.is_ok() == false)
       {
@@ -182,7 +217,7 @@ namespace snuffbox
         return false;
       }
 
-      meshes_.reserve(model.meshes.size());
+      meshes_.resize(model.meshes.size());
       for (size_t i = 0; i < model.meshes.size(); ++i)
       {
         CompileMesh<T>(model, model.meshes.at(i), i);
@@ -198,28 +233,42 @@ namespace snuffbox
       const tinygltf::Mesh& mesh,
       size_t scene_index)
     {
-      size_t num_primitives = mesh.primitives.size();
-      size_t num_vertices = num_primitives * 3;
-
       Mesh m;
-
-      m.vertices.resize(num_vertices);
-      m.indices.resize(num_vertices);
 
       ForEachPrimitive(mesh, [&](const tinygltf::Primitive& p)
       {
-        size_t len;
-        uint8_t data[16];
+        size_t len, attr_count;
+        const float* buffer;
         VertexAttribute attr;
+        T vert = CreateDefaultVertex<T>();
+        float attr_data[16];
+        size_t vertex_offset = 0;
 
-        std::map<std::string, int>::iterator it = p.attributes.begin();
+        std::map<std::string, int>::const_iterator it = p.attributes.begin();
         for (it; it != p.attributes.end(); ++it)
         {
-          /*attr = GetVertexAttribute(it->first);
-          GetAttributeData(model, it->second, &len, &data);
+          attr = GetVertexAttribute(it->first);
+          buffer = GetAttributeData(model, it->second, &len, &attr_count);
 
-          SetVertexAttribute(attr, data, )*/
+          if (it == p.attributes.begin())
+          {
+            vertex_offset = m.vertices.size();
+            m.vertices.resize(vertex_offset + sizeof(T) * attr_count);
+          }
+
+          for (size_t i = 0; i < attr_count; ++i)
+          {
+            memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
+            SetVertexAttribute(attr, attr_data, &vert);
+
+            memcpy(
+              &m.vertices.at(vertex_offset + i), 
+              &vert, 
+              sizeof(T));
+          }
         }
+
+        AssignIndices(model, p, &m.indices);
       });
 
       meshes_.at(scene_index) = m;

@@ -7,7 +7,7 @@ namespace snuffbox
   namespace foundation
   {
     //--------------------------------------------------------------------------
-    const size_t Memory::kDefaultHeapSize_ = 1024ul * 1024ul * 2ul;
+    const size_t Memory::kDefaultHeapSize_ = 1024ul * 1024ul * 1024ul * 2ul;
     const size_t Memory::kDefaultAlignment_ = 16ul;
 
     Memory::DefaultAllocator Memory::default_allocator_(kDefaultHeapSize_);

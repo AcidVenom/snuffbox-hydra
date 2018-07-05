@@ -122,7 +122,7 @@ namespace snuffbox
 
       case compilers::AssetTypes::kModel:
         ptr = foundation::Memory::ConstructShared<
-          compilers::ModelCompiler>(alloc);
+          compilers::ModelCompiler<graphics::Vertex3D>>(alloc);
         break;
 
       default:

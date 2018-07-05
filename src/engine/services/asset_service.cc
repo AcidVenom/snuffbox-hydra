@@ -4,6 +4,7 @@
 #include "engine/assets/scene_asset.h"
 #include "engine/assets/shader_asset.h"
 #include "engine/assets/material_asset.h"
+#include "engine/assets/model_asset.h"
 
 #include <foundation/io/directory_tree.h>
 #include <foundation/auxiliary/logger.h>
@@ -303,6 +304,10 @@ namespace snuffbox
 
       case compilers::AssetTypes::kMaterial:
         ptr = foundation::Memory::Construct<MaterialAsset>(alloc, path);
+        break;
+
+      case compilers::AssetTypes::kModel:
+        ptr = foundation::Memory::Construct<ModelAsset>(alloc, path);
         break;
 
       default:

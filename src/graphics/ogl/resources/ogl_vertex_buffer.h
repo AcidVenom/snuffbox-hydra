@@ -168,8 +168,7 @@ namespace snuffbox
       last = SetAttributeFloat<Vertex3D>(1, 4, last); // Color
       last = SetAttributeFloat<Vertex3D>(2, 3, last); // Normal
       last = SetAttributeFloat<Vertex3D>(3, 3, last); // Tangent
-      last = SetAttributeFloat<Vertex3D>(4, 3, last); // Bitangent
-      last = SetAttributeFloat<Vertex3D>(5, 2, last); // UV
+      last = SetAttributeFloat<Vertex3D>(4, 2, last); // UV
     }
 
     //--------------------------------------------------------------------------

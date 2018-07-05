@@ -10,7 +10,6 @@ SET(CompilersSources
   "compilers/material_compiler.h"
   "compilers/material_compiler.cc"
   "compilers/model_compiler.h"
-  "compilers/model_compiler.cc"
 )
 
 SET(DefinitionsSources

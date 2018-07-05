@@ -1,6 +1,9 @@
 #pragma once
 
 #include "tools/compilers/compilers/compiler.h"
+#include "tools/compilers/utils/gltf_compiler.h"
+
+#include <graphics/definitions/vertex.h>
 
 namespace snuffbox
 {
@@ -9,6 +12,8 @@ namespace snuffbox
     /**
     * @brief Compiles models from a provided glTF format, into a binary
     *        format using TinyGLTF
+    *
+    * @tparam T The vertex format to use
     *
     * Models can be viewed as a scene in 3D modeling software. The scene
     * consists of multiple meshes, which are converted to the Vertex3D format
@@ -38,8 +43,37 @@ namespace snuffbox
     *
     * @author Daniel Konings
     */
+    template <typename T>
     class ModelCompiler : public ICompiler
     {
+
+    protected:
+
+      /**
+      * @brief The model header describing the model after it
+      *
+      * @author Daniel Konings
+      */
+      struct ModelHeader
+      {
+        size_t num_meshes; //!< The number of meshes
+      };
+
+      /**
+      * @brief The mesh header to append after the model header for each
+      *        mesh
+      *
+      * @remarks The number of mesh headers are equal to ModelHeader::num_meshes
+      *
+      * @author Daniel Konings
+      */
+      struct MeshHeader
+      {
+        size_t num_vertices; //!< The number of vertices in this mesh
+        size_t vertices_offset; //!< The offset to all vertices
+        size_t num_indices; //!< The number of indices in this mesh
+        size_t indices_offset; //!< The offset to all indices
+      };
 
     public:
 
@@ -60,5 +94,165 @@ namespace snuffbox
       */
       bool DecompileImpl(foundation::File& file) override;
     };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline ModelCompiler<T>::ModelCompiler()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline bool ModelCompiler<T>::CompileImpl(foundation::File& file)
+    {
+      GLTFCompiler comp;
+      if (comp.Compile<T>(file) == false)
+      {
+        set_error(comp.error());
+        return false;
+      }
+
+      const foundation::Vector<GLTFCompiler::Mesh>& meshes = comp.meshes();
+      foundation::Vector<uint8_t> buffer;
+
+      ModelHeader header;
+      header.num_meshes = meshes.size();
+
+      MeshHeader mesh_header;
+      size_t offset = 0;
+
+      buffer.resize(sizeof(ModelHeader));
+      memcpy(&buffer.at(offset), &header, sizeof(ModelHeader));
+      offset += sizeof(ModelHeader);
+
+      size_t mesh_headers_offset = offset;
+
+      for (size_t i = 0; i < meshes.size(); ++i)
+      {
+        buffer.resize(buffer.size() + sizeof(MeshHeader));
+
+        const GLTFCompiler::Mesh& mesh = meshes.at(i);
+
+        mesh_header.num_vertices = mesh.vertices.size() / sizeof(T);
+        mesh_header.vertices_offset = 0;
+
+        mesh_header.num_indices = mesh.indices.size();
+        mesh_header.indices_offset = 0;
+
+        memcpy(&buffer.at(offset), &mesh_header, sizeof(MeshHeader));
+
+        offset += sizeof(MeshHeader);
+      }
+
+      MeshHeader* headers = nullptr;
+
+      size_t v_size, i_size;
+
+      for (size_t i = 0; i < meshes.size(); ++i)
+      {
+        headers = 
+          reinterpret_cast<MeshHeader*>(&buffer.at(mesh_headers_offset));
+
+        MeshHeader& h = headers[i];
+        const GLTFCompiler::Mesh& mesh = meshes.at(i);
+
+        h.vertices_offset = offset;
+        v_size = h.num_vertices * sizeof(T);
+
+        h.indices_offset = offset + v_size;
+        i_size = h.num_indices * sizeof(uint32_t);
+
+        buffer.resize(buffer.size() + v_size + i_size);
+
+        memcpy(&buffer.at(offset), mesh.vertices.data(), v_size);
+        memcpy(&buffer.at(offset + v_size), mesh.indices.data(), i_size);
+
+        offset += v_size + i_size;
+      }
+      
+      SourceFileData fd;
+      fd.magic = FileHeaderMagic::kModel;
+
+      if (AllocateSourceFile(buffer.data(), buffer.size(), &fd) == false)
+      {
+        return false;
+      }
+
+      SetData(fd.data, fd.total_size);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline bool ModelCompiler<T>::DecompileImpl(foundation::File& file)
+    {
+      BuildFileData fd;
+      fd.magic = FileHeaderMagic::kModel;
+
+      if (ReadBuildFile(file, &fd) == false)
+      {
+        return false;
+      }
+
+      SetData(fd.block, fd.length);
+
+      return true;
+    }
+  }
+
+  namespace compilers
+  {
+    //--------------------------------------------------------------------------
+    template <>
+    inline graphics::Vertex3D GLTFCompiler::CreateDefaultVertex()
+    {
+      graphics::Vertex3D v;
+      v.position = glm::vec3(0.0f, 0.0f, 0.0f);
+      v.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+      v.normal = glm::vec3(0.0f, 0.0f, 1.0f);
+      v.tangent = glm::vec3(1.0f, 0.0f, 0.0f);
+      v.uv = glm::vec2(0.0f, 0.0f);
+
+      return v;
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void GLTFCompiler::SetVertexAttribute<graphics::Vertex3D>(
+      GLTFCompiler::VertexAttribute attr,
+      const float* data,
+      graphics::Vertex3D* out)
+    {
+      if (out == nullptr)
+      {
+        return;
+      }
+
+      switch (attr)
+      {
+      case VertexAttribute::kPosition:
+        memcpy(&out->position, data, sizeof(float) * 3);
+        break;
+
+      case VertexAttribute::kNormal:
+        memcpy(&out->normal, data, sizeof(float) * 3);
+        break;
+
+      case VertexAttribute::kTangent:
+        memcpy(&out->tangent, data, sizeof(float) * 3);
+        break;
+
+      case VertexAttribute::kUV:
+        memcpy(&out->uv, data, sizeof(float) * 2);
+        break;
+
+      default:
+        foundation::Logger::Assert(false, 
+          "Unknown vertex attribute in SetVertexAttribute");
+        break;
+      }
+    }
   }
 }

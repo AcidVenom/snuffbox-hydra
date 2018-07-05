@@ -103,6 +103,8 @@ SET(AssetsSources
   "assets/shader_asset.cc"
   "assets/material_asset.h"
   "assets/material_asset.cc"
+  "assets/model_asset.h"
+  "assets/model_asset.cc"
 )
 
 IF (NOT SNUFF_NSCRIPTING)

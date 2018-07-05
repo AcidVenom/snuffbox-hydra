@@ -139,33 +139,7 @@ namespace snuffbox
     {
       if (mesh == nullptr)
       {
-        //!< @todo Remove this when mesh loading is implemented
-        static bool initialized = false;
-        static OGLMesh m;
-
-        if (initialized == false)
-        {
-
-          glm::vec3 n(0.0f, 0.0f, -1.0f);
-          glm::vec3 t(1.0f, 0.0f, 0.0f);
-          glm::vec3 b(0.0f, -1.0f, 0.0f);
-
-          foundation::Vector<Vertex3D> verts =
-          {
-            {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, n, t, b, {0.0f, 0.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, n, t, b, {1.0f, 0.0f}},
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, n, t, b, {0.0f, 1.0f}},
-            {{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, n, t, b, {1.0f, 1.0f}}
-          };
-
-          foundation::Vector<Index> indices = {0, 1, 2, 2, 1, 3};
-
-          m.Create(verts, indices);
-
-          initialized = true;
-        }
-
-        mesh = &m;
+        return;
       }
 
       OGLMesh* gpu_mesh = reinterpret_cast<OGLMesh*>(mesh);

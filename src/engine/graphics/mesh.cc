@@ -261,9 +261,6 @@ namespace snuffbox
         value = obj->Get("tangent");
         v.tangent = args.GetVectorValue(value, glm::vec3(1.0f, 0.0f, 0.0f));
 
-        value = obj->Get("bitangent");
-        v.bitangent = args.GetVectorValue(value, glm::vec3(0.0f, -1.0f, 0.0f));
-
         value = obj->Get("uv");
         v.uv = args.GetVectorValue(value, glm::vec2(0.0f, 0.0f));
 
