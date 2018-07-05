@@ -252,6 +252,11 @@ namespace snuffbox
           if (it == p.attributes.begin())
           {
             m.vertices.resize(sizeof(T) * attr_count);
+            for (size_t i = 0; i < attr_count; ++i)
+            {
+              *reinterpret_cast<T*>(&m.vertices.at(i * sizeof(T))) = 
+                CreateDefaultVertex<T>();
+            }
           }
 
           for (size_t i = 0; i < attr_count; ++i)
