@@ -47,6 +47,17 @@ namespace snuffbox
     class ModelCompiler : public ICompiler
     {
 
+    public:
+
+      /**
+      * @see GLTFCompiler::Mesh
+      */
+      struct Mesh
+      {
+        foundation::Vector<T> vertices;
+        foundation::Vector<uint32_t> indices;
+      };
+
     protected:
 
       /**
@@ -93,6 +104,17 @@ namespace snuffbox
       * @see ICompiler::DecompileImpl
       */
       bool DecompileImpl(foundation::File& file) override;
+
+    public:
+
+      /**
+      * @return The currently decompiled meshes
+      */
+      const foundation::Vector<Mesh>& meshes() const;
+
+    private:
+
+      foundation::Vector<Mesh> meshes_; //!< The currently decompiled meshes
     };
 
     //--------------------------------------------------------------------------
@@ -198,7 +220,42 @@ namespace snuffbox
 
       SetData(fd.block, fd.length);
 
+      ModelHeader header = *reinterpret_cast<ModelHeader*>(fd.block);
+      size_t offset = sizeof(ModelHeader);
+
+      const MeshHeader* mesh_header;
+
+      meshes_.resize(header.num_meshes);
+      for (size_t i = 0; i < header.num_meshes; ++i)
+      {
+        Mesh& mesh = meshes_.at(i);
+        mesh_header = reinterpret_cast<const MeshHeader*>(&fd.block[offset]);
+
+        mesh.vertices.resize(mesh_header->num_vertices);
+        mesh.indices.resize(mesh_header->num_indices);
+
+        memcpy(
+          mesh.vertices.data(), 
+          &fd.block[mesh_header->vertices_offset],
+          mesh_header->num_vertices * sizeof(T));
+
+        memcpy(
+          mesh.indices.data(),
+          &fd.block[mesh_header->indices_offset],
+          mesh_header->num_indices * sizeof(uint32_t));
+        
+        offset += sizeof(MeshHeader);
+      }
+
       return true;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline const foundation::Vector<typename ModelCompiler<T>::Mesh>& 
+      ModelCompiler<T>::meshes() const
+    {
+      return meshes_;
     }
   }
 
@@ -233,19 +290,19 @@ namespace snuffbox
       switch (attr)
       {
       case VertexAttribute::kPosition:
-        memcpy(&out->position, data, sizeof(float) * 3);
+        memcpy(&(out->position.x), data, sizeof(float) * 3);
         break;
 
       case VertexAttribute::kNormal:
-        memcpy(&out->normal, data, sizeof(float) * 3);
+        memcpy(&(out->normal.x), data, sizeof(float) * 3);
         break;
 
       case VertexAttribute::kTangent:
-        memcpy(&out->tangent, data, sizeof(float) * 3);
+        memcpy(&(out->tangent.x), data, sizeof(float) * 3);
         break;
 
       case VertexAttribute::kUV:
-        memcpy(&out->uv, data, sizeof(float) * 2);
+        memcpy(&(out->uv.x), data, sizeof(float) * 2);
         break;
 
       default:

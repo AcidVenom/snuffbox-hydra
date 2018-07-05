@@ -2,6 +2,7 @@
 #include "tools/editor/windows/gui.h"
 
 #include <engine/components/transform_component.h>
+#include <engine/components/mesh_component.h>
 #include <engine/components/mesh_renderer_component.h>
 #include <engine/components/camera_component.h>
 
@@ -267,7 +268,36 @@ namespace snuffbox
       QTreeWidgetItem* parent)
     {
       parent->setText(0, "Mesh");
-      return nullptr;
+
+      engine::MeshComponent* c =
+        static_cast<engine::MeshComponent*>(component);
+
+      GUI gui;
+
+      gui.StartLayout(GUI::LayoutStyle::kVertical);
+
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      engine::SerializableAsset* a = c->asset();
+
+      gui.Label("Model ");
+      gui.AssetField(a, [=](QWidget*, const QString& value)
+      {
+        engine::Mesh mesh(a->handle, c->scene_index());
+        c->SetMesh(&mesh);
+      });
+
+      gui.Label(" Index ");
+      gui.NumberField(
+        static_cast<double>(c->scene_index()), true, [=](QWidget*, double v)
+      {
+        engine::Mesh mesh(a->handle, static_cast<int>(v));
+        c->SetMesh(&mesh);
+      });
+
+      gui.EndLayout();
+
+      return gui.EndAsWidget();
     }
 
     //--------------------------------------------------------------------------

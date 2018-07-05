@@ -240,7 +240,6 @@ namespace snuffbox
         size_t len, attr_count;
         const float* buffer;
         VertexAttribute attr;
-        T vert = CreateDefaultVertex<T>();
         float attr_data[16];
         size_t vertex_offset = 0;
 
@@ -252,19 +251,17 @@ namespace snuffbox
 
           if (it == p.attributes.begin())
           {
-            vertex_offset = m.vertices.size();
-            m.vertices.resize(vertex_offset + sizeof(T) * attr_count);
+            m.vertices.resize(sizeof(T) * attr_count);
           }
 
           for (size_t i = 0; i < attr_count; ++i)
           {
             memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
-            SetVertexAttribute(attr, attr_data, &vert);
-
-            memcpy(
-              &m.vertices.at(vertex_offset + i), 
-              &vert, 
-              sizeof(T));
+            
+            SetVertexAttribute(
+              attr, 
+              attr_data, 
+              reinterpret_cast<T*>(&(m.vertices.at(i * sizeof(T)))));
           }
         }
 

@@ -117,6 +117,16 @@ namespace snuffbox
       */
       bool IsValid() const;
 
+      /**
+      * @return The underlying model asset
+      */
+      ModelAsset* asset() const;
+
+      /**
+      * @return The scene index of this mesh if it is a model
+      */
+      int index() const;
+
     protected:
 
       /**

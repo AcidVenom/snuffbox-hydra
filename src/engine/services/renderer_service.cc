@@ -7,6 +7,7 @@
 #include "engine/components/mesh_renderer_component.h"
 
 #include "engine/assets/material_asset.h"
+#include "engine/assets/model_asset.h"
 
 #include <foundation/auxiliary/logger.h>
 
@@ -98,6 +99,11 @@ namespace snuffbox
       TransformComponent* transform,
       MeshRendererComponent* renderer)
     {
+      if (mesh == nullptr)
+      {
+        return;
+      }
+
       graphics::DrawCommand cmd;
       graphics::PerObjectData& data = cmd.data;
 
@@ -116,7 +122,19 @@ namespace snuffbox
       }
 
       cmd.material = mat_asset == nullptr ? nullptr : mat_asset->gpu_handle();
-      cmd.mesh = nullptr;
+
+      Mesh* m = mesh->mesh();
+      ModelAsset* mod_asset = nullptr;
+
+      if (m != nullptr && (mod_asset = m->asset()) != nullptr)
+      {
+        if (mod_asset->is_loaded() == false)
+        {
+          mod_asset->Load();
+        }
+      }
+
+      cmd.mesh = m->IsValid() == true ? m->GetGPUHandle() : nullptr;
 
       renderer_->Queue(cmd);
     }

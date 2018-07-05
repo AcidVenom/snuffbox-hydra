@@ -1,5 +1,6 @@
 #include "engine/graphics/mesh.h"
 #include "engine/assets/asset.h"
+#include "engine/assets/model_asset.h"
 
 #include "engine/application/application.h"
 #include "engine/services/renderer_service.h"
@@ -19,7 +20,7 @@ namespace snuffbox
       gpu_handle_(nullptr),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
-      gpu_handle_ = renderer_->GetLoader()->CreateMesh();
+      
     }
 
     //--------------------------------------------------------------------------
@@ -60,12 +61,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Mesh::FromModel(IAsset* model, int idx)
     {
-      //!< @todo Uncomment this when model assets are a thing
-      //if (model->type() != compilers::AssetTypes::kModel)
-      //{
-      //  return;
-      //}
-      //asset_ = static_cast<ModelAsset*>(model);
+      if (model == nullptr || model->type() != compilers::AssetTypes::kModel)
+      {
+        return;
+      }
+
+      Release();
+
+      asset_ = static_cast<ModelAsset*>(model);
       index_ = idx;
     }
 
@@ -74,6 +77,12 @@ namespace snuffbox
       const foundation::Vector<graphics::Vertex2D>& verts,
       const foundation::Vector<graphics::Index>& indices)
     {
+      asset_ = nullptr;
+      index_ = -1;
+
+      Release();
+
+      gpu_handle_ = renderer_->GetLoader()->CreateMesh();
       renderer_->GetLoader()->LoadMesh(gpu_handle_, verts, indices);
     }
 
@@ -82,12 +91,23 @@ namespace snuffbox
       const foundation::Vector<graphics::Vertex3D>& verts,
       const foundation::Vector<graphics::Index>& indices)
     {
+      asset_ = nullptr;
+      index_ = -1;
+
+      Release();
+
+      gpu_handle_ = renderer_->GetLoader()->CreateMesh();
       renderer_->GetLoader()->LoadMesh(gpu_handle_, verts, indices);
     }
 
     //--------------------------------------------------------------------------
     void* Mesh::GetGPUHandle() const
     {
+      if (asset_ != nullptr)
+      {
+        return asset_->GetGPUHandle(index_);
+      }
+
       if (gpu_handle_ != nullptr)
       {
         return gpu_handle_;
@@ -100,6 +120,18 @@ namespace snuffbox
     bool Mesh::IsValid() const
     {
       return GetGPUHandle() != nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    ModelAsset* Mesh::asset() const
+    {
+      return asset_;
+    }
+
+    //--------------------------------------------------------------------------
+    int Mesh::index() const
+    {
+      return index_;
     }
 
     //--------------------------------------------------------------------------

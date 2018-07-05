@@ -59,6 +59,8 @@ namespace snuffbox
       }
 
       glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LESS);
 
       return OGLUtils::CheckError();
     }

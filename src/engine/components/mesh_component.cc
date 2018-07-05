@@ -10,21 +10,57 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     MeshComponent::MeshComponent(Entity* entity) :
-      ComponentBase<MeshComponent, Components::kMesh>(entity)
+      ComponentBase<MeshComponent, Components::kMesh>(entity),
+      scene_index_(-1)
     {
+      asset_.type = compilers::AssetTypes::kModel;
+      asset_.handle = nullptr;
+    }
 
+    //--------------------------------------------------------------------------
+    void MeshComponent::SetMesh(Mesh* mesh)
+    {
+      mesh_ = eastl::move(*mesh);
+      scene_index_ = mesh_.index();
+    }
+
+    //--------------------------------------------------------------------------
+    SerializableAsset* MeshComponent::asset()
+    {
+      return &asset_;
+    }
+
+    //--------------------------------------------------------------------------
+    Mesh* MeshComponent::mesh()
+    {
+      return &mesh_;
+    }
+
+    //--------------------------------------------------------------------------
+    int MeshComponent::scene_index() const
+    {
+      return scene_index_;
     }
 
     //--------------------------------------------------------------------------
     void MeshComponent::Serialize(foundation::SaveArchive& archive) const
     {
-
+      archive(
+        SET_ARCHIVE_PROP(asset_),
+        SET_ARCHIVE_PROP(scene_index_));
     }
 
     //--------------------------------------------------------------------------
     void MeshComponent::Deserialize(foundation::LoadArchive& archive)
     {
+      archive(
+        GET_ARCHIVE_PROP(asset_),
+        GET_ARCHIVE_PROP(scene_index_));
 
+      if (asset_.handle != nullptr)
+      {
+        mesh_.FromModel(asset_.handle, scene_index_);
+      }
     }
   }
 }
