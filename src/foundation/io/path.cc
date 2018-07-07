@@ -307,15 +307,17 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Path Path::GetBaseDirectory() const
     {
-      Vector<String> split = StringUtils::Split(path_, '/');
-      Path ret;
-
-      for (size_t i = 0; i < split.size() - 1; ++i)
+      if (StringUtils::Contains(path_, "/") == false)
       {
-        ret /= split.at(i);
+        return *this;
       }
 
-      return ret;
+      size_t pos = StringUtils::FindLastOf(path_, '/');
+
+      String copy = path_;
+      copy.erase(copy.begin() + pos, copy.end());
+
+      return copy;
     }
 
     //--------------------------------------------------------------------------

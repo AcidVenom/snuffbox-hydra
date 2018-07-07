@@ -81,7 +81,7 @@ namespace snuffbox
 
       while (true)
       {
-        new_pos = str.find('.', pos + 1);
+        new_pos = str.find(token, pos + 1);
 
         if (new_pos == String::npos)
         {

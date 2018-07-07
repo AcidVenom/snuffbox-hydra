@@ -123,9 +123,6 @@ namespace snuffbox
         return VertexAttribute::kUV;
       }
 
-      foundation::Logger::Assert(false,
-        "Found an unknown vertex attribute in a GLTF model");
-
       return VertexAttribute::kUnknown;
     }
 

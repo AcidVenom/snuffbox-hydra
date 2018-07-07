@@ -252,7 +252,8 @@ namespace snuffbox
         a = &mats.at(i);
         gui.AssetField(a, [=](QWidget*, const QString& value)
         {
-          c->SetMaterial(static_cast<int>(i), &engine::Material(a->handle));
+          engine::Material new_mat = engine::Material(a->handle);
+          c->SetMaterial(static_cast<int>(i), &new_mat);
         });
 
         gui.EndLayout();

@@ -241,15 +241,21 @@ namespace snuffbox
         const float* buffer;
         VertexAttribute attr;
         float attr_data[16];
-        size_t vertex_offset = 0;
+        bool is_first = true;
 
         std::map<std::string, int>::const_iterator it = p.attributes.begin();
-        for (it; it != p.attributes.end(); ++it)
+        for (; it != p.attributes.end(); ++it)
         {
           attr = GetVertexAttribute(it->first);
+
+          if (attr == VertexAttribute::kUnknown)
+          {
+            continue;
+          }
+
           buffer = GetAttributeData(model, it->second, &len, &attr_count);
 
-          if (it == p.attributes.begin())
+          if (is_first == true)
           {
             m.vertices.resize(sizeof(T) * attr_count);
             for (size_t i = 0; i < attr_count; ++i)
@@ -257,6 +263,8 @@ namespace snuffbox
               *reinterpret_cast<T*>(&m.vertices.at(i * sizeof(T))) = 
                 CreateDefaultVertex<T>();
             }
+
+            is_first = false;
           }
 
           for (size_t i = 0; i < attr_count; ++i)
