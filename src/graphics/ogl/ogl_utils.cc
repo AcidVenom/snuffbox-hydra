@@ -27,10 +27,10 @@ namespace snuffbox
           msg = "INVALID_VALUE";
           break;
         case GL_OUT_OF_MEMORY:
-          msg="OUT_OF_MEMORY";
+          msg = "OUT_OF_MEMORY";
           break;
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-          msg="INVALID_FRAMEBUFFER_OPERATION";
+          msg = "INVALID_FRAMEBUFFER_OPERATION";
           break;
         }
 

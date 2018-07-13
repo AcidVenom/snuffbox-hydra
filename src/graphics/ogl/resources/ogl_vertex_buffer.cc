@@ -49,7 +49,7 @@ namespace snuffbox
 
       if (vao_ != 0)
       {
-        glDeleteBuffers(1, &vao_);
+        glDeleteVertexArrays(1, &vao_);
         vao_ = 0;
       }
 

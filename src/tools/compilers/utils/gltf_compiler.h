@@ -3,6 +3,7 @@
 #include <foundation/io/file.h>
 
 #include <tiny_gltf.h>
+#include <glm/glm.hpp>
 
 #include <cinttypes>
 
@@ -30,6 +31,8 @@ namespace snuffbox
       {
         foundation::Vector<uint8_t> vertices; //!< The vertex data of the mesh
         foundation::Vector<uint32_t> indices; //!< The index data of the mesh
+        glm::mat4x4 transform; //!< The local transformation of the mesh
+        foundation::String name; //!< The name of the mesh
       };
 
       /**
@@ -116,14 +119,22 @@ namespace snuffbox
       * @tparam The vertex format to use
       *
       * @param[in] model The current glTF model
-      * @param[in] mesh The current glTF mesh within the model
-      * @param[in] scene_index The scene index of the current mesh
+      * @param[in] node The current glTF node within the model that contains
+      *                 a mesh
       */
       template <typename T>
       void CompileMesh(
         const tinygltf::Model& model, 
-        const tinygltf::Mesh& mesh,
-        size_t scene_index);
+        const tinygltf::Node& mesh);
+
+      /**
+      * @brief Affines the transformation of a single mesh from its root
+      *        transformation
+      *
+      * @param[in] node The node that contains the transformation data
+      * @param[out] out The mesh to write the data to
+      */
+      static void AffineTransform(const tinygltf::Node& node, Mesh* out);
 
       /**
       * @brief Retrieves a vertex's attribute data from the accessor within
@@ -217,10 +228,15 @@ namespace snuffbox
         return false;
       }
 
-      meshes_.resize(model.meshes.size());
-      for (size_t i = 0; i < model.meshes.size(); ++i)
+      int mesh_idx = -1;
+      for (size_t i = 0; i < model.nodes.size(); ++i)
       {
-        CompileMesh<T>(model, model.meshes.at(i), i);
+        if (model.nodes.at(i).mesh < 0)
+        {
+          continue;
+        }
+
+        CompileMesh<T>(model, model.nodes.at(i));
       }
 
       return true;
@@ -230,10 +246,14 @@ namespace snuffbox
     template <typename T>
     inline void GLTFCompiler::CompileMesh(
       const tinygltf::Model& model, 
-      const tinygltf::Mesh& mesh,
-      size_t scene_index)
+      const tinygltf::Node& node)
     {
+      const tinygltf::Mesh& mesh = model.meshes.at(node.mesh);
+
       Mesh m;
+      m.name = mesh.name.c_str();
+
+      AffineTransform(node, &m);
 
       ForEachPrimitive(mesh, [&](const tinygltf::Primitive& p)
       {
@@ -270,6 +290,14 @@ namespace snuffbox
           for (size_t i = 0; i < attr_count; ++i)
           {
             memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
+
+            if (
+              attr == VertexAttribute::kPosition || 
+              attr == VertexAttribute::kNormal || 
+              attr == VertexAttribute::kTangent)
+            {
+              attr_data[3] = -attr_data[3];
+            }
             
             SetVertexAttribute(
               attr, 
@@ -281,7 +309,7 @@ namespace snuffbox
         AssignIndices(model, p, &m.indices);
       });
 
-      meshes_.at(scene_index) = m;
+      meshes_.push_back(m);
     }
   }
 }

@@ -19,12 +19,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool ModelAsset::IsValid(int scene_index) const
     {
-      if (scene_index < 0 || scene_index >= gpu_handles_.size())
+      if (scene_index < 0 || scene_index >= meshes_.size())
       {
         return false;
       }
 
-      return gpu_handles_.at(scene_index) != nullptr;
+      return meshes_.at(scene_index) != nullptr;
     }
 
     //--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ namespace snuffbox
         return nullptr;
       }
 
-      return gpu_handles_.at(scene_index);
+      return meshes_.at(scene_index);
     }
 
     //--------------------------------------------------------------------------
@@ -59,7 +59,7 @@ namespace snuffbox
       const foundation::Vector<Compiler::Mesh>& meshes = compiler.meshes();
 
       size_t n = meshes.size();
-      gpu_handles_.resize(n);
+      meshes_.resize(n);
       void* handle = nullptr;
 
       graphics::IRendererLoader* loader = renderer_->GetLoader();
@@ -83,7 +83,7 @@ namespace snuffbox
           handle = nullptr;
         }
 
-        gpu_handles_.at(i) = handle;
+        meshes_.at(i) = handle;
       }
 
       return true;
@@ -98,9 +98,16 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ModelAsset::Release()
     {
-      for (size_t i = 0; i < gpu_handles_.size(); ++i)
+      void* handle = nullptr;
+      for (size_t i = 0; i < meshes_.size(); ++i)
       {
-        renderer_->GetLoader()->ReleaseMesh(gpu_handles_.at(i));
+        handle = meshes_.at(i);
+
+        if (handle != nullptr)
+        {
+          renderer_->GetLoader()->ReleaseMesh(handle);
+          meshes_.at(i) = nullptr;
+        }
       }
     }
   }

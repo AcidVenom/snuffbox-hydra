@@ -293,6 +293,10 @@ namespace snuffbox
         memcpy(&(out->position.x), data, sizeof(float) * 3);
         break;
 
+      case VertexAttribute::kColor:
+        memcpy(&(out->color.r), data, sizeof(float) * 4);
+        break;
+
       case VertexAttribute::kNormal:
         memcpy(&(out->normal.x), data, sizeof(float) * 3);
         break;

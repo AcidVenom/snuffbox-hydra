@@ -10,6 +10,10 @@
 
 #include <foundation/auxiliary/logger.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace snuffbox
 {
   namespace compilers
@@ -32,6 +36,62 @@ namespace snuffbox
         {
           del(mesh.primitives.at(i));
         }
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void GLTFCompiler::AffineTransform(const tinygltf::Node& node, Mesh* out)
+    {
+      if (out == nullptr)
+      {
+        return;
+      }
+
+      out->transform = glm::mat4x4(1.0f);
+
+      if (node.matrix.size() != 0)
+      {
+        float* start = &(out->transform[0].x);
+        for (int i = 0; i < 16; ++i)
+        {
+          *(start + i) = static_cast<float>(node.matrix.at(i));
+        }
+      }
+      else
+      {
+        auto GetVectorValue = [&](const std::vector<double>& v, glm::vec4 def)
+        {
+          glm::vec4 buffer = def;
+
+          if (v.size() != 0)
+          {
+            for (size_t i = 0; i < 4; ++i)
+            {
+              if (v.size() <= i)
+              {
+                break;
+              }
+
+              buffer[static_cast<glm::vec4::length_type>(i)] = 
+                static_cast<float>(v.at(i));
+            }
+          }
+
+          return buffer;
+        };
+
+        glm::vec4 t = 
+          GetVectorValue(node.translation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        glm::vec4 r =
+          GetVectorValue(node.rotation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        glm::vec4 s =
+          GetVectorValue(node.scale, glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
+
+        out->transform = 
+          glm::translate(out->transform, glm::vec3(t.x, t.y, t.z));
+
+        out->transform *= glm::toMat4(glm::quat(r.w, r.x, r.y, r.z));
+        out->transform = glm::scale(out->transform, glm::vec3(s.x, s.y, s.z));
       }
     }
 
