@@ -291,14 +291,6 @@ namespace snuffbox
           {
             memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
 
-            if (
-              attr == VertexAttribute::kPosition || 
-              attr == VertexAttribute::kNormal || 
-              attr == VertexAttribute::kTangent)
-            {
-              attr_data[3] = -attr_data[3];
-            }
-            
             SetVertexAttribute(
               attr, 
               attr_data, 
