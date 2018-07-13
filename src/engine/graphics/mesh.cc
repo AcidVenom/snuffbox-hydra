@@ -33,9 +33,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Mesh::Mesh(Mesh&& other) noexcept
     {
-      other.gpu_handle_ = nullptr;
-      other.asset_ = nullptr;
-      other.index_ = -1;
+      *this = eastl::move(other);
     }
 
     //--------------------------------------------------------------------------
@@ -46,8 +44,11 @@ namespace snuffbox
         return *this;
       }
 
+      Release();
+
       asset_ = other.asset_;
       index_ = other.index_;
+
       gpu_handle_ = other.gpu_handle_;
       renderer_ = other.renderer_;
 
@@ -168,6 +169,32 @@ namespace snuffbox
     {
       scripting::ScriptArray* indices = 
         static_cast<scripting::ScriptArray*>(args.GetArgument(idx));
+
+      if (out == nullptr)
+      {
+        return;
+      }
+
+      out->resize(indices->size());
+
+      scripting::ScriptNumber* num = nullptr;
+
+      for (size_t i = 0; i < indices->size(); ++i)
+      {
+        if (indices->at(i)->type() != scripting::ScriptValueTypes::kNumber)
+        {
+          foundation::Logger::LogVerbosity<1>(
+            foundation::LogChannel::kScript,
+            foundation::LogSeverity::kError,
+            "Index for a mesh is not a number type (index number {0})",
+            i);
+
+          return;
+        }
+
+        num = static_cast<scripting::ScriptNumber*>(indices->at(i).get());
+        out->at(i) = static_cast<graphics::Index>(num->value());
+      }
     }
 
     //--------------------------------------------------------------------------
