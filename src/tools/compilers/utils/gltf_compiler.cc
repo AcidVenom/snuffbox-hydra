@@ -40,18 +40,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void GLTFCompiler::AffineTransform(const tinygltf::Node& node, Mesh* out)
+    glm::mat4x4 GLTFCompiler::NodeTransform(const tinygltf::Node& node)
     {
-      if (out == nullptr)
-      {
-        return;
-      }
-
-      out->transform = glm::mat4x4(1.0f);
+      glm::mat4x4 mat = glm::mat4x4(1.0f);
 
       if (node.matrix.size() != 0)
       {
-        float* start = &(out->transform[0].x);
+        float* start = &(mat[0].x);
         for (int i = 0; i < 16; ++i)
         {
           *(start + i) = static_cast<float>(node.matrix.at(i));
@@ -87,12 +82,12 @@ namespace snuffbox
         glm::vec4 s =
           GetVectorValue(node.scale, glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
-        out->transform = 
-          glm::translate(out->transform, glm::vec3(t.x, t.y, t.z));
-
-        out->transform *= glm::toMat4(glm::quat(r.w, r.x, r.y, r.z));
-        out->transform = glm::scale(out->transform, glm::vec3(s.x, s.y, s.z));
+        mat = glm::translate(mat, glm::vec3(t.x, t.y, t.z));
+        mat *= glm::toMat4(glm::quat(r.w, r.x, r.y, r.z));
+        mat = glm::scale(mat, glm::vec3(s.x, s.y, s.z));
       }
+
+      return mat;
     }
 
     //--------------------------------------------------------------------------
@@ -156,6 +151,28 @@ namespace snuffbox
       }
 
       return start;
+    }
+
+    //--------------------------------------------------------------------------
+    void GLTFCompiler::TransformVector(
+      VertexAttribute attr, 
+      float* data,
+      const glm::mat4x4& transform)
+    {
+      if (
+        attr != VertexAttribute::kPosition &&
+        attr != VertexAttribute::kNormal &&
+        attr != VertexAttribute::kTangent)
+      {
+        return;
+      }
+      
+      float w = attr == VertexAttribute::kPosition ? 1.0f : 0.0f;
+      glm::vec4 v = glm::vec4(data[0], data[1], data[2], w);
+      v = transform * v;
+
+      v.z *= -1.0f;
+      memcpy(data, &v.x, sizeof(float) * 3);
     }
 
     //--------------------------------------------------------------------------

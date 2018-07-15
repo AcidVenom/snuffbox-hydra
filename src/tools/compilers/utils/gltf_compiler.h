@@ -114,6 +114,19 @@ namespace snuffbox
         const foundation::Function<void(const tinygltf::Primitive&)>& del);
 
       /**
+      * @brief Compiles a model's nodes recursively
+      *
+      * @param[in] model The current model being compiled
+      * @param[in] node The root node to start at
+      * @param[in] transform The previous transform of the parent node
+      */
+      template <typename T>
+      void CompileNode(
+        const tinygltf::Model& model,
+        const tinygltf::Node& node,
+        const glm::mat4x4& transform = glm::mat4x4(1.0f));
+
+      /**
       * @brief Compiles a single in a model into a binary format
       *
       * @tparam The vertex format to use
@@ -121,20 +134,23 @@ namespace snuffbox
       * @param[in] model The current glTF model
       * @param[in] node The current glTF node within the model that contains
       *                 a mesh
+      * @param[in] transform The parent hierarchy transformation
       */
       template <typename T>
       void CompileMesh(
         const tinygltf::Model& model, 
-        const tinygltf::Node& mesh);
+        const tinygltf::Node& node,
+        const glm::mat4x4& transform);
 
       /**
-      * @brief Affines the transformation of a single mesh from its root
-      *        transformation
+      * @brief Affines the transformation of a single node and returns it
+      *
+      * @remarks If the node doesn't have any transformation data, an identity
+      *          matrix is returned
       *
       * @param[in] node The node that contains the transformation data
-      * @param[out] out The mesh to write the data to
       */
-      static void AffineTransform(const tinygltf::Node& node, Mesh* out);
+      static glm::mat4x4 NodeTransform(const tinygltf::Node& node);
 
       /**
       * @brief Retrieves a vertex's attribute data from the accessor within
@@ -150,6 +166,23 @@ namespace snuffbox
         int accessor,
         size_t* len,
         size_t* count);
+
+      /**
+      * @brief Flips the Z-axis accordingly, to left-handed coordinate space
+      *        and applies the transformations of the node hierarchy
+      *
+      * @remarks Transformations are not applied on the color and UV value
+      *          of an object, the normal is multiplied with a W component of
+      *          0
+      *
+      * @param[in] attr The current vertex attribute
+      * @param[out] data The attribute data to adjust
+      * @param[in] transform The node hierarchy transformations
+      */
+      static void TransformVector(
+        VertexAttribute attr, 
+        float* data,
+        const glm::mat4x4& transform);
 
       /**
       * @brief Converts a vertex attribute name to the corresponding
@@ -228,32 +261,50 @@ namespace snuffbox
         return false;
       }
 
-      int mesh_idx = -1;
-      for (size_t i = 0; i < model.nodes.size(); ++i)
+      if (model.nodes.size() == 0)
       {
-        if (model.nodes.at(i).mesh < 0)
-        {
-          continue;
-        }
-
-        CompileMesh<T>(model, model.nodes.at(i));
+        return true;
       }
+
+      CompileNode<T>(model, model.nodes.at(0));
 
       return true;
     }
 
     //--------------------------------------------------------------------------
     template <typename T>
+    inline void GLTFCompiler::CompileNode(
+      const tinygltf::Model& model, 
+      const tinygltf::Node& node,
+      const glm::mat4x4& transform)
+    {
+      const std::vector<int>& children = node.children;
+      glm::mat4x4 root_transform = transform * NodeTransform(node);
+
+      if (node.mesh >= 0)
+      {
+        CompileMesh<T>(model, node, root_transform);
+      }
+
+      for (size_t i = 0; i < children.size(); ++i)
+      {
+        const tinygltf::Node& child = model.nodes.at(children.at(i));
+        CompileNode<T>(model, child, root_transform);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
     inline void GLTFCompiler::CompileMesh(
       const tinygltf::Model& model, 
-      const tinygltf::Node& node)
+      const tinygltf::Node& node,
+      const glm::mat4x4& transform)
     {
       const tinygltf::Mesh& mesh = model.meshes.at(node.mesh);
 
       Mesh m;
       m.name = mesh.name.c_str();
-
-      AffineTransform(node, &m);
+      m.transform = transform;
 
       ForEachPrimitive(mesh, [&](const tinygltf::Primitive& p)
       {
@@ -287,9 +338,11 @@ namespace snuffbox
             is_first = false;
           }
 
-          for (size_t i = 0; i < attr_count; ++i)
+          for (int i = static_cast<int>(attr_count) - 1; i >= 0; --i)
           {
             memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
+
+            TransformVector(attr, attr_data, m.transform);
 
             SetVertexAttribute(
               attr, 
