@@ -56,7 +56,8 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void* EASTLAllocator::allocate(size_t n, size_t alignment, size_t offset, int flags)
+    void* EASTLAllocator::allocate(
+      size_t n, size_t alignment, size_t offset, int flags)
     {
       return Memory::Allocate(n, alignment, &allocator_);
     }

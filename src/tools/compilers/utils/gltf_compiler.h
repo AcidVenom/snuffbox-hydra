@@ -31,8 +31,6 @@ namespace snuffbox
       {
         foundation::Vector<uint8_t> vertices; //!< The vertex data of the mesh
         foundation::Vector<uint32_t> indices; //!< The index data of the mesh
-        glm::mat4x4 transform; //!< The local transformation of the mesh
-        foundation::String name; //!< The name of the mesh
       };
 
       /**
@@ -303,8 +301,6 @@ namespace snuffbox
       const tinygltf::Mesh& mesh = model.meshes.at(node.mesh);
 
       Mesh m;
-      m.name = mesh.name.c_str();
-      m.transform = transform;
 
       ForEachPrimitive(mesh, [&](const tinygltf::Primitive& p)
       {
@@ -342,7 +338,7 @@ namespace snuffbox
           {
             memcpy(attr_data, &buffer[i * len], sizeof(float) * len);
 
-            TransformVector(attr, attr_data, m.transform);
+            TransformVector(attr, attr_data, transform);
 
             SetVertexAttribute(
               attr, 

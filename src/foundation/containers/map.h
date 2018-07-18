@@ -1,6 +1,8 @@
 #pragma once
 
-#include <foundation/memory/allocators/eastl_allocator.h>
+#ifndef EASTL_USER_CONFIG_HEADER
+#define EASTL_USER_CONFIG_HEADER "foundation/memory/eastl_config.h"
+#endif
 
 #include <EASTL/map.h>
 #include <EASTL/unordered_map.h>

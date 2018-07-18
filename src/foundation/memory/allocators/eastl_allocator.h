@@ -1,6 +1,9 @@
 #pragma once
 
-#include <EASTL/allocator.h>
+namespace eastl
+{
+  class allocator;
+}
 
 namespace snuffbox
 {
@@ -24,7 +27,7 @@ namespace snuffbox
       *
       * @param[in] pName The name for debugging
       */
-      EASTLAllocator(const char* pName = EASTL_NAME_VAL("EASTLAllocator"));
+      EASTLAllocator(const char* pName = "EASTLAllocator");
 
       /**
       * @brief Copy constructor
@@ -34,7 +37,7 @@ namespace snuffbox
       */
       EASTLAllocator(
         const eastl::allocator& x, 
-        const char* pName = EASTL_NAME_VAL("EASTLAllocator"));
+        const char* pName = "EASTLAllocator");
 
       /**
       * @brief Default destructor
@@ -112,9 +115,7 @@ namespace snuffbox
 
     protected:
 
-#if EASTL_NAME_ENABLED
       const char* mpName; //!< The debug name of this allocator
-#endif
       IAllocator& allocator_; //!< A reference to the underlying IAllocator
     };
   }

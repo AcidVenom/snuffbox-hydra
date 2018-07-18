@@ -9,6 +9,7 @@ SET(DefinitionsSources
 SET(MemorySources
   "memory/memory.h"
   "memory/memory.cc"
+  "memory/eastl_config.h"
 )
 
 SET(MemoryAllocatorSources

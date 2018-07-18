@@ -1,7 +1,7 @@
 #pragma once
 
-#include "foundation/memory/allocators/malloc_allocator.h"
 #include "foundation/memory/allocators/eastl_allocator.h"
+#include "foundation/memory/allocators/malloc_allocator.h"
 
 #include <EASTL/memory.h>
 

@@ -75,14 +75,11 @@ namespace snuffbox
           return buffer;
         };
 
-        glm::vec4 t = 
-          GetVectorValue(node.translation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         glm::vec4 r =
           GetVectorValue(node.rotation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         glm::vec4 s =
           GetVectorValue(node.scale, glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
-        mat = glm::translate(mat, glm::vec3(t.x, t.y, t.z));
         mat *= glm::toMat4(glm::quat(r.w, r.x, r.y, r.z));
         mat = glm::scale(mat, glm::vec3(s.x, s.y, s.z));
       }
@@ -167,8 +164,7 @@ namespace snuffbox
         return;
       }
       
-      float w = attr == VertexAttribute::kPosition ? 1.0f : 0.0f;
-      glm::vec4 v = glm::vec4(data[0], data[1], data[2], w);
+      glm::vec4 v = glm::vec4(data[0], data[1], data[2], 0.0f);
       v = transform * v;
 
       v.z *= -1.0f;
