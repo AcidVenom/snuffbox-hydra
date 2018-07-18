@@ -122,6 +122,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     bool EditorApplication::SetProjectDirectory(const foundation::Path& path)
     {
+      NewScene();
+
       if (foundation::Directory::Exists(path) == false)
       {
         foundation::Logger::LogVerbosity<1>(
@@ -178,15 +180,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool EditorApplication::NewScene()
+    bool EditorApplication::NewScene(bool prompt)
     {
-      if (ShowSceneSaveDialog() == false)
+      if (prompt == true && ShowSceneSaveDialog() == false)
       {
         return false;
       }
 
       GetService<engine::SceneService>()->SwitchScene(nullptr);
       loaded_scene_ = "";
+      serialized_scene_ = "";
 
       scene_changed_ = true;
 
@@ -333,6 +336,11 @@ namespace snuffbox
 
       compilers::AssetTypes type = item.type;
       const foundation::Path& relative = item.relative;
+
+      if (relative == loaded_scene_)
+      {
+        NewScene(false);
+      }
 
       as->RemoveAsset(type, relative);
     }

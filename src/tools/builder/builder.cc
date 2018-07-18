@@ -84,7 +84,7 @@ namespace snuffbox
           FindFileChanges(source_tree_.items());
         });
 
-      listener_.Listen(source_directory_);
+      listener_.Listen(source_dir);
 
       return true;
     }

@@ -82,9 +82,12 @@ namespace snuffbox
       /**
       * @brief Opens a new scene
       *
+      * @param[in] prompt Should the user be prompted to save the 
+      *                   previous scene?
+      *
       * @return Was the action not cancelled?
       */
-      bool NewScene();
+      bool NewScene(bool prompt = true);
 
       /**
       * @brief Opens a scene by relative path in the build directory
