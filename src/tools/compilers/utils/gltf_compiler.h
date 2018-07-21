@@ -23,6 +23,23 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to store node information of each node in a glTF scene
+      *
+      * @author Daniel Konings
+      */
+      struct Node
+      {
+        foundation::String name; //!< The name of the node
+        int mesh_index; //!< The mesh index, or -1 if this is a transform node
+        glm::vec3 local_translation; //!< The translation of the node
+
+        /**
+        * @brief The children of the node
+        */
+        foundation::Vector<Node> children;
+      };
+
+      /**
       * @brief Used to contain compiled data of each mesh in the glTF scene
       *
       * @author Daniel Konings
@@ -117,9 +134,11 @@ namespace snuffbox
       * @param[in] model The current model being compiled
       * @param[in] node The root node to start at
       * @param[in] transform The previous transform of the parent node
+      *
+      * @return The compiled node
       */
       template <typename T>
-      void CompileNode(
+      Node CompileNode(
         const tinygltf::Model& model,
         const tinygltf::Node& node,
         const glm::mat4x4& transform = glm::mat4x4(1.0f));
@@ -170,7 +189,7 @@ namespace snuffbox
       *        and applies the transformations of the node hierarchy
       *
       * @remarks Transformations are not applied on the color and UV value
-      *          of an object, the normal is multiplied with a W component of
+      *          of an object, all others are multiplied with a W component of
       *          0
       *
       * @param[in] attr The current vertex attribute
@@ -213,7 +232,25 @@ namespace snuffbox
         const tinygltf::Primitive& primitive, 
         foundation::Vector<uint32_t>* out);
 
+      /**
+      * @brief Checks if a specific node has a parent
+      *
+      * @param[in] model The model the node resides in
+      * @param[in] node_index The node index to check within another node's
+      *                       children tree
+      *
+      * @return Does the node have a parent?
+      */
+      static bool HasParent(
+        const tinygltf::Model& model, 
+        size_t node_index);
+
     public:
+
+      /**
+      * @return The compiled scene nodes
+      */
+      const foundation::Vector<Node>& nodes() const;
 
       /**
       * @return The compiled meshes
@@ -228,6 +265,7 @@ namespace snuffbox
     private:
 
       tinygltf::TinyGLTF ctx_; //!< The curent tinygltf context
+      foundation::Vector<Node> nodes_; //!< The compiled scene nodes
       foundation::Vector<Mesh> meshes_; //!< The compiled meshes
       foundation::String error_; //!< The current error message
     };
@@ -259,36 +297,56 @@ namespace snuffbox
         return false;
       }
 
-      if (model.nodes.size() == 0)
+      for (size_t i = 0; i < model.nodes.size(); ++i)
       {
-        return true;
-      }
+        const tinygltf::Node& current = model.nodes.at(i);
 
-      CompileNode<T>(model, model.nodes.at(0));
+        if (HasParent(model, i) == false)
+        {
+          nodes_.push_back(CompileNode<T>(model, current));
+        }
+      }
 
       return true;
     }
 
     //--------------------------------------------------------------------------
     template <typename T>
-    inline void GLTFCompiler::CompileNode(
+    inline GLTFCompiler::Node GLTFCompiler::CompileNode(
       const tinygltf::Model& model, 
       const tinygltf::Node& node,
       const glm::mat4x4& transform)
     {
       const std::vector<int>& children = node.children;
-      glm::mat4x4 root_transform = transform * NodeTransform(node);
+      glm::mat4x4 node_transform = NodeTransform(node);
+      glm::mat4x4 root_transform = transform * node_transform;
+
+      int mesh_index = -1;
 
       if (node.mesh >= 0)
       {
         CompileMesh<T>(model, node, root_transform);
+        mesh_index = static_cast<int>(meshes_.size()) - 1;
       }
 
-      for (size_t i = 0; i < children.size(); ++i)
+      Node new_node;
+      new_node.name = node.name.c_str();
+      new_node.mesh_index = mesh_index;
+      new_node.local_translation = glm::vec3(
+          node_transform[3][0], 
+          node_transform[3][1], 
+          -node_transform[3][2]);
+
+      size_t n_children = children.size();
+      new_node.children.resize(n_children);
+
+      for (size_t i = 0; i < n_children; ++i)
       {
         const tinygltf::Node& child = model.nodes.at(children.at(i));
-        CompileNode<T>(model, child, root_transform);
+        new_node.children.at(i) = CompileNode<T>(model, child, root_transform);
       }
+
+      return new_node;
     }
 
     //--------------------------------------------------------------------------

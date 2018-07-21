@@ -2,6 +2,8 @@
 
 #include "engine/assets/asset.h"
 
+#include <tools/compilers/compilers/model_compiler.h>
+
 #include <foundation/containers/vector.h>
 
 namespace snuffbox
@@ -22,27 +24,6 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Used to store per-node data, to re-create the actual model
-      *        hierarchy as entities, engine-sided.
-      *
-      * The scene index is used for access of the GPU handle of the mesh
-      */
-      struct NodeData
-      {
-        int index; //!< The scene index of this node in the model
-        foundation::Vector<NodeData> children; //!< The children of this node
-
-        /**
-        * @brief The transform of the mesh in relation to the root node
-        *
-        * The root node is created engine-sided, as a top-level entity. From
-        * there an entire glTF scene is reconstructed with the correct
-        * transformations.
-        */
-        glm::mat4x4 transform;
-      };
-
-      /**
       * @see IAsset::IAsset
       */
       ModelAsset(const foundation::Path& path);
@@ -60,6 +41,11 @@ namespace snuffbox
       * @return The GPU handle, or nullptr if it is invalid
       */
       void* GetGPUHandle(int scene_index) const;
+
+      /**
+      * @brief Instantiates this model asset as an entity
+      */
+      void Instantiate();
 
     protected:
 
@@ -83,6 +69,16 @@ namespace snuffbox
       RendererService* renderer_; //!< The current renderer service
 
       /**
+      * @brief A short-hand to reach the nodes of the current model compiler
+      */
+      using CompilerNode = compilers::ModelCompiler<graphics::Vertex3D>::Node;
+
+      /**
+      * @brief The compiled nodes, to reconstruct the model engine-sided
+      */
+      foundation::Vector<CompilerNode> nodes_;
+
+      /**
       * @brief The GPU handles of each mesh in the model
       *
       * The index of the GPU handle correlates to the scene index of the mesh
@@ -90,8 +86,6 @@ namespace snuffbox
       * @see ModelAsset::NodeData
       */
       foundation::Vector<void*> meshes_;
-
-      NodeData root_; //!< The root node of the model
     };
   }
 }

@@ -2,8 +2,6 @@
 #include "engine/application/application.h"
 #include "engine/services/renderer_service.h"
 
-#include <tools/compilers/compilers/model_compiler.h>
-
 namespace snuffbox
 {
   namespace engine
@@ -39,6 +37,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void ModelAsset::Instantiate()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     bool ModelAsset::LoadImpl(const foundation::Path& path)
     {
       using Compiler = compilers::ModelCompiler<graphics::Vertex3D>;
@@ -57,6 +61,7 @@ namespace snuffbox
       }
 
       const foundation::Vector<Compiler::Mesh>& meshes = compiler.meshes();
+      nodes_ = eastl::move(compiler.nodes());
 
       size_t n = meshes.size();
       meshes_.resize(n);

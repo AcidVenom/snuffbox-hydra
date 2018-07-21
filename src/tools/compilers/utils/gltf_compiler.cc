@@ -75,11 +75,14 @@ namespace snuffbox
           return buffer;
         };
 
+        glm::vec4 t =
+          GetVectorValue(node.translation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         glm::vec4 r =
           GetVectorValue(node.rotation, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         glm::vec4 s =
           GetVectorValue(node.scale, glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
 
+        mat = glm::translate(mat, glm::vec3(t.x, t.y, t.z));
         mat *= glm::toMat4(glm::quat(r.w, r.x, r.y, r.z));
         mat = glm::scale(mat, glm::vec3(s.x, s.y, s.z));
       }
@@ -232,6 +235,38 @@ namespace snuffbox
 
         out->push_back(*reinterpret_cast<const uint32_t*>(current));
       }
+    }
+
+    //--------------------------------------------------------------------------
+    bool GLTFCompiler::HasParent(
+      const tinygltf::Model& model, 
+      size_t node_index)
+    {
+      for (size_t i = 0; i < model.nodes.size(); ++i)
+      {
+        if (i == node_index)
+        {
+          continue;
+        }
+
+        const tinygltf::Node& current = model.nodes.at(i);
+
+        for (size_t j = 0; j < current.children.size(); ++j)
+        {
+          if (current.children.at(j) == node_index)
+          {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::Vector<GLTFCompiler::Node>& GLTFCompiler::nodes() const
+    {
+      return nodes_;
     }
 
     //--------------------------------------------------------------------------

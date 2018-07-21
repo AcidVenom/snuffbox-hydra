@@ -58,6 +58,17 @@ namespace snuffbox
         foundation::Vector<uint32_t> indices;
       };
 
+      /**
+      * @see GLTFCompiler::Node
+      */
+      struct Node
+      {
+        foundation::String name;
+        int mesh_index;
+        foundation::Vector<Node> children;
+        glm::vec3 local_translation;
+      };
+
     protected:
 
       /**
@@ -67,7 +78,25 @@ namespace snuffbox
       */
       struct ModelHeader
       {
+        size_t num_root_nodes; //!< The number of root nodes
         size_t num_meshes; //!< The number of meshes
+      };
+
+      /**
+      * @brief The node header to append after the model header for each node
+      *
+      * First, the name follows after the header, after which the children of
+      * the node will immediately follow as well. The children are yet again
+      * a list of node headers with the same structure.
+      */
+      struct NodeHeader
+      {
+        size_t num_children; //!< The number of children of this node
+        size_t name_length; //!< The length of the name of this node
+        int mesh_index; //!< The mesh index of this node, or -1 if none
+        float local_x; //!< The local X translation of the node
+        float local_y; //!< The local Y translation of the node
+        float local_z; //!< The local Z translation of the node
       };
 
       /**
@@ -108,6 +137,11 @@ namespace snuffbox
     public:
 
       /**
+      * @return The currently decompiled nodes
+      */
+      const foundation::Vector<Node>& nodes() const;
+
+      /**
       * @return The currently decompiled meshes
       */
       const foundation::Vector<Mesh>& meshes() const;
@@ -115,6 +149,7 @@ namespace snuffbox
     private:
 
       foundation::Vector<Mesh> meshes_; //!< The currently decompiled meshes
+      foundation::Vector<Node> nodes_; //!< The currently decompiled nodes
     };
 
     //--------------------------------------------------------------------------
@@ -135,18 +170,52 @@ namespace snuffbox
         return false;
       }
 
+      const foundation::Vector<GLTFCompiler::Node>& nodes = comp.nodes();
       const foundation::Vector<GLTFCompiler::Mesh>& meshes = comp.meshes();
       foundation::Vector<uint8_t> buffer;
 
       ModelHeader header;
+      header.num_root_nodes = nodes.size();
       header.num_meshes = meshes.size();
 
+      NodeHeader node_header;
       MeshHeader mesh_header;
       size_t offset = 0;
 
       buffer.resize(sizeof(ModelHeader));
       memcpy(&buffer.at(offset), &header, sizeof(ModelHeader));
       offset += sizeof(ModelHeader);
+
+      foundation::Function<void(const GLTFCompiler::Node&)> WriteNode;
+      WriteNode = [&](const GLTFCompiler::Node& node)
+      {
+        node_header.num_children = node.children.size();
+        node_header.name_length = node.name.size();
+        node_header.mesh_index = node.mesh_index;
+        node_header.local_x = node.local_translation.x;
+        node_header.local_y = node.local_translation.y;
+        node_header.local_z = node.local_translation.z;
+
+        buffer.resize(
+          buffer.size() + 
+          sizeof(NodeHeader) + 
+          node_header.name_length);
+
+        memcpy(&buffer.at(offset), &node_header, sizeof(NodeHeader));
+        offset += sizeof(NodeHeader);
+        memcpy(&buffer.at(offset), node.name.c_str(), node_header.name_length);
+        offset += node_header.name_length;
+
+        for (size_t i = 0; i < node.children.size(); ++i)
+        {
+          WriteNode(node.children.at(i));
+        }
+      };
+
+      for (size_t i = 0; i < header.num_root_nodes; ++i)
+      {
+        WriteNode(nodes.at(i));
+      }
 
       size_t mesh_headers_offset = offset;
 
@@ -223,6 +292,48 @@ namespace snuffbox
       ModelHeader header = *reinterpret_cast<ModelHeader*>(fd.block);
       size_t offset = sizeof(ModelHeader);
 
+      const NodeHeader* node_header;
+
+      foundation::Function<Node()> ReadNode;
+      ReadNode = [&]()
+      {
+        Node node;
+        node_header = reinterpret_cast<const NodeHeader*>(&fd.block[offset]);
+
+        node.mesh_index = node_header->mesh_index;
+
+        node.local_translation.x = node_header->local_x;
+        node.local_translation.y = node_header->local_y;
+        node.local_translation.z = node_header->local_z;
+
+        node.children.resize(node_header->num_children);
+
+        offset += sizeof(NodeHeader);
+
+        if (node_header->name_length != 0)
+        {
+          node.name = foundation::String(
+            reinterpret_cast<char*>(&fd.block[offset]), 
+            node_header->name_length);
+
+          offset += node_header->name_length;
+        }
+
+        for (size_t i = 0; i < node.children.size(); ++i)
+        {
+          node.children.at(i) = ReadNode();
+        }
+
+        return node;
+      };
+
+      nodes_.resize(header.num_root_nodes);
+
+      for (size_t i = 0; i < header.num_root_nodes; ++i)
+      {
+        nodes_.at(i) = ReadNode();
+      }
+
       const MeshHeader* mesh_header;
 
       meshes_.resize(header.num_meshes);
@@ -256,6 +367,14 @@ namespace snuffbox
       ModelCompiler<T>::meshes() const
     {
       return meshes_;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline const foundation::Vector<typename ModelCompiler<T>::Node>&
+      ModelCompiler<T>::nodes() const
+    {
+      return nodes_;
     }
   }
 
