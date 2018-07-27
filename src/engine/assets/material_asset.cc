@@ -16,8 +16,11 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    MaterialAsset::MaterialAsset(const foundation::Path& path) :
-      IAsset(compilers::AssetTypes::kMaterial, path),
+    MaterialAsset::MaterialAsset(
+      const foundation::Path& path,
+      const foundation::String& name) 
+      :
+      IAsset(compilers::AssetTypes::kMaterial, path, name),
       vs_(nullptr),
       ps_(nullptr),
       gs_(nullptr),

@@ -26,7 +26,7 @@ namespace snuffbox
       /**
       * @see IAsset::IAsset
       */
-      ModelAsset(const foundation::Path& path);
+      ModelAsset(const foundation::Path& path, const foundation::String& name);
 
       /**
       * @return Is a mesh at a specified scene index valid?

@@ -34,6 +34,7 @@ namespace snuffbox
       */
       ShaderAsset(
         const foundation::Path& path,
+        const foundation::String& name,
         compilers::AssetTypes type);
 
     protected:

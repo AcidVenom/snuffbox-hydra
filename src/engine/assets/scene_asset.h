@@ -23,7 +23,7 @@ namespace snuffbox
       /**
       * @see IAsset::IAsset
       */
-      SceneAsset(const foundation::Path& path);
+      SceneAsset(const foundation::Path& path, const foundation::String& name);
 
       /**
       * @return The scene contained by this asset

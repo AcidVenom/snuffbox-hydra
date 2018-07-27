@@ -37,10 +37,14 @@ namespace snuffbox
       *
       * @param[in] type The type of the asset to create
       * @param[in] path The path to the file to load
+      * @param[in] name The name of this asset in the asset service
       *
       * @see IAsset::Load
       */
-      IAsset(compilers::AssetTypes type, const foundation::Path& path);
+      IAsset(
+        compilers::AssetTypes type,
+        const foundation::Path& path,
+        const foundation::String& name);
 
       /**
       * @brief Loads a file as an asset
@@ -81,6 +85,11 @@ namespace snuffbox
       * @return The path to the file to load
       */
       const foundation::Path& path() const;
+
+      /**
+      * @return The name of this asset in the asset service
+      */
+      const foundation::String& name() const;
 
       /**
       * @return Has this asset been loaded?
@@ -134,6 +143,7 @@ namespace snuffbox
 
       compilers::AssetTypes type_; //!< The type of this asset
       foundation::Path path_; //!< The path to the file to load
+      foundation::String name_; //!< The name of the asset in the asset service
 
       bool is_loaded_; //!< Has this asset been loaded?
 

@@ -11,9 +11,14 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    IAsset::IAsset(compilers::AssetTypes type, const foundation::Path& path) :
+    IAsset::IAsset(
+      compilers::AssetTypes type, 
+      const foundation::Path& path,
+      const foundation::String& name)
+      :
       type_(type),
       path_(path),
+      name_(name),
       is_loaded_(false)
     {
 
@@ -105,6 +110,12 @@ namespace snuffbox
     const foundation::Path& IAsset::path() const
     {
       return path_;
+    }
+
+    //--------------------------------------------------------------------------
+    const foundation::String& IAsset::name() const
+    {
+      return name_;
     }
 
     //--------------------------------------------------------------------------

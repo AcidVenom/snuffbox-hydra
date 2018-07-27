@@ -25,7 +25,9 @@ namespace snuffbox
       /**
       * @see IAsset::IAsset
       */
-      MaterialAsset(const foundation::Path& path);
+      MaterialAsset(
+        const foundation::Path& path, 
+        const foundation::String& name);
 
     protected:
 

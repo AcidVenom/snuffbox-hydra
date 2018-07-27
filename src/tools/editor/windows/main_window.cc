@@ -4,7 +4,9 @@
 #include "tools/editor/definitions/editor_colors.h"
 
 #include <engine/services/scene_service.h>
+#include <engine/services/asset_service.h>
 #include <engine/ecs/scene.h>
+#include <engine/assets/model_asset.h>
 
 #include <qstylefactory.h>
 #include <qevent.h>
@@ -406,6 +408,15 @@ namespace snuffbox
       case compilers::AssetTypes::kScene:
         app_->OpenScene(relative.toStdString().c_str());
         break;
+
+      case compilers::AssetTypes::kModel:
+      {
+        foundation::Path asset = relative.toStdString().c_str();
+        foundation::String str = asset.NoExtension().ToString();
+        app_->GetService<engine::AssetService>()->Load(type, str);
+        static_cast<engine::ModelAsset*>(app_->GetService<engine::AssetService>()->Get(type, str))->Instantiate();
+      }
+      break;
 
       default:
         break;

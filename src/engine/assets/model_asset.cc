@@ -2,13 +2,21 @@
 #include "engine/application/application.h"
 #include "engine/services/renderer_service.h"
 
+#include "engine/ecs/entity.h"
+#include "engine/components/transform_component.h"
+#include "engine/components/mesh_component.h"
+#include "engine/components/mesh_renderer_component.h"
+
 namespace snuffbox
 {
   namespace engine
   {
     //--------------------------------------------------------------------------
-    ModelAsset::ModelAsset(const foundation::Path& path) :
-      IAsset(compilers::AssetTypes::kModel, path),
+    ModelAsset::ModelAsset(
+      const foundation::Path& path, 
+      const foundation::String& name)
+      :
+      IAsset(compilers::AssetTypes::kModel, path, name),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
 
@@ -39,7 +47,41 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void ModelAsset::Instantiate()
     {
+      foundation::Function<void(Entity* parent, const CompilerNode&)> PerNode;
+      
+      PerNode = [&](Entity* parent, const CompilerNode& node)
+      {
+        Entity* current = foundation::Memory::Construct<Entity>(
+          &foundation::Memory::default_allocator());
 
+        current->set_name(node.name);
+        current->GetComponent<TransformComponent>()->SetLocalPosition(
+          node.local_translation);
+
+        if (node.mesh_index >= 0)
+        {
+          Mesh mesh(this, node.mesh_index);
+
+          current->AddComponent<MeshComponent>()->SetMesh(&mesh);
+          current->AddComponent<MeshRendererComponent>();
+        }
+
+        if (parent != nullptr)
+        {
+          current->GetComponent<TransformComponent>()->SetParent(
+            parent->GetComponent<TransformComponent>());
+        }
+
+        for (size_t i = 0; i < node.children.size(); ++i)
+        {
+          PerNode(current, node.children.at(i));
+        }
+      };
+
+      for (size_t i = 0; i < nodes_.size(); ++i)
+      {
+        PerNode(nullptr, nodes_.at(i));
+      }
     }
 
     //--------------------------------------------------------------------------

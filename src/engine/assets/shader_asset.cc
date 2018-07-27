@@ -15,9 +15,10 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     ShaderAsset::ShaderAsset(
       const foundation::Path& path,
+      const foundation::String& name,
       compilers::AssetTypes type)
       :
-      IAsset(type, path),
+      IAsset(type, path, name),
       gpu_handle_(nullptr),
       renderer_(Application::Instance()->GetService<RendererService>())
     {

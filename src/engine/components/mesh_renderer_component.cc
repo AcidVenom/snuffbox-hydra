@@ -71,7 +71,14 @@ namespace snuffbox
         return;
       }
 
-      shared_materials_.at(idx).handle = material->asset();
+      SerializableAsset& sa = shared_materials_.at(idx);
+      sa.handle = material->asset();
+
+      if (sa.handle != nullptr)
+      {
+        sa.name = sa.handle->name();
+      }
+
       materials_.at(idx) = *material;
     }
 

@@ -12,8 +12,11 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    SceneAsset::SceneAsset(const foundation::Path& path) :
-      IAsset(compilers::AssetTypes::kScene, path),
+    SceneAsset::SceneAsset(
+      const foundation::Path& path, 
+      const foundation::String& name) 
+      :
+      IAsset(compilers::AssetTypes::kScene, path, name),
       scene_(nullptr)
     {
       scene_ = foundation::Memory::Construct<Scene>(

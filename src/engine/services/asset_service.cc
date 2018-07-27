@@ -289,25 +289,27 @@ namespace snuffbox
       switch (type)
       {
       case compilers::AssetTypes::kScript:
-        ptr = foundation::Memory::Construct<ScriptAsset>(alloc, path);
+        ptr = foundation::Memory::Construct<ScriptAsset>(alloc, path, no_ext_s);
         break;
 
       case compilers::AssetTypes::kScene:
-        ptr = foundation::Memory::Construct<SceneAsset>(alloc, path);
+        ptr = foundation::Memory::Construct<SceneAsset>(alloc, path, no_ext_s);
         break;
 
       case compilers::AssetTypes::kVertexShader:
       case compilers::AssetTypes::kPixelShader:
       case compilers::AssetTypes::kGeometryShader:
-        ptr = foundation::Memory::Construct<ShaderAsset>(alloc, path, type);
+        ptr = foundation::Memory::Construct<ShaderAsset>(
+          alloc, path, no_ext_s, type);
         break;
 
       case compilers::AssetTypes::kMaterial:
-        ptr = foundation::Memory::Construct<MaterialAsset>(alloc, path);
+        ptr = foundation::Memory::Construct<MaterialAsset>(
+          alloc, path, no_ext_s);
         break;
 
       case compilers::AssetTypes::kModel:
-        ptr = foundation::Memory::Construct<ModelAsset>(alloc, path);
+        ptr = foundation::Memory::Construct<ModelAsset>(alloc, path, no_ext_s);
         break;
 
       default:

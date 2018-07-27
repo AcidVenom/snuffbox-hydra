@@ -1,4 +1,5 @@
 #include "engine/components/mesh_component.h"
+#include "engine/assets/model_asset.h"
 
 #ifndef SNUFF_NSCRIPTING
 #include <sparsed/mesh_component.gen.cc>
@@ -22,6 +23,13 @@ namespace snuffbox
     {
       mesh_ = eastl::move(*mesh);
       scene_index_ = mesh_.index();
+
+      asset_.handle = static_cast<IAsset*>(mesh_.asset());
+
+      if (asset_.handle != nullptr)
+      {
+        asset_.name = asset_.handle->name();
+      }
     }
 
     //--------------------------------------------------------------------------

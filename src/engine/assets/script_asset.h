@@ -21,7 +21,7 @@ namespace snuffbox
       /**
       * @see IAsset::IAsset
       */
-      ScriptAsset(const foundation::Path& path);
+      ScriptAsset(const foundation::Path& path, const foundation::String& name);
 
     protected:
 

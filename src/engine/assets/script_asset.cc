@@ -12,8 +12,11 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    ScriptAsset::ScriptAsset(const foundation::Path& path) :
-      IAsset(compilers::AssetTypes::kScript, path)
+    ScriptAsset::ScriptAsset(
+      const foundation::Path& path, 
+      const foundation::String& name) 
+      :
+      IAsset(compilers::AssetTypes::kScript, path, name)
     {
 
     }
