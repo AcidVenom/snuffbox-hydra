@@ -160,6 +160,15 @@ namespace snuffbox
       */
       void OnSceneChanged();
 
+      /**
+      * @brief Instantiates a model when it is double clicked in the asset
+      *        browser
+      *
+      * @param[in] relative The relative path to the asset
+      * @param[in] type The type of the asset
+      */
+      void InstantiateModel(QString relative, int type);
+
     private slots:
 
       /**

@@ -319,12 +319,12 @@ namespace snuffbox
       */
       void UpdateMatrices();
 
+    public:
+
       /**
       * @see IComponent::Update
       */
       void Update(float dt) override;
-
-    public:
 
       /**
       * @see ISerializable::Serialize

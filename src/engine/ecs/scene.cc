@@ -1,6 +1,8 @@
 #include "engine/ecs/scene.h"
 #include "engine/ecs/entity.h"
 #include "engine/components/transform_component.h"
+#include "engine/components/mesh_renderer_component.h"
+#include "engine/components/camera_component.h"
 #include "engine/application/application.h"
 #include "engine/services/scene_service.h"
 
@@ -13,7 +15,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     Scene::Scene() :
-      current_id_(0)
+      current_id_(0),
+      deleted_(false)
     {
 
     }
@@ -62,7 +65,8 @@ namespace snuffbox
         foundation::Memory::Destruct(e);
       }
 
-      entities_.erase(entities_.begin() + idx);
+      entities_.at(idx) = nullptr;
+      deleted_ = true;
     }
 
     //--------------------------------------------------------------------------
@@ -106,21 +110,84 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void Scene::RemoveNullEntities()
+    {
+      foundation::Vector<Entity*> result;
+      size_t old_size = entities_.size();
+      result.resize(old_size);
+
+      size_t current = 0;
+      Entity* entity = nullptr;
+
+      for (size_t i = 0; i < old_size; ++i)
+      {
+        entity = entities_.at(i);
+
+        if (entity != nullptr)
+        {
+          result.at(current) = entity;
+          ++current;
+        }
+      }
+
+      result.erase(result.begin() + current, result.end());
+      entities_ = eastl::move(result);
+    }
+
+    //--------------------------------------------------------------------------
     void Scene::Start()
     {
-      for (size_t i = 0; i < entities_.size(); ++i)
+      ForEachEntity([](Entity* e)
       {
-        entities_.at(i)->Start();
-      }
+        e->Start();
+        return true;
+      });
     }
 
     //--------------------------------------------------------------------------
     void Scene::Update(float dt)
     {
-      for (size_t i = 0; i < entities_.size(); ++i)
+      ForEachEntity([dt](Entity* e)
       {
-        entities_.at(i)->Update(dt);
+        e->Update(dt);
+        return true;
+      });
+      
+      if (deleted_ == true)
+      {
+        RemoveNullEntities();
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void Scene::RenderEntities(float dt)
+    {
+      ForEachEntity([dt](Entity* e)
+      {
+        if (e->active() == false)
+        {
+          return true;
+        }
+
+        bool renderable = false;
+        if (e->HasComponent<MeshRendererComponent>() == true)
+        {
+          MeshRendererComponent* mrc = e->GetComponent<MeshRendererComponent>();
+          mrc->Update(dt);
+          renderable = true;
+        }
+        else if (e->HasComponent<CameraComponent>() == true)
+        {
+          CameraComponent* cc = e->GetComponent<CameraComponent>();
+          cc->Update(dt);
+          renderable = true;
+        }
+
+        TransformComponent* tc = e->GetComponent<TransformComponent>();
+        tc->Update(dt);
+
+        return true;
+      });
     }
 
     //--------------------------------------------------------------------------
@@ -147,17 +214,23 @@ namespace snuffbox
     {
       foundation::Vector<TransformComponent*> result;
 
+      Entity* e = nullptr;
       TransformComponent* t = nullptr;
 
       for (size_t i = 0; i < entities_.size(); ++i)
       {
-        t = entities_.at(i)->GetComponent<TransformComponent>();
+        e = entities_.at(i);
 
-        if (t->parent() == nullptr)
+        if (e != nullptr)
         {
-          result.push_back(t);
+          t = e->GetComponent<TransformComponent>();
+
+          if (t->parent() == nullptr)
+          {
+            result.push_back(t);
+          }
         }
-      }
+      };
 
       return result;
     }
@@ -170,9 +243,15 @@ namespace snuffbox
         return;
       }
 
+      Entity* current = nullptr;
       for (size_t i = 0; i < entities_.size(); ++i)
       {
-        del(entities_.at(i));
+        current = entities_.at(i);
+
+        if (current != nullptr)
+        {
+          del(entities_.at(i));
+        }
       }
     }
 

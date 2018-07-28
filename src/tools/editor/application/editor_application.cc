@@ -104,6 +104,10 @@ namespace snuffbox
         {
           Update(dt);
         }
+        else
+        {
+          RenderOnly(dt);
+        }
 
         renderer->Render(dt);
         builder_.IdleNotification();
@@ -389,6 +393,18 @@ namespace snuffbox
       window_->SetPlaybackEnabled(true);
       has_error_ = false;
 #endif
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::RenderOnly(float dt)
+    {
+      engine::Scene* current = 
+        GetService<engine::SceneService>()->current_scene();
+
+      if (current != nullptr)
+      {
+        current->RenderEntities(dt);
+      }
     }
 
     //--------------------------------------------------------------------------

@@ -306,6 +306,27 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::InstantiateModel(QString relative, int type)
+    {
+      if (static_cast<compilers::AssetTypes>(type) 
+        != compilers::AssetTypes::kModel)
+      {
+        return;
+      }
+
+      foundation::Path asset = relative.toStdString().c_str();
+      foundation::String no_ext = asset.NoExtension().ToString();
+
+      if (app_->GetService<engine::AssetService>()->Load(type, no_ext) == false)
+      {
+        return;
+      }
+
+      engine::AssetService* as = app_->GetService<engine::AssetService>();
+      static_cast<engine::ModelAsset*>(as->Get(type, no_ext))->Instantiate();
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::OpenProject()
     {
       QString dir = QFileDialog::getExistingDirectory(
@@ -410,13 +431,8 @@ namespace snuffbox
         break;
 
       case compilers::AssetTypes::kModel:
-      {
-        foundation::Path asset = relative.toStdString().c_str();
-        foundation::String str = asset.NoExtension().ToString();
-        app_->GetService<engine::AssetService>()->Load(type, str);
-        static_cast<engine::ModelAsset*>(app_->GetService<engine::AssetService>()->Get(type, str))->Instantiate();
-      }
-      break;
+        InstantiateModel(relative, type);
+        break;
 
       default:
         break;

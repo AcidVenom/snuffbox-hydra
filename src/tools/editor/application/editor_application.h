@@ -159,6 +159,11 @@ namespace snuffbox
       void ReloadScripts();
 
       /**
+      * @see Scene::RenderEntities
+      */
+      void RenderOnly(float dt);
+
+      /**
       * @brief Checks if we had errors during playmode and if so; disable
       *        the play button until those errors are fixed
       */
