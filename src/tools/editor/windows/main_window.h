@@ -6,6 +6,7 @@
 #include "tools/editor/windows/hierarchy_view.h"
 #include "tools/editor/windows/inspector.h"
 #include "tools/editor/windows/asset_browser.h"
+#include "tools/editor/windows/editor_event_filter.h"
 
 #include <graphics/definitions/graphics_window.h>
 #include <foundation/memory/memory.h>
@@ -116,6 +117,17 @@ namespace snuffbox
       *        with
       */
       void CreateAssetBrowser();
+
+      /**
+      * @brief Creates the event filter for input
+      */
+      void CreateEventFilter();
+
+      /**
+      * @brief Registers the input filter to send Qt input events
+      *        to the engine
+      */
+      void RegisterInputFilter();
 
       /**
       * @brief Loads the layout the user had during previous execution,
@@ -236,6 +248,11 @@ namespace snuffbox
       foundation::UniquePtr<HierarchyView> hierarchy_; //!< The hierarchy view
       foundation::UniquePtr<Inspector> inspector_; //!< The inspector
       foundation::UniquePtr<AssetBrowser> asset_browser_; //!< The asset browser
+
+      /**
+      * @brief The event filter to use for filtering input
+      */
+      foundation::UniquePtr<EditorEventFilter> input_event_filter_;
 
       QString project_dir_; //!< The current project directory
       QString current_scene_; //!< The current scene

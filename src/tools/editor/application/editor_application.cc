@@ -7,6 +7,7 @@
 #include <engine/services/cvar_service.h>
 #include <engine/services/scene_service.h>
 #include <engine/services/asset_service.h>
+#include <engine/services/input_service.h>
 #include <engine/assets/scene_asset.h>
 
 #ifndef SNUFF_NSCRIPTING
@@ -76,6 +77,7 @@ namespace snuffbox
       engine::SceneService* scene_service = GetService<engine::SceneService>();
 
       window_->CreateHierarchy(scene_service);
+      window_->RegisterInputFilter();
 
       window_->BindResizeCallback([&](uint16_t width, uint16_t height)
       {
@@ -106,6 +108,7 @@ namespace snuffbox
         }
         else
         {
+          GetService<engine::InputService>()->Flush();
           RenderOnly(dt);
         }
 

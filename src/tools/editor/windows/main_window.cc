@@ -5,6 +5,7 @@
 
 #include <engine/services/scene_service.h>
 #include <engine/services/asset_service.h>
+#include <engine/services/input_service.h>
 #include <engine/ecs/scene.h>
 #include <engine/assets/model_asset.h>
 
@@ -43,6 +44,7 @@ namespace snuffbox
       CreateConsole();
       CreateInspector();
       CreateAssetBrowser();
+      CreateEventFilter();
 
       BindEvents();
 
@@ -93,10 +95,10 @@ namespace snuffbox
           on_resize_(ui_.gameWindow->width(), ui_.gameWindow->height());
         }
 
-        return true;
+        return false;
       }
 
-      return false;
+      return input_event_filter_->eventFilter(obj, evt);
     }
 
     //--------------------------------------------------------------------------
@@ -214,6 +216,23 @@ namespace snuffbox
         SIGNAL(DoubleClickedAsset(QString, int)),
         this,
         SLOT(OnDoubleClickedAsset(QString, int)));
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::CreateEventFilter()
+    {
+      input_event_filter_ = 
+        foundation::Memory::ConstructUnique<EditorEventFilter>(
+          &foundation::Memory::default_allocator());
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::RegisterInputFilter()
+    {
+      app_->GetService<engine::InputService>()->RegisterInputFilter(
+        input_event_filter_.get());
+
+      ui_.gameWindow->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
     }
 
     //--------------------------------------------------------------------------

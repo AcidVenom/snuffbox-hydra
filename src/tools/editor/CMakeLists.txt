@@ -27,6 +27,8 @@ SET(WindowsSources
   "windows/gui.cc"
   "windows/asset_browser.h"
   "windows/asset_browser.cc"
+  "windows/editor_event_filter.h"
+  "windows/editor_event_filter.cc"
 )
 
 SET(ApplicationSources
