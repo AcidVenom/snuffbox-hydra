@@ -334,6 +334,54 @@ namespace snuffbox
 
       gui.EndLayout();
 
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      gui.Label("Field of view ");
+      gui.NumberField(static_cast<double>(c->fov()), false,
+        [=](QWidget*, double val)
+      {
+        c->set_fov(static_cast<float>(val));
+      });
+
+      gui.EndLayout();
+
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      gui.Label("Aspect ");
+      gui.NumberField(static_cast<double>(c->aspect()), false,
+        [=](QWidget*, double val)
+      {
+        c->set_aspect(static_cast<float>(val));
+      });
+
+      gui.EndLayout();
+
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      gui.Label("Orthographic size ");
+      gui.NumberField(static_cast<double>(c->orthographic_size()), false,
+        [=](QWidget*, double val)
+      {
+        c->set_orthographic_size(static_cast<float>(val));
+      });
+
+      gui.EndLayout();
+
+      gui.StartLayout(GUI::LayoutStyle::kHorizontal);
+
+      gui.Label("Is orthographic");
+      gui.Checkbox(
+        c->projection() == engine::CameraProjection::kOrthographic,
+        [=](QWidget*, bool val)
+      {
+        c->set_projection(
+          val == true ? 
+          engine::CameraProjection::kOrthographic : 
+          engine::CameraProjection::kPerspective);
+      });
+
+      gui.EndLayout();
+
       return gui.EndAsWidget();
     }
 

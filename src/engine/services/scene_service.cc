@@ -77,6 +77,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SceneService::SwitchScene(Scene* scene)
     {
+      if (current_scene_ == &default_scene_)
+      {
+        current_scene_->Clear();
+      }
+
       UnloadAssets();
 
       if (loaded_scene_ != nullptr && loaded_scene_->scene() != scene)

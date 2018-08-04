@@ -17,6 +17,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class EditorCamera;
+
     /**
     * @brief The editor application that runs the engine in editor mode
     *
@@ -147,6 +149,14 @@ namespace snuffbox
       void OnRemoved(const builder::BuildItem& item);
 
       /**
+      * @brief Creates the editor camera for a particular scene as an internal
+      *        entity
+      *
+      * @param[in] scene The scene to create the camera for
+      */
+      void NewEditorCamera(engine::Scene* scene);
+
+      /**
       * @brief Reloads all script-related content when a new script was added
       *        or reloaded
       *
@@ -208,10 +218,16 @@ namespace snuffbox
       */
       void CheckSceneChanged();
 
+      /**
+      * @brief Destroys the editor camera
+      */
+      void OnShutdown() override;
+
     private:
 
       builder::Builder builder_; //!< The builder service
       foundation::UniquePtr<MainWindow> window_; //!< The main window
+      EditorCamera* camera_; //!< The editor camera
 
       QString project_dir_; //!< The current project directory
       QString assets_dir_; //!< The current assets directory

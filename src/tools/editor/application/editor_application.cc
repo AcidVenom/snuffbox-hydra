@@ -1,4 +1,5 @@
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/application/editor_camera.h"
 #include "tools/editor/definitions/project.h"
 
 #include <engine/ecs/entity.h>
@@ -40,6 +41,7 @@ namespace snuffbox
       Application(argc, argv, cfg),
       QApplication(argc, argv),
       window_(nullptr),
+      camera_(nullptr),
       project_dir_(""),
       assets_dir_(""),
       loaded_scene_(""),
@@ -92,9 +94,12 @@ namespace snuffbox
       });
 
       SwitchState(States::kEditing);
+      NewEditorCamera(scene_service->current_scene());
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
+
+      engine::InputService* input = GetService<engine::InputService>();
 
       while (should_quit() == false)
       {
@@ -108,7 +113,7 @@ namespace snuffbox
         }
         else
         {
-          GetService<engine::InputService>()->Flush();
+          input->Flush();
           RenderOnly(dt);
         }
 
@@ -194,11 +199,20 @@ namespace snuffbox
         return false;
       }
 
-      GetService<engine::SceneService>()->SwitchScene(nullptr);
+      if (camera_ != nullptr)
+      {
+        camera_->Destroy();
+      }
+
+      engine::SceneService* ss = GetService<engine::SceneService>();
+
+      ss->SwitchScene(nullptr);
       loaded_scene_ = "";
       serialized_scene_ = "";
 
       scene_changed_ = true;
+
+      NewEditorCamera(ss->current_scene());
 
       return true;
     }
@@ -216,12 +230,21 @@ namespace snuffbox
         return;
       }
 
+      if (camera_ != nullptr)
+      {
+        camera_->Destroy();
+      }
+
+      engine::SceneService* ss = GetService<engine::SceneService>();
+
       loaded_scene_ = path.ToString();
 
       foundation::String asset = path.NoExtension().ToString();
-      GetService<engine::SceneService>()->SwitchScene(asset);
+      ss->SwitchScene(asset);
 
       scene_changed_ = true;
+
+      NewEditorCamera(ss->current_scene());
     }
 
     //--------------------------------------------------------------------------
@@ -353,6 +376,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void EditorApplication::NewEditorCamera(engine::Scene* scene)
+    {
+      camera_ = foundation::Memory::Construct<EditorCamera>(
+        &foundation::Memory::default_allocator(), scene);
+    }
+
+    //--------------------------------------------------------------------------
     void EditorApplication::ReloadScripts()
     {
 #ifndef SNUFF_NSCRIPTING
@@ -418,6 +448,11 @@ namespace snuffbox
         window_->SetPlaybackEnabled(false);
       }
 
+      if (camera_ != nullptr)
+      {
+        camera_->set_active(true);
+      }
+
 #ifndef SNUFF_NSCRIPTING
       GetService<engine::ScriptService>()->Restart();
 #endif
@@ -431,6 +466,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void EditorApplication::Play()
     {
+      if (camera_ != nullptr)
+      {
+        camera_->set_active(false);
+      }
+
       SerializeCurrentScene();
 
       RunScripts();
@@ -499,6 +539,15 @@ namespace snuffbox
       {
         window_->OnSceneChanged();
         scene_changed_ = false;
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnShutdown()
+    {
+      if (camera_ != nullptr)
+      {
+        camera_->Destroy();
       }
     }
   }

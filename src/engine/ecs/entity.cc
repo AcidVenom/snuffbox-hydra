@@ -33,10 +33,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Entity::Entity(Scene* scene) :
+    Entity::Entity(Scene* scene, bool internal) :
       name_(kDefaultName_),
       destroyed_(false),
       active_(true),
+      is_internal_(internal),
       scene_(scene),
       id_(0)
     {
@@ -220,6 +221,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Entity::is_internal() const
+    {
+      return is_internal_;
+    }
+
+    //--------------------------------------------------------------------------
     TransformComponent* Entity::transform() const
     {
       return GetComponent<TransformComponent>();
@@ -306,6 +313,14 @@ namespace snuffbox
           comp->Update(dt);
         }
       }
+
+      OnUpdate(dt);
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::OnUpdate(float dt)
+    {
+
     }
 
     //--------------------------------------------------------------------------

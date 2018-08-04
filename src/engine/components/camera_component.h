@@ -74,6 +74,13 @@ namespace snuffbox
       SCRIPT_FUNC() void set_aspect(float aspect);
 
       /**
+      * @brief Sets the orthographic size of the camera
+      *
+      * @param[in] size The size to set
+      */
+      SCRIPT_FUNC() void set_orthographic_size(float size);
+
+      /**
       * @brief Sets the projection mode of the camera
       *
       * @param[in] projection The projection mode of the camera
@@ -99,6 +106,11 @@ namespace snuffbox
       * @return The aspect ratio of the camera
       */
       SCRIPT_FUNC() float aspect() const;
+
+      /**
+      * @return The orthographic siez of the camera
+      */
+      SCRIPT_FUNC() float orthographic_size() const;
 
       /**
       * @return The projection mode of the camera
@@ -141,6 +153,7 @@ namespace snuffbox
       float far_; //!< The far plane of the camera
       float fov_; //!< The field of view of the camera
       float aspect_; //!< The aspect ratio of the camera
+      float orthographic_size_; //!< The orthographic size of the camera
 
       CameraProjection projection_; //!< The projection mode of the camera
 

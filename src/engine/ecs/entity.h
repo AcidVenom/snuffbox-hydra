@@ -57,8 +57,9 @@ namespace snuffbox
       * @brief Construct an entity within a specific scene
       *
       * @param[in] scene The scene to add this entity to
+      * @param[in] internal Is this entity for internal use?
       */
-      Entity(Scene* scene);
+      Entity(Scene* scene, bool internal = false);
 
       SCRIPT_CONSTRUCTOR(Entity);
 
@@ -232,6 +233,11 @@ namespace snuffbox
       SCRIPT_FUNC() bool active() const;
 
       /**
+      * @return Is this an internal entity?
+      */
+      bool is_internal() const;
+
+      /**
       * @return The transform component of this entity
       */
       SCRIPT_FUNC() TransformComponent* transform() const;
@@ -349,6 +355,16 @@ namespace snuffbox
       void Update(float dt);
 
       /**
+      * @brief This method can be overridden to do custom C++-sided behavior
+      *        after inheritance
+      *
+      * @param[in] dt The current delta-time of the application
+      *
+      * @see Entity::Update
+      */
+      virtual void OnUpdate(float dt);
+
+      /**
       * @brief Sets the ID of this entity, used by the scene to initially
       *        assign an ID, or when an entity is deserialized
       *
@@ -394,6 +410,18 @@ namespace snuffbox
       foundation::String name_; //!< The name of this entity
       bool destroyed_; //!< Has this entity been destroyed yet?
       bool active_; //!< Is this entity active?
+
+      /**
+      * @brief Is this an internal entity?
+      *
+      * Internal entities can be used by the editor for functionalities like
+      * the editor camera. This avoids writing duplicate code and makes the
+      * entity pipeline accessible without exposing it to the end-user.
+      *
+      * @remarks Internal entities are not serialized, nor destroyed when a
+      *          scene is cleared. It's up to the user to destroy these entities
+      */
+      bool is_internal_;
 
       Scene* scene_; //!< The scene this entity was spawned in
       size_t id_; //!< The ID of this entity, from within the current scene

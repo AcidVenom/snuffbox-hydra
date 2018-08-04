@@ -34,6 +34,8 @@ SET(WindowsSources
 SET(ApplicationSources
   "application/editor_application.h"
   "application/editor_application.cc"
+  "application/editor_camera.h"
+  "application/editor_camera.cc"
 )
 
 SOURCE_GROUP("\\"           FILES ${RootSources})

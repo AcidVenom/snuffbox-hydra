@@ -73,6 +73,11 @@ namespace snuffbox
     int Scene::HasEntity(Entity* entity)
     {
       int idx = -1;
+      if (entity == nullptr)
+      {
+        return idx;
+      }
+
       for (int i = 0; i < static_cast<int>(entities_.size()); ++i)
       {
         if (entities_.at(i) == entity)
@@ -169,22 +174,18 @@ namespace snuffbox
           return true;
         }
 
-        bool renderable = false;
         if (e->HasComponent<MeshRendererComponent>() == true)
         {
-          MeshRendererComponent* mrc = e->GetComponent<MeshRendererComponent>();
-          mrc->Update(dt);
-          renderable = true;
+          e->GetComponent<MeshRendererComponent>()->Update(dt);
         }
-        else if (e->HasComponent<CameraComponent>() == true)
+        else if (
+          e->HasComponent<CameraComponent>() == true &&
+          e->is_internal() == true)
         {
-          CameraComponent* cc = e->GetComponent<CameraComponent>();
-          cc->Update(dt);
-          renderable = true;
+          e->Update(dt);
         }
 
-        TransformComponent* tc = e->GetComponent<TransformComponent>();
-        tc->Update(dt);
+        e->GetComponent<TransformComponent>()->Update(dt);
 
         return true;
       });
@@ -193,20 +194,20 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::Clear()
     {
-      foundation::Vector<Entity*> copy = entities_;
-
       Entity* e = nullptr;
-      for (int i = static_cast<int>(copy.size()) - 1; i >= 0; --i)
+      for (int i = static_cast<int>(entities_.size()) - 1; i >= 0; --i)
       {
-        if (HasEntity(copy.at(i)) == -1)
+        e = entities_.at(i);
+        if (HasEntity(e) == -1 || e->is_internal() == true)
         {
           continue;
         }
 
-        copy.at(i)->Destroy();
+        e->Destroy();
+        entities_.at(i) = nullptr;
       }
 
-      entities_.clear();
+      RemoveNullEntities();
     }
 
     //--------------------------------------------------------------------------
@@ -221,7 +222,7 @@ namespace snuffbox
       {
         e = entities_.at(i);
 
-        if (e != nullptr)
+        if (e != nullptr && e->is_internal() == false)
         {
           t = e->GetComponent<TransformComponent>();
 

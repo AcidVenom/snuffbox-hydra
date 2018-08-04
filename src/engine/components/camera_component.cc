@@ -33,6 +33,7 @@ namespace snuffbox
       far_(100.0f),
       fov_(90.0f),
       aspect_(16.0f / 9.0f),
+      orthographic_size_(5.0f),
       projection_(CameraProjection::kPerspective),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
@@ -71,6 +72,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void CameraComponent::set_orthographic_size(float size)
+    {
+      orthographic_size_ = size;
+    }
+
+    //--------------------------------------------------------------------------
     void CameraComponent::set_projection(CameraProjection projection)
     {
       projection_ = projection;
@@ -101,6 +108,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    float CameraComponent::orthographic_size() const
+    {
+      return orthographic_size_;
+    }
+
+    //--------------------------------------------------------------------------
     CameraProjection CameraComponent::projection() const
     {
       return projection_;
@@ -121,8 +134,19 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void CameraComponent::UpdateMatrices()
     {
-      projection_matrix_ = 
-        glm::perspectiveLH_ZO(glm::radians(fov_), aspect_, near_, far_);
+      if (projection_ == CameraProjection::kPerspective)
+      {
+        projection_matrix_ = 
+          glm::perspectiveLH_ZO(glm::radians(fov_), aspect_, near_, far_);
+      }
+      else
+      {
+        float hy = orthographic_size_ * 0.5f;
+        float hx = aspect_ * hy;
+
+        projection_matrix_ = 
+          glm::orthoLH_ZO(-hx, hx, -hy, hy, near_, far_);
+      }
 
       TransformComponent* t = entity()->GetComponent<TransformComponent>();
       const glm::vec3 eye = t->GetPosition();
@@ -137,6 +161,9 @@ namespace snuffbox
       archive(
         SET_ARCHIVE_PROP(near_),
         SET_ARCHIVE_PROP(far_),
+        SET_ARCHIVE_PROP(fov_),
+        SET_ARCHIVE_PROP(aspect_),
+        SET_ARCHIVE_PROP(orthographic_size_),
         SET_ARCHIVE_PROP(projection_));
     }
 
@@ -146,6 +173,9 @@ namespace snuffbox
       archive(
         GET_ARCHIVE_PROP(near_),
         GET_ARCHIVE_PROP(far_),
+        GET_ARCHIVE_PROP(fov_),
+        GET_ARCHIVE_PROP(aspect_),
+        GET_ARCHIVE_PROP(orthographic_size_),
         GET_ARCHIVE_PROP(projection_));
     }
   }

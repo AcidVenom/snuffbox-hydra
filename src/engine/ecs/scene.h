@@ -112,7 +112,7 @@ namespace snuffbox
 
       /**
       * @brief Only renders all entities in the scene whenever they are active,
-      *        cameras are rendered as well
+      *        internal cameras are rendered as well
       *
       * This call doesn't actually execute any other components other than
       * rendering components. This method is not to be used in conjuction
