@@ -111,23 +111,6 @@ namespace snuffbox
       void Update(float dt);
 
       /**
-      * @brief Only renders all entities in the scene whenever they are active,
-      *        internal cameras are rendered as well
-      *
-      * This call doesn't actually execute any other components other than
-      * rendering components. This method is not to be used in conjuction
-      * with Scene::Update and is primarily used by the editor while editing
-      * the scene.
-      *
-      * This call also calls Scene::RemoveNullEntities after the frame to make
-      * sure any null-references are removed from the scene. This makes sure
-      * the contents of the entity vector don't get changed during execution.
-      *
-      * @param[in] dt The current delta-time of the application
-      */
-      void RenderEntities(float dt);
-
-      /**
       * @brief Clears all entities in the scene
       *
       * The entities that were created from script are not destructed here,

@@ -1,8 +1,6 @@
 #include "engine/ecs/scene.h"
 #include "engine/ecs/entity.h"
 #include "engine/components/transform_component.h"
-#include "engine/components/mesh_renderer_component.h"
-#include "engine/components/camera_component.h"
 #include "engine/application/application.h"
 #include "engine/services/scene_service.h"
 
@@ -162,33 +160,6 @@ namespace snuffbox
       {
         RemoveNullEntities();
       }
-    }
-
-    //--------------------------------------------------------------------------
-    void Scene::RenderEntities(float dt)
-    {
-      ForEachEntity([dt](Entity* e)
-      {
-        if (e->active() == false)
-        {
-          return true;
-        }
-
-        if (e->HasComponent<MeshRendererComponent>() == true)
-        {
-          e->GetComponent<MeshRendererComponent>()->Update(dt);
-        }
-        else if (
-          e->HasComponent<CameraComponent>() == true &&
-          e->is_internal() == true)
-        {
-          e->Update(dt);
-        }
-
-        e->GetComponent<TransformComponent>()->Update(dt);
-
-        return true;
-      });
     }
 
     //--------------------------------------------------------------------------

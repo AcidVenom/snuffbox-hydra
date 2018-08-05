@@ -340,6 +340,17 @@ namespace snuffbox
       IComponent* CreateComponentByID(Components id);
 
       /**
+      * @brief Sets the ID of this entity, used by the scene to initially
+      *        assign an ID, or when an entity is deserialized
+      *
+      * @param[in] id The ID to set
+      */
+      void set_id(size_t id);
+
+    public:
+
+
+      /**
       * @brief Called when the scene starts or when the scene is already
       *        running and the entity is created
       */
@@ -363,16 +374,6 @@ namespace snuffbox
       * @see Entity::Update
       */
       virtual void OnUpdate(float dt);
-
-      /**
-      * @brief Sets the ID of this entity, used by the scene to initially
-      *        assign an ID, or when an entity is deserialized
-      *
-      * @param[in] id The ID to set
-      */
-      void set_id(size_t id);
-
-    public:
 
       /**
       * @return The scene this entity was spawned in

@@ -3,6 +3,9 @@
 #include "tools/editor/definitions/project.h"
 
 #include <engine/ecs/entity.h>
+#include <engine/components/transform_component.h>
+#include <engine/components/mesh_renderer_component.h>
+#include <engine/components/camera_component.h>
 
 #include <engine/services/renderer_service.h>
 #include <engine/services/cvar_service.h>
@@ -436,7 +439,27 @@ namespace snuffbox
 
       if (current != nullptr)
       {
-        current->RenderEntities(dt);
+        current->ForEachEntity([dt](engine::Entity* e)
+        {
+          if (e->active() == false)
+          {
+            return true;
+          }
+
+          if (e->HasComponent<engine::MeshRendererComponent>() == true)
+          {
+            e->GetComponent<engine::MeshRendererComponent>()->Update(dt);
+          }
+
+          e->GetComponent<engine::TransformComponent>()->Update(dt);
+
+          return true;
+        });
+
+        if (camera_ != nullptr)
+        {
+          camera_->Update(dt);
+        }
       }
     }
 

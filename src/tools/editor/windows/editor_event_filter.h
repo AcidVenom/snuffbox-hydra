@@ -1,8 +1,10 @@
 #pragma once
 
 #include <engine/input/input_filter.h>
+#include <engine/definitions/keycodes.h>
 
 #include <qobject.h>
+#include <qnamespace.h>
 
 class QKeyEvent;
 class QMouseEvent;
@@ -65,6 +67,21 @@ namespace snuffbox
       * @brief The event filter to filter out keyboard and mouse events
       */
       bool eventFilter(QObject* obj, QEvent* evt);
+
+      /**
+      * @brief Converts a Qt keycode to the respective engine keycode
+      *
+      * @remarks Most keycodes are the same, but modifier keys and special keys
+      *          are handled differently. These are converted
+      *
+      * Modifier keys are returned as their left-sided equivalent, e.g.
+      * Qt::Key::Key_Shift becomes engine::Key::kLeftShift
+      *
+      * @param[in] kc The keycode to convert
+      *
+      * @return The converted keycode
+      */
+      static engine::Keys ConvertKeyCode(Qt::Key kc);
 
     private:
 

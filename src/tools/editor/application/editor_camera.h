@@ -37,6 +37,7 @@ namespace snuffbox
     private:
 
       engine::CameraComponent* camera_; //!< The camera component
+      glm::vec2 angle_; //!< The current angle of the camera
     };
   }
 }

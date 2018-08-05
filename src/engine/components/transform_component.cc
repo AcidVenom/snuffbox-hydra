@@ -194,7 +194,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::RotateAxis(const glm::vec3& axis, float angle)
     {
-      rotation_ = glm::angleAxis(angle, axis);
+      rotation_ *= glm::angleAxis(angle, axis);
       MarkDirty(DirtyFlags::kSelf);
     }
 

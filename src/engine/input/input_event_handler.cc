@@ -16,6 +16,9 @@ namespace snuffbox
         case KeyButtonEvent::kReleased:
           return KeyButtonState::kReleased;
 
+        case KeyButtonEvent::kPressed:
+          return KeyButtonState::kDown;
+
         default:
           return KeyButtonState::kUp;
         }
@@ -26,6 +29,9 @@ namespace snuffbox
         {
         case KeyButtonEvent::kPressed:
           return KeyButtonState::kPressed;
+
+        case KeyButtonEvent::kReleased:
+          return KeyButtonState::kUp;
           
         default:
           return KeyButtonState::kDown;
