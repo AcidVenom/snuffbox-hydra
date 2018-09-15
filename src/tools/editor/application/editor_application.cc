@@ -18,7 +18,8 @@ namespace snuffbox
       int argc, char** argv, const Configuration& cfg)
       :
       engine::Application(argc, argv, cfg),
-      qapp_(argc, argv)
+      qapp_(argc, argv),
+      project_(nullptr)
     {
       QCoreApplication::setOrganizationName(
         QStringLiteral("Daniel Konings"));
@@ -38,7 +39,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes EditorApplication::Run()
     {
-      std::unique_ptr<ProjectWindow> project_window(new ProjectWindow(nullptr));
+      std::unique_ptr<ProjectWindow> 
+        project_window(new ProjectWindow(&project_));
+
       project_window->show();
 
       if (project_window->exec() == QDialog::Rejected)
@@ -79,6 +82,12 @@ namespace snuffbox
         cfg.application_name);
 
       return settings;
+    }
+
+    //--------------------------------------------------------------------------
+    const Project& EditorApplication::project() const
+    {
+      return project_;
     }
 
     //--------------------------------------------------------------------------

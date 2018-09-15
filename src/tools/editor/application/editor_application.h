@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tools/editor/project/project.h"
+
 #include <engine/application/application.h>
 
 #include <QApplication>
@@ -44,6 +46,11 @@ namespace snuffbox
       */
       QSettings& GlobalSettings() const;
 
+      /**
+      * @return The current project settings
+      */
+      const Project& project() const;
+
     protected:
 
       /**
@@ -54,6 +61,7 @@ namespace snuffbox
     private:
 
       QApplication qapp_; //!< The Qt application
+      Project project_; //!< The current project settings
     };
   }
 }
