@@ -256,6 +256,12 @@ namespace snuffbox
     foundation::ErrorCodes Application::InitializeRenderer()
     {
       RendererService* renderer = GetService<RendererService>();
+
+      if (renderer == nullptr)
+      {
+        return foundation::ErrorCodes::kNoRendererCreated;
+      }
+
       return reinterpret_cast<IService*>(renderer)->OnInitialize(*this);
     }
 

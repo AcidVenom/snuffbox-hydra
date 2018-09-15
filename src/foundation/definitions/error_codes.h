@@ -13,6 +13,7 @@ namespace snuffbox
       kGLFWInitializationFailed,
       kCreateWindowError,
       kScriptInitializationFailed,
+      kNoRendererCreated,
       kRendererInitializationFailed,
       kUnknown
     };

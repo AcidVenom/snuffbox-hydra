@@ -1,53 +1,36 @@
-SET(CMAKE_AUTOUIC ON)
 SET(CMAKE_AUTOMOC ON)
 
 SET(RootSources
   "main.cc"
 )
 
-SET(DefinitionsSources
-  "definitions/project.h"
-  "definitions/project.cc"
-  "definitions/color_format.h"
-  "definitions/editor_colors.h"
-  "definitions/editor_colors.cc"
-)
-
-SET(WindowsSources
-  "windows/main_window.ui"
-  "windows/main_window.h"
-  "windows/main_window.cc"
-  "windows/console.h"
-  "windows/console.cc"
-  "windows/hierarchy_view.h"
-  "windows/hierarchy_view.cc"
-  "windows/inspector.h"
-  "windows/inspector.cc"
-  "windows/gui.h"
-  "windows/gui.cc"
-  "windows/asset_browser.h"
-  "windows/asset_browser.cc"
-  "windows/editor_event_filter.h"
-  "windows/editor_event_filter.cc"
-)
-
 SET(ApplicationSources
   "application/editor_application.h"
   "application/editor_application.cc"
-  "application/editor_camera.h"
-  "application/editor_camera.cc"
+)
+
+SET(ProjectSources
+  "project/project.h"
+  "project/project.cc"
+  "project/project_window.h"
+  "project/project_window.cc"
+)
+
+SET(InputSources
+  "input/editor_event_filter.h"
+  "input/editor_event_filter.cc"
 )
 
 SOURCE_GROUP("\\"           FILES ${RootSources})
-SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
-SOURCE_GROUP("windows"      FILES ${WindowsSources})
 SOURCE_GROUP("application"  FILES ${ApplicationSources})
+SOURCE_GROUP("project"      FILES ${ProjectSources})
+SOURCE_GROUP("input"        FILES ${InputSources})
 
 SET(EditorSources
   ${RootSources}
-  ${DefinitionsSources}
-  ${WindowsSources}
   ${ApplicationSources}
+  ${ProjectSources}
+  ${InputSources}
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})
