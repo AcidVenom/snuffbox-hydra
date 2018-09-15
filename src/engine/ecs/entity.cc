@@ -221,6 +221,24 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool Entity::IsActive() const
+    {
+      TransformComponent* parent = GetComponent<TransformComponent>()->parent();
+
+      while (parent != nullptr)
+      {
+        if (parent->entity()->IsActive() == false)
+        {
+          return false;
+        }
+
+        parent = parent->parent();
+      }
+
+      return active_;
+    }
+
+    //--------------------------------------------------------------------------
     bool Entity::is_internal() const
     {
       return is_internal_;
@@ -296,7 +314,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Entity::Update(float dt)
     {
-      if (active_ == false)
+      if (IsActive() == false)
       {
         return;
       }

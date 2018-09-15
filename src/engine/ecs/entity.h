@@ -229,8 +229,20 @@ namespace snuffbox
 
       /**
       * @return Is this entity active?
+      *
+      * @remarks This function does not propagate the parent tree and simply
+      *          returns whether this specific entity is active or not
       */
       SCRIPT_FUNC() bool active() const;
+
+      /**
+      * @return Is this entity active?
+      *
+      * @remarks This function propagates the entire parent tree, if any
+      *          of the upper-level parents are inactive, this entity is treated
+      *          as inactive as well
+      */
+      SCRIPT_FUNC() bool IsActive() const;
 
       /**
       * @return Is this an internal entity?

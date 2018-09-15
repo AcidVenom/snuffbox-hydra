@@ -131,7 +131,7 @@ namespace snuffbox
 
       HierarchyViewItem* new_item = new HierarchyViewItem(child);
 
-      if (ent->active() == false)
+      if (ent->IsActive() == false)
       {
         new_item->setTextColor(0, EditorColors::DefaultPalette().color(
           QPalette::Disabled, 

@@ -441,7 +441,7 @@ namespace snuffbox
       {
         current->ForEachEntity([dt](engine::Entity* e)
         {
-          if (e->active() == false)
+          if (e->IsActive() == false)
           {
             return true;
           }
