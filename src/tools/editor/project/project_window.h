@@ -119,6 +119,11 @@ namespace snuffbox
       static const QString kProjectFile_;
 
       /**
+      * @brief The project name key in the project settings JSON file
+      */
+      static const QString kProjectNameKey_;
+
+      /**
       * @brief The maximum number of recently opened projects to show
       */
       static const int kMaxRecentlyOpened_;

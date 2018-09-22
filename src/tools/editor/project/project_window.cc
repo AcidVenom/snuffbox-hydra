@@ -28,6 +28,7 @@ namespace snuffbox
       "Project.RecentlyOpened.%0";
 
     const QString ProjectWindow::kProjectFile_ = "project_settings.json";
+    const QString ProjectWindow::kProjectNameKey_ = "project_name";
 
     const int ProjectWindow::kMaxRecentlyOpened_ = 5;
 
@@ -65,6 +66,9 @@ namespace snuffbox
 
       recent_projects_ = new QListWidget(recent_layout->widget());
       recent_projects_->setObjectName(QStringLiteral("RecentProjectsWidget"));
+
+      recent_projects_->setStyleSheet(
+        "QListView::item:selected { background-color: rgb(50, 100, 0); }");
 
       QHBoxLayout* buttons_layout = new QHBoxLayout(main_layout->widget());
       buttons_layout->setObjectName(QStringLiteral("ProjectButtonsLayout"));
@@ -162,7 +166,7 @@ namespace snuffbox
 
       QJsonDocument doc;
       QJsonObject root;
-      root.insert("project_name", dialog->project_name());
+      root.insert(kProjectNameKey_, dialog->project_name());
 
       doc.setObject(root);
 
@@ -171,6 +175,7 @@ namespace snuffbox
       if (file.open(QFile::WriteOnly) == true)
       {
         file.write(doc.toJson());
+        file.close();
         AddRecentProject(dir);
       }
     }
@@ -229,6 +234,32 @@ namespace snuffbox
         }
       }
 
+      QListWidgetItem* new_item = nullptr;
+      QWidget* recent_project_widget = nullptr;
+      QVBoxLayout* layout = nullptr;
+      QLabel* name_widget = nullptr;
+      QLabel* path_widget = nullptr;
+
+      auto GetProjectName = [](const QString& path)
+      {
+        QFile file(path + "/" + kProjectFile_);
+        QString undefined = QStringLiteral("undefined");
+
+        if (file.open(QFile::ReadOnly) == true)
+        {
+          QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+
+          if (doc.isObject() == false)
+          {
+            return undefined;
+          }
+
+          return doc.object()[kProjectNameKey_].toString(undefined);
+        }
+
+        return undefined;
+      };
+
       for (int i = 0; i < recent_project_paths_.size(); ++i)
       {
         if (i >= kMaxRecentlyOpened_)
@@ -236,7 +267,30 @@ namespace snuffbox
           break;
         }
 
-        recent_projects_->addItem(recent_project_paths_.at(i));
+        const QString& full_path = recent_project_paths_.at(i);
+
+        new_item = new QListWidgetItem(recent_projects_);
+        recent_project_widget = new QWidget(new_item->listWidget());
+
+        layout = new QVBoxLayout(recent_project_widget);
+
+        name_widget = new QLabel(layout->widget());
+        path_widget = new QLabel(layout->widget());
+
+        name_widget->setText(GetProjectName(full_path));
+        name_widget->setStyleSheet(
+          "font-weight: bold; font-size: 14px;");
+
+        path_widget->setText(full_path);
+
+        layout->addWidget(name_widget);
+        layout->addWidget(path_widget);
+
+        recent_project_widget->setLayout(layout);
+
+        recent_projects_->setItemWidget(new_item, recent_project_widget);
+        recent_projects_->addItem(new_item);
+        new_item->setSizeHint(QSize(256, 64));
       }
     }
 
@@ -336,6 +390,8 @@ namespace snuffbox
       main_layout->setObjectName(QStringLiteral("NewProjectMainLayout"));
 
       error_ = new QLabel(main_layout->widget());
+      error_->setObjectName(QStringLiteral("NewProjectErrorMessage"));
+      
       error_->setText(QStringLiteral("Please specify a name"));
       error_->setStyleSheet("QLabel { color: red; }");
       error_->setVisible(false);

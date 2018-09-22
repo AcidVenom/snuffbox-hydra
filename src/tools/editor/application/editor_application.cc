@@ -1,6 +1,7 @@
 #include "tools/editor/application/editor_application.h"
 
 #include "tools/editor/project/project_window.h"
+#include "tools/editor/application/styling.h"
 
 #include <engine/services/script_service.h>
 
@@ -28,6 +29,8 @@ namespace snuffbox
         QStringLiteral("www.danielkonings.com"));
 
       QCoreApplication::setApplicationName(cfg.application_name);
+
+      Styling::ApplyStyle(&qapp_);
     }
 
     //--------------------------------------------------------------------------

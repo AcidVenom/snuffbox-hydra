@@ -7,6 +7,8 @@ SET(RootSources
 SET(ApplicationSources
   "application/editor_application.h"
   "application/editor_application.cc"
+  "application/styling.h"
+  "application/styling.cc"
 )
 
 SET(ProjectSources
