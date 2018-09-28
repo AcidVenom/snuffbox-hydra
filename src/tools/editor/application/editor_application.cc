@@ -1,9 +1,14 @@
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/windows/main_window.h"
 
 #include "tools/editor/project/project_window.h"
 #include "tools/editor/application/styling.h"
 
+#ifndef SNUFF_NSCRIPTING
 #include <engine/services/script_service.h>
+#endif
+
+#include <engine/services/renderer_service.h>
 
 #include <foundation/auxiliary/logger.h>
 
@@ -52,15 +57,33 @@ namespace snuffbox
         return foundation::ErrorCodes::kSuccess;
       }
 
+      std::unique_ptr<MainWindow>
+        main_window(new MainWindow());
+
       ApplyConfiguration();
 
       foundation::Logger::LogVerbosity<2>(
         foundation::LogChannel::kEditor,
         foundation::LogSeverity::kDebug,
-        "Initializing the editor"
-        );
+        "Initializing the editor\n\tOpening project: {0}",
+        project_.project_path().toStdString());
 
       foundation::ErrorCodes err = Initialize();
+
+      if (err == foundation::ErrorCodes::kSuccess)
+      {
+        err = CreateRenderer(main_window->GetGraphicsWindow());
+      }
+
+      main_window->show();
+
+      engine::RendererService* renderer = GetService<engine::RendererService>();
+
+      while (should_quit() == false && main_window->isVisible() == true)
+      {
+        renderer->Render(0.0f);
+        qapp_.processEvents();
+      }
 
       if (err != foundation::ErrorCodes::kSuccess)
       {
@@ -88,15 +111,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const Project& EditorApplication::project() const
+    Project& EditorApplication::project()
     {
       return project_;
-    }
-
-    //--------------------------------------------------------------------------
-    void EditorApplication::CreateRenderer()
-    {
-      //!< @todo Implement this function when we have a 3D view again
     }
   }
 }

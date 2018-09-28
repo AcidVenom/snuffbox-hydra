@@ -19,6 +19,11 @@ GetService<snuffbox::engine::ScriptService>()->On##x##Callback(__VA_ARGS__)
 
 namespace snuffbox
 {
+  namespace graphics
+  {
+    struct GraphicsWindow;
+  }
+
   namespace engine
   {
     class WindowService;
@@ -167,9 +172,6 @@ namespace snuffbox
       * After initialization of the main services, the renderer service is
       * created and initialized as well
       *
-      * @see Application::CreateRenderer
-      * @see Application::InitializeRenderer
-      *
       * @return The error code, or ErrorCodes::kSuccess if every service
       *         was initialized succesfully
       */
@@ -183,21 +185,16 @@ namespace snuffbox
       void ShutdownServices();
 
       /**
-      * @brief Creates the renderer service
+      * @brief Creates the renderer service in the corresponding graphics
+      *        window
       *
-      * This method should be overridden by the editor application to
-      * use a different graphics window over the GLFW window used in the
-      * regular player application.
-      */
-      virtual void CreateRenderer();
-
-      /**
-      * @brief Initializes the renderer after initializing all other services
+      * @param[in] window The graphics window to create the renderer in
       *
-      * @return The error code, or ErrorCodes::kSuccess if initialization was
-      *         a success
+      * @return The error code, or ErrorCodes::kSuccess if the renderer
+      *         was succesfully initialized
       */
-      foundation::ErrorCodes InitializeRenderer();
+      foundation::ErrorCodes CreateRenderer(
+        const graphics::GraphicsWindow& window);
 
       /**
       * @brief Registers all CVars from the different systems and set

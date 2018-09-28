@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tools/editor/project/project.h"
+#include "tools/editor/windows/main_window.h"
 
 #include <engine/application/application.h>
 
@@ -11,6 +12,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class MainWindow;
+
     /**
     * @brief The application instance for the editor version of the engine
     *
@@ -47,21 +50,14 @@ namespace snuffbox
       QSettings& GlobalSettings() const;
 
       /**
-      * @return The current project settings
+      * @return The current project
       */
-      const Project& project() const;
-
-    protected:
-
-      /**
-      * @see Application::CreateRenderer
-      */
-      void CreateRenderer() override;
+      Project& project();
 
     private:
 
       QApplication qapp_; //!< The Qt application
-      Project project_; //!< The current project settings
+      Project project_; //!< The current project
     };
   }
 }

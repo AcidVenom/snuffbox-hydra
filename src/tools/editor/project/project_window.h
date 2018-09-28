@@ -5,6 +5,7 @@
 
 class QLabel;
 class QListWidget;
+class QListWidgetItem;
 
 namespace snuffbox
 {
@@ -46,6 +47,13 @@ namespace snuffbox
       */
       void OnOpenProject();
 
+      /**
+      * @brief Opens a recent project from the recent item view
+      *
+      * @param[in] item The recent project item that was double clicked
+      */
+      void OnRecentClicked(QListWidgetItem* item);
+
     protected:
 
       /**
@@ -57,6 +65,17 @@ namespace snuffbox
       * @brief Refreshes the recently opened list widget
       */
       void RefreshRecentlyOpened();
+
+      /**
+      * @brief Opens a project by directory
+      *
+      * @param[in] dir The directory of the project to open
+      *
+      * @remarks This sets the project in the EditorApplication
+      *
+      * If this call succeeds, it will close the ProjectWindow
+      */
+      void OpenProject(const QString& dir);
 
       /**
       * @brief Adds a project to the list of recently opened proejcts
@@ -82,12 +101,14 @@ namespace snuffbox
       */
       void SaveRecentProjects();
 
-    public:
-
       /**
-      * @brief Save all on-close settings in the destructor
+      * @brief Saves all current settings into the global settings
+      *
+      * @see ProjectWindow::SaveRecentProjects
+      *
+      * @param[in] evt The Qt close event
       */
-      ~ProjectWindow();
+      void closeEvent(QCloseEvent* evt) override;
 
     private:
 
@@ -112,16 +133,6 @@ namespace snuffbox
       * @brief The key for the recently opened projects, in the global QSettings
       */
       static const QString kSettingsRecentlyOpened_;
-
-      /**
-      * @brief The file to save project settings in
-      */
-      static const QString kProjectFile_;
-
-      /**
-      * @brief The project name key in the project settings JSON file
-      */
-      static const QString kProjectNameKey_;
 
       /**
       * @brief The maximum number of recently opened projects to show

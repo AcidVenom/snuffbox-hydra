@@ -1,5 +1,6 @@
 #include "tools/editor/project/project_window.h"
 #include "tools/editor/application/editor_application.h"
+#include "tools/editor/windows/message_box.h"
 
 #include <QLayout>
 #include <QListWidget>
@@ -7,17 +8,62 @@
 #include <QLabel>
 #include <QSettings>
 #include <QFileDialog>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QFile>
 #include <QFlags>
-#include <QMessageBox>
 #include <QLineEdit>
 
 namespace snuffbox
 {
   namespace editor
   {
+    //--------------------------------------------------------------------------
+    class RecentProjectListWidgetItem : public QListWidgetItem
+    {
+    public:
+
+      RecentProjectListWidgetItem(
+        const QString& name,
+        const QString& path, 
+        QListWidget* view = nullptr) 
+        :
+        QListWidgetItem(view),
+        path_(path)
+      {
+        if (view != nullptr)
+        {
+          QWidget* recent_project_widget = new QWidget(view);
+
+          QVBoxLayout* layout = new QVBoxLayout(recent_project_widget);
+
+          QLabel* name_widget = new QLabel(layout->widget());
+          QLabel* path_widget = new QLabel(layout->widget());
+
+          name_widget->setText(name);
+          name_widget->setStyleSheet(
+            "font-weight: bold; font-size: 14px;");
+
+          path_widget->setText(path);
+
+          layout->addWidget(name_widget);
+          layout->addWidget(path_widget);
+
+          recent_project_widget->setLayout(layout);
+
+          view->setItemWidget(this, recent_project_widget);
+          setSizeHint(QSize(256, 64));
+        }
+      }
+
+      const QString& path() const
+      {
+        return path_;
+      }
+
+    private:
+
+      QString path_;
+    };
+
     //--------------------------------------------------------------------------
     const int ProjectWindow::kProjectWindowWidth_ = 640;
     const int ProjectWindow::kProjectWindowHeight_ = 320;
@@ -26,9 +72,6 @@ namespace snuffbox
       "Project.RecentFolder";
     const QString ProjectWindow::kSettingsRecentlyOpened_ = 
       "Project.RecentlyOpened.%0";
-
-    const QString ProjectWindow::kProjectFile_ = "project_settings.json";
-    const QString ProjectWindow::kProjectNameKey_ = "project_name";
 
     const int ProjectWindow::kMaxRecentlyOpened_ = 5;
 
@@ -105,6 +148,12 @@ namespace snuffbox
         this, 
         &ProjectWindow::OnOpenProject);
 
+      connect(
+        recent_projects_, 
+        &QListWidget::itemDoubleClicked,
+        this,
+        &ProjectWindow::OnRecentClicked);
+
       connect(button_cancel, &QPushButton::clicked, this, &QDialog::reject);
 
       QSettings& settings = EditorApplication::Instance()->GlobalSettings();
@@ -124,35 +173,16 @@ namespace snuffbox
         return;
       }
 
-      QString settings_path = dir + "/" + kProjectFile_;
+      QString settings_path = dir + "/" + Project::kProjectFile;
+      static QString error_title = QStringLiteral("Cannot create project");
+      
 
       if (QFile::exists(settings_path) == true)
       {
-        QMessageBox error;
-        error.setText("Cannot create project");
-        error.setInformativeText(
+        MessageBox::Show(
+          QMessageBox::Icon::Critical, 
+          error_title, 
           "There is already a project in this directory");
-        error.setStandardButtons(QMessageBox::Ok);
-        error.setDefaultButton(QMessageBox::Ok);
-        error.setIcon(QMessageBox::Icon::Critical);
-
-        QSpacerItem* spacer = new QSpacerItem(
-          kProjectWindowWidth_  * 0.5, 
-          0, 
-          QSizePolicy::Minimum, 
-          QSizePolicy::Expanding);
-
-        QGridLayout* layout = static_cast<QGridLayout*>(error.layout());
-        layout->addItem(
-          spacer, 
-          layout->rowCount(), 
-          0,
-          1,
-          layout->columnCount());
-
-        // Hack to dodge a Qt error message..?
-        error.setFixedSize(640, 480);
-        error.exec();
 
         return;
       }
@@ -164,20 +194,19 @@ namespace snuffbox
         return;
       }
 
-      QJsonDocument doc;
-      QJsonObject root;
-      root.insert(kProjectNameKey_, dialog->project_name());
+      Project::Settings settings;
+      settings.name = dialog->project_name();
 
-      doc.setObject(root);
-
-      QFile file(settings_path);
-
-      if (file.open(QFile::WriteOnly) == true)
+      if (Project::CreateProject(dir, settings) == true)
       {
-        file.write(doc.toJson());
-        file.close();
         AddRecentProject(dir);
+        return;
       }
+
+      MessageBox::Show(
+        QMessageBox::Icon::Critical, 
+        error_title, 
+        "Could not create project settings file");
     }
 
     //--------------------------------------------------------------------------
@@ -185,6 +214,22 @@ namespace snuffbox
     {
       bool valid;
       QString dir = ShowFolderDialog(&valid);
+
+      if (valid == false)
+      {
+        return;
+      }
+
+      OpenProject(dir);
+    }
+
+    //--------------------------------------------------------------------------
+    void ProjectWindow::OnRecentClicked(QListWidgetItem* item)
+    {
+      RecentProjectListWidgetItem* recent = 
+        static_cast<RecentProjectListWidgetItem*>(item);
+
+      OpenProject(recent->path());
     }
 
     //--------------------------------------------------------------------------
@@ -226,38 +271,18 @@ namespace snuffbox
       QString path;
       for (int i = recent_project_paths_.size() - 1; i >= 0; --i)
       {
-        path = recent_project_paths_.at(i) + "/" + kProjectFile_;
-
-        if (QFile::exists(path) == false)
+        if (Project::Exists(recent_project_paths_.at(i)) == false)
         {
           recent_project_paths_.erase(recent_project_paths_.begin() + i);
         }
       }
 
-      QListWidgetItem* new_item = nullptr;
-      QWidget* recent_project_widget = nullptr;
-      QVBoxLayout* layout = nullptr;
-      QLabel* name_widget = nullptr;
-      QLabel* path_widget = nullptr;
+      RecentProjectListWidgetItem* new_item = nullptr;
 
       auto GetProjectName = [](const QString& path)
       {
-        QFile file(path + "/" + kProjectFile_);
-        QString undefined = QStringLiteral("undefined");
-
-        if (file.open(QFile::ReadOnly) == true)
-        {
-          QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-
-          if (doc.isObject() == false)
-          {
-            return undefined;
-          }
-
-          return doc.object()[kProjectNameKey_].toString(undefined);
-        }
-
-        return undefined;
+        Project::Settings settings = Project::GetProjectSettings(path);
+        return settings.name;
       };
 
       for (int i = 0; i < recent_project_paths_.size(); ++i)
@@ -269,29 +294,31 @@ namespace snuffbox
 
         const QString& full_path = recent_project_paths_.at(i);
 
-        new_item = new QListWidgetItem(recent_projects_);
-        recent_project_widget = new QWidget(new_item->listWidget());
+        new_item = new RecentProjectListWidgetItem(
+          GetProjectName(full_path), full_path, recent_projects_);
 
-        layout = new QVBoxLayout(recent_project_widget);
-
-        name_widget = new QLabel(layout->widget());
-        path_widget = new QLabel(layout->widget());
-
-        name_widget->setText(GetProjectName(full_path));
-        name_widget->setStyleSheet(
-          "font-weight: bold; font-size: 14px;");
-
-        path_widget->setText(full_path);
-
-        layout->addWidget(name_widget);
-        layout->addWidget(path_widget);
-
-        recent_project_widget->setLayout(layout);
-
-        recent_projects_->setItemWidget(new_item, recent_project_widget);
         recent_projects_->addItem(new_item);
-        new_item->setSizeHint(QSize(256, 64));
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void ProjectWindow::OpenProject(const QString& dir)
+    {
+      Project& project = EditorApplication::Instance()->project();
+
+      if (project.SetProjectPath(dir) == false)
+      {
+        MessageBox::Show(
+          QMessageBox::Icon::Critical, 
+          "Could not open project", 
+          "There is no valid project in this directory");
+
+        return;
+      }
+
+      AddRecentProject(dir);
+      
+      accept();
     }
 
     //--------------------------------------------------------------------------
@@ -346,30 +373,30 @@ namespace snuffbox
       QSettings& settings = EditorApplication::Instance()->GlobalSettings();
 
       int save_at = 0;
-      for (int i = 0; i < kMaxRecentlyOpened_; ++i)
+      for (
+        int i = 0; 
+        i < kMaxRecentlyOpened_ && i < recent_project_paths_.size(); 
+        ++i)
       {
-        if (i < recent_project_paths_.size())
+        const QString& path = recent_project_paths_.at(i);
+        if (Project::Exists(path) == true)
         {
-          const QString& path = recent_project_paths_.at(i);
-          if (QFile::exists(path + "/" + kProjectFile_) == true)
-          {
-            settings.setValue(
-              kSettingsRecentlyOpened_.arg(save_at),
-              path);
+          settings.setValue(
+            kSettingsRecentlyOpened_.arg(save_at),
+            path);
 
-            ++save_at;
-          }
+          ++save_at;
         }
       }
       
-      for (int i = kMaxRecentlyOpened_ - 1; i > save_at; --i)
+      for (int i = kMaxRecentlyOpened_ - 1; i >= save_at; --i)
       {
         settings.remove(kSettingsRecentlyOpened_.arg(i));
       }
     }
 
     //--------------------------------------------------------------------------
-    ProjectWindow::~ProjectWindow()
+    void ProjectWindow::closeEvent(QCloseEvent* evt)
     {
       SaveRecentProjects();
     }
