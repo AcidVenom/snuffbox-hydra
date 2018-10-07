@@ -33,17 +33,40 @@ namespace snuffbox
       MainWindow(QWidget* parent = nullptr);
 
       /**
-      * @see GameView::GetGraphicsWindow
+      * @return The game view
       */
-      graphics::GraphicsWindow GetGraphicsWindow() const;
+      GameView* game_view() const;
+
+    protected:
+
+      /**
+      * @brief Saves the current window geometry, to maintain sizing between
+      *        different sessions
+      */
+      void SaveWindowGeometry();
+
+      /**
+      * @brief Load an old window geometry if available
+      */
+      void LoadWindowGeometry();
+
+      /**
+      * @brief Save the current window geometry
+      */
+      void closeEvent(QCloseEvent* evt) override;
 
     private:
 
       QDockWidget* game_view_widget_; //!< The central game view dock widget
+      QDockWidget* console_widget_; //!< The console widget
+
       GameView* game_view_; //!< The game view
 
       static const int kMinWidth_; //!< The minimum width of the window
       static const int kMinHeight_; //!< The minumum height of the window
+
+      static const QString kSettingsGeometryKey_; //!< The geometry settings key
+      static const QString kSettingsStateKey_; //!< The state settings key
     };
   }
 }

@@ -11,13 +11,18 @@ SET(ApplicationSources
   "application/styling.cc"
 )
 
+SET(EditorWidgetsSources
+  "editor-widgets/game_view.h"
+  "editor-widgets/game_view.cc"
+  "editor-widgets/console_widget.h"
+  "editor-widgets/console_widget.cc"
+)
+
 SET(WindowsSources
   "windows/message_box.h"
   "windows/message_box.cc"
   "windows/main_window.h"
   "windows/main_window.cc"
-  "windows/game_view.h"
-  "windows/game_view.cc"
 )
 
 SET(ProjectSources
@@ -32,16 +37,18 @@ SET(InputSources
   "input/editor_event_filter.cc"
 )
 
-SOURCE_GROUP("\\"           FILES ${RootSources})
-SOURCE_GROUP("application"  FILES ${ApplicationSources})
-SOURCE_GROUP("windows"      FILES ${WindowsSources})
-SOURCE_GROUP("project"      FILES ${ProjectSources})
-SOURCE_GROUP("input"        FILES ${InputSources})
+SOURCE_GROUP("\\"             FILES ${RootSources})
+SOURCE_GROUP("application"    FILES ${ApplicationSources})
+SOURCE_GROUP("windows"        FILES ${WindowsSources})
+SOURCE_GROUP("editor-widgets" FILES ${EditorWidgetsSources})
+SOURCE_GROUP("project"        FILES ${ProjectSources})
+SOURCE_GROUP("input"          FILES ${InputSources})
 
 SET(EditorSources
   ${RootSources}
   ${ApplicationSources}
   ${WindowsSources}
+  ${EditorWidgetsSources}
   ${ProjectSources}
   ${InputSources}
 )

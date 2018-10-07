@@ -1,6 +1,8 @@
 #include "tools/editor/application/editor_application.h"
 #include "tools/editor/windows/main_window.h"
 
+#include "tools/editor/editor-widgets/game_view.h"
+
 #include "tools/editor/project/project_window.h"
 #include "tools/editor/application/styling.h"
 
@@ -11,6 +13,7 @@
 #include <engine/services/renderer_service.h>
 
 #include <foundation/auxiliary/logger.h>
+#include <foundation/auxiliary/timer.h>
 
 #include <QApplication>
 #include <memory>
@@ -70,19 +73,11 @@ namespace snuffbox
 
       foundation::ErrorCodes err = Initialize();
 
+      GameView* game_view = main_window->game_view();
+
       if (err == foundation::ErrorCodes::kSuccess)
       {
-        err = CreateRenderer(main_window->GetGraphicsWindow());
-      }
-
-      main_window->show();
-
-      engine::RendererService* renderer = GetService<engine::RendererService>();
-
-      while (should_quit() == false && main_window->isVisible() == true)
-      {
-        renderer->Render(0.0f);
-        qapp_.processEvents();
+        err = CreateRenderer(game_view->GetGraphicsWindow());
       }
 
       if (err != foundation::ErrorCodes::kSuccess)
@@ -91,7 +86,27 @@ namespace snuffbox
         return err;
       }
 
-      SCRIPT_CALLBACK(Start);
+      main_window->show();
+
+      engine::RendererService* renderer = GetService<engine::RendererService>();
+      game_view->BindResizeCallback([renderer](uint16_t w, uint16_t h)
+      {
+        renderer->OnResize(w, h);
+      });
+
+      foundation::Timer delta_time("delta_time");
+      float dt = 0.0f;
+
+      while (should_quit() == false && main_window->isVisible() == true)
+      {
+        delta_time.Start();
+
+        qapp_.processEvents();
+        renderer->Render(dt);
+
+        delta_time.Stop();
+        dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
+      }
 
       Shutdown();
 

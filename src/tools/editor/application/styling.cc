@@ -23,6 +23,8 @@ namespace snuffbox
       palette.setColor(Role::ButtonText, QColor(Qt::white));
       palette.setColor(Role::WindowText, QColor(Qt::white));
       palette.setColor(Role::BrightText, QColor(Qt::white));
+      palette.setColor(Group::Disabled, Role::Text, QColor(Qt::darkGray));
+      palette.setColor(Group::Disabled, Role::Light, QColor(Qt::black));
       palette.setColor(Role::Button, QColor(65, 70, 65));
       palette.setColor(Role::Highlight, QColor(100, 200, 0));
 
