@@ -103,7 +103,7 @@ namespace snuffbox
       /* .MaxCullDistances = */ 8,
       /* .MaxCombinedClipAndCullDistances = */ 8,
       /* .MaxSamples = */ 4,
-      /* .limits = */ {
+      /* .limits = */ 
       /* .nonInductiveForLoops = */ 1,
       /* .whileLoops = */ 1,
       /* .doWhileLoops = */ 1,
@@ -113,7 +113,7 @@ namespace snuffbox
       /* .generalSamplerIndexing = */ 1,
       /* .generalVariableIndexing = */ 1,
       /* .generalConstantMatrixVectorIndexing = */ 1,
-      }
+      
     };
 
     const glslang::EShTargetLanguageVersion Glslang::kLangVersion_ =

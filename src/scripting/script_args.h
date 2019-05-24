@@ -424,10 +424,6 @@ namespace snuffbox
         "x", "y", "z", "w"
       };
 
-      static_assert(T::length() <= 4, 
-        "Only vectors with a component count of\
-        <= 4 can be converted to a ScriptValue");
-
       auto Get = [&](const char* key)
       {
         if (obj->Contains(key) == false)
