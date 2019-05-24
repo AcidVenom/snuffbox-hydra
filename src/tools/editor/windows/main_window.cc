@@ -1,9 +1,14 @@
 #include "tools/editor/windows/main_window.h"
 #include "tools/editor/application/editor_application.h"
+
 #include "tools/editor/editor-widgets/game_view.h"
 #include "tools/editor/editor-widgets/console_widget.h"
+#include "tools/editor/asset-browser/asset_browser.h"
+
+#include "tools/editor/asset-browser/asset_icon.h"
 
 #include <QDockWidget>
+#include <QVBoxLayout>
 
 namespace snuffbox
 {
@@ -19,31 +24,39 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     MainWindow::MainWindow(QWidget* parent) :
       QMainWindow(parent),
-      game_view_widget_(nullptr),
-      console_widget_(nullptr),
       game_view_(nullptr)
     {
       setObjectName(QStringLiteral("MainWindow"));
       setMinimumSize(kMinWidth_, kMinHeight_);
 
-      game_view_widget_ = new QDockWidget(this);
-      game_view_ = new GameView(game_view_widget_);
-      game_view_widget_->setWidget(game_view_);
-      game_view_widget_->setWindowTitle(QStringLiteral("Game view"));
-      game_view_widget_->setObjectName(QStringLiteral("MainWindowGameDock"));
-      game_view_widget_->setMinimumSize(kMinWidth_ * 0.5, kMinHeight_ * 0.5);
+      QDockWidget* game_view_widget = new QDockWidget(this);
+      game_view_ = new GameView(game_view_widget);
+      game_view_widget->setWidget(game_view_);
+      game_view_widget->setWindowTitle(QStringLiteral("Game view"));
+      game_view_widget->setObjectName(QStringLiteral("MainWindowGameDock"));
+      game_view_widget->setMinimumSize(kMinWidth_ * 0.5, kMinHeight_ * 0.5);
       
-      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget_);
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
 
-      console_widget_ = new QDockWidget(this);
-      ConsoleWidget* console = new ConsoleWidget(console_widget_);
-      console_widget_->setWidget(console);
-      console_widget_->setWindowTitle(QStringLiteral("Console"));
-      console_widget_->setObjectName(QStringLiteral("MainWindowConsoleDock"));
+      QDockWidget* assets_widget = new QDockWidget(this);
+      AssetBrowser* asset_browser = new AssetBrowser(assets_widget);
+      assets_widget->setWidget(asset_browser);
+      assets_widget->setWindowTitle(QStringLiteral("Assets"));
+      assets_widget->setObjectName(QStringLiteral("MainWindowAssetsDock"));
+
+      asset_browser->Refresh("D:/Programming/snuffbox-hydra-bin/test/.build/assets");
+
+      addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
+
+      QDockWidget* console_widget = new QDockWidget(this);
+      ConsoleWidget* console = new ConsoleWidget(console_widget);
+      console_widget->setWidget(console);
+      console_widget->setWindowTitle(QStringLiteral("Console"));
+      console_widget->setObjectName(QStringLiteral("MainWindowConsoleDock"));
 
       foundation::Logger::RedirectOutput(&ConsoleWidget::OnLog, console);
 
-      addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget_);
+      addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
 
       LoadWindowGeometry();
     }

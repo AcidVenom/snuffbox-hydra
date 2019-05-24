@@ -57,9 +57,6 @@ namespace snuffbox
 
     private:
 
-      QDockWidget* game_view_widget_; //!< The central game view dock widget
-      QDockWidget* console_widget_; //!< The console widget
-
       GameView* game_view_; //!< The game view
 
       static const int kMinWidth_; //!< The minimum width of the window

@@ -17,6 +17,8 @@ namespace snuffbox
       text_(nullptr),
       num_logs_(0)
     {
+      setObjectName(QStringLiteral("ConsoleWidget"));
+
       QVBoxLayout* layout = new QVBoxLayout(this);
       layout->setObjectName(QStringLiteral("ConsoleTabLayout"));
       layout->setStretch(0, 1);

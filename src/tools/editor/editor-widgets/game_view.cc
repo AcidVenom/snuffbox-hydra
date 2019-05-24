@@ -12,8 +12,12 @@ namespace snuffbox
       QWidget(parent),
       on_resize_(nullptr)
     {
+      setObjectName(QStringLiteral("GameViewWidget"));
+
       setMouseTracking(true);
       setAutoFillBackground(false);
+
+      setFocusPolicy(Qt::FocusPolicy::StrongFocus);
     }
 
     //--------------------------------------------------------------------------
