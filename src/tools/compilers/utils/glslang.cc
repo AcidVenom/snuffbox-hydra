@@ -324,7 +324,6 @@ namespace snuffbox
         kClientVersion_);
 
       shader->setAutoMapLocations(true);
-      shader->setHlslIoMapping(true);
     }
 
     //--------------------------------------------------------------------------

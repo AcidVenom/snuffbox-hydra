@@ -14,5 +14,6 @@ namespace snuffbox
   }
 }
 
+#define EA_COMPILER_NO_STRUCTURED_BINDING
 #define EASTLAllocatorType snuffbox::foundation::EASTLAllocator
 #define EASTLAllocatorDefault() &snuffbox::foundation::default_eastl_alloc;
