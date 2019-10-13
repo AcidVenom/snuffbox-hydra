@@ -2,7 +2,11 @@
 
 #include <foundation/io/file.h>
 
+#pragma warning(push)
+#pragma warning(disable : 4267)
 #include <tiny_gltf.h>
+#pragma warning(pop)
+
 #include <glm/glm.hpp>
 
 #include <cinttypes>
@@ -281,7 +285,7 @@ namespace snuffbox
       }
 
       tinygltf::Model model;
-      std::string err;
+      std::string err, warn;
       
       size_t len;
       const uint8_t* str = file.ReadBuffer(&len);
@@ -289,7 +293,8 @@ namespace snuffbox
       foundation::String base = file.path().GetBaseDirectory().ToString();
       if (ctx_.LoadASCIIFromString(
         &model, 
-        &err, 
+        &err,
+		&warn,
         reinterpret_cast<const char*>(str), 
         static_cast<unsigned int>(len), base.c_str()) == false)
       {
