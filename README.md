@@ -1,6 +1,12 @@
 # snuffbox-hydra
 The "Hydra" revision of Snuffbox. Constantly getting new ideas over time, thus creating a new Snuffbox version without finishing the older ones.
 
+# Cloning the repository
+This revision can simply be cloned through `git clone https://github.com/AcidVenom/snuffbox-hydra`. However, there seems to be a small issue regarding the submodules of
+EASTL. This causes an infinite recursion retrieving its corresponding "test" submodules. `--recurse-submodules` seems to completely break.
+
+I have added a simple shell script in the root of this repository, namely **update_submodules.sh**, which updates the submodules for you one-by-one, avoiding this issue.
+
 # Compilation
 
 CMake is basically required to set up this project. Everything has been tested with **CMake 3.10.1**.
