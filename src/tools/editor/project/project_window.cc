@@ -317,8 +317,9 @@ namespace snuffbox
       }
 
       AddRecentProject(dir);
-      
-      accept();
+	  SaveRecentProjects();
+
+	  accept();
     }
 
     //--------------------------------------------------------------------------
