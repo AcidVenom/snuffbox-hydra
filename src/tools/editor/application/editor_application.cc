@@ -6,6 +6,8 @@
 #include "tools/editor/project/project_window.h"
 #include "tools/editor/application/styling.h"
 
+#include "tools/builder/builder.h"
+
 #ifndef SNUFF_NSCRIPTING
 #include <engine/services/script_service.h>
 #endif
@@ -50,49 +52,31 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes EditorApplication::Run()
     {
-      std::unique_ptr<ProjectWindow> 
-        project_window(new ProjectWindow(&project_));
-
-      project_window->show();
-
-      if (project_window->exec() == QDialog::Rejected)
+      foundation::ErrorCodes err = foundation::ErrorCodes::kSuccess;
+      if (ShowProjectWindow() == false)
       {
-        return foundation::ErrorCodes::kSuccess;
-      }
-
-      std::unique_ptr<MainWindow>
-        main_window(new MainWindow());
-
-      ApplyConfiguration();
-
-      foundation::Logger::LogVerbosity<2>(
-        foundation::LogChannel::kEditor,
-        foundation::LogSeverity::kDebug,
-        "Initializing the editor\n\tOpening project: {0}",
-        project_.project_path().toStdString());
-
-      foundation::ErrorCodes err = Initialize();
-
-      GameView* game_view = main_window->game_view();
-
-      if (err == foundation::ErrorCodes::kSuccess)
-      {
-        err = CreateRenderer(game_view->GetGraphicsWindow());
-      }
-
-      if (err != foundation::ErrorCodes::kSuccess)
-      {
-        Shutdown();
         return err;
       }
 
-      main_window->show();
+      ApplyConfiguration();
+
+      std::unique_ptr<MainWindow> main_window = CreateMainWindow(&err);
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
+
+      builder::Builder builder;
+      if (builder.Initialize(
+        project_.project_path().toStdString().c_str(),
+        Project::kAssetDirectory,
+        Project::kBuildDirectory
+      ) == false)
+      {
+        return foundation::ErrorCodes::kBuilderInitializationFailed;
+      }
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
-      game_view->BindResizeCallback([renderer](uint16_t w, uint16_t h)
-      {
-        renderer->OnResize(w, h);
-      });
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
@@ -106,6 +90,8 @@ namespace snuffbox
 
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
+
+        builder.IdleNotification();
       }
 
       Shutdown();
@@ -129,6 +115,60 @@ namespace snuffbox
     Project& EditorApplication::project()
     {
       return project_;
+    }
+
+    //--------------------------------------------------------------------------
+    bool EditorApplication::ShowProjectWindow()
+    {
+      std::unique_ptr<ProjectWindow>
+        project_window(new ProjectWindow(&project_));
+
+      project_window->show();
+
+      if (project_window->exec() == QDialog::Rejected)
+      {
+        return false;
+      }
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    std::unique_ptr<MainWindow> EditorApplication::CreateMainWindow(
+      foundation::ErrorCodes* err)
+    {
+      std::unique_ptr<MainWindow> main_window(new MainWindow(this));
+
+      foundation::Logger::LogVerbosity<2>(
+        foundation::LogChannel::kEditor,
+        foundation::LogSeverity::kDebug,
+        "Initializing the editor\n\tOpening project: {0}",
+        project_.project_path().toStdString());
+
+      *err = Initialize();
+
+      GameView* game_view = main_window->game_view();
+
+      if (*err == foundation::ErrorCodes::kSuccess)
+      {
+        *err = CreateRenderer(game_view->GetGraphicsWindow());
+      }
+
+      if (*err != foundation::ErrorCodes::kSuccess)
+      {
+        Shutdown();
+        return nullptr;
+      }
+
+      main_window->show();
+
+      engine::RendererService* renderer = GetService<engine::RendererService>();
+      game_view->BindResizeCallback([renderer](uint16_t w, uint16_t h)
+      {
+        renderer->OnResize(w, h);
+      });
+
+      return main_window;
     }
   }
 }

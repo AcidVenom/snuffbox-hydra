@@ -12,11 +12,26 @@ namespace snuffbox
     const QString Project::kProjectFile = "project_settings.json";
     const QString Project::kProjectNameKey_ = "project_name";
 
+    const char* Project::kAssetDirectory = "assets";
+    const char* Project::kBuildDirectory = ".build";
+
     //--------------------------------------------------------------------------
     Project::Project(QObject* parent) :
       QObject(parent)
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    QString Project::GetCurrentAssetsPath() const
+    {
+      return project_path() + '/' + Project::kAssetDirectory;
+    }
+
+    //--------------------------------------------------------------------------
+    QString Project::GetCurrentBuildPath() const
+    {
+      return project_path() + '/' + Project::kBuildDirectory;
     }
 
     //--------------------------------------------------------------------------

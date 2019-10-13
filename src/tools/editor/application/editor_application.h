@@ -54,6 +54,26 @@ namespace snuffbox
       */
       Project& project();
 
+    protected:
+
+      /**
+      * @brief Shows a project window, to pick a new or existing project from
+      *
+      * @return Should we continue execution, or did the user exit?
+      */
+      bool ShowProjectWindow();
+
+      /**
+      * @brief Creates the main window, that contains the graphics view
+      *        and all other editor panes
+      *
+      * @param[out] An error code, or foundation::ErrorCodes::kSuccess if no
+      *             errors occurred
+      *
+      * @return The created main window, or nullptr if initialization failed
+      */
+      std::unique_ptr<MainWindow> CreateMainWindow(foundation::ErrorCodes* err);
+
     private:
 
       QApplication qapp_; //!< The Qt application

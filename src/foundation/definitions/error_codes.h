@@ -15,6 +15,7 @@ namespace snuffbox
       kScriptInitializationFailed,
       kNoRendererCreated,
       kRendererInitializationFailed,
+      kBuilderInitializationFailed,
       kUnknown
     };
   }

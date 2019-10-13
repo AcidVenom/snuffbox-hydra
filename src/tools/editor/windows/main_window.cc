@@ -22,8 +22,9 @@ namespace snuffbox
     const QString MainWindow::kSettingsStateKey_ = "MainWindow.State";
 
     //--------------------------------------------------------------------------
-    MainWindow::MainWindow(QWidget* parent) :
+    MainWindow::MainWindow(EditorApplication* app, QWidget* parent) :
       QMainWindow(parent),
+      app_(app),
       game_view_(nullptr)
     {
       setObjectName(QStringLiteral("MainWindow"));
@@ -44,7 +45,9 @@ namespace snuffbox
       assets_widget->setWindowTitle(QStringLiteral("Assets"));
       assets_widget->setObjectName(QStringLiteral("MainWindowAssetsDock"));
 
-      asset_browser->Refresh("D:/Programming/snuffbox-hydra-bin/test/.build/assets");
+      Project& current_project = app->project();
+      asset_browser->Refresh(
+        current_project.GetCurrentBuildPath() + '/' + Project::kAssetDirectory);
 
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
 

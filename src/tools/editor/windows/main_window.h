@@ -10,7 +10,7 @@ namespace snuffbox
 {
   namespace editor
   {
-
+    class EditorApplication;
     class GameView;
 
     /**
@@ -28,9 +28,11 @@ namespace snuffbox
       /**
       * @brief Construct the main window in a parent tree
       *
+      * @param[in] app The editor application to retrieve settings from
+      *                and to link signals to
       * @param[in] parent The parent of the main window
       */
-      MainWindow(QWidget* parent = nullptr);
+      MainWindow(EditorApplication* app, QWidget* parent = nullptr);
 
       /**
       * @return The game view
@@ -57,6 +59,7 @@ namespace snuffbox
 
     private:
 
+      EditorApplication* app_; //!< The editor application
       GameView* game_view_; //!< The game view
 
       static const int kMinWidth_; //!< The minimum width of the window

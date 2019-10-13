@@ -39,6 +39,22 @@ namespace snuffbox
       Project(QObject* parent = nullptr);
 
       /**
+      * @return The current assets path,
+      *         relative to the current project path
+      *
+      * @see Project::project_path
+      */
+      QString GetCurrentAssetsPath() const;
+
+      /**
+      * @return The current build output path, 
+      *         relative to the current project path
+      *
+      * @see Project::project_path
+      */
+      QString GetCurrentBuildPath() const;
+
+      /**
       * @return The current project path
       */
       const QString& project_path() const;
@@ -98,6 +114,18 @@ namespace snuffbox
       * @brief The file to save project settings in
       */
       static const QString kProjectFile;
+
+      /**
+      * @brief The directory to use relative to the project directory for
+      *        source assets
+      */
+      static const char* kAssetDirectory;
+
+      /**
+      * @brief The directory to use relative to the project directory for
+      *        build output
+      */
+      static const char* kBuildDirectory;
 
     private:
 
