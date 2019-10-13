@@ -8,6 +8,9 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    const char* Styling::kColorRoles_[Styling::ColorRole::kCount];
+
+    //--------------------------------------------------------------------------
     void Styling::ApplyStyle(QApplication* app)
     {
       app->setStyle("fusion");
@@ -29,6 +32,21 @@ namespace snuffbox
       palette.setColor(Role::Highlight, QColor(100, 200, 0));
 
       app->setPalette(palette);
+    }
+
+    //--------------------------------------------------------------------------
+    const char* Styling::GetStyleColor(ColorRole role)
+    {
+      static bool initialized_roles = false;
+      if (initialized_roles == false)
+      {
+        kColorRoles_[ColorRole::kSelected] = "rgb(50, 100, 0)";
+        kColorRoles_[ColorRole::kClickable] = "rgb(61, 68, 67)";
+        kColorRoles_[ColorRole::kHighlight] = "rgb(100, 200, 0)";
+        initialized_roles = true;
+      }
+
+      return kColorRoles_[role];
     }
   }
 }

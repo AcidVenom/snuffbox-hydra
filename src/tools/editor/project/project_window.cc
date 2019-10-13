@@ -1,6 +1,7 @@
 #include "tools/editor/project/project_window.h"
 #include "tools/editor/application/editor_application.h"
 #include "tools/editor/windows/message_box.h"
+#include "tools/editor/application/styling.h"
 
 #include <QLayout>
 #include <QListWidget>
@@ -110,8 +111,11 @@ namespace snuffbox
       recent_projects_ = new QListWidget(recent_layout->widget());
       recent_projects_->setObjectName(QStringLiteral("RecentProjectsWidget"));
 
-      recent_projects_->setStyleSheet(
-        "QListView::item:selected { background-color: rgb(50, 100, 0); }");
+      QString style =
+        QString("QListView::item:selected { background-color: %0; }")
+        .arg(Styling::GetStyleColor(Styling::ColorRole::kSelected));
+
+      recent_projects_->setStyleSheet(style);
 
       QHBoxLayout* buttons_layout = new QHBoxLayout(main_layout->widget());
       buttons_layout->setObjectName(QStringLiteral("ProjectButtonsLayout"));

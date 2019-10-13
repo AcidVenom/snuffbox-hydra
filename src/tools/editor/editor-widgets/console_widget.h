@@ -3,6 +3,7 @@
 #include <foundation/auxiliary/logger.h>
 
 #include <QWidget>
+#include <QFont>
 
 class QPlainTextEdit;
 class QTabWidget;
@@ -64,6 +65,11 @@ namespace snuffbox
 
       QPlainTextEdit* text_; //!< The text within the console
       int num_logs_; //!< The number of logs in this tab
+
+      QFont spacing_font_; //!< The font used for spacing
+      QFont default_font_; //!< The font used for regular block text
+
+      static const int kFontSize_; //!< The font size of each console tab
     };
     /**
     * @brief The console widget that shows each individual log channel filtered

@@ -3,7 +3,9 @@
 #include <QWidget>
 
 class QTreeView;
-class QGridLayout;
+class QSplitter;
+class QSettings;
+class FlowLayout;
 
 namespace snuffbox
 {
@@ -27,7 +29,17 @@ namespace snuffbox
       *
       * @param[in] parent The parent widget this widget lives in
       */
-      AssetBrowser(QWidget* parent = nullptr);
+      AssetBrowser( QWidget* parent = nullptr);
+
+      /**
+      * @brief Saves the splitter state of the asset browser to restore later
+      */
+      void SaveState(QSettings* settings);
+
+      /**
+      * @brief Loads the splitter state of the asset browser, if available
+      */
+      void LoadState(const QSettings* settings);
 
     public slots:
 
@@ -41,9 +53,18 @@ namespace snuffbox
     private:
 
       QTreeView* tree_; //!< The tree view to navigate the asset tree
-      QGridLayout* asset_list_; //!< The asset list layout
+      FlowLayout* asset_list_; //!< The asset list layout
+      QSplitter* splitter_; //!< The splitter
 
-      static const int kItemsPerRow_; //!< The number of items per row
+      /**
+      * @brief The spacing between asset browser items
+      */
+      static const int kFlowLayoutSpacing_;
+
+      /**
+      * @brief The asset browser splitter key
+      */
+      static const QString kSettingsAssetBrowserKey_;
     };
   }
 }

@@ -7,6 +7,9 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    const QSize AssetBrowserItem::kMaxItemSize = QSize(128, 96);
+
+    //--------------------------------------------------------------------------
     AssetBrowserItem::AssetBrowserItem(
       compilers::AssetTypes type,
       const QString& path,
@@ -20,6 +23,9 @@ namespace snuffbox
       setObjectName(QStringLiteral("AssetBrowserItem"));
 
       icon_ = new AssetIcon(type, path, this);
+
+      setMinimumSize(kMaxItemSize);
+      setMaximumSize(kMaxItemSize);
     }
   }
 }

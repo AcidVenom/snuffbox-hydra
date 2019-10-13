@@ -11,6 +11,7 @@ namespace snuffbox
   namespace editor
   {
     class EditorApplication;
+    class AssetBrowser;
     class GameView;
 
     /**
@@ -53,6 +54,12 @@ namespace snuffbox
       void LoadWindowGeometry();
 
       /**
+      * @brief Window size is saved seperately, so we can set the window size
+      *        before adding any new objects, to make sure they all fit in
+      */
+      void LoadWindowSize();
+
+      /**
       * @brief Save the current window geometry
       */
       void closeEvent(QCloseEvent* evt) override;
@@ -61,12 +68,14 @@ namespace snuffbox
 
       EditorApplication* app_; //!< The editor application
       GameView* game_view_; //!< The game view
+      AssetBrowser* asset_browser_; //!< The asset browser
 
       static const int kMinWidth_; //!< The minimum width of the window
       static const int kMinHeight_; //!< The minumum height of the window
 
       static const QString kSettingsGeometryKey_; //!< The geometry settings key
       static const QString kSettingsStateKey_; //!< The state settings key
+      static const QString kSettingsSizeKey_; //!< The size of the window key
     };
   }
 }

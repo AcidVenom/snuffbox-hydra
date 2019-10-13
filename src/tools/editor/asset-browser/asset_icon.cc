@@ -1,4 +1,6 @@
 #include "tools/editor/asset-browser/asset_icon.h"
+#include "tools/editor/asset-browser/asset_browser_item.h"
+#include "tools/editor/application/styling.h"
 
 #include <foundation/io/resources.h>
 #include <foundation/io/file.h>
@@ -24,7 +26,9 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    const int AssetIcon::kDefaultIconSize_ = 48;
+    const int AssetIcon::kDefaultIconSize_ = 54;
+    const int AssetIcon::kElisionPadding_ = 16;
+    const int AssetIcon::kLabelPadding_ = 8;
 
     //--------------------------------------------------------------------------
     AssetIcon::AssetIcon(
@@ -38,7 +42,11 @@ namespace snuffbox
       icon_size_(kDefaultIconSize_),
       icon_label_(nullptr)
     {
+      QSize content_size = AssetBrowserItem::kMaxItemSize;
+      content_size.setWidth(content_size.width() - kLabelPadding_ * 2);
+
       setObjectName(QStringLiteral("AssetIcon"));
+      setMinimumSize(content_size);
 
       QVBoxLayout* layout = new QVBoxLayout(this);
       layout->setObjectName(QStringLiteral("AssetIconLayout"));
@@ -58,9 +66,14 @@ namespace snuffbox
       layout->addWidget(name_label_);
 
       icon_label_->setAlignment(Qt::AlignCenter);
+      layout->setAlignment(icon_label_, Qt::AlignHCenter);
       name_label_->setAlignment(Qt::AlignCenter);
 
+      const int p = kLabelPadding_;
+      name_label_->setContentsMargins(p, p * 0.5, p, p * 0.5);
+
       setLayout(layout);
+      SetSelected(false);
     }
 
     //--------------------------------------------------------------------------
@@ -95,7 +108,10 @@ namespace snuffbox
         name = split.at(split.size() - 1);
       }
 
-      name_label_->setText(name.c_str());
+      QFontMetrics metrics(name_label_->font());
+      int width = minimumSize().width() - kElisionPadding_;
+      QString text = metrics.elidedText(name.c_str(), Qt::ElideRight, width);
+      name_label_->setText(text);
     }
 
     //--------------------------------------------------------------------------
@@ -115,6 +131,16 @@ namespace snuffbox
     {
       icon_size_ = size;
       icon_label_->setFixedSize(icon_size_, icon_size_);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetIcon::SetSelected(bool selected)
+    {
+      Styling::ColorRole cr = selected == true ? 
+        Styling::ColorRole::kSelected : Styling::ColorRole::kClickable;
+
+      QString format = "background: %0; border-radius: 10px;";
+      name_label_->setStyleSheet(format.arg(Styling::GetStyleColor(cr)));
     }
 
     //--------------------------------------------------------------------------

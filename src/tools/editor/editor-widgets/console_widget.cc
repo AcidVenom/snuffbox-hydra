@@ -10,6 +10,9 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    const int ConsoleTab::kFontSize_ = 10;
+
+    //--------------------------------------------------------------------------
     ConsoleTab::ConsoleTab(int tab_index, QTabWidget* parent) :
       QWidget(parent),
       tab_widget_(parent),
@@ -27,18 +30,20 @@ namespace snuffbox
       text_->setObjectName(QStringLiteral("ConsoleTabText"));
       text_->setReadOnly(true);
 
-      QFont font;
 #ifdef SNUFF_WIN32
-      font.setFamily(QStringLiteral("Lucida Console"));
+      default_font_.setFamily(QStringLiteral("Lucida Console"));
 #elif SNUFF_LINUX
-      font.setFamily(QStringLiteral("Ubuntu Mono"));
+      default_font_.setFamily(QStringLiteral("Ubuntu Mono"));
 #else
-      font.setFamily(QStringLiteral("Verdana"));
+      default_font_.setFamily(QStringLiteral("Verdana"));
 #endif
       
-      font.setPointSize(9);
+      default_font_.setPointSize(kFontSize_);
+      spacing_font_ = default_font_;
 
-      text_->setFont(font);
+      spacing_font_.setPointSize(2);
+
+      text_->setFont(default_font_);
 
       layout->addWidget(text_);
     }
@@ -67,9 +72,22 @@ namespace snuffbox
       QTextBlockFormat old_block_format = cursor.blockFormat();
 
       cursor.movePosition(QTextCursor::End);
-      cursor.setCharFormat(char_format);
       cursor.setBlockFormat(block_format);
-      cursor.insertText(text + "\n");
+
+      auto InsertTextWithFont = [&](QFont& font, const QString& new_line)
+      {
+        char_format.setFont(font);
+        cursor.setCharFormat(char_format);
+
+        cursor.insertText(new_line);
+      };
+
+      // Well, I cannot get spacing on text work for the life of me
+      // I should probably use an actual custom text layout for this..
+
+      InsertTextWithFont(spacing_font_, QStringLiteral("\n"));
+      InsertTextWithFont(default_font_, text); 
+      InsertTextWithFont(spacing_font_, QStringLiteral("\n\n"));
 
       cursor.setBlockFormat(old_block_format);
       cursor.setCharFormat(old_char_format);
@@ -95,13 +113,13 @@ namespace snuffbox
       switch (severity)
       {
       case foundation::LogSeverity::kDebug:
-        fg = QColor(Qt::gray);
+        fg = QColor(80, 80, 80);
         bg = QColor(Qt::transparent);
         break;
 
       case foundation::LogSeverity::kInfo:
         fg = QColor(200, 200, 255);
-        bg = QColor(0, 0, 80);
+        bg = QColor(Qt::transparent);
         break;
 
       case foundation::LogSeverity::kWarning:
@@ -142,7 +160,7 @@ namespace snuffbox
       tab_widget_(nullptr)
     {
       setObjectName(QStringLiteral("ConsoleWidget"));
-      setMinimumSize(640, 160);
+      setMinimumSize(240, 160);
 
       QVBoxLayout* layout = new QVBoxLayout(this);
       layout->setStretch(0, 1);

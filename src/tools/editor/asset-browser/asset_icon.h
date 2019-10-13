@@ -13,6 +13,8 @@ namespace snuffbox
     /**
     * @brief Used to show an icon and name for different assets within the
     *        asset browser
+    *
+    * @author Daniel Konings
     */
     class AssetIcon : public QWidget
     {
@@ -70,6 +72,13 @@ namespace snuffbox
       void SetIconSize(int size);
 
       /**
+      * @brief Visually sets if this asset icon is currently selected
+      *
+      * @param[in] selected Is this icon selected?
+      */
+      void SetSelected(bool selected);
+
+      /**
       * @return The icon size of this asset icon
       */
       int icon_size() const;
@@ -105,6 +114,17 @@ namespace snuffbox
       QLabel* name_label_; //!< The label to display the asset name with
 
       static const int kDefaultIconSize_; //!< The default icon size
+
+      /**
+      * @brief The amount of elision padding for the label text
+      *        e.g. 'some very long' name becomes 'some ver..'
+      */
+      static const int kElisionPadding_;
+
+      /**
+      * @brief The padding for the name labels
+      */
+      static const int kLabelPadding_;
     };
   }
 }

@@ -47,6 +47,10 @@ namespace snuffbox
       const QString& path_; //!< The full path of the underlying asset
 
       AssetIcon* icon_; //!< The asset icon
+
+    public:
+
+      static const QSize kMaxItemSize; // The maximum item size
     };
   }
 }

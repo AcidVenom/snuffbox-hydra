@@ -46,6 +46,11 @@ SET(WindowsSources
   "windows/main_window.cc"
 )
 
+SET(CustomLayoutSources
+  "custom-layouts/flowlayout.h"
+  "custom-layouts/flowlayout.cc"
+)
+
 SOURCE_GROUP("\\"             FILES ${RootSources})
 SOURCE_GROUP("application"    FILES ${ApplicationSources})
 SOURCE_GROUP("asset-browser"  FILES ${AssetBrowserSources})
@@ -53,6 +58,7 @@ SOURCE_GROUP("editor-widgets" FILES ${EditorWidgetsSources})
 SOURCE_GROUP("input"          FILES ${InputSources})
 SOURCE_GROUP("project"        FILES ${ProjectSources})
 SOURCE_GROUP("windows"        FILES ${WindowsSources})
+SOURCE_GROUP("custom-layouts" FILES ${CustomLayoutSources})
 
 SET(EditorSources
   ${RootSources}
@@ -62,6 +68,7 @@ SET(EditorSources
   ${InputSources}
   ${ProjectSources}
   ${WindowsSources}
+  ${CustomLayoutSources}
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})
