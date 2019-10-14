@@ -43,8 +43,12 @@ namespace snuffbox
       game_view_widget->setObjectName(QStringLiteral("MainWindowGameDock"));
       game_view_widget->setMinimumSize(kMinWidth_ * 0.5, kMinHeight_ * 0.5);
 
+      Project& current_project = app->project();
+      QString build_path = 
+        current_project.GetCurrentBuildPath() + '/' + Project::kAssetDirectory;
+
       QDockWidget* assets_widget = new QDockWidget(this);
-      asset_browser_ = new AssetBrowser(assets_widget);
+      asset_browser_ = new AssetBrowser(build_path, assets_widget);
 
       assets_widget->setWidget(asset_browser_);
       assets_widget->setWindowTitle(QStringLiteral("Assets"));
@@ -64,9 +68,13 @@ namespace snuffbox
 
       foundation::Logger::RedirectOutput(&ConsoleWidget::OnLog, console);
 
-      Project& current_project = app->project();
-      asset_browser_->Refresh(
-        current_project.GetCurrentBuildPath() + '/' + Project::kAssetDirectory);
+      RefreshAssetList();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::RefreshAssetList()
+    {
+      asset_browser_->Refresh();
     }
 
     //--------------------------------------------------------------------------

@@ -36,6 +36,11 @@ namespace snuffbox
       MainWindow(EditorApplication* app, QWidget* parent = nullptr);
 
       /**
+      * @brief Refreshes the current asset list
+      */
+      void RefreshAssetList();
+
+      /**
       * @return The game view
       */
       GameView* game_view() const;

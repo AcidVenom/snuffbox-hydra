@@ -49,8 +49,10 @@ namespace snuffbox
       = "AssetBrowser.Splitter";
 
     //--------------------------------------------------------------------------
-    AssetBrowser::AssetBrowser(QWidget* parent) :
+    AssetBrowser::AssetBrowser(const QString& build_path, QWidget* parent) :
       QWidget(parent),
+      build_path_(build_path),
+      navigation_path_(build_path),
       tree_(nullptr),
       asset_list_(nullptr),
       splitter_(nullptr),
@@ -126,9 +128,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::Refresh(const QString& path)
+    void AssetBrowser::Refresh()
     {
-      foundation::Path full_path = path.toStdString().c_str();
+      QLayoutItem* old_item = nullptr;
+      while ((old_item = asset_list_->takeAt(0)) != nullptr)
+      {
+        delete old_item->widget();
+        delete old_item;
+      }
+
+      foundation::Path full_path = navigation_path_.toStdString().c_str();
 
       foundation::Vector<engine::AssetService::AssetFile> assets = 
         engine::AssetService::EnumerateAssets(

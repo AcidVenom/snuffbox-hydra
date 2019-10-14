@@ -25,12 +25,18 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    const int EditorApplication::kMinBuildChangeWait_ = 250;
+
+    //--------------------------------------------------------------------------
     EditorApplication::EditorApplication(
       int argc, char** argv, const Configuration& cfg)
       :
       engine::Application(argc, argv, cfg),
       qapp_(argc, argv),
-      project_(nullptr)
+      project_(nullptr),
+      main_window_(nullptr),
+      build_change_timer_("BuildChangeTimer"),
+      build_dir_changed_(false)
     {
       QCoreApplication::setOrganizationName(
         QStringLiteral("Daniel Konings"));
@@ -60,7 +66,7 @@ namespace snuffbox
 
       ApplyConfiguration();
 
-      std::unique_ptr<MainWindow> main_window = CreateMainWindow(&err);
+      main_window_ = CreateMainWindow(&err);
       if (err != foundation::ErrorCodes::kSuccess)
       {
         return err;
@@ -76,12 +82,22 @@ namespace snuffbox
         return foundation::ErrorCodes::kBuilderInitializationFailed;
       }
 
+      builder.set_on_finished([&](const builder::BuildItem& item)
+      {
+        OnBuilderFinished(&builder, item);
+      });
+
+      builder.set_on_removed([&](const builder::BuildItem& item)
+      {
+        OnBuilderRemoved(&builder, item);
+      });
+
       engine::RendererService* renderer = GetService<engine::RendererService>();
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
 
-      while (should_quit() == false && main_window->isVisible() == true)
+      while (should_quit() == false && main_window_->isVisible() == true)
       {
         delta_time.Start();
 
@@ -92,6 +108,8 @@ namespace snuffbox
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
 
         builder.IdleNotification();
+
+        CheckForBuildChanges();
       }
 
       Shutdown();
@@ -169,6 +187,47 @@ namespace snuffbox
       });
 
       return main_window;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnBuilderFinished(
+      const builder::Builder* builder, 
+      const builder::BuildItem& item)
+    {
+      if (builder->IsBuilding() == true)
+      {
+        return;
+      }
+
+      build_dir_changed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnBuilderRemoved(
+      const builder::Builder* builder, 
+      const builder::BuildItem& item)
+    {
+      build_change_timer_.Stop();
+      build_change_timer_.Start();
+
+      build_dir_changed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::CheckForBuildChanges()
+    {
+      if (
+        build_change_timer_.Elapsed() > kMinBuildChangeWait_ &&
+        build_dir_changed_ == true)
+      {
+        build_dir_changed_ = false;
+        main_window_->RefreshAssetList();
+
+        foundation::Logger::LogVerbosity<3>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kDebug,
+          "Build directory changed");
+      }
     }
   }
 }

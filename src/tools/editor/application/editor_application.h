@@ -4,12 +4,19 @@
 #include "tools/editor/windows/main_window.h"
 
 #include <engine/application/application.h>
+#include <foundation/auxiliary/timer.h>
 
 #include <QApplication>
 #include <QSettings>
 
 namespace snuffbox
 {
+  namespace builder
+  {
+    class Builder;
+    struct BuildItem;
+  }
+
   namespace editor
   {
     class MainWindow;
@@ -74,10 +81,55 @@ namespace snuffbox
       */
       std::unique_ptr<MainWindow> CreateMainWindow(foundation::ErrorCodes* err);
 
+      /**
+      * @brief Called when the builder has finished building one of
+      *        its current items
+      *
+      * @param[in] builder The builder that invoked this call
+      * @param[in] item The item that was finished
+      */
+      void OnBuilderFinished(
+        const builder::Builder* builder, 
+        const builder::BuildItem& item);
+
+      /**
+      * @brief Called when the builder has removed a file because it was no
+      *        longer in the source directory
+      *
+      * @param[in] builder The builder that invoked this call
+      * @param[in] item The item that was removed
+      */
+      void OnBuilderRemoved(
+        const builder::Builder* builder, 
+        const builder::BuildItem& item);
+
+      /**
+      * @brief Checks if the build directory has changed and if it did,
+      *        refresh the current asset listing
+      *
+      * @remarks We do not constantly want to update this, so we make sure to
+      *          wait a while inbetween changes in the case of mass-deletes
+      */
+      void CheckForBuildChanges();
+
     private:
 
       QApplication qapp_; //!< The Qt application
       Project project_; //!< The current project
+
+      /**
+      * @brief The grace period timer for build changes
+      */
+      foundation::Timer build_change_timer_;
+      bool build_dir_changed_; //!< Has the build directory changed?
+
+      std::unique_ptr<MainWindow> main_window_; //!< The main window
+
+      /**
+      * @brief The minimum amount of time, in milliseconds, to wait inbetween
+      *        build changes during removal
+      */
+      static const int kMinBuildChangeWait_;
     };
   }
 }

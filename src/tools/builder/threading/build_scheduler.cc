@@ -48,6 +48,25 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool BuildScheduler::IsBuilding() const
+    {
+      BuildJob* job = nullptr;
+      bool compiling = false;
+
+      for (size_t i = 0; i < jobs_.size(); ++i)
+      {
+        job = jobs_.at(i);
+        if (job->ready() == false || job->has_data() == true)
+        {
+          compiling = true;
+          break;
+        }
+      }
+
+      return compiling == true || queue_.empty() == false;
+    }
+
+    //--------------------------------------------------------------------------
     void BuildScheduler::Flush()
     {
       std::lock_guard<std::mutex> lock(queue_mutex_);
@@ -162,25 +181,6 @@ namespace snuffbox
           "Finished building {0} item(s)",
           build_count_);
       }
-    }
-
-    //--------------------------------------------------------------------------
-    bool BuildScheduler::IsBuilding() const
-    {
-      BuildJob* job = nullptr;
-      bool compiling = false;
-
-      for (size_t i = 0; i < jobs_.size(); ++i)
-      {
-        job = jobs_.at(i);
-        if (job->ready() == false || job->has_data() == true)
-        {
-          compiling = true;
-          break;
-        }
-      }
-
-      return compiling == true || queue_.empty() == false;
     }
 
     //--------------------------------------------------------------------------

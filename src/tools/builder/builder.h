@@ -201,6 +201,8 @@ namespace snuffbox
       *        an item
       *
       * @param[in] cb The callback to set
+      *
+      * @remarks This function is not called from the main thread
       */
       void set_on_finished(const OnFinishedCallback& cb);
 
@@ -209,6 +211,8 @@ namespace snuffbox
       *        from the build directory
       *
       * @param[in] cb The callback to set
+      *
+      * @remarks This function is not called from the main thread
       */
       void set_on_removed(const OnFinishedCallback& cb);
 
@@ -216,6 +220,11 @@ namespace snuffbox
       * @return The current build directory
       */
       const foundation::Path& build_directory() const;
+
+      /**
+      * @return Are we still building?
+      */
+      bool IsBuilding() const;
 
       /**
       * @brief Stops the builder if it was running

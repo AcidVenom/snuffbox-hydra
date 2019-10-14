@@ -275,6 +275,19 @@ namespace snuffbox
       foundation::String out_ext;
       BuildItem build_item;
 
+      auto OnItemRemoved = [&](const foundation::Path& removed_path)
+      {
+        if (on_removed_ != nullptr)
+        {
+          build_item.in = source_file;
+          build_item.relative = removed_path.StripPath(build_directory_);
+          build_item.type = compilers::AssetTypesFromBuildExtension(
+            removed_path.extension().c_str());
+
+          on_removed_(build_item);
+        }
+      };
+
       for (size_t i = 0; i < build_items.size(); ++i)
       {
         const foundation::DirectoryTreeItem& item = build_items.at(i);
@@ -288,6 +301,7 @@ namespace snuffbox
           if (foundation::Directory::Exists(current_source) == false)
           {
             foundation::Directory::Remove(item_path);
+            OnItemRemoved(item_path);
             continue;
           }
 
@@ -302,6 +316,7 @@ namespace snuffbox
           if (foundation::File::Exists(source_file) == false)
           {
             foundation::File::Remove(item_path);
+            OnItemRemoved(item_path);
           }
         }
         else
@@ -315,16 +330,7 @@ namespace snuffbox
             if (foundation::File::Exists(source_file) == false)
             {
               foundation::File::Remove(item_path);
-              
-              if (on_removed_ != nullptr)
-              {
-                build_item.in = source_file;
-                build_item.relative = item_path.StripPath(build_directory_);
-                build_item.type = compilers::AssetTypesFromBuildExtension(
-                  item_path.extension().c_str());
-
-                on_removed_(build_item);
-              }
+              OnItemRemoved(item_path);
             }
           }
         }
@@ -440,6 +446,12 @@ namespace snuffbox
     const foundation::Path& Builder::build_directory() const
     {
       return build_directory_;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Builder::IsBuilding() const
+    {
+      return scheduler_.IsBuilding();
     }
 
     //--------------------------------------------------------------------------

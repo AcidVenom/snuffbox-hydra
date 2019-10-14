@@ -29,9 +29,10 @@ namespace snuffbox
       /**
       * @brief Construct through a Qt parent
       *
+      * @param[in] build_path The build path to operate on
       * @param[in] parent The parent widget this widget lives in
       */
-      AssetBrowser( QWidget* parent = nullptr);
+      AssetBrowser(const QString& build_path, QWidget* parent = nullptr);
 
       /**
       * @brief Saves the splitter state of the asset browser to restore later
@@ -46,11 +47,9 @@ namespace snuffbox
     public slots:
 
       /**
-      * @brief Refreshes the asset browser to a new directory
-      *
-      * @param[in] path The path of the new directory to open
+      * @brief Refreshes the asset browser within the current navigation path
       */
-      void Refresh(const QString& path);
+      void Refresh();
 
       /**
       * @brief Called when a new item is selected
@@ -69,6 +68,13 @@ namespace snuffbox
       void SelectionChanged(const AssetBrowserItem* new_item);
 
     private:
+
+      QString build_path_; //!< The current build path
+
+      /**
+      * @brief The current navigation path within the build path
+      */
+      QString navigation_path_;
 
       QTreeView* tree_; //!< The tree view to navigate the asset tree
       FlowLayout* asset_list_; //!< The asset list layout

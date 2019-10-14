@@ -49,6 +49,11 @@ namespace snuffbox
       void IdleNotification(Builder* builder);
 
       /**
+      * @return Are we currently building?
+      */
+      bool IsBuilding() const;
+
+      /**
       * @brief Joins the build jobs back to the main thread by destructing them
       */
       ~BuildScheduler();
@@ -84,11 +89,6 @@ namespace snuffbox
       *        yet
       */
       void UpdateBuildStatus();
-
-      /**
-      * @return Are we currently building?
-      */
-      bool IsBuilding() const;
 
       /**
       * @brief Stops all build jobs, but waits for them to finish their current
