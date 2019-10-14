@@ -3,6 +3,7 @@
 #include "tools/editor/custom-layouts/flowlayout.h"
 
 #include <engine/services/asset_service.h>
+#include <foundation/containers/function.h>
 
 #include <QTreeView>
 #include <QSplitter>
@@ -15,6 +16,34 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    class ClickableFrame : public QFrame
+    {
+
+    public:
+
+      ClickableFrame(
+        const foundation::Function<void()>& callback, 
+        QWidget* parent = nullptr) :
+        QFrame(parent),
+        callback_(callback)
+      {
+
+      }
+
+    protected:
+
+      void mouseReleaseEvent(QMouseEvent* evt) override
+      {
+        callback_();
+        QFrame::mouseReleaseEvent(evt);
+      }
+
+    private:
+
+      foundation::Function<void()> callback_;
+    };
+
+    //--------------------------------------------------------------------------
     const int AssetBrowser::kFlowLayoutSpacing_ = 10;
     const QString AssetBrowser::kSettingsAssetBrowserKey_ 
       = "AssetBrowser.Splitter";
@@ -24,7 +53,8 @@ namespace snuffbox
       QWidget(parent),
       tree_(nullptr),
       asset_list_(nullptr),
-      splitter_(nullptr)
+      splitter_(nullptr),
+      selected_item_(nullptr)
     {
       setObjectName(QStringLiteral("AssetBrowser"));
 
@@ -33,7 +63,11 @@ namespace snuffbox
       tree_ = new QTreeView(this);
       tree_->setObjectName(QStringLiteral("AssetBrowserTree"));
 
-      QFrame* browser_frame = new QFrame(this);
+      ClickableFrame* browser_frame = new ClickableFrame([&]()
+      {
+        emit SelectionChanged(nullptr);
+      }, this);
+
       browser_frame->setObjectName(QStringLiteral("AssetBrowserFrame"));
       browser_frame->setFrameStyle(
         QFrame::Shape::StyledPanel | QFrame::Shadow::Sunken);
@@ -124,6 +158,14 @@ namespace snuffbox
 
         asset_list_->addWidget(item);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::OnItemSelect(const AssetBrowserItem* item)
+    {
+      selected_item_ = item;
+
+      emit SelectionChanged(item);
     }
   }
 }

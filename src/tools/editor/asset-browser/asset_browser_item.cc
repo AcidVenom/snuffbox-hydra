@@ -1,9 +1,13 @@
 #include "tools/editor/asset-browser/asset_browser_item.h"
 
 #include "tools/editor/asset-browser/asset_icon.h"
+#include "tools/editor/asset-browser/asset_browser.h"
 #include "tools/editor/application/styling.h"
 
 #include <QVBoxLayout>
+#include <QStyle>
+#include <QPainter>
+#include <QStyleOption>
 
 namespace snuffbox
 {
@@ -16,7 +20,7 @@ namespace snuffbox
     AssetBrowserItem::AssetBrowserItem(
       compilers::AssetTypes type,
       const QString& path,
-      QWidget* parent)
+      AssetBrowser* parent)
       :
       QWidget(parent),
       type_(type),
@@ -37,6 +41,18 @@ namespace snuffbox
       layout->setContentsMargins(0, 0, 0, 20);
 
       setLayout(layout);
+
+      connect(
+        this, 
+        &AssetBrowserItem::Selected, 
+        parent, 
+        &AssetBrowser::OnItemSelect);
+
+      connect(
+        parent,
+        &AssetBrowser::SelectionChanged,
+        this,
+        &AssetBrowserItem::OnSelectionChanged);
     }
 
     //--------------------------------------------------------------------------
@@ -52,16 +68,31 @@ namespace snuffbox
     }
 
 	  //--------------------------------------------------------------------------
-	  void AssetBrowserItem::mousePressEvent(QMouseEvent* evt)
+	  void AssetBrowserItem::mouseReleaseEvent(QMouseEvent* evt)
 	  {
 		  SetSelected(true);
 	  }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowserItem::paintEvent(QPaintEvent* evt)
+    {                                                                                                                                        
+      QStyleOption style_option;                                                                                                                                                                  
+      style_option.initFrom(this);
+
+      QPainter painter(this);
+      style()->drawPrimitive(QStyle::PE_Widget, &style_option, &painter, this);                                                                                                                         
+    };
 
     //--------------------------------------------------------------------------
     void AssetBrowserItem::SetSelected(bool selected)
     {
       selected_ = selected;
       icon_->SetSelected(selected_);
+
+      if (selected_ == true)
+      {
+        emit Selected(this);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -83,6 +114,15 @@ namespace snuffbox
         .arg(highlight_col, highlight_col_bg) : "";
 
       setStyleSheet(style);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowserItem::OnSelectionChanged(const AssetBrowserItem* new_item)
+    {
+      if (new_item != this)
+      {
+        SetSelected(false);
+      }
     }
   }
 }

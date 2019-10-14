@@ -11,6 +11,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class AssetBrowserItem;
+
     /**
     * @brief Used to show Snuffbox's assets within a specific directory, from
     *        which you can open import settings or import them into the engine
@@ -50,11 +52,28 @@ namespace snuffbox
       */
       void Refresh(const QString& path);
 
+      /**
+      * @brief Called when a new item is selected
+      *
+      * @param[in] item The item that was selected
+      */
+      void OnItemSelect(const AssetBrowserItem* item);
+
+    signals:
+
+      /**
+      * @brief Emitted when the current asset browser selection has changed
+      *
+      * @parma[in] new_item The new item
+      */
+      void SelectionChanged(const AssetBrowserItem* new_item);
+
     private:
 
       QTreeView* tree_; //!< The tree view to navigate the asset tree
       FlowLayout* asset_list_; //!< The asset list layout
       QSplitter* splitter_; //!< The splitter
+      const AssetBrowserItem* selected_item_; //!< The currently selected item
 
       /**
       * @brief The spacing between asset browser items
