@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGraphicsDropShadowEffect>
 
 #include <resources/directory_icon.h>
 #include <resources/scene_icon.h>
@@ -59,6 +60,12 @@ namespace snuffbox
 
       name_label_ = new QLabel(this);
       name_label_->setObjectName(QStringLiteral("AssetIconNameLabel"));
+
+      QGraphicsDropShadowEffect* drop_shadow = new QGraphicsDropShadowEffect();
+      drop_shadow->setBlurRadius(10);
+      drop_shadow->setOffset(2, 4);
+      drop_shadow->setColor(QColor(0, 0, 0, 30));
+      name_label_->setGraphicsEffect(drop_shadow);
 
       SetNameFromPath(path);
 

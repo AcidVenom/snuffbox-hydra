@@ -102,14 +102,14 @@ namespace snuffbox
         Styling::GetStyleColor(Styling::ColorRole::kHighlight);
 
       QString highlight_col_bg =
-        Styling::GetStyleColor(Styling::ColorRole::kHighlight, 0.1f);
+        Styling::GetStyleColor(Styling::ColorRole::kHighlight, 0.4f);
 
       QString style = highlighted == true ?
         QString(
           "#AssetBrowserItem {"
             "border: 1px solid %0;"
             "background: %1;"
-            "border-radius: 5px;"
+            "border-radius: 10px;"
           "}")
         .arg(highlight_col, highlight_col_bg) : "";
 

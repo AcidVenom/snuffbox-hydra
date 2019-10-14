@@ -41,7 +41,7 @@ namespace snuffbox
       if (initialized_roles == false)
       {
         kColorRoles_[ColorRole::kSelected] = "rgba(50, 100, 0, %0)";
-        kColorRoles_[ColorRole::kClickable] = "rgba(61, 68, 67, %0)";
+        kColorRoles_[ColorRole::kClickable] = "rgba(61, 75, 67, %0)";
         kColorRoles_[ColorRole::kHighlight] = "rgba(100, 200, 0, %0)";
         initialized_roles = true;
       }
