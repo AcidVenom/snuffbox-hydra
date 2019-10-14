@@ -25,7 +25,7 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    const int EditorApplication::kMinBuildChangeWait_ = 250;
+    const int EditorApplication::kMinBuildChangeWait_ = 200;
 
     //--------------------------------------------------------------------------
     EditorApplication::EditorApplication(
@@ -199,7 +199,7 @@ namespace snuffbox
         return;
       }
 
-      build_dir_changed_ = true;
+      BuildChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -207,6 +207,14 @@ namespace snuffbox
       const builder::Builder* builder, 
       const builder::BuildItem& item)
     {
+      BuildChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::BuildChanged()
+    {
+      std::unique_lock<std::mutex> lock_guard(build_mutex_);
+
       build_change_timer_.Stop();
       build_change_timer_.Start();
 

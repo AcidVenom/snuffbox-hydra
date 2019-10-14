@@ -104,6 +104,11 @@ namespace snuffbox
         const builder::BuildItem& item);
 
       /**
+      * @brief Mark that the current build has changed
+      */
+      void BuildChanged();
+
+      /**
       * @brief Checks if the build directory has changed and if it did,
       *        refresh the current asset listing
       *
@@ -122,6 +127,7 @@ namespace snuffbox
       */
       foundation::Timer build_change_timer_;
       bool build_dir_changed_; //!< Has the build directory changed?
+      std::mutex build_mutex_; //!< The mutex for any building callbacks
 
       std::unique_ptr<MainWindow> main_window_; //!< The main window
 
