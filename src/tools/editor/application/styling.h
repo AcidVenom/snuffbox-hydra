@@ -2,6 +2,8 @@
 
 class QApplication;
 
+#include <QString>
+
 namespace snuffbox
 {
   namespace editor
@@ -38,10 +40,11 @@ namespace snuffbox
       * @brief Retrieves a color from a provided color role
       *
       * @param[in] role The color role to retrieve
+      * @param[in] a The alpha, default = 1.0
       *
-      * @return The stringified color as "rgb(r, g, b)" string
+      * @return The stringified color as "rgba(r, g, b, a)" string
       */
-      static const char* GetStyleColor(ColorRole role);
+      static QString GetStyleColor(ColorRole role, float a = 1.0f);
 
     private:
 

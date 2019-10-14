@@ -41,12 +41,51 @@ namespace snuffbox
         const QString& path, 
         QWidget* parent = nullptr);
 
+	protected:
+
+    /**
+    * @brief Called when the mouse cursor enters the area of this widget
+    *
+    * @param[in] evt The event that triggered this event
+    */
+    void enterEvent(QEvent* evt) override;
+
+    /**
+    * @brief Called when the mouse cursor leaves the area of this widget
+    *
+    * @param[in] evt The event that triggered this event
+    */
+    void leaveEvent(QEvent* evt) override;
+
+		/**
+		* @brief Called when the widget is pressed down on by mouse
+		*
+		* @param[in] evt The mouse event that triggered this event
+		*/
+		void mousePressEvent(QMouseEvent* evt) override;
+
+    /**
+    * @brief Sets whether this asset browser item is selected
+    *
+    * @param[in] selected The new value
+    */
+    void SetSelected(bool selected);
+
+    /**
+    * @brief Sets whether this asset browser item has been highlighted by mouse
+    *
+    * @param[in] highlighted The new value
+    */
+    void SetHighlighted(bool highlighted);
+
     private:
 
       compilers::AssetTypes type_; //!< The type of the underlying asset
       const QString& path_; //!< The full path of the underlying asset
 
       AssetIcon* icon_; //!< The asset icon
+
+      bool selected_; //!< Is this asset browser item selected?
 
     public:
 

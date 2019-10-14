@@ -35,18 +35,19 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const char* Styling::GetStyleColor(ColorRole role)
+    QString Styling::GetStyleColor(ColorRole role, float a)
     {
       static bool initialized_roles = false;
       if (initialized_roles == false)
       {
-        kColorRoles_[ColorRole::kSelected] = "rgb(50, 100, 0)";
-        kColorRoles_[ColorRole::kClickable] = "rgb(61, 68, 67)";
-        kColorRoles_[ColorRole::kHighlight] = "rgb(100, 200, 0)";
+        kColorRoles_[ColorRole::kSelected] = "rgba(50, 100, 0, %0)";
+        kColorRoles_[ColorRole::kClickable] = "rgba(61, 68, 67, %0)";
+        kColorRoles_[ColorRole::kHighlight] = "rgba(100, 200, 0, %0)";
         initialized_roles = true;
       }
 
-      return kColorRoles_[role];
+      QString format = kColorRoles_[role];
+      return format.arg(std::to_string(a).c_str());
     }
   }
 }
