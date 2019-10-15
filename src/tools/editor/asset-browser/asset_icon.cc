@@ -102,7 +102,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetIcon::SetNameFromPath(const QString& path)
     {
-      foundation::Path full_path = foundation::Path(path.toStdString().c_str());
+      foundation::Path full_path = foundation::Path(path.toLatin1().data());
       full_path = full_path.NoExtension();
 
       foundation::Vector<foundation::String> split = 

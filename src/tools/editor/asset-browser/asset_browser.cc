@@ -137,7 +137,7 @@ namespace snuffbox
         delete old_item;
       }
 
-      foundation::Path full_path = navigation_path_.toStdString().c_str();
+      foundation::Path full_path = navigation_path_.toLatin1().data();
 
       foundation::Vector<engine::AssetService::AssetFile> assets = 
         engine::AssetService::EnumerateAssets(

@@ -74,7 +74,7 @@ namespace snuffbox
 
       builder::Builder builder;
       if (builder.Initialize(
-        project_.project_path().toStdString().c_str(),
+        project_.project_path().toLatin1().data(),
         Project::kAssetDirectory,
         Project::kBuildDirectory
       ) == false)
@@ -161,7 +161,7 @@ namespace snuffbox
         foundation::LogChannel::kEditor,
         foundation::LogSeverity::kDebug,
         "Initializing the editor\n\tOpening project: {0}",
-        project_.project_path().toStdString());
+        project_.project_path().toLatin1().data());
 
       *err = Initialize();
 
