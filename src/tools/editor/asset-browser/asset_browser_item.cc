@@ -20,17 +20,19 @@ namespace snuffbox
     AssetBrowserItem::AssetBrowserItem(
       compilers::AssetTypes type,
       const QString& path,
+      const QString& base_dir,
       AssetBrowser* parent)
       :
       QWidget(parent),
       type_(type),
-      path_(path),
+      relative_path_(path),
+      full_path_(base_dir + '/' + path),
       icon_(nullptr),
       selected_(false)
     {
       setObjectName(QStringLiteral("AssetBrowserItem"));
 
-      icon_ = new AssetIcon(type, path, this);
+      icon_ = new AssetIcon(type, relative_path_, this);
 
       setMinimumSize(kMaxItemSize);
       setMaximumSize(kMaxItemSize);
@@ -72,6 +74,15 @@ namespace snuffbox
 	  {
 		  SetSelected(true);
 	  }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowserItem::mouseDoubleClickEvent(QMouseEvent* evt)
+    {
+      if (type_ == compilers::AssetTypes::kDirectory)
+      {
+        emit DirectoryChanged(full_path_);
+      }
+    }
 
     //--------------------------------------------------------------------------
     void AssetBrowserItem::paintEvent(QPaintEvent* evt)

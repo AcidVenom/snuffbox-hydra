@@ -1,11 +1,11 @@
 #include "tools/editor/asset-browser/asset_browser.h"
 #include "tools/editor/asset-browser/asset_browser_item.h"
+#include "tools/editor/asset-browser/asset_tree.h"
 #include "tools/editor/custom-layouts/flowlayout.h"
 
 #include <engine/services/asset_service.h>
 #include <foundation/containers/function.h>
 
-#include <QTreeView>
 #include <QSplitter>
 #include <QLayout>
 #include <QScrollArea>
@@ -62,8 +62,7 @@ namespace snuffbox
 
       QHBoxLayout* main_layout = new QHBoxLayout();
 
-      tree_ = new QTreeView(this);
-      tree_->setObjectName(QStringLiteral("AssetBrowserTree"));
+      tree_ = new AssetTree(build_path_, this);
 
       ClickableFrame* browser_frame = new ClickableFrame([&]()
       {
@@ -102,6 +101,12 @@ namespace snuffbox
       main_layout->addWidget(splitter_);
       
       setLayout(main_layout);
+
+      connect(
+        tree_,
+        &AssetTree::DirectorySelected,
+        this,
+        &AssetBrowser::OnDirectorySelected);
     }
 
     //--------------------------------------------------------------------------
@@ -128,7 +133,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::Refresh()
+    void AssetBrowser::RefreshBrowser()
     {
       QLayoutItem* old_item = nullptr;
       while ((old_item = asset_list_->takeAt(0)) != nullptr)
@@ -162,11 +167,24 @@ namespace snuffbox
 
         AssetBrowserItem* item = new AssetBrowserItem(
           asset.type, 
-          asset.relative_path.ToString().c_str(), 
+          asset.relative_path.ToString().c_str(),
+          full_path.ToString().c_str(),
           this);
+
+        connect(
+          item, 
+          &AssetBrowserItem::DirectoryChanged, 
+          this, 
+          &AssetBrowser::OnDirectorySelected);
 
         asset_list_->addWidget(item);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::Refresh()
+    {
+      RefreshBrowser();
     }
 
     //--------------------------------------------------------------------------
@@ -175,6 +193,13 @@ namespace snuffbox
       selected_item_ = item;
 
       emit SelectionChanged(item);
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::OnDirectorySelected(const QString& directory)
+    {
+      navigation_path_ = directory;
+      RefreshBrowser();
     }
   }
 }

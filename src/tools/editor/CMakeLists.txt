@@ -18,6 +18,8 @@ SET(AssetBrowserSources
   "asset-browser/asset_icon.cc"
   "asset-browser/asset_browser_item.h"
   "asset-browser/asset_browser_item.cc"
+  "asset-browser/asset_tree.h"
+  "asset-browser/asset_tree.cc"
 )
 
 SET(EditorWidgetsSources

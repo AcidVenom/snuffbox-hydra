@@ -36,12 +36,14 @@ namespace snuffbox
       * @remarks The asset name is retrieved from the last part of the path
       *
       * @param[in] type The type of the underlying asset
-      * @param[in] path The full path of the underlying asset
+      * @param[in] path The relative path of the underlying asset
+      * @param[in] base_dir The base directory of the underyling asset
       * @param[in] parent The parent asset browser of this item
       */
       AssetBrowserItem(
         compilers::AssetTypes type, 
         const QString& path, 
+        const QString& base_dir,
         AssetBrowser* parent);
 
 	  protected:
@@ -67,6 +69,14 @@ namespace snuffbox
 		  * @param[in] evt The mouse event that triggered this event
 		  */
 		  void mouseReleaseEvent(QMouseEvent* evt) override;
+
+      /**
+      * @brief Called when the widget is double clicked, if the asset icon
+      *        is a directory, navigate to that directory
+      *
+      * @param[in] evt The mouse event that triggered this event
+      */
+      void mouseDoubleClickEvent(QMouseEvent* evt) override;
 
       /**
       * @brief When sub-classing from QWidget, utilizing Q_OBJECT, stylesheets
@@ -109,10 +119,19 @@ namespace snuffbox
       */
       void Selected(const AssetBrowserItem* item);
 
+      /**
+      * @brief Emitted when this item has been double clicked and it was a
+      *        directory
+      *
+      * @param[in] directory The directory to navigate to
+      */
+      void DirectoryChanged(const QString& directory);
+
     private:
 
       compilers::AssetTypes type_; //!< The type of the underlying asset
-      const QString& path_; //!< The full path of the underlying asset
+      QString relative_path_; //!< The relative path of the underlying asset
+      QString full_path_; //!< The full path to the underlying asset
 
       AssetIcon* icon_; //!< The asset icon
 

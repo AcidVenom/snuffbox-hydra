@@ -2,7 +2,6 @@
 
 #include <QWidget>
 
-class QTreeView;
 class QSplitter;
 class QSettings;
 class FlowLayout;
@@ -12,6 +11,7 @@ namespace snuffbox
   namespace editor
   {
     class AssetBrowserItem;
+    class AssetTree;
 
     /**
     * @brief Used to show Snuffbox's assets within a specific directory, from
@@ -49,6 +49,11 @@ namespace snuffbox
       /**
       * @brief Refreshes the asset browser within the current navigation path
       */
+      void RefreshBrowser();
+
+      /**
+      * @brief Refresh both the asset browser and asset tree
+      */
       void Refresh();
 
       /**
@@ -57,6 +62,15 @@ namespace snuffbox
       * @param[in] item The item that was selected
       */
       void OnItemSelect(const AssetBrowserItem* item);
+
+    protected slots:
+
+      /**
+      * @brief Called when a new directory is selected within the asset tree
+      *
+      * @param[in] directory The new directory
+      */
+      void OnDirectorySelected(const QString& directory);
 
     signals:
 
@@ -76,7 +90,7 @@ namespace snuffbox
       */
       QString navigation_path_;
 
-      QTreeView* tree_; //!< The tree view to navigate the asset tree
+      AssetTree* tree_; //!< The tree view to navigate the asset tree
       FlowLayout* asset_list_; //!< The asset list layout
       QSplitter* splitter_; //!< The splitter
       const AssetBrowserItem* selected_item_; //!< The currently selected item
