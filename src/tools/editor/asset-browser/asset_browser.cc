@@ -314,24 +314,38 @@ namespace snuffbox
 
       ctx.exec(browser_frame_->mapToGlobal(pos));
     }
-    //--------------------------------------------------------------------------
 
-#define DECL_ACTION_CB(ctx, name, cb)\
-connect(## name ##, &QAction::triggered, this, &AssetBrowser::##cb##);\
-ctx->addAction(## name ##);
+    //--------------------------------------------------------------------------
+    void AddToContextMenu(
+      AssetBrowser* browser,
+      QMenu* menu, 
+      QAction* action, 
+      void(AssetBrowser::*callback)())
+    {
+      menu->addAction(action);
+      QObject::connect(
+        action,
+        &QAction::triggered,
+        browser,
+        callback);
+    }
 
     //--------------------------------------------------------------------------
     void AssetBrowser::ShowItemContextMenu(QMenu* menu)
     {
-      QAction* delete_action = new QAction("Delete");
-      DECL_ACTION_CB(menu, delete_action, DeleteHoveredItem);
+      using AB = AssetBrowser;
+
+      QAction* del = new QAction("Delete");
+      AddToContextMenu(this, menu, del, &AB::DeleteHoveredItem);
     }
 
     //--------------------------------------------------------------------------
     void AssetBrowser::ShowRegularContextMenu(QMenu* menu)
     {
-      QAction* create_dir_action = new QAction("Create directory");
-      DECL_ACTION_CB(menu, create_dir_action, CreateNewSourceDirectory);
+      using AB = AssetBrowser;
+
+      QAction* create_dir = new QAction("Create directory");
+      AddToContextMenu(this, menu, create_dir, &AB::CreateNewSourceDirectory);
     }
 
     //--------------------------------------------------------------------------
@@ -381,7 +395,7 @@ ctx->addAction(## name ##);
         QMessageBox::question(
           nullptr, 
           "Confirmation", 
-          QString("Are you sure you want to delete '%0', this cannot be undone")
+          QString("Are you sure you want to delete '%0'? This cannot be undone")
             .arg(file_or_dir.ToString().c_str()),
           QMessageBox::Yes | QMessageBox::No);
 
