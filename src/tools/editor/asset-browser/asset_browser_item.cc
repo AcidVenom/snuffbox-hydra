@@ -58,6 +58,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    const QString& AssetBrowserItem::full_path() const
+    {
+      return full_path_;
+    }
+
+    //--------------------------------------------------------------------------
     void AssetBrowserItem::enterEvent(QEvent* evt)
     {
       SetHighlighted(true);
@@ -67,12 +73,14 @@ namespace snuffbox
     void AssetBrowserItem::leaveEvent(QEvent* evt)
     {
       SetHighlighted(false);
+      emit Hovered(this, false);
     }
 
 	  //--------------------------------------------------------------------------
 	  void AssetBrowserItem::mouseReleaseEvent(QMouseEvent* evt)
 	  {
 		  SetSelected(true);
+      emit Hovered(this, true);
 	  }
 
     //--------------------------------------------------------------------------

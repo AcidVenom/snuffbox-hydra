@@ -47,8 +47,10 @@ namespace snuffbox
       QString build_path = 
         current_project.GetCurrentBuildPath() + '/' + Project::kAssetDirectory;
 
+      QString asset_path = current_project.GetCurrentAssetsPath();
+
       QDockWidget* assets_widget = new QDockWidget(this);
-      asset_browser_ = new AssetBrowser(build_path, assets_widget);
+      asset_browser_ = new AssetBrowser(asset_path, build_path, assets_widget);
 
       assets_widget->setWidget(asset_browser_);
       assets_widget->setWindowTitle(QStringLiteral("Assets"));

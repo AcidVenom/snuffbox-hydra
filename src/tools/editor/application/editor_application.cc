@@ -87,9 +87,9 @@ namespace snuffbox
         OnBuilderFinished(&builder, item);
       });
 
-      builder.set_on_removed([&](const builder::BuildItem& item)
+      builder.set_on_changed([&](const builder::BuildItem& item)
       {
-        OnBuilderRemoved(&builder, item);
+        OnBuilderChanged(&builder, item);
       });
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
@@ -203,7 +203,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::OnBuilderRemoved(
+    void EditorApplication::OnBuilderChanged(
       const builder::Builder* builder, 
       const builder::BuildItem& item)
     {

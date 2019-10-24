@@ -46,6 +46,11 @@ namespace snuffbox
         const QString& base_dir,
         AssetBrowser* parent);
 
+      /**
+      * @return The full path of this item
+      */
+      const QString& full_path() const;
+
 	  protected:
 
       /**
@@ -118,6 +123,14 @@ namespace snuffbox
       * @param[in] item The item that was selected (this)
       */
       void Selected(const AssetBrowserItem* item);
+
+      /**
+      * @brief Emitted when this item was hovered over or left by the mouse
+      *
+      * @param[in] item The item that was hovered (this)
+      * @param[in] hovered Were we hovered over or left?
+      */
+      void Hovered(const AssetBrowserItem* item, bool hovered);
 
       /**
       * @brief Emitted when this item has been double clicked and it was a

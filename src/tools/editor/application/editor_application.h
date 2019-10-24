@@ -94,12 +94,12 @@ namespace snuffbox
 
       /**
       * @brief Called when the builder has removed a file because it was no
-      *        longer in the source directory
+      *        longer in the source directory, or a directory changed
       *
       * @param[in] builder The builder that invoked this call
-      * @param[in] item The item that was removed
+      * @param[in] item The item that was removed, or the directory that changed
       */
-      void OnBuilderRemoved(
+      void OnBuilderChanged(
         const builder::Builder* builder, 
         const builder::BuildItem& item);
 

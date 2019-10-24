@@ -17,7 +17,7 @@ namespace snuffbox
       is_ok_(false),
       build_directory_(""),
       on_finished_(nullptr),
-      on_removed_(nullptr)
+      on_changed_(nullptr)
     {
       compilers::Glslang::Initialize();
     }
@@ -259,6 +259,16 @@ namespace snuffbox
             {
               continue;
             }
+
+            if (on_changed_ != nullptr)
+            {
+              BuildItem dir_item;
+              dir_item.in = item.path();
+              dir_item.relative = current;
+              dir_item.type = compilers::AssetTypes::kDirectory;
+
+              on_changed_(dir_item);
+            }
           }
 
           SyncItems(item.children());
@@ -277,14 +287,14 @@ namespace snuffbox
 
       auto OnItemRemoved = [&](const foundation::Path& removed_path)
       {
-        if (on_removed_ != nullptr)
+        if (on_changed_ != nullptr)
         {
           build_item.in = source_file;
           build_item.relative = removed_path.StripPath(build_directory_);
           build_item.type = compilers::AssetTypesFromBuildExtension(
             removed_path.extension().c_str());
 
-          on_removed_(build_item);
+          on_changed_(build_item);
         }
       };
 
@@ -437,9 +447,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Builder::set_on_removed(const OnFinishedCallback& cb)
+    void Builder::set_on_changed(const OnFinishedCallback& cb)
     {
-      on_removed_ = cb;
+      on_changed_ = cb;
     }
 
     //--------------------------------------------------------------------------

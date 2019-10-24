@@ -5,6 +5,8 @@
 class QSplitter;
 class QSettings;
 class FlowLayout;
+class QFrame;
+class QMenu;
 
 namespace snuffbox
 {
@@ -29,10 +31,14 @@ namespace snuffbox
       /**
       * @brief Construct through a Qt parent
       *
+      * @param[in] source_path The source path to operate on
       * @param[in] build_path The build path to operate on
       * @param[in] parent The parent widget this widget lives in
       */
-      AssetBrowser(const QString& build_path, QWidget* parent = nullptr);
+      AssetBrowser(
+        const QString& source_path,
+        const QString& build_path, 
+        QWidget* parent = nullptr);
 
       /**
       * @brief Saves the splitter state of the asset browser to restore later
@@ -43,6 +49,33 @@ namespace snuffbox
       * @brief Loads the splitter state of the asset browser, if available
       */
       void LoadState(const QSettings* settings);
+
+    protected:
+
+      /**
+      * @brief Retrieves The current source directory from the current path
+      *        within the build directory
+      *
+      * @param[in] from The build directory to map to the source directory
+      *
+      * @return The mapped directory
+      */
+      QString GetCurrentSourceDirectory(const QString& from) const;
+
+      /**
+      * @brief Creates a new file or directory name based on the 
+      *        files and directories that are within a base directory
+      *
+      * @param[in] base_dir The base directory
+      * @param[in] file_or_dir The new file or directory name
+      * @param[in] is_file Is this new name a file or directory?
+      *
+      * @return The new path, mangled so that it is unique
+      */
+      static QString GetUniqueFileOrDirectoryName(
+        const QString& base_dir, 
+        const QString& file_or_dir,
+        bool is_file);
 
     public slots:
 
@@ -63,6 +96,15 @@ namespace snuffbox
       */
       void OnItemSelect(const AssetBrowserItem* item);
 
+      /**
+      * @brief Called when a new item is hovered over or when the mouse left
+      *        the item's rectangle
+      *
+      * @param[in] item The item that was hovered
+      * @param[in] hovered Is the item still hovered?
+      */
+      void OnItemHovered(const AssetBrowserItem* item, bool hovered);
+
     protected slots:
 
       /**
@@ -71,6 +113,41 @@ namespace snuffbox
       * @param[in] directory The new directory
       */
       void OnDirectorySelected(const QString& directory);
+
+      /**
+      * @brief Shows a custom context menu for when the user right-clicks
+      *        within the clickable browser frame
+      *
+      * @param[in] pos The position to spawn the context menu at
+      */
+      void CustomContextMenu(const QPoint& pos);
+
+      /**
+      * @brief Used to show a context menu for when the user is hovering over
+      *        an asset browser item
+      *
+      * @param[in] menu The menu to show the context actions in
+      */
+      void ShowItemContextMenu(QMenu* menu);
+
+      /**
+      * @brief Used to show a context menu for when the user is not hovering
+      *        over an asset browser item
+      *
+      * @param[in] menu The menu to show the context actions in
+      */
+      void ShowRegularContextMenu(QMenu* menu);
+
+      /**
+      * @brief Creates a new directory in the source directory, from the
+      *        current navigation path
+      */
+      void CreateNewSourceDirectory();
+
+      /**
+      * @brief Deletes the currently hovered item
+      */
+      void DeleteHoveredItem();
 
     signals:
 
@@ -83,6 +160,7 @@ namespace snuffbox
 
     private:
 
+      QString source_path_; //!< The current source path
       QString build_path_; //!< The current build path
 
       /**
@@ -93,7 +171,10 @@ namespace snuffbox
       AssetTree* tree_; //!< The tree view to navigate the asset tree
       FlowLayout* asset_list_; //!< The asset list layout
       QSplitter* splitter_; //!< The splitter
+      QFrame* browser_frame_; //!< The frame that contains the browser
       const AssetBrowserItem* selected_item_; //!< The currently selected item
+      const AssetBrowserItem* hovered_item_; //!< The currently hovered item
+      const AssetBrowserItem* last_hovered_item_; //!< The last hovered item
 
       /**
       * @brief The spacing between asset browser items
@@ -104,6 +185,11 @@ namespace snuffbox
       * @brief The asset browser splitter key
       */
       static const QString kSettingsAssetBrowserKey_;
+
+      /**
+      * @brief The name for a newly created directory
+      */
+      static const QString kNewDirectoryName_;
     };
   }
 }

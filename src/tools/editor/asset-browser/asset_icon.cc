@@ -115,10 +115,14 @@ namespace snuffbox
         name = split.at(split.size() - 1);
       }
 
+      const char* relative_name = name.c_str();
+
       QFontMetrics metrics(name_label_->font());
       int width = minimumSize().width() - kElisionPadding_;
-      QString text = metrics.elidedText(name.c_str(), Qt::ElideRight, width);
+      QString text = metrics.elidedText(relative_name, Qt::ElideRight, width);
       name_label_->setText(text);
+
+      name_label_->setToolTip(relative_name);
     }
 
     //--------------------------------------------------------------------------
@@ -146,7 +150,7 @@ namespace snuffbox
       Styling::ColorRole cr = selected == true ? 
         Styling::ColorRole::kSelected : Styling::ColorRole::kClickable;
 
-      QString format = "background: %0; border-radius: 10px;";
+      QString format = "QLabel { background: %0; border-radius: 10px; }";
       name_label_->setStyleSheet(format.arg(Styling::GetStyleColor(cr)));
     }
 

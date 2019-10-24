@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QPalette>
+#include <QToolTip>
 
 namespace snuffbox
 {
@@ -30,6 +31,10 @@ namespace snuffbox
       palette.setColor(Group::Disabled, Role::Light, QColor(Qt::black));
       palette.setColor(Role::Button, QColor(65, 70, 65));
       palette.setColor(Role::Highlight, QColor(100, 200, 0));
+      palette.setColor(Role::ToolTipBase, QColor(200, 255, 100));
+      palette.setColor(Role::ToolTipText, QColor(Qt::black));
+
+      QToolTip::setPalette(palette);
 
       app->setPalette(palette);
     }

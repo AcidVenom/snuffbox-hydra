@@ -208,13 +208,13 @@ namespace snuffbox
 
       /**
       * @brief Sets the callback for when the builder has removed a file
-      *        from the build directory
+      *        from the build directory, or a directory changed
       *
       * @param[in] cb The callback to set
       *
       * @remarks This function is not called from the main thread
       */
-      void set_on_removed(const OnFinishedCallback& cb);
+      void set_on_changed(const OnFinishedCallback& cb);
 
       /**
       * @return The current build directory
@@ -258,9 +258,9 @@ namespace snuffbox
 
       /**
       * @brief The callback for when the builder has removed a file
-      *        from the build directory
+      *        from the build directory, or a directory has changed
       */
-      OnFinishedCallback on_removed_;
+      OnFinishedCallback on_changed_;
 
       /**
       * @brief The extension for the time stamp files
