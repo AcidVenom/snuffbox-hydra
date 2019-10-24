@@ -84,6 +84,8 @@ namespace snuffbox
       * @param[in] source_dir The source directory
       * @param[in] assets The asset directory in the source directory
       * @param[in] build The name to put the build directory under
+      * @param[in] on_finished @see Builder::set_on_finished, default = nullptr
+      * @param[in] on_changed @see Builder::set_on_changed, default = nullptr
       *
       * @see BuildScheduler::Refresh
       *
@@ -92,7 +94,9 @@ namespace snuffbox
       bool Initialize(
         const foundation::Path& source_dir,
         const char* assets,
-        const char* build);
+        const char* build,
+        const OnFinishedCallback& on_finished = nullptr,
+        const OnFinishedCallback& on_changed = nullptr);
 
       /**
       * @brief Notify the builder that the application is idle and that the

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tools/compilers/definitions/asset_types.h>
+
 #include <QWidget>
 
 class QSplitter;
@@ -142,7 +144,18 @@ namespace snuffbox
       * @brief Creates a new directory in the source directory, from the
       *        current navigation path
       */
-      void CreateNewSourceDirectory();
+      void CreateNewSourceDirectory() const;
+
+      /**
+      * @brief Creates a new asset in the source directory, from the current
+      *        navigation path
+      *
+      * @param[in] type The type of asset to create
+      * @param[in] new_name The name of the asset to create
+      */
+      void CreateNewAsset(
+        compilers::AssetTypes type,
+        const char* new_name) const;
 
       /**
       * @brief Deletes the currently hovered item

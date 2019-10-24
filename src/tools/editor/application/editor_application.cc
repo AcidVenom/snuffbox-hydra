@@ -76,21 +76,19 @@ namespace snuffbox
       if (builder.Initialize(
         project_.project_path().toLatin1().data(),
         Project::kAssetDirectory,
-        Project::kBuildDirectory
+        Project::kBuildDirectory,
+        [&](const builder::BuildItem& item)
+        {
+          OnBuilderFinished(&builder, item);
+        },
+        [&](const builder::BuildItem& item)
+        {
+          OnBuilderChanged(&builder, item);
+        }
       ) == false)
       {
         return foundation::ErrorCodes::kBuilderInitializationFailed;
       }
-
-      builder.set_on_finished([&](const builder::BuildItem& item)
-      {
-        OnBuilderFinished(&builder, item);
-      });
-
-      builder.set_on_changed([&](const builder::BuildItem& item)
-      {
-        OnBuilderChanged(&builder, item);
-      });
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
 

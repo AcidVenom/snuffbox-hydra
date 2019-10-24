@@ -26,12 +26,17 @@ namespace snuffbox
     bool Builder::Initialize(
       const foundation::Path& source_dir,
       const char* assets,
-      const char* build)
+      const char* build,
+      const OnFinishedCallback& on_finished,
+      const OnFinishedCallback& on_changed)
     {
       listener_.Stop();
 
       assets_ = assets;
       build_ = build;
+
+      on_finished_ = on_finished;
+      on_changed_ = on_changed;
 
       if (foundation::Directory::Exists(source_dir) == false)
       {

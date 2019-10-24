@@ -2,6 +2,7 @@
 #include "tools/editor/asset-browser/asset_browser_item.h"
 #include "tools/editor/asset-browser/asset_tree.h"
 #include "tools/editor/custom-layouts/flowlayout.h"
+#include "tools/compilers/definitions/default_assets.h"
 
 #include <engine/services/asset_service.h>
 #include <foundation/containers/function.h>
@@ -180,7 +181,22 @@ namespace snuffbox
       const QString& file_or_dir,
       bool is_file)
     {
-      QString format = file_or_dir + "%0";
+      QString format;
+
+      if (is_file == false)
+      {
+        format = file_or_dir + "%0";
+      }
+      else
+      {
+        foundation::Path no_ext = file_or_dir.toLatin1().data();
+        foundation::String ext = no_ext.extension();
+
+        no_ext = no_ext.NoExtension();
+
+        format = QString(no_ext.ToString().c_str()) + "%0." + ext.c_str();
+      }
+
       QString current_dir = base_dir + '/' + format.arg("");
 
       int copy_count = 1;
@@ -228,7 +244,17 @@ namespace snuffbox
         const engine::AssetService::AssetFile& a, 
         const engine::AssetService::AssetFile& b)
       {
-        return a.type > b.type;
+        bool is_same = a.type == b.type;
+
+        if (is_same == false)
+        {
+          return a.type > b.type;
+        }
+
+        const foundation::String& sa = a.relative_path.ToString();
+        const foundation::String& sb = b.relative_path.ToString();
+
+        return sa > sb && sa.size() < sb.size();
       });
 
       int row = 0;
@@ -320,14 +346,14 @@ namespace snuffbox
       AssetBrowser* browser,
       QMenu* menu, 
       QAction* action, 
-      void(AssetBrowser::*callback)())
+      const foundation::Function<void()>& func)
     {
       menu->addAction(action);
       QObject::connect(
         action,
         &QAction::triggered,
         browser,
-        callback);
+        func);
     }
 
     //--------------------------------------------------------------------------
@@ -336,7 +362,10 @@ namespace snuffbox
       using AB = AssetBrowser;
 
       QAction* del = new QAction("Delete");
-      AddToContextMenu(this, menu, del, &AB::DeleteHoveredItem);
+      AddToContextMenu(this, menu, del, [this]()
+      { 
+        DeleteHoveredItem(); 
+      });
     }
 
     //--------------------------------------------------------------------------
@@ -345,11 +374,54 @@ namespace snuffbox
       using AB = AssetBrowser;
 
       QAction* create_dir = new QAction("Create directory");
-      AddToContextMenu(this, menu, create_dir, &AB::CreateNewSourceDirectory);
+      AddToContextMenu(this, menu, create_dir, [this]()
+      { 
+        CreateNewSourceDirectory();
+      });
+
+      menu->addSeparator();
+
+      QMenu* create_sub_menu = menu->addMenu("Create asset");
+
+      struct CreateAssetDesc
+      {
+        const char* name;
+        compilers::AssetTypes type;
+      };
+      
+      const CreateAssetDesc create_desc[] =
+      {
+        { "Scene", compilers::AssetTypes::kScene },
+        { nullptr },
+        { "Script", compilers::AssetTypes::kScript },
+        { nullptr },
+        { "Vertex shader", compilers::AssetTypes::kVertexShader },
+        { "Pixel shader", compilers::AssetTypes::kPixelShader },
+        { "Geometry shader", compilers::AssetTypes::kGeometryShader }
+      };
+
+      int count = sizeof(create_desc) / sizeof(CreateAssetDesc);
+
+      for (int i = 0; i < count; ++i)
+      {
+        const CreateAssetDesc& desc = create_desc[i];
+
+        if (desc.name == nullptr)
+        {
+          create_sub_menu->addSeparator();
+          continue;
+        }
+
+        QAction* create_action = new QAction(desc.name);
+        AddToContextMenu(this, create_sub_menu, create_action, [this, desc]()
+        {
+          CreateNewAsset(desc.type, desc.name);
+        });
+      }
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::CreateNewSourceDirectory()
+    void AssetBrowser::CreateNewSourceDirectory() const
     {
       QString base_dir = GetCurrentSourceDirectory(navigation_path_);
       QString current_dir = GetUniqueFileOrDirectoryName(
@@ -369,6 +441,64 @@ namespace snuffbox
           "do you have the right permissions?",
           new_dir_path);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::CreateNewAsset(
+      compilers::AssetTypes type,
+      const char* new_name) const
+    {
+      const char* ext = compilers::AssetTypesToSourceExtension(type);
+
+      QString fixed_name = new_name;
+      fixed_name = fixed_name.replace(" ", "-").toLower();
+      fixed_name = "new-" + fixed_name + '.' + ext;
+
+      QString base_dir = GetCurrentSourceDirectory(navigation_path_);
+      QString current_file = GetUniqueFileOrDirectoryName(
+        base_dir, fixed_name, true);
+
+      foundation::Path new_file_path = current_file.toLatin1().data();
+
+      foundation::File new_file;
+      new_file.Open(new_file_path, foundation::FileFlags::kWrite);
+
+      if (new_file.is_ok() == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kError,
+          "Could not create new asset '{0}',"
+          "do you have the right permissions?",
+          new_file_path);
+
+        return;
+      }
+
+      using AST = compilers::AssetTypes;
+
+      const int asset_count = static_cast<int>(AST::kCount);
+      const char* default_assets[asset_count];
+      memset(default_assets, 0, sizeof(const char*) * asset_count);
+
+      default_assets[static_cast<int>(AST::kVertexShader)] =
+        compilers::kDefaultVSShader;
+
+      default_assets[static_cast<int>(AST::kPixelShader)] =
+        compilers::kDefaultPSShader;
+
+      default_assets[static_cast<int>(AST::kGeometryShader)] =
+        compilers::kDefaultGSShader;
+
+      const char* default_contents = default_assets[static_cast<int>(type)];
+      if (default_contents != nullptr)
+      {
+        new_file.Write(
+          reinterpret_cast<const uint8_t*>(default_contents),
+          strlen(default_contents));
+      }
+
+      new_file.Close();
     }
 
     //--------------------------------------------------------------------------
