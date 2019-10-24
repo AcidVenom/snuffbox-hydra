@@ -22,6 +22,25 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    struct CreateAssetDesc
+    {
+      const char* name;
+      compilers::AssetTypes type;
+    };
+
+    //--------------------------------------------------------------------------
+    const CreateAssetDesc kCreateAssetDescs[] =
+    {
+      { "Scene", compilers::AssetTypes::kScene },
+      { nullptr },
+      { "Script", compilers::AssetTypes::kScript },
+      { nullptr },
+      { "Vertex shader", compilers::AssetTypes::kVertexShader },
+      { "Pixel shader", compilers::AssetTypes::kPixelShader },
+      { "Geometry shader", compilers::AssetTypes::kGeometryShader }
+    };
+
+    //--------------------------------------------------------------------------
     class ClickableFrame : public QFrame
     {
 
@@ -389,28 +408,11 @@ namespace snuffbox
 
       QMenu* create_sub_menu = menu->addMenu("Create asset");
 
-      struct CreateAssetDesc
-      {
-        const char* name;
-        compilers::AssetTypes type;
-      };
-      
-      const CreateAssetDesc create_desc[] =
-      {
-        { "Scene", compilers::AssetTypes::kScene },
-        { nullptr },
-        { "Script", compilers::AssetTypes::kScript },
-        { nullptr },
-        { "Vertex shader", compilers::AssetTypes::kVertexShader },
-        { "Pixel shader", compilers::AssetTypes::kPixelShader },
-        { "Geometry shader", compilers::AssetTypes::kGeometryShader }
-      };
-
-      int count = sizeof(create_desc) / sizeof(CreateAssetDesc);
+      int count = sizeof(kCreateAssetDescs) / sizeof(CreateAssetDesc);
 
       for (int i = 0; i < count; ++i)
       {
-        const CreateAssetDesc& desc = create_desc[i];
+        const CreateAssetDesc& desc = kCreateAssetDescs[i];
 
         if (desc.name == nullptr)
         {
