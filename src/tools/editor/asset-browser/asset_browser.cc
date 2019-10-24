@@ -292,7 +292,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::OnItemSelect(const AssetBrowserItem* item)
+    void AssetBrowser::OnItemSelect(AssetBrowserItem* item)
     {
       selected_item_ = item;
 
@@ -300,7 +300,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::OnItemHovered(const AssetBrowserItem* item, bool hovered)
+    void AssetBrowser::OnItemHovered(AssetBrowserItem* item, bool hovered)
     {
       last_hovered_item_ = hovered_item_;
 
@@ -366,6 +366,12 @@ namespace snuffbox
       { 
         DeleteHoveredItem(); 
       });
+
+      QAction* rename = new QAction("Rename");
+      AddToContextMenu(this, menu, rename, [this]()
+      {
+        RenameHoveredItem();
+      });
     }
 
     //--------------------------------------------------------------------------
@@ -376,7 +382,7 @@ namespace snuffbox
       QAction* create_dir = new QAction("Create directory");
       AddToContextMenu(this, menu, create_dir, [this]()
       { 
-        CreateNewSourceDirectory();
+        CreateNewSourceDirectory(kNewDirectoryName_);
       });
 
       menu->addSeparator();
@@ -415,17 +421,21 @@ namespace snuffbox
         QAction* create_action = new QAction(desc.name);
         AddToContextMenu(this, create_sub_menu, create_action, [this, desc]()
         {
-          CreateNewAsset(desc.type, desc.name);
+          QString fixed_name = desc.name;
+          fixed_name = fixed_name.replace(" ", "-").toLower();
+          fixed_name = "new-" + fixed_name;
+
+          CreateNewAsset(desc.type, fixed_name);
         });
       }
     }
 
     //--------------------------------------------------------------------------
-    void AssetBrowser::CreateNewSourceDirectory() const
+    void AssetBrowser::CreateNewSourceDirectory(const QString& name) const
     {
       QString base_dir = GetCurrentSourceDirectory(navigation_path_);
       QString current_dir = GetUniqueFileOrDirectoryName(
-        base_dir, kNewDirectoryName_, false);
+        base_dir, name, false);
 
       foundation::Path new_dir_path = current_dir.toLatin1().data();
 
@@ -446,13 +456,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetBrowser::CreateNewAsset(
       compilers::AssetTypes type,
-      const char* new_name) const
+      const QString& new_name) const
     {
       const char* ext = compilers::AssetTypesToSourceExtension(type);
 
-      QString fixed_name = new_name;
-      fixed_name = fixed_name.replace(" ", "-").toLower();
-      fixed_name = "new-" + fixed_name + '.' + ext;
+      QString fixed_name = new_name + '.' + ext;
 
       QString base_dir = GetCurrentSourceDirectory(navigation_path_);
       QString current_file = GetUniqueFileOrDirectoryName(
@@ -515,10 +523,20 @@ namespace snuffbox
       foundation::Path base_dir = full_path;
       base_dir = base_dir.GetBaseDirectory();
 
-      foundation::Path file_or_dir = full_path.StripPath(base_dir);
+      bool is_dir = full_path.is_directory();
+      foundation::Path file_or_dir = 
+        full_path.StripPath(base_dir).NoExtension();
 
       QString src_dir = GetCurrentSourceDirectory(base_dir.ToString().c_str());
       foundation::Path to_delete = src_dir.toLatin1().data();
+
+      if (is_dir == false)
+      {
+        file_or_dir += ".";
+        file_or_dir +=
+          compilers::AssetTypesToSourceExtension(last_hovered_item_->type());
+      }
+
       to_delete /= file_or_dir;
 
       QMessageBox::StandardButton reply =
@@ -526,7 +544,7 @@ namespace snuffbox
           nullptr, 
           "Confirmation", 
           QString("Are you sure you want to delete '%0'? This cannot be undone")
-            .arg(file_or_dir.ToString().c_str()),
+            .arg(file_or_dir.NoExtension().ToString().c_str()),
           QMessageBox::Yes | QMessageBox::No);
 
       if (reply == QMessageBox::No)
@@ -545,7 +563,60 @@ namespace snuffbox
 
       delete last_hovered_item_;
 
-      last_hovered_item_ = hovered_item_;
+      last_hovered_item_ = nullptr;
+      hovered_item_ = nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetBrowser::RenameHoveredItem()
+    {
+      if (last_hovered_item_ == nullptr)
+      {
+        return;
+      }
+
+      bool was_changed = false;
+      QString old_name;
+      QString new_name = last_hovered_item_->Rename(&was_changed, &old_name);
+
+      if (was_changed == false)
+      {
+        return;
+      }
+
+      foundation::Path full_path = 
+        last_hovered_item_->full_path().toLatin1().data();
+
+      compilers::AssetTypes type = last_hovered_item_->type();
+
+      bool is_dir = full_path.is_directory();
+      if (is_dir == true)
+      {
+        CreateNewSourceDirectory(new_name);
+      }
+      else
+      {
+        CreateNewAsset(type, new_name.toLatin1().data());
+      }
+
+      QString base_dir = GetCurrentSourceDirectory(navigation_path_);
+      base_dir = base_dir + '/' + old_name;
+
+      if (is_dir == false)
+      {
+        base_dir = 
+          base_dir + '.' + compilers::AssetTypesToSourceExtension(type);
+
+        foundation::File::Remove(base_dir.toLatin1().data());
+      }
+      else
+      {
+        foundation::Directory::Remove(base_dir.toLatin1().data());
+      }
+
+      delete last_hovered_item_;
+
+      last_hovered_item_ = nullptr;
       hovered_item_ = nullptr;
     }
   }

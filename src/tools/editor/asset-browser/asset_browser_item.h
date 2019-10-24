@@ -51,6 +51,21 @@ namespace snuffbox
       */
       const QString& full_path() const;
 
+      /**
+      * @return The type of this asset browser item
+      */
+      compilers::AssetTypes type() const;
+
+      /**
+      * @brief Renames this item
+      *
+      * @param[out] was_changed Was the name actually changed?
+      * @param[out] old_name The old name of the item
+      *
+      * @return The renamed string
+      */
+      QString Rename(bool* was_changed, QString* old_name);
+
 	  protected:
 
       /**
@@ -122,7 +137,7 @@ namespace snuffbox
       *
       * @param[in] item The item that was selected (this)
       */
-      void Selected(const AssetBrowserItem* item);
+      void Selected(AssetBrowserItem* item);
 
       /**
       * @brief Emitted when this item was hovered over or left by the mouse
@@ -130,7 +145,7 @@ namespace snuffbox
       * @param[in] item The item that was hovered (this)
       * @param[in] hovered Were we hovered over or left?
       */
-      void Hovered(const AssetBrowserItem* item, bool hovered);
+      void Hovered(AssetBrowserItem* item, bool hovered);
 
       /**
       * @brief Emitted when this item has been double clicked and it was a

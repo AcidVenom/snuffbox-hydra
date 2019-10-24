@@ -96,7 +96,7 @@ namespace snuffbox
       *
       * @param[in] item The item that was selected
       */
-      void OnItemSelect(const AssetBrowserItem* item);
+      void OnItemSelect(AssetBrowserItem* item);
 
       /**
       * @brief Called when a new item is hovered over or when the mouse left
@@ -105,7 +105,7 @@ namespace snuffbox
       * @param[in] item The item that was hovered
       * @param[in] hovered Is the item still hovered?
       */
-      void OnItemHovered(const AssetBrowserItem* item, bool hovered);
+      void OnItemHovered(AssetBrowserItem* item, bool hovered);
 
     protected slots:
 
@@ -143,8 +143,10 @@ namespace snuffbox
       /**
       * @brief Creates a new directory in the source directory, from the
       *        current navigation path
+      *
+      * @param[in] name The new name of the directory
       */
-      void CreateNewSourceDirectory() const;
+      void CreateNewSourceDirectory(const QString& name) const;
 
       /**
       * @brief Creates a new asset in the source directory, from the current
@@ -155,12 +157,17 @@ namespace snuffbox
       */
       void CreateNewAsset(
         compilers::AssetTypes type,
-        const char* new_name) const;
+        const QString& new_name) const;
 
       /**
       * @brief Deletes the currently hovered item
       */
       void DeleteHoveredItem();
+
+      /**
+      * @brief Renames the currently hovered item
+      */
+      void RenameHoveredItem();
 
     signals:
 
@@ -185,9 +192,9 @@ namespace snuffbox
       FlowLayout* asset_list_; //!< The asset list layout
       QSplitter* splitter_; //!< The splitter
       QFrame* browser_frame_; //!< The frame that contains the browser
-      const AssetBrowserItem* selected_item_; //!< The currently selected item
-      const AssetBrowserItem* hovered_item_; //!< The currently hovered item
-      const AssetBrowserItem* last_hovered_item_; //!< The last hovered item
+      AssetBrowserItem* selected_item_; //!< The currently selected item
+      AssetBrowserItem* hovered_item_; //!< The currently hovered item
+      AssetBrowserItem* last_hovered_item_; //!< The last hovered item
 
       /**
       * @brief The spacing between asset browser items

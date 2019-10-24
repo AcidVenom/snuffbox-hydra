@@ -8,6 +8,7 @@
 #include <QStyle>
 #include <QPainter>
 #include <QStyleOption>
+#include <QInputDialog>
 
 namespace snuffbox
 {
@@ -61,6 +62,48 @@ namespace snuffbox
     const QString& AssetBrowserItem::full_path() const
     {
       return full_path_;
+    }
+
+    //--------------------------------------------------------------------------
+    compilers::AssetTypes AssetBrowserItem::type() const
+    {
+      return type_;
+    }
+
+    //--------------------------------------------------------------------------
+    QString AssetBrowserItem::Rename(bool* was_changed, QString* old_name)
+    {
+      bool accepted = false;
+
+      foundation::Path name = relative_path_.toLatin1().data();
+      name = name.NoExtension();
+
+      if (old_name != nullptr)
+      {
+        *old_name = name.ToString().c_str();
+      }
+
+      foundation::Path old = name;
+
+      QString new_name = QInputDialog::getText(
+        this, 
+        "Rename", 
+        "New name", 
+        QLineEdit::Normal, 
+        name.ToString().c_str(),
+        &accepted);
+
+      bool changed = 
+        accepted == true && 
+        name.ToString().empty() == false &&
+        strcmp(new_name.toLatin1().data(), old.ToString().c_str()) != 0;
+
+      if (was_changed != nullptr)
+      {
+        *was_changed = changed;
+      }
+
+      return new_name;
     }
 
     //--------------------------------------------------------------------------
