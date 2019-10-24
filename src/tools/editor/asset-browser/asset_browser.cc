@@ -591,29 +591,23 @@ namespace snuffbox
 
       compilers::AssetTypes type = last_hovered_item_->type();
 
+      QString base_dir = GetCurrentSourceDirectory(navigation_path_);
+      base_dir = base_dir + '/' + old_name;
+
       bool is_dir = full_path.is_directory();
       if (is_dir == true)
       {
         CreateNewSourceDirectory(new_name);
+        foundation::Directory::Remove(base_dir.toLatin1().data());
       }
       else
       {
-        CreateNewAsset(type, new_name.toLatin1().data());
-      }
-
-      QString base_dir = GetCurrentSourceDirectory(navigation_path_);
-      base_dir = base_dir + '/' + old_name;
-
-      if (is_dir == false)
-      {
-        base_dir = 
+        base_dir =
           base_dir + '.' + compilers::AssetTypesToSourceExtension(type);
 
+        CreateNewAsset(type, new_name.toLatin1().data());
+
         foundation::File::Remove(base_dir.toLatin1().data());
-      }
-      else
-      {
-        foundation::Directory::Remove(base_dir.toLatin1().data());
       }
 
       delete last_hovered_item_;
