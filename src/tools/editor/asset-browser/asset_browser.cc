@@ -1,6 +1,7 @@
 #include "tools/editor/asset-browser/asset_browser.h"
 #include "tools/editor/asset-browser/asset_browser_item.h"
 #include "tools/editor/asset-browser/asset_tree.h"
+#include "tools/editor/windows/main_window.h"
 #include "tools/editor/custom-layouts/flowlayout.h"
 #include "tools/compilers/definitions/default_assets.h"
 
@@ -82,10 +83,12 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     AssetBrowser::AssetBrowser(
+      MainWindow* main_window,
       const QString& source_path,
       const QString& build_path, 
       QWidget* parent) :
       QWidget(parent),
+      main_window_(main_window),
       source_path_(source_path),
       build_path_(build_path),
       navigation_path_(build_path),
@@ -225,7 +228,7 @@ namespace snuffbox
 
       while (Checker(current_dir.toLatin1().data()))
       {
-        QString post_fix = QString("-%0").arg(copy_count);
+        QString post_fix = QString("_%0").arg(copy_count);
         current_dir = base_dir + '/' + format.arg(post_fix);
 
         ++copy_count;
@@ -299,6 +302,12 @@ namespace snuffbox
           &AssetBrowserItem::Hovered,
           this,
           &AssetBrowser::OnItemHovered);
+
+        connect(
+          item,
+          &AssetBrowserItem::TryAssetImport,
+          main_window_,
+          &MainWindow::OnAssetImported);
 
         asset_list_->addWidget(item);
       }
@@ -424,8 +433,8 @@ namespace snuffbox
         AddToContextMenu(this, create_sub_menu, create_action, [this, desc]()
         {
           QString fixed_name = desc.name;
-          fixed_name = fixed_name.replace(" ", "-").toLower();
-          fixed_name = "new-" + fixed_name;
+          fixed_name = fixed_name.replace(" ", "_").toLower();
+          fixed_name = "new_" + fixed_name;
 
           CreateNewAsset(desc.type, fixed_name);
         });
@@ -500,6 +509,9 @@ namespace snuffbox
       default_assets[static_cast<int>(AST::kGeometryShader)] =
         compilers::kDefaultGSShader;
 
+      default_assets[static_cast<int>(AST::kScene)] =
+        compilers::kDefaultScene;
+
       const char* default_contents = default_assets[static_cast<int>(type)];
       if (default_contents != nullptr)
       {
@@ -545,7 +557,8 @@ namespace snuffbox
         QMessageBox::question(
           nullptr, 
           "Confirmation", 
-          QString("Are you sure you want to delete '%0'? This cannot be undone")
+          QString("Are you sure you want to delete '%0'?"
+                  "\nThis cannot be undone")
             .arg(file_or_dir.NoExtension().ToString().c_str()),
           QMessageBox::Yes | QMessageBox::No);
 

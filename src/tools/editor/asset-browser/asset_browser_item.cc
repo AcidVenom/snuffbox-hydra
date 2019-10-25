@@ -132,7 +132,10 @@ namespace snuffbox
       if (type_ == compilers::AssetTypes::kDirectory)
       {
         emit DirectoryChanged(full_path_);
+        return;
       }
+
+      emit TryAssetImport(type_, full_path_);
     }
 
     //--------------------------------------------------------------------------

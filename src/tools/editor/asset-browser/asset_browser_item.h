@@ -155,6 +155,14 @@ namespace snuffbox
       */
       void DirectoryChanged(const QString& directory);
 
+      /**
+      * @brief Attempt to import/open an asset in the editor
+      *
+      * @param[in] type The type of the asset being imported/opened
+      * @param[in] full_path The full path to the asset in the build directory
+      */
+      void TryAssetImport(compilers::AssetTypes type, const QString& full_path);
+
     private:
 
       compilers::AssetTypes type_; //!< The type of the underlying asset

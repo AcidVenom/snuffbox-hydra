@@ -73,8 +73,10 @@ namespace snuffbox
       * switch back to the default scene. The default scene is then reset.
       *
       * @remarks This unloads the previously loaded scene
+      *
+      * @return Did we succesfully switch scenes?
       */
-      void SwitchScene(Scene* scene);
+      bool SwitchScene(Scene* scene);
 
       /**
       * @brief Switches the current scene from a scene asset
@@ -82,8 +84,10 @@ namespace snuffbox
       * @param[in] path The path to the scene to switch to
       *
       * @see SceneService::SwitchScene
+      *
+      * @return Did we succesfully switch scenes?
       */
-      void SwitchScene(const foundation::String& path);
+      bool SwitchScene(const foundation::String& path);
 
       /**
       * @brief Called from a Scene when the respective scene has changed

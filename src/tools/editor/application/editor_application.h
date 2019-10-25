@@ -2,6 +2,7 @@
 
 #include "tools/editor/project/project.h"
 #include "tools/editor/windows/main_window.h"
+#include "tools/editor/scene-editor/asset_importer.h"
 
 #include <engine/application/application.h>
 #include <foundation/auxiliary/timer.h>
@@ -55,6 +56,11 @@ namespace snuffbox
       * @return The global settings of the application
       */
       QSettings& GlobalSettings() const;
+
+      /**
+      * @return The current asset importer
+      */
+      AssetImporter* asset_importer() const;
 
       /**
       * @return The current project
@@ -130,6 +136,7 @@ namespace snuffbox
       std::mutex build_mutex_; //!< The mutex for any building callbacks
 
       std::unique_ptr<MainWindow> main_window_; //!< The main window
+      std::unique_ptr<AssetImporter> asset_importer_; //!< The asset importer
 
       /**
       * @brief The minimum amount of time, in milliseconds, to wait inbetween

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tools/compilers/definitions/asset_types.h>
 #include <graphics/definitions/graphics_window.h>
 
 #include <QMainWindow>
@@ -68,6 +69,12 @@ namespace snuffbox
       * @brief Save the current window geometry
       */
       void closeEvent(QCloseEvent* evt) override;
+
+    public slots:
+
+      void OnAssetImported(
+        compilers::AssetTypes type, 
+        const QString& full_path);
 
     private:
 

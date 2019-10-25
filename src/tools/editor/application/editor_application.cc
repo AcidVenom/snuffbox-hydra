@@ -13,6 +13,7 @@
 #endif
 
 #include <engine/services/renderer_service.h>
+#include <engine/services/asset_service.h>
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/auxiliary/timer.h>
@@ -35,6 +36,7 @@ namespace snuffbox
       qapp_(argc, argv),
       project_(nullptr),
       main_window_(nullptr),
+      asset_importer_(nullptr),
       build_change_timer_("BuildChangeTimer"),
       build_dir_changed_(false)
     {
@@ -66,6 +68,8 @@ namespace snuffbox
 
       ApplyConfiguration();
 
+      asset_importer_ = std::unique_ptr<AssetImporter>(new AssetImporter(this));
+
       main_window_ = CreateMainWindow(&err);
       if (err != foundation::ErrorCodes::kSuccess)
       {
@@ -89,6 +93,8 @@ namespace snuffbox
       {
         return foundation::ErrorCodes::kBuilderInitializationFailed;
       }
+
+      GetService<engine::AssetService>()->Refresh(builder.build_directory());
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
 
@@ -125,6 +131,12 @@ namespace snuffbox
         cfg.application_name);
 
       return settings;
+    }
+
+    //--------------------------------------------------------------------------
+    AssetImporter* EditorApplication::asset_importer() const
+    {
+      return asset_importer_.get();
     }
 
     //--------------------------------------------------------------------------
@@ -192,6 +204,12 @@ namespace snuffbox
       const builder::Builder* builder, 
       const builder::BuildItem& item)
     {
+      engine::AssetService* as = GetService<engine::AssetService>();
+      as->RegisterAsset(item.relative);
+
+      foundation::String asset_path = item.relative.NoExtension().ToString();
+      as->Reload(item.type, asset_path);
+
       if (builder->IsBuilding() == true)
       {
         return;

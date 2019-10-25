@@ -50,7 +50,8 @@ namespace snuffbox
       QString asset_path = current_project.GetCurrentAssetsPath();
 
       QDockWidget* assets_widget = new QDockWidget(this);
-      asset_browser_ = new AssetBrowser(asset_path, build_path, assets_widget);
+      asset_browser_ = 
+        new AssetBrowser(this, asset_path, build_path, assets_widget);
 
       assets_widget->setWidget(asset_browser_);
       assets_widget->setWindowTitle(QStringLiteral("Assets"));
@@ -134,6 +135,14 @@ namespace snuffbox
       Q_UNUSED(evt);
 
       SaveWindowGeometry();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnAssetImported(
+      compilers::AssetTypes type, 
+      const QString& full_path)
+    {
+      app_->asset_importer()->ImportAsset(type, full_path.toLatin1().data());
     }
   }
 }

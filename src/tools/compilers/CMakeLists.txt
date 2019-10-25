@@ -23,6 +23,7 @@ SET(DefinitionsDefaultAssetsSources
   "definitions/default-assets/default_vertex_shader.h"
   "definitions/default-assets/default_pixel_shader.h"
   "definitions/default-assets/default_geometry_shader.h"
+  "definitions/default-assets/default_scene.h"
 )
 
 SET(UtilsSources

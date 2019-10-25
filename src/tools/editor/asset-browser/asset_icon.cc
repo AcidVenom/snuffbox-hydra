@@ -28,7 +28,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const int AssetIcon::kDefaultIconSize_ = 54;
-    const int AssetIcon::kElisionPadding_ = 16;
+    const int AssetIcon::kElisionPadding_ = 20;
     const int AssetIcon::kLabelPadding_ = 8;
 
     //--------------------------------------------------------------------------

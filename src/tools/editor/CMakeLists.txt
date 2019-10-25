@@ -53,6 +53,15 @@ SET(CustomLayoutSources
   "custom-layouts/flowlayout.cc"
 )
 
+SET(SceneEditorSources
+  "scene-editor/hierarchy_view.h"
+  "scene-editor/hierarchy_view.cc"
+  "scene-editor/hierarchy_view_item.h"
+  "scene-editor/hierarchy_view_item.cc"
+  "scene-editor/asset_importer.h"
+  "scene-editor/asset_importer.cc"
+)
+
 SOURCE_GROUP("\\"             FILES ${RootSources})
 SOURCE_GROUP("application"    FILES ${ApplicationSources})
 SOURCE_GROUP("asset-browser"  FILES ${AssetBrowserSources})
@@ -61,6 +70,7 @@ SOURCE_GROUP("input"          FILES ${InputSources})
 SOURCE_GROUP("project"        FILES ${ProjectSources})
 SOURCE_GROUP("windows"        FILES ${WindowsSources})
 SOURCE_GROUP("custom-layouts" FILES ${CustomLayoutSources})
+SOURCE_GROUP("scene-editor"   FILES ${SceneEditorSources})
 
 SET(EditorSources
   ${RootSources}
@@ -71,6 +81,7 @@ SET(EditorSources
   ${ProjectSources}
   ${WindowsSources}
   ${CustomLayoutSources}
+  ${SceneEditorSources}
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})

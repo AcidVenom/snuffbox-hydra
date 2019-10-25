@@ -14,6 +14,7 @@ namespace snuffbox
 {
   namespace editor
   {
+    class MainWindow;
     class AssetBrowserItem;
     class AssetTree;
 
@@ -33,11 +34,13 @@ namespace snuffbox
       /**
       * @brief Construct through a Qt parent
       *
+      * @param[in] main_window The main window this browser belongs to
       * @param[in] source_path The source path to operate on
       * @param[in] build_path The build path to operate on
       * @param[in] parent The parent widget this widget lives in
       */
       AssetBrowser(
+        MainWindow* main_window,
         const QString& source_path,
         const QString& build_path, 
         QWidget* parent = nullptr);
@@ -179,6 +182,8 @@ namespace snuffbox
       void SelectionChanged(const AssetBrowserItem* new_item);
 
     private:
+
+      MainWindow* main_window_; //!< The main window this browser belongs to
 
       QString source_path_; //!< The current source path
       QString build_path_; //!< The current build path
