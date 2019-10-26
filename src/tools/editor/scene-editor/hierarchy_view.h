@@ -2,7 +2,9 @@
 
 #include <foundation/containers/map.h>
 
+#include <QUndoStack>
 #include <QTreeWidget>
+#include <QUuid>
 
 namespace snuffbox
 {
@@ -23,10 +25,16 @@ namespace snuffbox
     *        of entities to modify them. The view is refreshed when any of
     *        the entities within a scene change.
     *
+    *        This class also contains the global undo stack. As I am only
+    *        looking to make the editing of entities undo-able, to save some
+    *        hassle, this is not necessary to be global.
+    *
     * @author Daniel Konings
     */
     class HierarchyView : public QTreeWidget
     {
+
+      friend class CreateEntityCommand;
 
       Q_OBJECT;
 
@@ -52,8 +60,13 @@ namespace snuffbox
       *        update the entity instead
       *
       * @param[in] ent The entity to check for
+      * @param[in] uuid The UUID to assign to this entity
+      * @param[in] update_uuid Should we update the UUID if already found?
       */
-      void TryAddEntity(engine::Entity* ent);
+      void TryAddEntity(
+        engine::Entity* ent, 
+        const QUuid& uuid, 
+        bool update_uuid);
 
       /**
       * @brief Re-parents an already existing or new hierarchy view item
@@ -97,6 +110,26 @@ namespace snuffbox
       void ShowEntityContextMenu(HierarchyViewItem* item, const QPoint& pos);
 
       /**
+      * @brief Searches a hierarchy view item by its UUID that was assigned
+      *        for its entity
+      *
+      * @param[in] uuid The UUID to search for
+      *
+      * @return The retrieved item, or nullptr if it was not found
+      */
+      HierarchyViewItem* FindItemByUUID(const QUuid& uuid) const;
+
+      /**
+      * @brief Searches an entity by its UUID, as stored in a
+      *        hierarchy view item
+      *
+      * @param[in] uuid The UUID to search for
+      *
+      * @return The retrieved entity, or nullptr if it was not found
+      */
+      engine::Entity* FindEntityByUUID(const QUuid& uuid) const;
+
+      /**
       * @brief Refreshes the hierarchy view for the current scene
       */
       void RefreshForCurrentScene();
@@ -113,6 +146,14 @@ namespace snuffbox
       */
       void dropEvent(QDropEvent* evt) override;
 
+      /**
+      * @brief Called after the command from "Create entity" resolves
+      *
+      * @param[in] uuid The UUID of the command, which will be the new UUID
+      *                 of the created entity
+      */
+      void CreateNewEntity(const QUuid& uuid);
+
     protected slots:
 
       /**
@@ -123,17 +164,18 @@ namespace snuffbox
       void CustomContextMenu(const QPoint& pos);
 
       /**
-      * @brief Called when the "Create entity" context menu option is clicked
-      */
-      void CreateEntity();
-
-      /**
       * @brief Called when an item in the tree was changed (probably a rename)
       *
       * @param[in] item The item that was changed
       * @param[in] column The column of the item that changed
       */
       void OnItemChanged(QTreeWidgetItem* item, int column);
+
+      /**
+      * @brief Called when an 'Create entity' has been clicked in the context
+      *        menu
+      */
+      void OnCreateEntity();
 
     public slots:
 
@@ -144,6 +186,16 @@ namespace snuffbox
       *                       it is a new scene
       */
       void OnSceneChanged(const QString& scene_name);
+      
+      /**
+      * @brief Redo the last entity command
+      */
+      void Redo();
+
+      /**
+      * @brief Undo the last entity command
+      */
+      void Undo();
 
     private:
 
@@ -151,6 +203,8 @@ namespace snuffbox
 
       EditorApplication* app_; //!< The current application
       EntityMap entity_to_item_; //!< The entity to item mapping
+
+      QUndoStack undo_stack_; //!< The undo stack
     };
   }
 }

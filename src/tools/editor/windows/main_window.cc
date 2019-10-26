@@ -80,6 +80,18 @@ namespace snuffbox
         hierarchy,
         &HierarchyView::OnSceneChanged);
 
+      connect(
+        this,
+        &MainWindow::Undone,
+        hierarchy,
+        &HierarchyView::Undo);
+
+      connect(
+        this,
+        &MainWindow::Redone,
+        hierarchy,
+        &HierarchyView::Redo);
+
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
@@ -138,6 +150,22 @@ namespace snuffbox
         ConfirmExit();
       });
 
+      QAction* undo = new QAction("Undo");
+      undo->setShortcut(Qt::CTRL + Qt::Key_Z);
+
+      QAction* redo = new QAction("Redo");
+      redo->setShortcut(Qt::CTRL + Qt::Key_Y);
+
+      connect(undo, &QAction::triggered, this, [&]()
+      {
+        emit Undone();
+      });
+
+      connect(redo, &QAction::triggered, this, [&]()
+      {
+        emit Redone();
+      });
+
       file_menu->addAction(open_project);
       file_menu->addSeparator();
       file_menu->addAction(new_scene);
@@ -145,6 +173,9 @@ namespace snuffbox
       file_menu->addAction(save_scene_as);
       file_menu->addSeparator();
       file_menu->addAction(exit_app);
+
+      edit_menu->addAction(undo);
+      edit_menu->addAction(redo);
     }
 
     //--------------------------------------------------------------------------

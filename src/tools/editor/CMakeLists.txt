@@ -60,6 +60,8 @@ SET(SceneEditorSources
   "scene-editor/hierarchy_view_item.cc"
   "scene-editor/asset_importer.h"
   "scene-editor/asset_importer.cc"
+  "scene-editor/entity_commands.h"
+  "scene-editor/entity_commands.cc"
 )
 
 SOURCE_GROUP("\\"             FILES ${RootSources})

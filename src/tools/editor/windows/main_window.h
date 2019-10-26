@@ -108,6 +108,18 @@ namespace snuffbox
         compilers::AssetTypes type, 
         const QString& full_path);
 
+    signals:
+
+      /**
+      * @brief Emitted when an undo has been triggered
+      */
+      void Undone();
+
+      /**
+      * @brief Emitted when a redo has been triggered
+      */
+      void Redone();
+
     public:
 
       /**

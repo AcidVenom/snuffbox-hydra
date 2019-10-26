@@ -3,6 +3,8 @@
 
 #include "tools/editor/application/editor_application.h"
 
+#include "tools/editor/scene-editor/entity_commands.h"
+
 #include <engine/services/scene_service.h>
 #include <engine/ecs/entity.h>
 #include <engine/components/transform_component.h>
@@ -61,7 +63,7 @@ namespace snuffbox
 
       scene->ForEachEntity([&](engine::Entity* ent)
       {
-        TryAddEntity(ent);
+        TryAddEntity(ent, QUuid::createUuid(), false);
         current_entities.insert(ent);
 
         return true;
@@ -71,7 +73,10 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::TryAddEntity(engine::Entity* ent)
+    void HierarchyView::TryAddEntity(
+      engine::Entity* ent, 
+      const QUuid& uuid,
+      bool update_uuid)
     {
       if (ent->transform() == nullptr)
       {
@@ -83,13 +88,21 @@ namespace snuffbox
       if (it != entity_to_item_.end())
       {
         HierarchyViewItem* old_item = it->second;
+
         ReparentItem(old_item, ent, true);
         old_item->Update();
+
+        if (update_uuid == true)
+        {
+          old_item->UpdateUUID(uuid);
+        }
 
         return;
       }
 
-      HierarchyViewItem* new_item = new HierarchyViewItem(ent, this);
+      HierarchyViewItem* new_item = 
+        new HierarchyViewItem(ent, this, uuid);
+
       ReparentItem(new_item, ent, false);
 
       entity_to_item_.insert(eastl::make_pair(ent, new_item));
@@ -112,7 +125,7 @@ namespace snuffbox
 
         if (it == entity_to_item_.end())
         {
-          TryAddEntity(entity_parent);
+          TryAddEntity(entity_parent, QUuid::createUuid(), false);
           current_parent = entity_to_item_.at(entity_parent);
         }
         else
@@ -193,7 +206,7 @@ namespace snuffbox
         &create_ent,
         &QAction::triggered,
         this,
-        &HierarchyView::CreateEntity);
+        &HierarchyView::OnCreateEntity);
 
       menu.addAction(&create_ent);
 
@@ -223,6 +236,37 @@ namespace snuffbox
       menu.addAction(&rename);
 
       menu.exec(mapToGlobal(pos));
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem* HierarchyView::FindItemByUUID(const QUuid& uuid) const
+    {
+      for (
+        EntityMap::const_iterator it = entity_to_item_.begin();
+        it != entity_to_item_.end();
+        ++it)
+      {
+        HierarchyViewItem* item = it->second;
+        if (item->uuid() == uuid)
+        {
+          return item;
+        }
+      }
+
+      return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    engine::Entity* HierarchyView::FindEntityByUUID(const QUuid& uuid) const
+    {
+      HierarchyViewItem* item = FindItemByUUID(uuid);
+
+      if (item == nullptr)
+      {
+        return nullptr;
+      }
+
+      return item->entity();
     }
 
     //--------------------------------------------------------------------------
@@ -271,6 +315,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::CreateNewEntity(const QUuid& uuid)
+    {
+      engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(
+        &foundation::Memory::default_allocator(), GetCurrentScene());
+
+      TryAddEntity(ent, uuid, true);
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::CustomContextMenu(const QPoint& pos)
     {
       HierarchyViewItem* hovered_item = 
@@ -284,13 +337,6 @@ namespace snuffbox
       {
         ShowEntityContextMenu(hovered_item, pos);
       }
-    }
-
-    //--------------------------------------------------------------------------
-    void HierarchyView::CreateEntity()
-    {
-      foundation::Memory::Construct<engine::Entity>(
-        &foundation::Memory::default_allocator(), GetCurrentScene());
     }
 
     //--------------------------------------------------------------------------
@@ -308,10 +354,41 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::OnCreateEntity()
+    {
+      CreateEntityCommand* command = 
+        new CreateEntityCommand(QUuid::createUuid(), this);
+
+      undo_stack_.push(command);
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::OnSceneChanged(const QString& scene_name)
     {
       Clear();
       RefreshForCurrentScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::Undo()
+    {
+      if (undo_stack_.canUndo() == false)
+      {
+        return;
+      }
+
+      undo_stack_.undo();
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::Redo()
+    {
+      if (undo_stack_.canRedo() == false)
+      {
+        return;
+      }
+
+      undo_stack_.redo();
     }
   }
 }
