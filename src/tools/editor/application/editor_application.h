@@ -53,9 +53,23 @@ namespace snuffbox
       foundation::ErrorCodes Run() override;
 
       /**
+      * @brief Attempts to open a new project through the dialog
+      *
+      * @remarks If accepted, this will reset the entire application
+      */
+      void TryOpenProject();
+
+      /**
       * @return The global settings of the application
       */
       QSettings& GlobalSettings() const;
+
+      /**
+      * @brief Sets the current scene within the window title
+      *
+      * @param[in] scene_name The name of the scene
+      */
+      void SetSceneInWindowTitle(const QString& scene_name);
 
       /**
       * @return The current asset importer
@@ -68,6 +82,11 @@ namespace snuffbox
       Project& project();
 
     protected:
+
+      /**
+      * @brief Sets the default values after a restart
+      */
+      void OnRestart();
 
       /**
       * @brief Shows a project window, to pick a new or existing project from
@@ -138,11 +157,14 @@ namespace snuffbox
       std::unique_ptr<MainWindow> main_window_; //!< The main window
       std::unique_ptr<AssetImporter> asset_importer_; //!< The asset importer
 
+      bool project_changed_; //!< Was the project changed and should we restart?
+
       /**
       * @brief The minimum amount of time, in milliseconds, to wait inbetween
       *        build changes during removal
       */
       static const int kMinBuildChangeWait_;
+      static const QString kTitleFormat_; //!< The format of the window title
     };
   }
 }

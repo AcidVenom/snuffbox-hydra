@@ -1,5 +1,7 @@
 #include "tools/editor/project/project.h"
 
+#include <foundation/io/directory.h>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
@@ -98,6 +100,16 @@ namespace snuffbox
       const QString& path, 
       const Project::Settings& settings)
     {
+      foundation::Path build_dir = path.toLatin1().data();
+      foundation::Path source_dir = build_dir;
+
+      build_dir = build_dir / kBuildDirectory / kAssetDirectory;
+      source_dir = source_dir / kAssetDirectory;
+
+      foundation::Directory create_dir;
+      create_dir.Open(build_dir);
+      create_dir.Open(source_dir);
+
       QJsonDocument doc;
       QJsonObject root;
       root.insert(kProjectNameKey_, settings.name);

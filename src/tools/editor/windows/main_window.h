@@ -37,6 +37,11 @@ namespace snuffbox
       MainWindow(EditorApplication* app, QWidget* parent = nullptr);
 
       /**
+      * @brief Creates the menu bar at the top of the window
+      */
+      void CreateMenuBar();
+
+      /**
       * @brief Refreshes the current asset list
       */
       void RefreshAssetList();
@@ -66,6 +71,33 @@ namespace snuffbox
       void LoadWindowSize();
 
       /**
+      * @brief Called when the 'File -> Open project' action is triggered
+      */
+      void OnOpenProject();
+
+      /**
+      * @brief Called when the 'File -> New scene' action is triggered
+      */
+      void OnNewScene();
+
+      /**
+      * @brief Called when the 'File -> Save scene' action is triggered
+      */
+      void OnSaveScene();
+
+      /**
+      * @brief Called when the 'File -> Save scene as' action is triggered
+      */
+      void OnSaveSceneAs();
+
+      /**
+      * @brief Shows a dialog whether or not to exit the application
+      *
+      * @return Was the dialog accepted?
+      */
+      bool ConfirmExit();
+
+      /**
       * @brief Save the current window geometry
       */
       void closeEvent(QCloseEvent* evt) override;
@@ -75,6 +107,13 @@ namespace snuffbox
       void OnAssetImported(
         compilers::AssetTypes type, 
         const QString& full_path);
+
+    public:
+
+      /**
+      * @brief Stop redirecting log output
+      */
+      ~MainWindow();
 
     private:
 

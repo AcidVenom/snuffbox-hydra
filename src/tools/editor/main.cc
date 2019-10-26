@@ -16,5 +16,8 @@ int main(int argc, char** argv)
 
   EditorApplication app(argc, argv, cfg);
 
-  return static_cast<int>(app.Run());
+  foundation::ErrorCodes err = foundation::ErrorCodes::kSuccess;
+  while ((err = app.Run()) == foundation::ErrorCodes::kRestart);
+
+  return static_cast<int>(err);
 }

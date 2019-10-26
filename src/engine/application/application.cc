@@ -51,16 +51,20 @@ namespace snuffbox
       config_(config),
       should_quit_(false)
     {
-      assert(
-        instance_ == nullptr && 
-        "There can only be one instance of a Snuffbox application");
-
-      instance_ = this;
-
       if (argc > 1 && argv != nullptr)
       {
         cli_ = CommandLineParser::Parse(argc, argv);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::SetAsInstance()
+    {
+      assert(
+        instance_ == nullptr &&
+        "There can only be one instance of a Snuffbox application");
+
+      instance_ = this;
     }
 
     //--------------------------------------------------------------------------
@@ -90,6 +94,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes Application::Run()
     {
+      SetAsInstance();
+
       ApplyConfiguration();
 
       Debug::LogVerbosity<2>(

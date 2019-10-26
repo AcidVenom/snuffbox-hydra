@@ -28,6 +28,8 @@ namespace snuffbox
         foundation::Path(project.GetCurrentAssetsPath().toLatin1().data());
 
       build_dir_ /= Project::kAssetDirectory;
+
+      NewScene();
     }
 
     //--------------------------------------------------------------------------
@@ -49,6 +51,15 @@ namespace snuffbox
       default:
         break;
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetImporter::NewScene()
+    {
+      app_->GetService<engine::SceneService>()->SwitchScene(nullptr);
+      current_scene_ = "";
+
+      app_->SetSceneInWindowTitle("New scene");
     }
 
     //--------------------------------------------------------------------------
@@ -87,18 +98,23 @@ namespace snuffbox
       if (ss->SwitchScene(scene_path) == true)
       {
         current_scene_ = scene_path;
+
+        QString changed_scene = current_scene_.c_str();
+        app_->SetSceneInWindowTitle(changed_scene);
+
+        emit SceneChanged(changed_scene);
       }
     }
 
     //--------------------------------------------------------------------------
-    void AssetImporter::SaveCurrentScene()
+    void AssetImporter::SaveCurrentScene(bool force_dialog)
     {
       engine::Scene* scene = 
         app_->GetService<engine::SceneService>()->current_scene();
 
       foundation::Path save_path;
 
-      bool needs_dialog = IsAssetSaved(
+      bool needs_dialog = force_dialog == true || IsAssetSaved(
         compilers::AssetTypes::kScene, 
         current_scene_, 
         &save_path) == false;
@@ -110,6 +126,14 @@ namespace snuffbox
           "Save scene",
           source_dir_.ToString().c_str(),
           "Scene files (*.scene)").toLatin1().data());
+
+        if (save_path.ToString().empty() == false)
+        {
+          current_scene_ =
+            save_path.StripPath(source_dir_).NoExtension().ToString();
+
+          app_->SetSceneInWindowTitle(current_scene_.c_str());
+        }
       }
 
       if (save_path.ToString().size() > 0)

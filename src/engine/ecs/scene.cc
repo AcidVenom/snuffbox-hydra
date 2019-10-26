@@ -294,6 +294,7 @@ namespace snuffbox
       archive(GET_ARCHIVE_PROP(entities));
 
       current_id_ = GetNextAvailableID();
+      OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------

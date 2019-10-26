@@ -32,7 +32,7 @@ namespace snuffbox
       engine::SceneService* ss = app_->GetService<engine::SceneService>();
       ss->set_on_scene_changed([&](engine::Scene* scene)
       {
-        OnSceneChanged(scene);
+        OnSceneDataChanged(scene);
       });
 
       setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
@@ -49,11 +49,11 @@ namespace snuffbox
         this,
         &HierarchyView::OnItemChanged);
 
-      OnSceneChanged(ss->current_scene());
+      RefreshForCurrentScene();
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::OnSceneChanged(engine::Scene* scene)
+    void HierarchyView::OnSceneDataChanged(engine::Scene* scene)
     {
       QSignalBlocker blocker(this);
 
@@ -226,6 +226,20 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::RefreshForCurrentScene()
+    {
+      OnSceneDataChanged(
+        app_->GetService<engine::SceneService>()->current_scene());
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::Clear()
+    {
+      clear();
+      entity_to_item_.clear();
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::dropEvent(QDropEvent* evt)
     {
       QModelIndex index = indexAt(evt->pos());
@@ -291,6 +305,13 @@ namespace snuffbox
       {
         edited_item->entity()->set_name(new_name.toLatin1().data());
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnSceneChanged(const QString& scene_name)
+    {
+      Clear();
+      RefreshForCurrentScene();
     }
   }
 }

@@ -45,7 +45,7 @@ namespace snuffbox
       /**
       * @brief Called when a scene has changed
       */
-      void OnSceneChanged(engine::Scene* scene);
+      void OnSceneDataChanged(engine::Scene* scene);
 
       /**
       * @brief Try to add an entity to the hierarchy view, if it already exists
@@ -97,6 +97,16 @@ namespace snuffbox
       void ShowEntityContextMenu(HierarchyViewItem* item, const QPoint& pos);
 
       /**
+      * @brief Refreshes the hierarchy view for the current scene
+      */
+      void RefreshForCurrentScene();
+
+      /**
+      * @brief Clears the hierarchy view and all mappings
+      */
+      void Clear();
+
+      /**
       * @brief Called when an item was dropped onto another item or the root
       *
       * @param[in] evt The drop event
@@ -124,6 +134,16 @@ namespace snuffbox
       * @param[in] column The column of the item that changed
       */
       void OnItemChanged(QTreeWidgetItem* item, int column);
+
+    public slots:
+
+      /**
+      * @brief Called when the asset importer has switched scenes
+      *
+      * @param[in] scene_name The new name of the scene, could be empty if
+      *                       it is a new scene
+      */
+      void OnSceneChanged(const QString& scene_name);
 
     private:
 

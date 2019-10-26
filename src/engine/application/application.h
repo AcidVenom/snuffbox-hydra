@@ -101,6 +101,11 @@ namespace snuffbox
         const Configuration& config = Configuration::kDefaultConfiguration);
 
       /**
+      * @brief Sets this instance as the current singleton application
+      */
+      void SetAsInstance();
+
+      /**
       * @brief Executes the application and starts the main loop
       *
       * @return The error code, succesful with ErrorCodes::kSuccess
@@ -321,6 +326,8 @@ namespace snuffbox
       CLI cli_; //!< The parsed command line
 
       Services services_; //!< The list of services that are available
+
+    protected:
 
       bool should_quit_; //!< Should the application quit?
 

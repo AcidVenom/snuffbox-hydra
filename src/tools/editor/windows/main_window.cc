@@ -10,6 +10,9 @@
 
 #include <QDockWidget>
 #include <QVBoxLayout>
+#include <QMenuBar>
+#include <QCloseEvent>
+#include <QMessageBox>
 
 #define RESET_WINDOW_GEOMETRY 0
 
@@ -33,6 +36,7 @@ namespace snuffbox
       asset_browser_(nullptr)
     {
       setObjectName(QStringLiteral("MainWindow"));
+      CreateMenuBar();
 
       setMinimumSize(kMinWidth_, kMinHeight_);
       LoadWindowSize();
@@ -70,6 +74,12 @@ namespace snuffbox
       scene_widget->setWindowTitle(QStringLiteral("Scene"));
       scene_widget->setObjectName(QStringLiteral("MainWindowSceneDock"));
 
+      connect(
+        app_->asset_importer(),
+        &AssetImporter::SceneChanged,
+        hierarchy,
+        &HierarchyView::OnSceneChanged);
+
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
@@ -80,6 +90,61 @@ namespace snuffbox
       foundation::Logger::RedirectOutput(&ConsoleWidget::OnLog, console);
 
       RefreshAssetList();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::CreateMenuBar()
+    {
+      QMenu* file_menu = menuBar()->addMenu("File");
+      QMenu* edit_menu = menuBar()->addMenu("Edit");
+
+      QAction* open_project = new QAction("Open project");
+      open_project->setShortcut(Qt::CTRL + Qt::Key_O);
+
+      QAction* new_scene = new QAction("New scene");
+      new_scene->setShortcut(Qt::CTRL + Qt::Key_N);
+
+      QAction* save_scene = new QAction("Save scene");
+      save_scene->setShortcut(Qt::CTRL + Qt::Key_S);
+
+      QAction* save_scene_as = new QAction("Save scene as");
+      save_scene_as->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+
+      QAction* exit_app = new QAction("Exit");
+      exit_app->setShortcut(Qt::CTRL + Qt::Key_Q);
+
+      connect(open_project, &QAction::triggered, this, [&]()
+      {
+        OnOpenProject();
+      });
+
+      connect(new_scene, &QAction::triggered, this, [&]()
+      {
+        OnNewScene();
+      });
+
+      connect(save_scene, &QAction::triggered, this, [&]()
+      {
+        OnSaveScene();
+      });
+
+      connect(save_scene_as, &QAction::triggered, this, [&]()
+      {
+        OnSaveSceneAs();
+      });
+
+      connect(exit_app, &QAction::triggered, this, [&]()
+      {
+        ConfirmExit();
+      });
+
+      file_menu->addAction(open_project);
+      file_menu->addSeparator();
+      file_menu->addAction(new_scene);
+      file_menu->addAction(save_scene);
+      file_menu->addAction(save_scene_as);
+      file_menu->addSeparator();
+      file_menu->addAction(exit_app);
     }
 
     //--------------------------------------------------------------------------
@@ -138,9 +203,72 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void MainWindow::OnOpenProject()
+    {
+      app_->TryOpenProject();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnNewScene()
+    {
+      QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "New scene",
+        "Do you want to save the changes in the current scene?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+      if (reply == QMessageBox::Cancel)
+      {
+        return;
+      }
+
+      if (reply == QMessageBox::Yes)
+      {
+        app_->asset_importer()->SaveCurrentScene();
+      }
+
+      app_->asset_importer()->NewScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSaveScene()
+    {
+      app_->asset_importer()->SaveCurrentScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSaveSceneAs()
+    {
+      app_->asset_importer()->SaveCurrentScene(true);
+    }
+
+    //--------------------------------------------------------------------------
+    bool MainWindow::ConfirmExit()
+    {
+      QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "Close",
+        "Are you sure you want to close the application?"
+        "\nAny unsaved data will be lost",
+        QMessageBox::Yes | QMessageBox::No);
+
+      bool accepted = reply == QMessageBox::Yes;
+      if (accepted == true)
+      {
+        app_->NotifyQuit();
+      }
+
+      return accepted;
+    }
+
+    //--------------------------------------------------------------------------
     void MainWindow::closeEvent(QCloseEvent* evt)
     {
-      Q_UNUSED(evt);
+      if (ConfirmExit() == false)
+      {
+        evt->ignore();
+        return;
+      }
 
       SaveWindowGeometry();
     }
@@ -151,6 +279,12 @@ namespace snuffbox
       const QString& full_path)
     {
       app_->asset_importer()->ImportAsset(type, full_path.toLatin1().data());
+    }
+
+    //--------------------------------------------------------------------------
+    MainWindow::~MainWindow()
+    {
+      foundation::Logger::RedirectOutput(nullptr, nullptr);
     }
   }
 }

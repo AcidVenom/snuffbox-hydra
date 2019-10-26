@@ -27,6 +27,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const int EditorApplication::kMinBuildChangeWait_ = 200;
+    const QString EditorApplication::kTitleFormat_ =
+      "Snuffbox Editor - %0";
 
     //--------------------------------------------------------------------------
     EditorApplication::EditorApplication(
@@ -35,10 +37,11 @@ namespace snuffbox
       engine::Application(argc, argv, cfg),
       qapp_(argc, argv),
       project_(nullptr),
+      build_change_timer_("BuildChangeTimer"),
+      build_dir_changed_(false),
       main_window_(nullptr),
       asset_importer_(nullptr),
-      build_change_timer_("BuildChangeTimer"),
-      build_dir_changed_(false)
+      project_changed_(false)
     {
       QCoreApplication::setOrganizationName(
         QStringLiteral("Daniel Konings"));
@@ -60,8 +63,19 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes EditorApplication::Run()
     {
+      SetAsInstance();
+
+      bool was_restarted = project_changed_ == true;
+
+      if (was_restarted)
+      {
+        OnRestart();
+      }
+
+      project_changed_ = false;
+
       foundation::ErrorCodes err = foundation::ErrorCodes::kSuccess;
-      if (ShowProjectWindow() == false)
+      if (was_restarted == false && ShowProjectWindow() == false)
       {
         return err;
       }
@@ -121,9 +135,24 @@ namespace snuffbox
         CheckForBuildChanges();
       }
 
+      builder.Shutdown();
       Shutdown();
 
-      return foundation::ErrorCodes::kSuccess;
+      main_window_.reset();
+      asset_importer_.reset();
+
+      return project_changed_ ? 
+        foundation::ErrorCodes::kRestart : foundation::ErrorCodes::kSuccess;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::TryOpenProject()
+    {
+      if (ShowProjectWindow() == true)
+      {
+        project_changed_ = true;
+        NotifyQuit();
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -139,6 +168,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void EditorApplication::SetSceneInWindowTitle(const QString& scene_name)
+    {
+      QString title = kTitleFormat_.arg(scene_name);
+      qapp_.setApplicationDisplayName(title);
+
+      if (main_window_ != nullptr)
+      {
+        main_window_->setWindowTitle(title);
+      }
+    }
+
+    //--------------------------------------------------------------------------
     AssetImporter* EditorApplication::asset_importer() const
     {
       return asset_importer_.get();
@@ -148,6 +189,12 @@ namespace snuffbox
     Project& EditorApplication::project()
     {
       return project_;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnRestart()
+    {
+      should_quit_ = false;
     }
 
     //--------------------------------------------------------------------------
