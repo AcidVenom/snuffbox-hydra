@@ -68,6 +68,11 @@ namespace snuffbox
 
       ApplyConfiguration();
 
+      if ((err = Initialize()) != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
+
       asset_importer_ = std::unique_ptr<AssetImporter>(new AssetImporter(this));
 
       main_window_ = CreateMainWindow(&err);
@@ -172,8 +177,6 @@ namespace snuffbox
         foundation::LogSeverity::kDebug,
         "Initializing the editor\n\tOpening project: {0}",
         project_.project_path().toLatin1().data());
-
-      *err = Initialize();
 
       GameView* game_view = main_window->game_view();
 

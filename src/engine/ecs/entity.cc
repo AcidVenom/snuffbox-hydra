@@ -182,6 +182,7 @@ namespace snuffbox
       for (size_t i = 0; i < children.size(); ++i)
       {
         child = children.at(i)->entity();
+        child->transform()->SetParent(nullptr);
         child->Destroy();
       }
 
@@ -190,8 +191,9 @@ namespace snuffbox
         components_[i].clear();
       }
 
-      scene_->OnSceneChanged();
+      engine::Scene* deleted_from = scene_;
       scene_->RemoveEntity(this);
+      deleted_from->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------

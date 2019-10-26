@@ -4,6 +4,7 @@
 #include "tools/editor/editor-widgets/game_view.h"
 #include "tools/editor/editor-widgets/console_widget.h"
 #include "tools/editor/asset-browser/asset_browser.h"
+#include "tools/editor/scene-editor/hierarchy_view.h"
 
 #include "tools/editor/asset-browser/asset_icon.h"
 
@@ -63,9 +64,16 @@ namespace snuffbox
       console_widget->setWindowTitle(QStringLiteral("Console"));
       console_widget->setObjectName(QStringLiteral("MainWindowConsoleDock"));
 
+      QDockWidget* scene_widget = new QDockWidget(this);
+      HierarchyView* hierarchy = new HierarchyView(app_, scene_widget);
+      scene_widget->setWidget(hierarchy);
+      scene_widget->setWindowTitle(QStringLiteral("Scene"));
+      scene_widget->setObjectName(QStringLiteral("MainWindowSceneDock"));
+
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
+      addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, scene_widget);
 
       LoadWindowGeometry();
 
