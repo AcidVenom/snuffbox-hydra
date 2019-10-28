@@ -8,6 +8,7 @@ namespace snuffbox
   namespace editor
   {
     class HierarchyView;
+    class HierarchyViewItem;
 
     /**
     * @brief The base class of every command that does something with entities.
@@ -86,6 +87,69 @@ namespace snuffbox
       * @see EntityCommand::undo
       */
       void undo() override;
+    };
+    //--------------------------------------------------------------------------
+
+    /**
+    * @brief A command to delete entities, or re-create them when undone
+    *
+    * @author Daniel Konings
+    */
+    class DeleteEntityCommand : public EntityCommand
+    {
+
+    public:
+
+      /**
+      * @see EntityCommand::EntityCommand
+      *
+      * @param[in] deleted_from The index this entity was deleted from
+      */
+      DeleteEntityCommand(
+        const QUuid& uuid,
+        HierarchyView* view,
+        int deleted_from);
+
+      /**
+      * @see EntityCommand::redo
+      */
+      void redo() override;
+
+      /**
+      * @see EntityCommand::undo
+      */
+      void undo() override;
+
+    private:
+
+      QString serialization_data_; //!< The data of the deleted entity
+      int deleted_from_; //!< The index this entity was deleted from
+    };
+
+    //--------------------------------------------------------------------------
+    class ReparentEntityCommand : public EntityCommand
+    {
+      ReparentEntityCommand(
+        const QUuid& uuid,
+        HierarchyView* view,
+        HierarchyViewItem* from,
+        HierarchyViewItem* to);
+
+      void redo() override;
+
+      void undo() override;
+
+    protected:
+
+      int GetIndexForItem(HierarchyViewItem* item) const;
+
+    private:
+
+      HierarchyViewItem* from_;
+      HierarchtViewItem* to_;
+
+      int index_from_;
+      int index_to_;
     };
   }
 }

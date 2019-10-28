@@ -35,6 +35,8 @@ namespace snuffbox
     {
 
       friend class CreateEntityCommand;
+      friend class DeleteEntityCommand;
+      friend class ReparentEntityCommand;
 
       Q_OBJECT;
 
@@ -62,8 +64,11 @@ namespace snuffbox
       * @param[in] ent The entity to check for
       * @param[in] uuid The UUID to assign to this entity
       * @param[in] update_uuid Should we update the UUID if already found?
+      *
+      * @return The corresponding hierarchy view item that was created or
+      *         updated for this entity
       */
-      void TryAddEntity(
+      HierarchyViewItem* TryAddEntity(
         engine::Entity* ent, 
         const QUuid& uuid, 
         bool update_uuid);
@@ -151,8 +156,13 @@ namespace snuffbox
       *
       * @param[in] uuid The UUID of the command, which will be the new UUID
       *                 of the created entity
+      *
+      * @param[in] index The index the entity should reside at, or -1 to append
+      *                  it at the end of the list
+      *
+      * @return The created entity
       */
-      void CreateNewEntity(const QUuid& uuid);
+      engine::Entity* CreateNewEntity(const QUuid& uuid, int index = -1);
 
     protected slots:
 
@@ -176,6 +186,12 @@ namespace snuffbox
       *        menu
       */
       void OnCreateEntity();
+
+      /**
+      * @brief Called when 'Delete' has been clicked in the context
+      *        menu of an entity
+      */
+      void OnDeleteEntity();
 
     public slots:
 
@@ -205,6 +221,8 @@ namespace snuffbox
       EntityMap entity_to_item_; //!< The entity to item mapping
 
       QUndoStack undo_stack_; //!< The undo stack
+
+      HierarchyViewItem* hovered_item_; //!< The currently hovered item
     };
   }
 }

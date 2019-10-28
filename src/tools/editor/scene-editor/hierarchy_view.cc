@@ -19,7 +19,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     HierarchyView::HierarchyView(EditorApplication* app, QWidget* parent) :
       QTreeWidget(parent),
-      app_(app)
+      app_(app),
+      hovered_item_(nullptr)
     {
       setSelectionMode(QAbstractItemView::SingleSelection);
       setColumnCount(1);
@@ -73,14 +74,14 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::TryAddEntity(
+    HierarchyViewItem* HierarchyView::TryAddEntity(
       engine::Entity* ent, 
       const QUuid& uuid,
       bool update_uuid)
     {
       if (ent->transform() == nullptr)
       {
-        return;
+        return nullptr;
       }
 
       EntityMap::iterator it = entity_to_item_.find(ent);
@@ -97,7 +98,7 @@ namespace snuffbox
           old_item->UpdateUUID(uuid);
         }
 
-        return;
+        return old_item;
       }
 
       HierarchyViewItem* new_item = 
@@ -106,6 +107,8 @@ namespace snuffbox
       ReparentItem(new_item, ent, false);
 
       entity_to_item_.insert(eastl::make_pair(ent, new_item));
+
+      return new_item;
     }
 
     //--------------------------------------------------------------------------
@@ -223,7 +226,7 @@ namespace snuffbox
       QAction del("Delete");
       connect(&del, &QAction::triggered, this, [&]()
       {
-        item->entity()->Destroy();
+        OnDeleteEntity();
       });
 
       QAction rename("Rename");
@@ -303,39 +306,77 @@ namespace snuffbox
       engine::Entity* ent = item_a->entity();
       if (index.isValid() == false)
       {
+        engine::TransformComponent* old_parent = ent->transform()->parent();
         ent->transform()->SetParent(nullptr);
       }
       else
       {
-        QTreeWidgetItem* dropped_on = itemFromIndex(index);
-        HierarchyViewItem* item_b = static_cast<HierarchyViewItem*>(dropped_on);
+        bool reparent = true;
+        switch (dropIndicatorPosition())
+        {
+        case QAbstractItemView::AboveItem:
+        case QAbstractItemView::BelowItem:
+          reparent = false;
+          break;
 
-        ent->transform()->SetParent(item_b->entity()->transform());
+        default:
+          reparent = true;
+          break;
+        }
+
+        if (reparent == true)
+        {
+          QTreeWidgetItem* dropped_on = itemFromIndex(index);
+          HierarchyViewItem* item_b = 
+            static_cast<HierarchyViewItem*>(dropped_on);
+
+          ent->transform()->SetParent(item_b->entity()->transform());
+        }
       }
+
+      QTreeWidget::dropEvent(evt);
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::CreateNewEntity(const QUuid& uuid)
+    engine::Entity* HierarchyView::CreateNewEntity(const QUuid& uuid, int index)
     {
       engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(
         &foundation::Memory::default_allocator(), GetCurrentScene());
 
-      TryAddEntity(ent, uuid, true);
+      HierarchyViewItem* item = TryAddEntity(ent, uuid, true);
+
+      if (index != -1)
+      {
+        QTreeWidgetItem* to_move = nullptr;
+        QTreeWidgetItem* parent = item->parent();
+
+        if (parent == nullptr)
+        {
+          to_move = takeTopLevelItem(indexOfTopLevelItem(item));
+          insertTopLevelItem(index, to_move);
+        }
+        else
+        {
+          to_move = parent->takeChild(parent->indexOfChild(item));
+          parent->insertChild(index, to_move);
+        }
+      }
+
+      return ent;
     }
 
     //--------------------------------------------------------------------------
     void HierarchyView::CustomContextMenu(const QPoint& pos)
     {
-      HierarchyViewItem* hovered_item = 
-        static_cast<HierarchyViewItem*>(itemAt(pos));
+      hovered_item_ = static_cast<HierarchyViewItem*>(itemAt(pos));
 
-      if (hovered_item == nullptr)
+      if (hovered_item_ == nullptr)
       {
         ShowRegularContextMenu(pos);
       }
       else
       {
-        ShowEntityContextMenu(hovered_item, pos);
+        ShowEntityContextMenu(hovered_item_, pos);
       }
     }
 
@@ -358,6 +399,32 @@ namespace snuffbox
     {
       CreateEntityCommand* command = 
         new CreateEntityCommand(QUuid::createUuid(), this);
+
+      undo_stack_.push(command);
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnDeleteEntity()
+    {
+      if (hovered_item_ == nullptr)
+      {
+        return;
+      }
+
+      int delete_index = -1;
+
+      QTreeWidgetItem* parent = hovered_item_->parent();
+      if (parent != nullptr)
+      {
+        delete_index = parent->indexOfChild(hovered_item_);
+      }
+      else
+      {
+        delete_index = indexOfTopLevelItem(hovered_item_);
+      }
+
+      DeleteEntityCommand* command =
+        new DeleteEntityCommand(hovered_item_->uuid(), this, delete_index);
 
       undo_stack_.push(command);
     }
