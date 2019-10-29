@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QUndoCommand>
-#include <QUuid>
+#include <QModelIndex>
 
 namespace snuffbox
 {
@@ -13,7 +13,7 @@ namespace snuffbox
     /**
     * @brief The base class of every command that does something with entities.
     *        This class guarantees that we have a reference to the hierarchy
-    *        view and that we have a valid UUID to operate with.
+    *        view and that we have a valid index to operate with.
     *
     * @author Daniel Konings
     */
@@ -28,13 +28,13 @@ namespace snuffbox
       EntityCommand() = delete;
 
       /**
-      * @brief Construct by UUID and the hierarchy view this command got
+      * @brief Construct by index and the hierarchy view this command got
       *        created from
       *
-      * @param[in] uuid The UUID of the entity to operate on
+      * @param[in] index The index of the entity to operate on
       * @param[in] view The hierarchy view that invoked this command
       */
-      EntityCommand(const QUuid& uuid, HierarchyView* view);
+      EntityCommand(const QString& index, HierarchyView* view);
 
       /**
       * @return The hierarchy view that invoked this command
@@ -42,23 +42,54 @@ namespace snuffbox
       HierarchyView* view() const;
 
       /**
-      * @return The UUID of the entity to operate on
+      * @return The index of the entity to operate on
       */
-      const QUuid& uuid() const;
+      const QString& index() const;
+
+      /**
+      * @brief Called when this command is executed initially or redone
+      *
+      * @remarks This makes sure any refreshes on the hierarchy view
+      *          are suspressed and that indexing strings are updated
+      */
+      void redo() override;
+
+      /**
+      * @brief Called when this entity command is undone
+      *
+      * @remarks This makes sure any refreshes on the hierarchy view
+      *          are suspressed and that indexing strings are updated
+      */
+      void undo() override;
 
       /**
       * @brief Called when this command is executed initially or redone
       */
-      virtual void redo() override = 0;
+      virtual void RedoImpl() = 0;
 
       /**
       * @brief Called when this entity command is undone
       */
-      virtual void undo() override = 0;
+      virtual void UndoImpl() = 0;
+
+      /**
+      * @brief Retrieves the hierarchy view item from its index
+      *
+      * @param[in] index The index to retrieve
+      *
+      * @return The found item, or nullptr if it doesn't exist, or the index
+      *         was not valid
+      */
+      HierarchyViewItem* GetFromIndex(const QString& index) const;
+
+      /**
+      * @return The entity this entity command operates on
+      */
+      HierarchyViewItem* GetSelf() const;
 
     private:
 
-      QUuid uuid_; //!< The UUID of the entity to operate on
+      QString index_; //!< The index of the entity to operate on
       HierarchyView* view_; //!< The hierarchy view that invoked this command
     };
     //--------------------------------------------------------------------------
@@ -76,17 +107,17 @@ namespace snuffbox
       /**
       * @see EntityCommand::EntityCommand
       */
-      CreateEntityCommand(const QUuid& uuid, HierarchyView* view);
+      CreateEntityCommand(const QString& index, HierarchyView* view);
 
       /**
       * @see EntityCommand::redo
       */
-      void redo() override;
+      void RedoImpl() override;
 
       /**
       * @see EntityCommand::undo
       */
-      void undo() override;
+      void UndoImpl() override;
     };
     //--------------------------------------------------------------------------
 
@@ -106,19 +137,19 @@ namespace snuffbox
       * @param[in] deleted_from The index this entity was deleted from
       */
       DeleteEntityCommand(
-        const QUuid& uuid,
+        const QString& index,
         HierarchyView* view,
         int deleted_from);
 
       /**
       * @see EntityCommand::redo
       */
-      void redo() override;
+      void RedoImpl() override;
 
       /**
       * @see EntityCommand::undo
       */
-      void undo() override;
+      void UndoImpl() override;
 
     private:
 
@@ -127,29 +158,51 @@ namespace snuffbox
     };
 
     //--------------------------------------------------------------------------
+
+    /**
+    * @brief Used to re-parent entities or move their position around in
+    *        the hierarchy view
+    *
+    * @author Daniel Konings
+    */
     class ReparentEntityCommand : public EntityCommand
     {
+
+    public:
+
+      /**
+      * @see EntityCommand::EntityCommand
+      *
+      * @param[in] from The item this item was moved from
+      * @param[in] to The item this item was moved to
+      * @param[in] index_from The index from which this item was moved
+      * @parampin] index_to The index to which this item was moved
+      */
       ReparentEntityCommand(
-        const QUuid& uuid,
+        const QString& index,
         HierarchyView* view,
-        HierarchyViewItem* from,
-        HierarchyViewItem* to);
+        const QString& from,
+        const QString& to,
+        int index_from,
+        int index_to);
 
-      void redo() override;
+      /**
+      * @see EntityCommand::redo
+      */
+      void RedoImpl() override;
 
-      void undo() override;
-
-    protected:
-
-      int GetIndexForItem(HierarchyViewItem* item) const;
+      /**
+      * @see EntityCommand::undo
+      */
+      void UndoImpl() override;
 
     private:
 
-      HierarchyViewItem* from_;
-      HierarchtViewItem* to_;
+      QString from_model_idx_; //!< The item this item was moved from
+      QString to_model_idx_; //!< The item this item was moved to
 
-      int index_from_;
-      int index_to_;
+      int index_from_; //!< The index from which this item was moved
+      int index_to_; //!< The index to which this item was moved
     };
   }
 }

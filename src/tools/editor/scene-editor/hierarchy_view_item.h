@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QTreeWidget>
-#include <QUuid>
 
 namespace snuffbox
 {
@@ -19,12 +18,13 @@ namespace snuffbox
     *        accordingly. This also allows for renaming and deletion of items,
     *        along with re-parenting.
     *
-    *        Alongside of storing entity data, a UUID is also stored to easily
-    *        retrieve entities by UUID. This functionality is in place because
-    *        we cannot guarantee an entity's pointer being the same after
-    *        redo or undo. This way, we can look up entities with their global
-    *        UUID. This is not implemented in the runtime of the engine itself,
-    *        as it is not deemed necessary there.
+    *        Alongside of storing entity data, an index is also stored to
+    *        retrieve entities by. The format of this index is a string,
+    *        specifying how to index the tree.
+    *        This functionality is in place because we cannot guarantee an 
+    *        entity's pointer being the same after redo or undo. 
+    *        This way, we can look up entities with their index as if a user
+    *        would expand tabs normally.
     *
     * @author Daniel Konings
     */
@@ -38,12 +38,12 @@ namespace snuffbox
       *
       * @param[in] entity The contained entity of this item
       * @param[in] view The view this item belongs to
-      * @param[in] uuid The UUID to store for this item
+      * @param[in] index A string representing how to index this item
       */
       HierarchyViewItem(
         engine::Entity* entity, 
         HierarchyView* view,
-        const QUuid& uuid);
+        const QString& index);
 
       /**
       * @brief Sets the parent of this item
@@ -61,11 +61,11 @@ namespace snuffbox
       void Update();
 
       /**
-      * @brief Updates the UUID of this item
+      * @brief Updates the indexing retrieval string of this item
       *
-      * @param[in] uuid The new UUID
+      * @param[in] index The new value
       */
-      void UpdateUUID(const QUuid& uuid);
+      void UpdateIndex(const QString& index);
 
       /**
       * @return The contained entity of this item
@@ -73,17 +73,17 @@ namespace snuffbox
       engine::Entity* entity() const;
 
       /**
-      * @return The UUID associated with this entity
+      * @return The index associated with this entity
       */
-      const QUuid& uuid() const;
+      const QString& index() const;
 
     private:
 
       HierarchyView* view_; //!< The view this item belongs to
+      QString index_; //!< The index of this item
       HierarchyViewItem* parent_; //!< The parent of this item
 
       engine::Entity* entity_; //!< The contained entity of this item
-      QUuid uuid_; //!< The UUID associated with this entity
     };
   }
 }

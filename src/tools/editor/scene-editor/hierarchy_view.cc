@@ -17,9 +17,31 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    HierarchyView::SceneChangedBlocker::SceneChangedBlocker(
+      HierarchyView* view) :
+      hierarchy(view)
+    {
+      hierarchy->blockSignals(true);
+      hierarchy->UpdateIndices();
+
+      hierarchy->block_scene_changed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyView::SceneChangedBlocker::~SceneChangedBlocker()
+    {
+      hierarchy->block_scene_changed_ = false;
+
+      hierarchy->RefreshForCurrentScene();
+      hierarchy->UpdateIndices();
+      hierarchy->blockSignals(false);
+    }
+
+    //--------------------------------------------------------------------------
     HierarchyView::HierarchyView(EditorApplication* app, QWidget* parent) :
       QTreeWidget(parent),
       app_(app),
+      block_scene_changed_(false),
       hovered_item_(nullptr)
     {
       setSelectionMode(QAbstractItemView::SingleSelection);
@@ -58,13 +80,18 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::OnSceneDataChanged(engine::Scene* scene)
     {
+      if (block_scene_changed_ == true)
+      {
+        return;
+      }
+
       QSignalBlocker blocker(this);
 
       foundation::HashSet<engine::Entity*> current_entities;
 
       scene->ForEachEntity([&](engine::Entity* ent)
       {
-        TryAddEntity(ent, QUuid::createUuid(), false);
+        TryAddEntity(ent);
         current_entities.insert(ent);
 
         return true;
@@ -74,10 +101,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    HierarchyViewItem* HierarchyView::TryAddEntity(
-      engine::Entity* ent, 
-      const QUuid& uuid,
-      bool update_uuid)
+    HierarchyViewItem* HierarchyView::TryAddEntity(engine::Entity* ent)
     {
       if (ent->transform() == nullptr)
       {
@@ -93,16 +117,13 @@ namespace snuffbox
         ReparentItem(old_item, ent, true);
         old_item->Update();
 
-        if (update_uuid == true)
-        {
-          old_item->UpdateUUID(uuid);
-        }
-
         return old_item;
       }
 
-      HierarchyViewItem* new_item = 
-        new HierarchyViewItem(ent, this, uuid);
+      HierarchyViewItem* new_item = new HierarchyViewItem(
+        ent, 
+        this, 
+        QString::number(topLevelItemCount()));
 
       ReparentItem(new_item, ent, false);
 
@@ -128,7 +149,7 @@ namespace snuffbox
 
         if (it == entity_to_item_.end())
         {
-          TryAddEntity(entity_parent, QUuid::createUuid(), false);
+          TryAddEntity(entity_parent);
           current_parent = entity_to_item_.at(entity_parent);
         }
         else
@@ -242,27 +263,43 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    HierarchyViewItem* HierarchyView::FindItemByUUID(const QUuid& uuid) const
+    HierarchyViewItem* HierarchyView::FindItemByIndex(
+      const QString& index) const
     {
-      for (
-        EntityMap::const_iterator it = entity_to_item_.begin();
-        it != entity_to_item_.end();
-        ++it)
+      QTreeWidgetItem* item = nullptr;
+      for (int i = 0; i < index.size(); ++i)
       {
-        HierarchyViewItem* item = it->second;
-        if (item->uuid() == uuid)
+        QString num = index.at(i);
+        char next_idx = num.toInt();
+
+        if (item == nullptr)
         {
-          return item;
+          if (next_idx >= topLevelItemCount())
+          {
+            return nullptr;
+          }
+
+          item = topLevelItem(next_idx);
+        }
+        else
+        {
+          if (next_idx >= item->childCount())
+          {
+            return nullptr;
+          }
+
+          item = item->child(next_idx);
         }
       }
 
-      return nullptr;
+      return static_cast<HierarchyViewItem*>(item);
     }
 
     //--------------------------------------------------------------------------
-    engine::Entity* HierarchyView::FindEntityByUUID(const QUuid& uuid) const
+    engine::Entity* HierarchyView::FindEntityByIndex(
+      const QString& index) const
     {
-      HierarchyViewItem* item = FindItemByUUID(uuid);
+      HierarchyViewItem* item = FindItemByIndex(index);
 
       if (item == nullptr)
       {
@@ -273,10 +310,65 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    HierarchyViewItem* HierarchyView::FindItemByEntity(
+      engine::Entity* ent) const
+    {
+      EntityMap::const_iterator it = entity_to_item_.find(ent);
+
+      if (it == entity_to_item_.end())
+      {
+        return nullptr;
+      }
+
+      return it->second;
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::RefreshForCurrentScene()
     {
       OnSceneDataChanged(
         app_->GetService<engine::SceneService>()->current_scene());
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::UpdateIndices()
+    {
+      for (
+        EntityMap::iterator it = entity_to_item_.begin(); 
+        it != entity_to_item_.end(); 
+        ++it)
+      {
+        QTreeWidgetItem* current = it->second;
+        QTreeWidgetItem* parent = current->parent();
+
+        QString index = "";
+
+        if (parent == nullptr)
+        {
+          index = QString::number(indexOfTopLevelItem(current));
+          continue;
+        }
+
+        while (parent != nullptr)
+        {
+          index += QString::number(parent->indexOfChild(current));
+
+          current = parent;
+          parent = parent->parent();
+        }
+
+        index += QString::number(indexOfTopLevelItem(current));
+
+        QString copy = index;
+
+        int j = 0;
+        for (int i = copy.size() - 1; i >= 0; --i)
+        {
+          index[j++] = copy.at(i);
+        }
+
+        it->second->UpdateIndex(index);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -303,47 +395,70 @@ namespace snuffbox
         return;
       }
 
-      engine::Entity* ent = item_a->entity();
-      if (index.isValid() == false)
+      int from_index = -1;
+      int to_index = -1;
+
+      QTreeWidgetItem* dropped_on = itemFromIndex(index);
+      HierarchyViewItem* item_b = 
+        static_cast<HierarchyViewItem*>(dropped_on);
+
+      QAbstractItemView::DropIndicatorPosition pos = 
+        dropIndicatorPosition();
+
+      bool was_above = pos == QAbstractItemView::AboveItem;
+      bool was_below = pos == QAbstractItemView::BelowItem;
+      bool was_dropped_on = was_above == false && was_below == false;
+
+      QTreeWidgetItem* parent = item_a->parent();
+      from_index = parent == nullptr ? 
+        indexOfTopLevelItem(item_a) : parent->indexOfChild(item_a);
+
+      if (item_b != nullptr)
       {
-        engine::TransformComponent* old_parent = ent->transform()->parent();
-        ent->transform()->SetParent(nullptr);
+        parent = item_b->parent();
+        if (was_dropped_on == true)
+        {
+          to_index = item_b->childCount();
+        }
+        else
+        {
+          to_index = parent == nullptr ?
+            indexOfTopLevelItem(item_b) : parent->indexOfChild(item_b);
+
+          item_b = static_cast<HierarchyViewItem*>(parent);
+        }
       }
       else
       {
-        bool reparent = true;
-        switch (dropIndicatorPosition())
-        {
-        case QAbstractItemView::AboveItem:
-        case QAbstractItemView::BelowItem:
-          reparent = false;
-          break;
-
-        default:
-          reparent = true;
-          break;
-        }
-
-        if (reparent == true)
-        {
-          QTreeWidgetItem* dropped_on = itemFromIndex(index);
-          HierarchyViewItem* item_b = 
-            static_cast<HierarchyViewItem*>(dropped_on);
-
-          ent->transform()->SetParent(item_b->entity()->transform());
-        }
+        to_index = topLevelItemCount() - 1;
       }
 
-      QTreeWidget::dropEvent(evt);
+      HierarchyViewItem* parent_item = 
+        static_cast<HierarchyViewItem*>(item_a->parent());
+
+      QString from_model_idx = 
+        parent_item == nullptr ? QString() : parent_item->index();
+      QString to_model_idx =
+        item_b == nullptr ? QString() : item_b->index();
+        
+      ReparentEntityCommand* cmd = new ReparentEntityCommand(
+        item_a->index(),
+        this,
+        from_model_idx,
+        to_model_idx,
+        from_index,
+        to_index);
+
+      undo_stack_.push(cmd);
     }
 
     //--------------------------------------------------------------------------
-    engine::Entity* HierarchyView::CreateNewEntity(const QUuid& uuid, int index)
+    HierarchyViewItem* HierarchyView::CreateNewEntity(int index)
     {
       engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(
         &foundation::Memory::default_allocator(), GetCurrentScene());
 
-      HierarchyViewItem* item = TryAddEntity(ent, uuid, true);
+      HierarchyViewItem* item = TryAddEntity(ent);
 
       if (index != -1)
       {
@@ -362,7 +477,7 @@ namespace snuffbox
         }
       }
 
-      return ent;
+      return item;
     }
 
     //--------------------------------------------------------------------------
@@ -397,8 +512,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::OnCreateEntity()
     {
-      CreateEntityCommand* command = 
-        new CreateEntityCommand(QUuid::createUuid(), this);
+      CreateEntityCommand* command =
+        new CreateEntityCommand(QString::number(topLevelItemCount()), this);
 
       undo_stack_.push(command);
     }
@@ -423,8 +538,10 @@ namespace snuffbox
         delete_index = indexOfTopLevelItem(hovered_item_);
       }
 
-      DeleteEntityCommand* command =
-        new DeleteEntityCommand(hovered_item_->uuid(), this, delete_index);
+      DeleteEntityCommand* command = new DeleteEntityCommand(
+        hovered_item_->index(), 
+        this, 
+        delete_index);
 
       undo_stack_.push(command);
     }

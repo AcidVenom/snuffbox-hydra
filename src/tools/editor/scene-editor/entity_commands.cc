@@ -5,18 +5,25 @@
 
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>
+#include <foundation/containers/function.h>
+
 #include <engine/ecs/entity.h>
+#include <engine/components/transform_component.h>
+
+#include <qdebug.h>
 
 namespace snuffbox
 {
   namespace editor
   {
     //--------------------------------------------------------------------------
-    EntityCommand::EntityCommand(const QUuid& uuid, HierarchyView* view) :
-      uuid_(uuid),
+    EntityCommand::EntityCommand(
+      const QString& index,
+      HierarchyView* view) :
+      index_(index),
       view_(view)
     {
-
+      qDebug() << index_;
     }
 
     //--------------------------------------------------------------------------
@@ -26,32 +33,64 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const QUuid& EntityCommand::uuid() const
+    const QString& EntityCommand::index() const
     {
-      return uuid_;
+      return index_;
+    }
+
+    //--------------------------------------------------------------------------
+    void EntityCommand::redo()
+    {
+      HierarchyView::SceneChangedBlocker scope(view_);
+      RedoImpl();
+    }
+
+    //--------------------------------------------------------------------------
+    void EntityCommand::undo()
+    {
+      HierarchyView::SceneChangedBlocker scope(view_);
+      UndoImpl();
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem* EntityCommand::GetFromIndex(
+      const QString& index) const
+    {
+      if (index.isEmpty() == true)
+      {
+        return nullptr;
+      }
+
+      return view_->FindItemByIndex(index);
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem* EntityCommand::GetSelf() const
+    {
+      return GetFromIndex(index_);
     }
 
     //--------------------------------------------------------------------------
     CreateEntityCommand::CreateEntityCommand(
-      const QUuid& uuid, 
+      const QString& index,
       HierarchyView* view) :
-      EntityCommand(uuid, view)
+      EntityCommand(index, view)
     {
 
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::redo()
+    void CreateEntityCommand::RedoImpl()
     {
       HierarchyView* hierarchy = view();
-      hierarchy->CreateNewEntity(uuid());
+      hierarchy->CreateNewEntity();
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::undo()
+    void CreateEntityCommand::UndoImpl()
     {
       HierarchyView* hierarchy = view();
-      engine::Entity* ent = hierarchy->FindEntityByUUID(uuid());
+      engine::Entity* ent = GetSelf()->entity();
 
       if (ent == nullptr)
       {
@@ -63,20 +102,20 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     DeleteEntityCommand::DeleteEntityCommand(
-      const QUuid& uuid, 
+      const QString& index,
       HierarchyView* view,
       int deleted_from) :
-      EntityCommand(uuid, view),
+      EntityCommand(index, view),
       deleted_from_(deleted_from)
     {
 
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::redo()
+    void DeleteEntityCommand::RedoImpl()
     {
       HierarchyView* hierarchy = view();
-      engine::Entity* ent = hierarchy->FindEntityByUUID(uuid());
+      engine::Entity* ent = GetSelf()->entity();
 
       if (ent == nullptr)
       {
@@ -91,10 +130,11 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::undo()
+    void DeleteEntityCommand::UndoImpl()
     {
       HierarchyView* hierarchy = view();
-      engine::Entity* ent = hierarchy->CreateNewEntity(uuid(), deleted_from_);
+      engine::Entity* ent = 
+        hierarchy->CreateNewEntity(deleted_from_)->entity();
 
       if (serialization_data_.isEmpty() == true)
       {
@@ -105,67 +145,95 @@ namespace snuffbox
       archive.FromJson(serialization_data_.toLatin1().data());
 
       archive(&ent);
-
-      hierarchy->RefreshForCurrentScene();
     }
 
     //--------------------------------------------------------------------------
     ReparentEntityCommand::ReparentEntityCommand(
-      const QUuid& uuid,
+      const QString& index,
       HierarchyView* view,
-      HierarchyViewItem* from,
-      HierarchyViewItem* to) :
-      EntityCommand(uuid, view),
-      from_(from),
-      to_(to),
-      index_from_(-1),
-      index_to_(-1)
+      const QString& from,
+      const QString& to,
+      int index_from,
+      int index_to) :
+      EntityCommand(index, view),
+      from_model_idx_(from),
+      to_model_idx_(to),
+      index_from_(index_from),
+      index_to_(index_to)
     {
-      index_from_ = GetIndexForItem(from_);
-      index_to_ = GetIndexForItem(to_);
+
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::redo()
+    void ReparentEntityCommand::RedoImpl()
     {
-      QTreeWidgetItem* self = nullptr;
-      if (from_ == nullptr)
+      HierarchyViewItem* self = GetSelf();
+      engine::TransformComponent* new_parent = nullptr;
+
+      HierarchyViewItem* from = GetFromIndex(from_model_idx_);
+      HierarchyViewItem* to = GetFromIndex(to_model_idx_);
+
+      if (to != nullptr)
       {
-        self = view()->takeTopLevelItem(index_from_);
+        new_parent = to->entity()->transform();
+      }
+
+      self->entity()->transform()->SetParent(new_parent);
+
+      if (from == nullptr)
+      {
+        self = static_cast<HierarchyViewItem*>(
+          view()->takeTopLevelItem(index_from_));
       }
       else
       {
-        self = from_->takeChild(index_from_);
+        self = static_cast<HierarchyViewItem*>(from->takeChild(index_from_));
       }
 
-      if (to_ == nullptr)
+      if (to == nullptr)
       {
         view()->insertTopLevelItem(index_to_, self);
       }
       else
       {
-        to_->insertChild(index_to_, self);
+        to->insertChild(index_to_, self);
       }
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::undo()
+    void ReparentEntityCommand::UndoImpl()
     {
+      HierarchyViewItem* self = GetSelf();
+      engine::TransformComponent* new_parent = nullptr;
 
-    }
+      HierarchyViewItem* from = GetFromIndex(from_model_idx_);
+      HierarchyViewItem* to = GetFromIndex(to_model_idx_);
 
-    //--------------------------------------------------------------------------
-    int ReparentEntityCommand::GetIndexForItem(HierarchyViewItem* item) const
-    {
-      HierarchyView* hierarchy = view();
-      HierarchyViewItem* self = hierarchy->FindItemByUUID(uuid());
-
-      if (item == nullptr)
+      if (from != nullptr)
       {
-        return hierarchy->indexOfTopLevelItem(self);
+        new_parent = from->entity()->transform();
       }
 
-      return item->indexOfChild(self);
+      self->entity()->transform()->SetParent(new_parent);
+
+      if (to == nullptr)
+      {
+        self = static_cast<HierarchyViewItem*>(
+          view()->takeTopLevelItem(index_to_));
+      }
+      else
+      {
+        self = static_cast<HierarchyViewItem*>(to->takeChild(index_to_));
+      }
+
+      if (from == nullptr)
+      {
+        view()->insertTopLevelItem(index_from_, self);
+      }
+      else
+      {
+        from->insertChild(index_from_, self);
+      }
     }
   }
 }

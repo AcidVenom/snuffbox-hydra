@@ -11,12 +11,12 @@ namespace snuffbox
     HierarchyViewItem::HierarchyViewItem(
       engine::Entity* entity, 
       HierarchyView* view,
-      const QUuid& uuid) :
+      const QString& index) :
       QTreeWidgetItem(view),
       view_(view),
+      index_(index),
       parent_(nullptr),
-      entity_(entity),
-      uuid_(uuid)
+      entity_(entity)
     {
       setFlags(
         flags() |
@@ -44,9 +44,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyViewItem::UpdateUUID(const QUuid& uuid)
+    void HierarchyViewItem::UpdateIndex(const QString& index)
     {
-      uuid_ = uuid;
+      index_ = index;
     }
 
     //--------------------------------------------------------------------------
@@ -56,9 +56,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const QUuid& HierarchyViewItem::uuid() const
+    const QString& HierarchyViewItem::index() const
     {
-      return uuid_;
+      return index_;
     }
   }
 }

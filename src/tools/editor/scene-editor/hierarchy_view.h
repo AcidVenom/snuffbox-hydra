@@ -4,7 +4,7 @@
 
 #include <QUndoStack>
 #include <QTreeWidget>
-#include <QUuid>
+#include <QModelIndex>
 
 namespace snuffbox
 {
@@ -34,6 +34,9 @@ namespace snuffbox
     class HierarchyView : public QTreeWidget
     {
 
+      friend HierarchyViewItem;
+
+      friend class EntityCommand;
       friend class CreateEntityCommand;
       friend class DeleteEntityCommand;
       friend class ReparentEntityCommand;
@@ -41,6 +44,36 @@ namespace snuffbox
       Q_OBJECT;
 
     public:
+
+      /**
+      * @brief Used to delay changes within entity commands until they
+      *        have finished mutating the data
+      *
+      * @author Daniel Konings
+      */
+      struct SceneChangedBlocker
+      {
+        /**
+        * @brief Delete default constructor
+        */
+        SceneChangedBlocker() = delete;
+
+        /**
+        * @brief Construct through the view to block
+        *
+        * @param[in] view The view to block
+        */
+        SceneChangedBlocker(HierarchyView* view);
+
+        /**
+        * @brief Destructor, re-enable receiving of changes
+        */
+        ~SceneChangedBlocker();
+
+        HierarchyView* hierarchy; //!< The view this blocker is for
+      };
+
+      friend SceneChangedBlocker;
 
       /**
       * @brief Creates a hierarchy view with the application to listen to
@@ -62,16 +95,11 @@ namespace snuffbox
       *        update the entity instead
       *
       * @param[in] ent The entity to check for
-      * @param[in] uuid The UUID to assign to this entity
-      * @param[in] update_uuid Should we update the UUID if already found?
       *
       * @return The corresponding hierarchy view item that was created or
       *         updated for this entity
       */
-      HierarchyViewItem* TryAddEntity(
-        engine::Entity* ent, 
-        const QUuid& uuid, 
-        bool update_uuid);
+      HierarchyViewItem* TryAddEntity(engine::Entity* ent);
 
       /**
       * @brief Re-parents an already existing or new hierarchy view item
@@ -115,29 +143,44 @@ namespace snuffbox
       void ShowEntityContextMenu(HierarchyViewItem* item, const QPoint& pos);
 
       /**
-      * @brief Searches a hierarchy view item by its UUID that was assigned
+      * @brief Searches a hierarchy view item by its index that was assigned
       *        for its entity
       *
-      * @param[in] uuid The UUID to search for
+      * @param[in] index The index to search for
       *
       * @return The retrieved item, or nullptr if it was not found
       */
-      HierarchyViewItem* FindItemByUUID(const QUuid& uuid) const;
+      HierarchyViewItem* FindItemByIndex(const QString& index) const;
 
       /**
-      * @brief Searches an entity by its UUID, as stored in a
+      * @brief Searches an entity by its index, as stored in a
       *        hierarchy view item
       *
-      * @param[in] uuid The UUID to search for
+      * @param[in] index The index to search for
       *
       * @return The retrieved entity, or nullptr if it was not found
       */
-      engine::Entity* FindEntityByUUID(const QUuid& uuid) const;
+      engine::Entity* FindEntityByIndex(const QString& index) const;
+
+      /**
+      * @brief Searches for an entity's item by its pointer within the current
+      *        entity mapping
+      *
+      * @param[in] ent The entity to search the item of
+      *
+      * @return The item, or a nullptr if not found
+      */
+      HierarchyViewItem* FindItemByEntity(engine::Entity* ent) const;
 
       /**
       * @brief Refreshes the hierarchy view for the current scene
       */
       void RefreshForCurrentScene();
+
+      /**
+      * @brief Updates all retrieval index strings
+      */
+      void UpdateIndices();
 
       /**
       * @brief Clears the hierarchy view and all mappings
@@ -154,15 +197,12 @@ namespace snuffbox
       /**
       * @brief Called after the command from "Create entity" resolves
       *
-      * @param[in] uuid The UUID of the command, which will be the new UUID
-      *                 of the created entity
-      *
       * @param[in] index The index the entity should reside at, or -1 to append
       *                  it at the end of the list
       *
-      * @return The created entity
+      * @return The created entity item
       */
-      engine::Entity* CreateNewEntity(const QUuid& uuid, int index = -1);
+      HierarchyViewItem* CreateNewEntity(int index = -1);
 
     protected slots:
 
@@ -219,6 +259,8 @@ namespace snuffbox
 
       EditorApplication* app_; //!< The current application
       EntityMap entity_to_item_; //!< The entity to item mapping
+
+      bool block_scene_changed_; //!< Blocks the scene changed callback
 
       QUndoStack undo_stack_; //!< The undo stack
 
