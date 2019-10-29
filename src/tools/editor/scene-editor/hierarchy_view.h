@@ -1,6 +1,7 @@
 #pragma once
 
 #include <foundation/containers/map.h>
+#include <foundation/containers/uuid.h>
 
 #include <QUndoStack>
 #include <QTreeWidget>
@@ -143,24 +144,24 @@ namespace snuffbox
       void ShowEntityContextMenu(HierarchyViewItem* item, const QPoint& pos);
 
       /**
-      * @brief Searches a hierarchy view item by its index that was assigned
+      * @brief Searches a hierarchy view item by its UUID that was assigned
       *        for its entity
       *
-      * @param[in] index The index to search for
+      * @param[in] uuid The UUID to search for
       *
       * @return The retrieved item, or nullptr if it was not found
       */
-      HierarchyViewItem* FindItemByIndex(const QString& index) const;
+      HierarchyViewItem* FindItemByUUID(const foundation::UUID& uuid) const;
 
       /**
-      * @brief Searches an entity by its index, as stored in a
+      * @brief Searches an entity by its uuid, as stored in the corresponding
       *        hierarchy view item
       *
-      * @param[in] index The index to search for
+      * @param[in] uuid The UUID to search for
       *
       * @return The retrieved entity, or nullptr if it was not found
       */
-      engine::Entity* FindEntityByIndex(const QString& index) const;
+      engine::Entity* FindEntityByUUID(const foundation::UUID& uuid) const;
 
       /**
       * @brief Searches for an entity's item by its pointer within the current
@@ -176,11 +177,6 @@ namespace snuffbox
       * @brief Refreshes the hierarchy view for the current scene
       */
       void RefreshForCurrentScene();
-
-      /**
-      * @brief Updates all retrieval index strings
-      */
-      void UpdateIndices();
 
       /**
       * @brief Clears the hierarchy view and all mappings

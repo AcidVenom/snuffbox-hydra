@@ -81,13 +81,6 @@ namespace snuffbox
       int HasEntity(Entity* entity);
 
       /**
-      * @brief Finds the highest ID in the entity list and increments it by 1
-      *
-      * @return The unique ID
-      */
-      size_t GetNextAvailableID();
-
-      /**
       * @brief Removes all null-entities after the update of a frame
       */
       void RemoveNullEntities();
@@ -137,15 +130,6 @@ namespace snuffbox
       void ForEachEntity(const EntityDelegate& del);
 
       /**
-      * @brief Finds an entity by ID and returns it
-      *
-      * @param[in] id The ID to search for
-      *
-      * @return The found entity, or nullptr if it doesn't exist in this scene
-      */
-      Entity* FindEntityByID(size_t id);
-
-      /**
       * @brief Called from either the Entity or TransformComponent when
       *        their scene properties/hierarchy have changed
       */
@@ -173,7 +157,6 @@ namespace snuffbox
       */
       foundation::Vector<Entity*> entities_;
 
-      size_t current_id_; //!< The next available ID for an entity
       bool deleted_; //!< Were any entities deleted this frame?
     };
   }

@@ -18,13 +18,8 @@ namespace snuffbox
     *        accordingly. This also allows for renaming and deletion of items,
     *        along with re-parenting.
     *
-    *        Alongside of storing entity data, an index is also stored to
-    *        retrieve entities by. The format of this index is a string,
-    *        specifying how to index the tree.
-    *        This functionality is in place because we cannot guarantee an 
-    *        entity's pointer being the same after redo or undo. 
-    *        This way, we can look up entities with their index as if a user
-    *        would expand tabs normally.
+    *        The UUID in the entity is used for editing operations. As entity
+    *        pointers will change during creation/deletion of entities.
     *
     * @author Daniel Konings
     */
@@ -42,8 +37,7 @@ namespace snuffbox
       */
       HierarchyViewItem(
         engine::Entity* entity, 
-        HierarchyView* view,
-        const QString& index);
+        HierarchyView* view);
 
       /**
       * @brief Sets the parent of this item
@@ -61,26 +55,13 @@ namespace snuffbox
       void Update();
 
       /**
-      * @brief Updates the indexing retrieval string of this item
-      *
-      * @param[in] index The new value
-      */
-      void UpdateIndex(const QString& index);
-
-      /**
       * @return The contained entity of this item
       */
       engine::Entity* entity() const;
 
-      /**
-      * @return The index associated with this entity
-      */
-      const QString& index() const;
-
     private:
 
       HierarchyView* view_; //!< The view this item belongs to
-      QString index_; //!< The index of this item
       HierarchyViewItem* parent_; //!< The parent of this item
 
       engine::Entity* entity_; //!< The contained entity of this item

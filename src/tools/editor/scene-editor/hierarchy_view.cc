@@ -22,8 +22,6 @@ namespace snuffbox
       hierarchy(view)
     {
       hierarchy->blockSignals(true);
-      hierarchy->UpdateIndices();
-
       hierarchy->block_scene_changed_ = true;
     }
 
@@ -31,9 +29,6 @@ namespace snuffbox
     HierarchyView::SceneChangedBlocker::~SceneChangedBlocker()
     {
       hierarchy->block_scene_changed_ = false;
-
-      hierarchy->RefreshForCurrentScene();
-      hierarchy->UpdateIndices();
       hierarchy->blockSignals(false);
     }
 
@@ -122,9 +117,9 @@ namespace snuffbox
 
       HierarchyViewItem* new_item = new HierarchyViewItem(
         ent, 
-        this, 
-        QString::number(topLevelItemCount()));
+        this);
 
+      ent->set_sort_index(topLevelItemCount());
       ReparentItem(new_item, ent, false);
 
       entity_to_item_.insert(eastl::make_pair(ent, new_item));
@@ -263,43 +258,28 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    HierarchyViewItem* HierarchyView::FindItemByIndex(
-      const QString& index) const
+    HierarchyViewItem* HierarchyView::FindItemByUUID(
+      const foundation::UUID& uuid) const
     {
-      QTreeWidgetItem* item = nullptr;
-      for (int i = 0; i < index.size(); ++i)
+      for (
+        EntityMap::const_iterator it = entity_to_item_.begin();
+        it != entity_to_item_.end();
+        ++it)
       {
-        QString num = index.at(i);
-        char next_idx = num.toInt();
-
-        if (item == nullptr)
+        if (it->second->entity()->uuid() == uuid)
         {
-          if (next_idx >= topLevelItemCount())
-          {
-            return nullptr;
-          }
-
-          item = topLevelItem(next_idx);
-        }
-        else
-        {
-          if (next_idx >= item->childCount())
-          {
-            return nullptr;
-          }
-
-          item = item->child(next_idx);
+          return it->second;
         }
       }
 
-      return static_cast<HierarchyViewItem*>(item);
+      return nullptr;
     }
 
     //--------------------------------------------------------------------------
-    engine::Entity* HierarchyView::FindEntityByIndex(
-      const QString& index) const
+    engine::Entity* HierarchyView::FindEntityByUUID(
+      const foundation::UUID& uuid) const
     {
-      HierarchyViewItem* item = FindItemByIndex(index);
+      HierarchyViewItem* item = FindItemByUUID(uuid);
 
       if (item == nullptr)
       {
@@ -328,47 +308,6 @@ namespace snuffbox
     {
       OnSceneDataChanged(
         app_->GetService<engine::SceneService>()->current_scene());
-    }
-
-    //--------------------------------------------------------------------------
-    void HierarchyView::UpdateIndices()
-    {
-      for (
-        EntityMap::iterator it = entity_to_item_.begin(); 
-        it != entity_to_item_.end(); 
-        ++it)
-      {
-        QTreeWidgetItem* current = it->second;
-        QTreeWidgetItem* parent = current->parent();
-
-        QString index = "";
-
-        if (parent == nullptr)
-        {
-          index = QString::number(indexOfTopLevelItem(current));
-          continue;
-        }
-
-        while (parent != nullptr)
-        {
-          index += QString::number(parent->indexOfChild(current));
-
-          current = parent;
-          parent = parent->parent();
-        }
-
-        index += QString::number(indexOfTopLevelItem(current));
-
-        QString copy = index;
-
-        int j = 0;
-        for (int i = copy.size() - 1; i >= 0; --i)
-        {
-          index[j++] = copy.at(i);
-        }
-
-        it->second->UpdateIndex(index);
-      }
     }
 
     //--------------------------------------------------------------------------
@@ -436,16 +375,18 @@ namespace snuffbox
       HierarchyViewItem* parent_item = 
         static_cast<HierarchyViewItem*>(item_a->parent());
 
-      QString from_model_idx = 
-        parent_item == nullptr ? QString() : parent_item->index();
-      QString to_model_idx =
-        item_b == nullptr ? QString() : item_b->index();
+      foundation::UUID from_uuid = 
+        parent_item == nullptr ? foundation::UUID() :
+        parent_item->entity()->uuid();
+      foundation::UUID to_uuid =
+        item_b == nullptr ? foundation::UUID() : 
+        item_b->entity()->uuid();
         
       ReparentEntityCommand* cmd = new ReparentEntityCommand(
-        item_a->index(),
+        item_a->entity()->uuid(),
         this,
-        from_model_idx,
-        to_model_idx,
+        from_uuid,
+        to_uuid,
         from_index,
         to_index);
 
@@ -475,6 +416,8 @@ namespace snuffbox
           to_move = parent->takeChild(parent->indexOfChild(item));
           parent->insertChild(index, to_move);
         }
+
+        item->entity()->set_sort_index(index);
       }
 
       return item;
@@ -513,7 +456,7 @@ namespace snuffbox
     void HierarchyView::OnCreateEntity()
     {
       CreateEntityCommand* command =
-        new CreateEntityCommand(QString::number(topLevelItemCount()), this);
+        new CreateEntityCommand(foundation::UUID::Create(), this);
 
       undo_stack_.push(command);
     }
@@ -539,7 +482,7 @@ namespace snuffbox
       }
 
       DeleteEntityCommand* command = new DeleteEntityCommand(
-        hovered_item_->index(), 
+        hovered_item_->entity()->uuid(), 
         this, 
         delete_index);
 

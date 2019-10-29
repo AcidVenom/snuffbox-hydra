@@ -10,11 +10,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     HierarchyViewItem::HierarchyViewItem(
       engine::Entity* entity, 
-      HierarchyView* view,
-      const QString& index) :
+      HierarchyView* view) :
       QTreeWidgetItem(view),
       view_(view),
-      index_(index),
       parent_(nullptr),
       entity_(entity)
     {
@@ -44,21 +42,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyViewItem::UpdateIndex(const QString& index)
-    {
-      index_ = index;
-    }
-
-    //--------------------------------------------------------------------------
     engine::Entity* HierarchyViewItem::entity() const
     {
       return entity_;
-    }
-
-    //--------------------------------------------------------------------------
-    const QString& HierarchyViewItem::index() const
-    {
-      return index_;
     }
   }
 }

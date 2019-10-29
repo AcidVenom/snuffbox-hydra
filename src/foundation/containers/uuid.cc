@@ -56,8 +56,16 @@ namespace snuffbox
     UUID UUID::FromString(const String& str)
     {
       UUID uuid;
-
       const int hex_length = sizeof(data_type) * 2;
+      const int brackets_length = 2;
+      const int dash_length = UUID_SEGMENTS - 1;
+
+      if (str.size() != 
+        hex_length * UUID_SEGMENTS + brackets_length + dash_length)
+      {
+        return uuid;
+      }
+
       char buffer[hex_length + 1 + 2];
       buffer[0] = '0';
       buffer[1] = 'x';

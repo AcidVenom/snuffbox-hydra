@@ -18,12 +18,12 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     EntityCommand::EntityCommand(
-      const QString& index,
+      const foundation::UUID& uuid,
       HierarchyView* view) :
-      index_(index),
+      uuid_(uuid),
       view_(view)
     {
-      qDebug() << index_;
+      
     }
 
     //--------------------------------------------------------------------------
@@ -33,61 +33,49 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    const QString& EntityCommand::index() const
+    const foundation::UUID& EntityCommand::uuid() const
     {
-      return index_;
+      return uuid_;
     }
 
     //--------------------------------------------------------------------------
-    void EntityCommand::redo()
+    HierarchyViewItem* EntityCommand::GetFromUUID(
+      const foundation::UUID& uuid) const
     {
-      HierarchyView::SceneChangedBlocker scope(view_);
-      RedoImpl();
-    }
-
-    //--------------------------------------------------------------------------
-    void EntityCommand::undo()
-    {
-      HierarchyView::SceneChangedBlocker scope(view_);
-      UndoImpl();
-    }
-
-    //--------------------------------------------------------------------------
-    HierarchyViewItem* EntityCommand::GetFromIndex(
-      const QString& index) const
-    {
-      if (index.isEmpty() == true)
+      if (uuid.IsNull() == true)
       {
         return nullptr;
       }
 
-      return view_->FindItemByIndex(index);
+      return view_->FindItemByUUID(uuid);
     }
 
     //--------------------------------------------------------------------------
     HierarchyViewItem* EntityCommand::GetSelf() const
     {
-      return GetFromIndex(index_);
+      return GetFromUUID(uuid_);
     }
 
     //--------------------------------------------------------------------------
     CreateEntityCommand::CreateEntityCommand(
-      const QString& index,
+      const foundation::UUID& uuid,
       HierarchyView* view) :
-      EntityCommand(index, view)
+      EntityCommand(uuid, view)
     {
 
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::RedoImpl()
+    void CreateEntityCommand::redo()
     {
       HierarchyView* hierarchy = view();
-      hierarchy->CreateNewEntity();
+      HierarchyViewItem* item = hierarchy->CreateNewEntity();
+
+      item->entity()->set_uuid(uuid());
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::UndoImpl()
+    void CreateEntityCommand::undo()
     {
       HierarchyView* hierarchy = view();
       engine::Entity* ent = GetSelf()->entity();
@@ -102,17 +90,17 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     DeleteEntityCommand::DeleteEntityCommand(
-      const QString& index,
+      const foundation::UUID& uuid,
       HierarchyView* view,
       int deleted_from) :
-      EntityCommand(index, view),
+      EntityCommand(uuid, view),
       deleted_from_(deleted_from)
     {
 
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::RedoImpl()
+    void DeleteEntityCommand::redo()
     {
       HierarchyView* hierarchy = view();
       engine::Entity* ent = GetSelf()->entity();
@@ -130,7 +118,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::UndoImpl()
+    void DeleteEntityCommand::undo()
     {
       HierarchyView* hierarchy = view();
       engine::Entity* ent = 
@@ -145,19 +133,21 @@ namespace snuffbox
       archive.FromJson(serialization_data_.toLatin1().data());
 
       archive(&ent);
+
+      hierarchy->RefreshForCurrentScene();
     }
 
     //--------------------------------------------------------------------------
     ReparentEntityCommand::ReparentEntityCommand(
-      const QString& index,
+      const foundation::UUID& uuid,
       HierarchyView* view,
-      const QString& from,
-      const QString& to,
+      const foundation::UUID& from,
+      const foundation::UUID& to,
       int index_from,
       int index_to) :
-      EntityCommand(index, view),
-      from_model_idx_(from),
-      to_model_idx_(to),
+      EntityCommand(uuid, view),
+      from_(from),
+      to_(to),
       index_from_(index_from),
       index_to_(index_to)
     {
@@ -165,13 +155,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::RedoImpl()
+    void ReparentEntityCommand::redo()
     {
+      HierarchyView::SceneChangedBlocker blocker(view());
+
       HierarchyViewItem* self = GetSelf();
       engine::TransformComponent* new_parent = nullptr;
 
-      HierarchyViewItem* from = GetFromIndex(from_model_idx_);
-      HierarchyViewItem* to = GetFromIndex(to_model_idx_);
+      HierarchyViewItem* from = GetFromUUID(from_);
+      HierarchyViewItem* to = GetFromUUID(to_);
 
       if (to != nullptr)
       {
@@ -198,16 +190,20 @@ namespace snuffbox
       {
         to->insertChild(index_to_, self);
       }
+
+      self->entity()->set_sort_index(index_to_);
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::UndoImpl()
+    void ReparentEntityCommand::undo()
     {
+      HierarchyView::SceneChangedBlocker blocker(view());
+
       HierarchyViewItem* self = GetSelf();
       engine::TransformComponent* new_parent = nullptr;
 
-      HierarchyViewItem* from = GetFromIndex(from_model_idx_);
-      HierarchyViewItem* to = GetFromIndex(to_model_idx_);
+      HierarchyViewItem* from = GetFromUUID(from_);
+      HierarchyViewItem* to = GetFromUUID(to_);
 
       if (from != nullptr)
       {
@@ -234,6 +230,8 @@ namespace snuffbox
       {
         from->insertChild(index_from_, self);
       }
+
+      self->entity()->set_sort_index(index_from_);
     }
   }
 }

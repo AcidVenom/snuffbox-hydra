@@ -39,7 +39,8 @@ namespace snuffbox
       active_(true),
       is_internal_(internal),
       scene_(scene),
-      id_(0)
+      uuid_(foundation::UUID::Create()),
+      sort_index_(-1)
     {
       AddComponentInternal(Components::kTransform);
       scene_->AddEntity(this);
@@ -290,13 +291,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Entity::set_id(size_t id)
-    {
-      id_ = id;
-    }
-
-
-    //--------------------------------------------------------------------------
     void Entity::Start()
     {
       for (
@@ -357,9 +351,27 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    size_t Entity::id() const
+    const foundation::UUID& Entity::uuid() const
     {
-      return id_;
+      return uuid_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_uuid(const foundation::UUID& uuid)
+    {
+      uuid_ = uuid;
+    }
+
+    //--------------------------------------------------------------------------
+    int Entity::sort_index() const
+    {
+      return sort_index_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_sort_index(int idx)
+    {
+      sort_index_ = idx;
     }
 
     //--------------------------------------------------------------------------
@@ -368,7 +380,8 @@ namespace snuffbox
       archive(
         SET_ARCHIVE_PROP(name_), 
         SET_ARCHIVE_PROP(active_),
-        SET_ARCHIVE_PROP(id_));
+        SET_ARCHIVE_PROP(uuid_),
+        SET_ARCHIVE_PROP(sort_index_));
 
       foundation::Vector<SerializedComponent> components;
 
@@ -400,7 +413,8 @@ namespace snuffbox
       archive(
         GET_ARCHIVE_PROP(name_), 
         GET_ARCHIVE_PROP(active_),
-        GET_ARCHIVE_PROP(id_));
+        GET_ARCHIVE_PROP(uuid_),
+        GET_ARCHIVE_PROP(sort_index_));
 
       foundation::Vector<SerializedComponent> components;
 

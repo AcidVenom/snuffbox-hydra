@@ -3,6 +3,7 @@
 #include "foundation/containers/string.h"
 #include "foundation/containers/vector.h"
 #include "foundation/io/path.h"
+#include "foundation/containers/uuid.h"
 
 #include <glm/glm.hpp>
 
@@ -110,6 +111,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     template <>
     inline String StringUtils::ToString(const Path& value)
+    {
+      return value.ToString();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline String StringUtils::ToString(const UUID& value)
     {
       return value.ToString();
     }

@@ -5,6 +5,7 @@
 #include "foundation/containers/vector.h"
 #include "foundation/containers/string.h"
 #include "foundation/io/path.h"
+#include "foundation/containers/uuid.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -416,6 +417,18 @@ namespace snuffbox
     {
       WriteIdentifier(Identifiers::kString);
       WriteRaw<char>(*value.c_str(), value.size() + 1);
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void SaveArchive::WriteValue(
+      const UUID& value,
+      enable_if_n_serializable<UUID>*)
+    {
+      WriteIdentifier(Identifiers::kString);
+
+      foundation::String stringified = value.ToString();
+      WriteRaw<char>(*stringified.c_str(), stringified.size() + 1);
     }
 
     //--------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 #include <foundation/containers/vector.h>
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
+#include <foundation/containers/uuid.h>
 
 #include <cstddef>
 
@@ -351,14 +352,6 @@ namespace snuffbox
       */
       IComponent* CreateComponentByID(Components id);
 
-      /**
-      * @brief Sets the ID of this entity, used by the scene to initially
-      *        assign an ID, or when an entity is deserialized
-      *
-      * @param[in] id The ID to set
-      */
-      void set_id(size_t id);
-
     public:
 
 
@@ -393,9 +386,29 @@ namespace snuffbox
       Scene* scene() const;
 
       /**
-      * @return The ID of this entity
+      * @return The UUID of this entity
       */
-      size_t id() const;
+      const foundation::UUID& uuid() const;
+
+      /**
+      * @brief Sets a new UUID for this entity
+      *
+      * @param[in] uuid The UUID to set
+      */
+      void set_uuid(const foundation::UUID& uuid);
+      
+      /**
+      * @return The sort index of the entity, used in editor
+      */
+      int sort_index() const;
+
+      /**
+      * @brief Sets the sort index of this entity, so that we can re-order
+      *        entities within the hierarchy view of the editor
+      *
+      * @param[in] idx The new sort index
+      */
+      void set_sort_index(int idx);
 
       /**
       * @see ISerializable::Serialize
@@ -437,7 +450,9 @@ namespace snuffbox
       bool is_internal_;
 
       Scene* scene_; //!< The scene this entity was spawned in
-      size_t id_; //!< The ID of this entity, from within the current scene
+      foundation::UUID uuid_; //!< The UUID of this entity
+
+      int sort_index_; //!< The sorting index of the entity, used in editor
 
       static const char* kDefaultName_; //!< The default name for entities
     };

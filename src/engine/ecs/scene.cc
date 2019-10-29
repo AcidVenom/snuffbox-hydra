@@ -13,7 +13,6 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     Scene::Scene() :
-      current_id_(0),
       deleted_(false)
     {
 
@@ -26,9 +25,6 @@ namespace snuffbox
       {
         return;
       }
-
-      entity->set_id(current_id_);
-      ++current_id_;
 
       entities_.push_back(entity);
     }
@@ -86,30 +82,6 @@ namespace snuffbox
       }
 
       return idx;
-    }
-
-    //--------------------------------------------------------------------------
-    size_t Scene::GetNextAvailableID()
-    {
-      if (entities_.size() == 0)
-      {
-        return 0;
-      }
-
-      size_t last = 0;
-
-      ForEachEntity([&last](Entity* e)
-      {
-        size_t id = e->id();
-        if (id > last)
-        {
-          last = id;
-        }
-
-        return true;
-      });
-
-      return last + 1;
     }
 
     //--------------------------------------------------------------------------
@@ -228,25 +200,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Entity* Scene::FindEntityByID(size_t id)
-    {
-      Entity* found = nullptr;
-
-      ForEachEntity([&found, id](Entity* e)
-      {
-        if (e->id() == id)
-        {
-          found = e;
-          return false;
-        }
-
-        return true;
-      });
-
-      return found;
-    }
-
-    //--------------------------------------------------------------------------
     void Scene::OnSceneChanged()
     {
       Application::Instance()->GetService<SceneService>()->OnSceneChanged(this);
@@ -293,7 +246,6 @@ namespace snuffbox
 
       archive(GET_ARCHIVE_PROP(entities));
 
-      current_id_ = GetNextAvailableID();
       OnSceneChanged();
     }
 
