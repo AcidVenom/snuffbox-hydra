@@ -13,7 +13,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     Scene::Scene() :
-      deleted_(false)
+      deleted_(false),
+      batch_changed_(false)
     {
 
     }
@@ -137,6 +138,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::Clear()
     {
+      batch_changed_ = true;
+
       Entity* e = nullptr;
       for (int i = static_cast<int>(entities_.size()) - 1; i >= 0; --i)
       {
@@ -151,6 +154,10 @@ namespace snuffbox
       }
 
       RemoveNullEntities();
+
+      batch_changed_ = false;
+
+      OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -202,6 +209,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::OnSceneChanged()
     {
+      if (batch_changed_ == true)
+      {
+        return;
+      }
+
       Application::Instance()->GetService<SceneService>()->OnSceneChanged(this);
     }
 
@@ -226,6 +238,8 @@ namespace snuffbox
     {
       Clear();
 
+      batch_changed_ = true;
+
       size_t n = archive.GetArraySize("entities");
 
       foundation::Vector<Entity*> entities;
@@ -245,6 +259,8 @@ namespace snuffbox
       }
 
       archive(GET_ARCHIVE_PROP(entities));
+
+      batch_changed_ = false;
 
       OnSceneChanged();
     }

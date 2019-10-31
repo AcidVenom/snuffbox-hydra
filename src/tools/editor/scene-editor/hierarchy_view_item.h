@@ -59,6 +59,11 @@ namespace snuffbox
       */
       engine::Entity* entity() const;
 
+      /**
+      * @brief Unmaps this hierarchy view item from the owning hierarchy view
+      */
+      ~HierarchyViewItem();
+
     private:
 
       HierarchyView* view_; //!< The view this item belongs to

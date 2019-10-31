@@ -98,6 +98,8 @@ namespace snuffbox
       }
 
       current_scene_ = scene;
+      current_scene_->OnSceneChanged();
+
       return true;
     }
 

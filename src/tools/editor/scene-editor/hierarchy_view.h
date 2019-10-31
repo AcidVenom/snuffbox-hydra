@@ -179,6 +179,12 @@ namespace snuffbox
       void RefreshForCurrentScene();
 
       /**
+      * @brief Updates the sorting indices of each entity after a modification
+      *        to the structure has been made
+      */
+      void UpdateSortIndices();
+
+      /**
       * @brief Clears the hierarchy view and all mappings
       */
       void Clear();
@@ -199,6 +205,13 @@ namespace snuffbox
       * @return The created entity item
       */
       HierarchyViewItem* CreateNewEntity(int index = -1);
+
+      /**
+      * @brief Unmaps a hierarchy view item after its deletion
+      *
+      * @param[in] item The item to unmap
+      */
+      void UnmapItem(const HierarchyViewItem* item);
 
     protected slots:
 

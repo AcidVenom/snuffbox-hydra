@@ -92,11 +92,16 @@ namespace snuffbox
     DeleteEntityCommand::DeleteEntityCommand(
       const foundation::UUID& uuid,
       HierarchyView* view,
-      int deleted_from) :
+      int deleted_index) :
       EntityCommand(uuid, view),
-      deleted_from_(deleted_from)
+      deleted_index_(deleted_index)
     {
+      HierarchyViewItem* self = GetSelf();
+      engine::TransformComponent* parent = 
+        self->entity()->transform()->parent();
 
+      deleted_from_ = 
+        parent == nullptr ? foundation::UUID() : parent->entity()->uuid();
     }
 
     //--------------------------------------------------------------------------
@@ -121,18 +126,28 @@ namespace snuffbox
     void DeleteEntityCommand::undo()
     {
       HierarchyView* hierarchy = view();
-      engine::Entity* ent = 
-        hierarchy->CreateNewEntity(deleted_from_)->entity();
-
-      if (serialization_data_.isEmpty() == true)
       {
-        return;
+        HierarchyView::SceneChangedBlocker blocker(hierarchy);
+
+        engine::Entity* ent = 
+          hierarchy->CreateNewEntity(deleted_index_)->entity();
+
+        if (serialization_data_.isEmpty() == true)
+        {
+          return;
+        }
+
+        foundation::LoadArchive archive;
+        archive.FromJson(serialization_data_.toLatin1().data());
+
+        archive(&ent);
+
+        if (deleted_from_.IsNull() == false)
+        {
+          HierarchyViewItem* parent = GetFromUUID(deleted_from_);
+          ent->transform()->SetParent(parent->entity()->transform());
+        }
       }
-
-      foundation::LoadArchive archive;
-      archive.FromJson(serialization_data_.toLatin1().data());
-
-      archive(&ent);
 
       hierarchy->RefreshForCurrentScene();
     }
@@ -191,7 +206,7 @@ namespace snuffbox
         to->insertChild(index_to_, self);
       }
 
-      self->entity()->set_sort_index(index_to_);
+      view()->UpdateSortIndices();
     }
 
     //--------------------------------------------------------------------------
@@ -231,7 +246,7 @@ namespace snuffbox
         from->insertChild(index_from_, self);
       }
 
-      self->entity()->set_sort_index(index_from_);
+      view()->UpdateSortIndices();
     }
   }
 }

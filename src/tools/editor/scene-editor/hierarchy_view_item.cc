@@ -46,5 +46,11 @@ namespace snuffbox
     {
       return entity_;
     }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem::~HierarchyViewItem()
+    {
+      view_->UnmapItem(this);
+    }
   }
 }

@@ -158,6 +158,12 @@ namespace snuffbox
       foundation::Vector<Entity*> entities_;
 
       bool deleted_; //!< Were any entities deleted this frame?
+
+      /**
+      * @brief Are we doing an operation that can be batched into a 
+      *        single scene changed event?
+      */
+      bool batch_changed_; 
     };
   }
 }

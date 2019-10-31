@@ -120,12 +120,12 @@ namespace snuffbox
       /**
       * @see EntityCommand::EntityCommand
       *
-      * @param[in] deleted_from The index this entity was deleted from
+      * @param[in] deleted_index The index this entity was deleted from
       */
       DeleteEntityCommand(
         const foundation::UUID& uuid,
         HierarchyView* view,
-        int deleted_from);
+        int deleted_index);
 
       /**
       * @see EntityCommand::redo
@@ -140,7 +140,9 @@ namespace snuffbox
     private:
 
       QString serialization_data_; //!< The data of the deleted entity
-      int deleted_from_; //!< The index this entity was deleted from
+
+      foundation::UUID deleted_from_; //!< The entity we were deleted from
+      int deleted_index_; //!< The index this entity was deleted from
     };
 
     //--------------------------------------------------------------------------

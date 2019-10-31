@@ -80,19 +80,54 @@ namespace snuffbox
         return;
       }
 
-      QSignalBlocker blocker(this);
+      SceneChangedBlocker blocker(this);
 
       foundation::HashSet<engine::Entity*> current_entities;
 
-      scene->ForEachEntity([&](engine::Entity* ent)
+      foundation::Vector<engine::TransformComponent*> top_level = 
+        scene->TopLevelTransforms();
+
+      auto Sorter = [](
+        const engine::TransformComponent* a, 
+        const engine::TransformComponent* b)
+      {
+        return a->entity()->sort_index() < b->entity()->sort_index();
+      };
+
+      auto AddEntity = [&](engine::Entity* ent)
       {
         TryAddEntity(ent);
         current_entities.insert(ent);
+      };
 
-        return true;
-      });
+      foundation::Function<void(engine::TransformComponent*)> Recurse;
+
+      Recurse = [&](engine::TransformComponent* top)
+      {
+        AddEntity(top->entity());
+
+        foundation::Vector<engine::TransformComponent*> children = 
+          top->children();
+
+        std::sort(children.begin(), children.end(), Sorter);
+
+        for (int i = 0; i < children.size(); ++i)
+        {
+          engine::TransformComponent* child = children.at(i);
+
+          AddEntity(child->entity());
+          Recurse(child);
+        }
+      };
+
+      std::sort(top_level.begin(), top_level.end(), Sorter);
+      for (int i = 0; i < top_level.size(); ++i)
+      {
+        Recurse(top_level.at(i));
+      }
 
       ValidateCurrentEntities(current_entities);
+      UpdateSortIndices();
     }
 
     //--------------------------------------------------------------------------
@@ -204,8 +239,10 @@ namespace snuffbox
         engine::Entity* removed_entity = to_remove.at(i);
         EntityMap::iterator it = entity_to_item_.find(removed_entity);
 
-        delete it->second;
-        entity_to_item_.erase(it);
+        if (it != entity_to_item_.end())
+        {
+          delete it->second;
+        }
       }
     }
 
@@ -308,6 +345,30 @@ namespace snuffbox
     {
       OnSceneDataChanged(
         app_->GetService<engine::SceneService>()->current_scene());
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::UpdateSortIndices()
+    {
+      for (
+        EntityMap::iterator it = entity_to_item_.begin();
+        it != entity_to_item_.end();
+        ++it)
+      {
+        engine::Entity* ent = it->first;
+        HierarchyViewItem* item = it->second;
+
+        QTreeWidgetItem* parent = item->parent();
+
+        if (parent == nullptr)
+        {
+          ent->set_sort_index(indexOfTopLevelItem(item));
+        }
+        else
+        {
+          ent->set_sort_index(parent->indexOfChild(item));
+        }
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -421,6 +482,17 @@ namespace snuffbox
       }
 
       return item;
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::UnmapItem(const HierarchyViewItem* item)
+    {
+      EntityMap::iterator it = entity_to_item_.find(item->entity());
+
+      if (it != entity_to_item_.end())
+      {
+        entity_to_item_.erase(it);
+      }
     }
 
     //--------------------------------------------------------------------------
