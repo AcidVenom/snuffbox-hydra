@@ -82,23 +82,6 @@ namespace snuffbox
 
       SceneChangedBlocker blocker(this);
 
-      foundation::Vector<HierarchyViewItem*> was_expanded;
-      was_expanded.resize(entity_to_item_.size(), nullptr);
-
-      int expanded_count = 0;
-      for (
-        EntityMap::iterator it = entity_to_item_.begin();
-        it != entity_to_item_.end();
-        ++it)
-      {
-        HierarchyViewItem* item = it->second;
-
-        if (item->isExpanded() == true)
-        {
-          was_expanded.at(expanded_count++) = item;
-        }
-      }
-
       foundation::HashSet<engine::Entity*> current_entities;
 
       foundation::Vector<engine::TransformComponent*> top_level = 
@@ -145,21 +128,6 @@ namespace snuffbox
 
       ValidateCurrentEntities(current_entities);
       UpdateSortIndices();
-
-      for (int i = 0; i < expanded_count; ++i)
-      {
-        HierarchyViewItem* expanded = was_expanded.at(i);
-        for (
-          EntityMap::iterator it = entity_to_item_.begin(); 
-          it != entity_to_item_.end(); 
-          ++it)
-        {
-          if (it->second == expanded)
-          {
-            expanded->setExpanded(true);
-          }
-        }
-      }
     }
 
     //--------------------------------------------------------------------------
