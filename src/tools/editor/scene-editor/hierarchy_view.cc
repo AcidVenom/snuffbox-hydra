@@ -91,7 +91,12 @@ namespace snuffbox
         it != entity_to_item_.end();
         ++it)
       {
-        was_expanded.at(expanded_count++) = it->second;
+        HierarchyViewItem* item = it->second;
+
+        if (item->isExpanded() == true)
+        {
+          was_expanded.at(expanded_count++) = item;
+        }
       }
 
       foundation::HashSet<engine::Entity*> current_entities;
