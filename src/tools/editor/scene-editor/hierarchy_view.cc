@@ -443,15 +443,20 @@ namespace snuffbox
 
       if (item_b != nullptr)
       {
-        if (item_a->parent() == item_b && was_dropped_on == true)
-        {
-          return;
-        }
-
         parent = item_b->parent();
         if (was_dropped_on == true)
         {
           to_index = item_b->childCount();
+
+          if (item_b->indexOfChild(item_a) >= 0)
+          {
+            if (item_b->childCount() == 1)
+            {
+              return;
+            }
+
+            --to_index;
+          }
         }
         else
         {
@@ -469,6 +474,16 @@ namespace snuffbox
       else
       {
         to_index = topLevelItemCount();
+
+        if (indexOfTopLevelItem(item_a) >= 0)
+        {
+          if (topLevelItemCount() == 1)
+          {
+            return;
+          }
+
+          --to_index;
+        }
       }
 
       HierarchyViewItem* parent_item = 

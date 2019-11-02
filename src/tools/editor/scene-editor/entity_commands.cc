@@ -241,11 +241,13 @@ namespace snuffbox
 
       if (to == nullptr)
       {
-        view()->insertTopLevelItem(index_to_, self);
+        int max_index = std::min(index_to_, view()->topLevelItemCount());
+        view()->insertTopLevelItem(max_index, self);
       }
       else
       {
-        to->insertChild(index_to_, self);
+        int max_index = std::min(index_to_, to->childCount());
+        to->insertChild(max_index, self);
       }
 
       ShiftSortIndices(uuid(), index_to_);
@@ -322,12 +324,24 @@ namespace snuffbox
       for (int i = next; i < count; ++i)
       {
         HierarchyViewItem* item = static_cast<HierarchyViewItem*>(Retrieve(i));
+
+        if (item == nullptr)
+        {
+          continue;
+        }
+
         item->entity()->set_sort_index(i);
       }
 
       for (int i = prev; i >= 0; --i)
       {
         HierarchyViewItem* item = static_cast<HierarchyViewItem*>(Retrieve(i));
+
+        if (item == nullptr)
+        {
+          continue;
+        }
+
         item->entity()->set_sort_index(i);
       }
 
