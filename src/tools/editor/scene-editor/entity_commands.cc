@@ -150,6 +150,15 @@ namespace snuffbox
       }
 
       hierarchy->RefreshForCurrentScene();
+
+      if (deleted_from_.IsNull() == false)
+      {
+        HierarchyViewItem* parent = GetFromUUID(deleted_from_);
+        QTreeWidgetItem* self =
+          parent->takeChild(parent->indexOfChild(GetSelf()));
+
+        parent->insertChild(deleted_index_, self);
+      }
     }
 
     //--------------------------------------------------------------------------
