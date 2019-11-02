@@ -480,11 +480,6 @@ namespace snuffbox
       foundation::UUID to_uuid =
         item_b == nullptr ? foundation::UUID() : 
         item_b->entity()->uuid();
-
-      if (from_uuid == to_uuid && to_index > 0)
-      {
-        --to_index;
-      }
         
       ReparentEntityCommand* cmd = new ReparentEntityCommand(
         item_a->entity()->uuid(),
