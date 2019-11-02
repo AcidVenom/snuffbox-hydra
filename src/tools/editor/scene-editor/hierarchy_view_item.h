@@ -40,6 +40,23 @@ namespace snuffbox
         HierarchyView* view);
 
       /**
+      * @see HierarchyViewItem::HierarchyViewItem
+      *
+      * @brief Construct with an optional parent
+      *
+      * @param[in] parent The parent item of this item
+      */
+      HierarchyViewItem(
+        engine::Entity* entity,
+        HierarchyView* view,
+        HierarchyViewItem* parent);
+
+      /**
+      * @brief Sets the default values of this item
+      */
+      void SetDefaults();
+
+      /**
       * @brief Sets the parent of this item
       *
       * @param[in] new_parent The parent to set

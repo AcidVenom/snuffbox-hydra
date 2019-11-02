@@ -39,6 +39,44 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void EntityCommand::redo()
+    {
+      HierarchyView* hierarchy = view();
+      {
+        HierarchyView::SceneChangedBlocker blocker(hierarchy);
+        RedoImpl();
+      }
+
+      hierarchy->RefreshForCurrentScene();
+      PostRedo();
+    }
+
+    //--------------------------------------------------------------------------
+    void EntityCommand::PostRedo()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
+    void EntityCommand::undo()
+    {
+      HierarchyView* hierarchy = view();
+      {
+        HierarchyView::SceneChangedBlocker blocker(hierarchy);
+        UndoImpl();
+      }
+
+      hierarchy->RefreshForCurrentScene();
+      PostUndo();
+    }
+
+    //--------------------------------------------------------------------------
+    void EntityCommand::PostUndo()
+    {
+
+    }
+
+    //--------------------------------------------------------------------------
     HierarchyViewItem* EntityCommand::GetFromUUID(
       const foundation::UUID& uuid) const
     {
@@ -66,7 +104,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::redo()
+    void CreateEntityCommand::RedoImpl()
     {
       HierarchyView* hierarchy = view();
       HierarchyViewItem* item = hierarchy->CreateNewEntity();
@@ -75,7 +113,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void CreateEntityCommand::undo()
+    void CreateEntityCommand::UndoImpl()
     {
       HierarchyView* hierarchy = view();
       engine::Entity* ent = GetSelf()->entity();
@@ -105,7 +143,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::redo()
+    void DeleteEntityCommand::RedoImpl()
     {
       HierarchyView* hierarchy = view();
       engine::Entity* ent = GetSelf()->entity();
@@ -123,41 +161,38 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void DeleteEntityCommand::undo()
+    void DeleteEntityCommand::UndoImpl()
     {
       HierarchyView* hierarchy = view();
-      {
-        HierarchyView::SceneChangedBlocker blocker(hierarchy);
-
         engine::Entity* ent = 
-          hierarchy->CreateNewEntity(deleted_index_)->entity();
+          hierarchy->CreateNewEntity()->entity();
 
-        if (serialization_data_.isEmpty() == true)
-        {
-          return;
-        }
-
-        foundation::LoadArchive archive;
-        archive.FromJson(serialization_data_.toLatin1().data());
-
-        archive(&ent);
-
-        if (deleted_from_.IsNull() == false)
-        {
-          HierarchyViewItem* parent = GetFromUUID(deleted_from_);
-          ent->transform()->SetParent(parent->entity()->transform());
-        }
+      if (serialization_data_.isEmpty() == true)
+      {
+        return;
       }
 
-      hierarchy->RefreshForCurrentScene();
+      foundation::LoadArchive archive;
+      archive.FromJson(serialization_data_.toLatin1().data());
+
+      archive(&ent);
 
       if (deleted_from_.IsNull() == false)
       {
         HierarchyViewItem* parent = GetFromUUID(deleted_from_);
-        QTreeWidgetItem* self =
-          parent->takeChild(parent->indexOfChild(GetSelf()));
+        ent->transform()->SetParent(parent->entity()->transform());
 
-        parent->insertChild(deleted_index_, self);
+        HierarchyViewItem* self = GetFromUUID(uuid());
+        hierarchy->UpdateParentIndex(self);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void DeleteEntityCommand::PostUndo()
+    {
+      if (deleted_from_.IsNull() == false)
+      {
+        
       }
     }
 
@@ -179,10 +214,8 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::redo()
+    void ReparentEntityCommand::RedoImpl()
     {
-      HierarchyView::SceneChangedBlocker blocker(view());
-
       HierarchyViewItem* self = GetSelf();
       engine::TransformComponent* new_parent = nullptr;
 
@@ -215,14 +248,12 @@ namespace snuffbox
         to->insertChild(index_to_, self);
       }
 
-      view()->UpdateSortIndices();
+      ShiftSortIndices(uuid(), index_to_);
     }
 
     //--------------------------------------------------------------------------
-    void ReparentEntityCommand::undo()
+    void ReparentEntityCommand::UndoImpl()
     {
-      HierarchyView::SceneChangedBlocker blocker(view());
-
       HierarchyViewItem* self = GetSelf();
       engine::TransformComponent* new_parent = nullptr;
 
@@ -255,7 +286,52 @@ namespace snuffbox
         from->insertChild(index_from_, self);
       }
 
-      view()->UpdateSortIndices();
+      ShiftSortIndices(uuid(), index_from_);
+    }
+
+    //--------------------------------------------------------------------------
+    void ReparentEntityCommand::ShiftSortIndices(
+      const foundation::UUID& target, 
+      int index)
+    {
+      HierarchyViewItem* self = GetFromUUID(target);
+      self->entity()->set_sort_index(index);
+
+      int next = index + 1;
+      int prev = index - 1;
+
+      HierarchyViewItem* parent = 
+        static_cast<HierarchyViewItem*>(self->parent());
+
+      HierarchyView* hierarchy = view();
+      foundation::Vector<HierarchyViewItem*> to_update;
+
+      int count = 
+        parent == nullptr ? 
+        hierarchy->topLevelItemCount() :
+        parent->childCount();
+
+      foundation::Function<QTreeWidgetItem*(int)> Retrieve;
+
+      Retrieve = [&](int i){ return hierarchy->topLevelItem(i); };
+      if (parent != nullptr)
+      {
+        Retrieve = [&](int i){ return parent->child(i); };
+      }
+
+      for (int i = next; i < count; ++i)
+      {
+        HierarchyViewItem* item = static_cast<HierarchyViewItem*>(Retrieve(i));
+        item->entity()->set_sort_index(i);
+      }
+
+      for (int i = prev; i >= 0; --i)
+      {
+        HierarchyViewItem* item = static_cast<HierarchyViewItem*>(Retrieve(i));
+        item->entity()->set_sort_index(i);
+      }
+
+      hierarchy->UpdateSortIndices();
     }
   }
 }

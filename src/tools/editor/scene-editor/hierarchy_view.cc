@@ -144,18 +144,29 @@ namespace snuffbox
       {
         HierarchyViewItem* old_item = it->second;
 
-        ReparentItem(old_item, ent, true);
+        UpdateParentIndex(old_item);
         old_item->Update();
 
         return old_item;
       }
 
-      HierarchyViewItem* new_item = new HierarchyViewItem(
-        ent, 
-        this);
+      HierarchyViewItem* new_item = nullptr;
+      engine::TransformComponent* parent = ent->transform()->parent();
 
-      ent->set_sort_index(topLevelItemCount());
-      ReparentItem(new_item, ent, false);
+      if (parent == nullptr)
+      {
+        new_item = new HierarchyViewItem(ent, this);
+        ent->set_sort_index(topLevelItemCount() - 1);
+      }
+      else
+      {
+        new_item = new HierarchyViewItem(
+          ent, 
+          this, 
+          FindItemByEntity(parent->entity()));
+      }
+      
+      UpdateParentIndex(new_item);
 
       entity_to_item_.insert(eastl::make_pair(ent, new_item));
 
@@ -163,55 +174,67 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::ReparentItem(
-      HierarchyViewItem* item,
-      engine::Entity* ent,
-      bool was_added)
+    void HierarchyView::UpdateParentIndex(HierarchyViewItem* item)
     {
-      engine::TransformComponent* transform_parent = ent->transform()->parent();
-      QTreeWidgetItem* old_parent = item->parent();
-      HierarchyViewItem* current_parent = nullptr;
+      engine::Entity* ent = item->entity();
+      engine::TransformComponent* parent = ent->transform()->parent();
 
-      if (transform_parent != nullptr)
+      if (parent == nullptr)
       {
-        engine::Entity* entity_parent = transform_parent->entity();
-        EntityMap::iterator it = entity_to_item_.find(entity_parent);
-
-        if (it == entity_to_item_.end())
+        int idx = indexOfTopLevelItem(item);
+        if (idx == -1)
         {
-          TryAddEntity(entity_parent);
-          current_parent = entity_to_item_.at(entity_parent);
+          QTreeWidgetItem* parent_item = item->parent();
+          if (parent_item != nullptr)
+          {
+            item = static_cast<HierarchyViewItem*>(
+              parent_item->takeChild(parent_item->indexOfChild(item)));
+          }
+          addTopLevelItem(item);
+          idx = indexOfTopLevelItem(item);
         }
-        else
+
+        if (idx != ent->sort_index())
         {
-          current_parent = it->second;
+          QTreeWidgetItem* taken_item = takeTopLevelItem(idx);
+          insertTopLevelItem(ent->sort_index(), taken_item);
         }
-      }
-
-      bool was_changed = item->SetParent(current_parent);
-
-      if (was_changed == false)
-      {
-        return;
-      }
-
-      if (old_parent != nullptr)
-      {
-        old_parent->removeChild(item);
       }
       else
       {
-        item = static_cast<HierarchyViewItem*>(
-          takeTopLevelItem(indexOfTopLevelItem(item)));
-      }
+        HierarchyViewItem* parent_item = FindItemByEntity(parent->entity());
+        if (parent_item == nullptr)
+        {
+          return;
+        }
 
-      if (current_parent == nullptr)
-      {
-        addTopLevelItem(item);
-        return;
-      }
+        int idx = parent_item->indexOfChild(item);
+        if (idx == -1)
+        {
+          if ((idx = indexOfTopLevelItem(item)) >= 0)
+          {
+            item = static_cast<HierarchyViewItem*>(takeTopLevelItem(idx));
+          }
+          else
+          {
+            QTreeWidgetItem* old_parent = item->parent();
+            if (old_parent != nullptr && old_parent != parent_item)
+            {
+              item = static_cast<HierarchyViewItem*>(
+                parent_item->takeChild(parent_item->indexOfChild(item)));
+            }
+          }
 
-      current_parent->addChild(item);
+          parent_item->addChild(item);
+          idx = parent_item->indexOfChild(item);
+        }
+        
+        if (idx != ent->sort_index())
+        {
+          QTreeWidgetItem* taken_item = parent_item->takeChild(idx);
+          parent_item->insertChild(ent->sort_index(), taken_item);
+        }
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -435,12 +458,17 @@ namespace snuffbox
           to_index = parent == nullptr ?
             indexOfTopLevelItem(item_b) : parent->indexOfChild(item_b);
 
+          if (was_below == true)
+          {
+            ++to_index;
+          }
+
           item_b = static_cast<HierarchyViewItem*>(parent);
         }
       }
       else
       {
-        to_index = topLevelItemCount() - 1;
+        to_index = topLevelItemCount();
       }
 
       HierarchyViewItem* parent_item = 
@@ -452,6 +480,11 @@ namespace snuffbox
       foundation::UUID to_uuid =
         item_b == nullptr ? foundation::UUID() : 
         item_b->entity()->uuid();
+
+      if (from_uuid == to_uuid && to_index > 0)
+      {
+        --to_index;
+      }
         
       ReparentEntityCommand* cmd = new ReparentEntityCommand(
         item_a->entity()->uuid(),
@@ -465,31 +498,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    HierarchyViewItem* HierarchyView::CreateNewEntity(int index)
+    HierarchyViewItem* HierarchyView::CreateNewEntity()
     {
       engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(
         &foundation::Memory::default_allocator(), GetCurrentScene());
 
       HierarchyViewItem* item = TryAddEntity(ent);
-
-      if (index != -1)
-      {
-        QTreeWidgetItem* to_move = nullptr;
-        QTreeWidgetItem* parent = item->parent();
-
-        if (parent == nullptr)
-        {
-          to_move = takeTopLevelItem(indexOfTopLevelItem(item));
-          insertTopLevelItem(index, to_move);
-        }
-        else
-        {
-          to_move = parent->takeChild(parent->indexOfChild(item));
-          parent->insertChild(index, to_move);
-        }
-
-        item->entity()->set_sort_index(index);
-      }
 
       return item;
     }

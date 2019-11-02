@@ -51,12 +51,34 @@ namespace snuffbox
       /**
       * @brief Called when this command is executed initially or redone
       */
-      void redo() override = 0;
+      void redo() override;
+
+      /**
+      * @see EntityCommand::redo
+      */
+      virtual void RedoImpl() = 0;
+
+      /**
+      * @brief Called after a redo, after the scene changed callback is 
+      *        unlocked
+      */
+      virtual void PostRedo();
 
       /**
       * @brief Called when this entity command is undone
       */
-      void undo() override = 0;
+      void undo() override;
+
+      /**
+      * @see EntityCommand::undo
+      */
+      virtual void UndoImpl() = 0;
+
+      /**
+      * @brief Called after an undo, after the scene changed callback is 
+      *        unlocked
+      */
+      virtual void PostUndo();
 
       /**
       * @brief Retrieves the hierarchy view item by a UUID
@@ -96,14 +118,14 @@ namespace snuffbox
       CreateEntityCommand(const foundation::UUID& uuid, HierarchyView* view);
 
       /**
-      * @see EntityCommand::redo
+      * @see EntityCommand::RedoImpl
       */
-      void redo() override;
+      void RedoImpl() override;
 
       /**
-      * @see EntityCommand::undo
+      * @see EntityCommand::UndoImpl
       */
-      void undo() override;
+      void UndoImpl() override;
     };
     //--------------------------------------------------------------------------
 
@@ -128,14 +150,20 @@ namespace snuffbox
         int deleted_index);
 
       /**
-      * @see EntityCommand::redo
+      * @see EntityCommand::RedoImpl
       */
-      void redo() override;
+      void RedoImpl() override;
 
       /**
-      * @see EntityCommand::undo
+      * @see EntityCommand::UndoImpl
       */
-      void undo() override;
+      void UndoImpl() override;
+
+      /**
+      * @brief Makes sure the deleted entity is reparented to its original
+      *        entity
+      */
+      void PostUndo() override;
 
     private:
 
@@ -175,14 +203,26 @@ namespace snuffbox
         int index_to);
 
       /**
-      * @see EntityCommand::redo
+      * @see EntityCommand::RedoImpl
       */
-      void redo() override;
+      void RedoImpl() override;
 
       /**
-      * @see EntityCommand::undo
+      * @see EntityCommand::UndoImpl
       */
-      void undo() override;
+      void UndoImpl() override;
+
+      /**
+      * @brief Updates the sort indices from a specific index, shifting them
+      *        by a positive value of 1 for everything after the item, or
+      *        by a negative value of 1 for everything before
+      *
+      * @remarks Indices before the index are not shifted in any way
+      *
+      * @param[in] target The target to shift from
+      * @param[in] index The index of the target
+      */
+      void ShiftSortIndices(const foundation::UUID& target, int index);
 
     private:
 

@@ -16,6 +16,25 @@ namespace snuffbox
       parent_(nullptr),
       entity_(entity)
     {
+      SetDefaults();
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem::HierarchyViewItem(
+      engine::Entity* entity,
+      HierarchyView* view,
+      HierarchyViewItem* parent) :
+      QTreeWidgetItem(parent),
+      view_(view),
+      parent_(parent),
+      entity_(entity)
+    {
+      SetDefaults();
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyViewItem::SetDefaults()
+    {
       setFlags(
         flags() |
         Qt::ItemIsEditable | 

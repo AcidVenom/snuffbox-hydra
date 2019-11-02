@@ -106,13 +106,8 @@ namespace snuffbox
       * @brief Re-parents an already existing or new hierarchy view item
       *
       * @param[in] item The item to re-parent
-      * @param[in] ent The entity that is contained within the item
-      * @param[in] was_added Was this item already added before?
       */
-      void ReparentItem(
-        HierarchyViewItem* item, 
-        engine::Entity* ent,
-        bool was_added);
+      void UpdateParentIndex(HierarchyViewItem* item);
 
       /**
       * @brief Validates the current entities and removes any that are not in
@@ -198,13 +193,11 @@ namespace snuffbox
 
       /**
       * @brief Called after the command from "Create entity" resolves
-      *
-      * @param[in] index The index the entity should reside at, or -1 to append
-      *                  it at the end of the list
+      *        or a delete undo has been done
       *
       * @return The created entity item
       */
-      HierarchyViewItem* CreateNewEntity(int index = -1);
+      HierarchyViewItem* CreateNewEntity();
 
       /**
       * @brief Unmaps a hierarchy view item after its deletion
