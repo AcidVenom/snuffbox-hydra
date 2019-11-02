@@ -92,10 +92,10 @@ namespace snuffbox
         hierarchy,
         &HierarchyView::Redo);
 
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, scene_widget);
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
-      addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, scene_widget);
 
       LoadWindowGeometry();
 
