@@ -39,6 +39,7 @@ namespace snuffbox
       if (randomized == false)
       {
         twister = std::mt19937_64(random_device());
+        randomized = true;
       }
 
       data_type segment = data_type(0);
