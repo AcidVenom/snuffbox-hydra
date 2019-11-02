@@ -381,6 +381,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::dropEvent(QDropEvent* evt)
     {
+      evt->setDropAction(Qt::DropAction::IgnoreAction);
+      evt->accept();
+
+      QTreeWidget::dropEvent(evt);
+
       QModelIndex index = indexAt(evt->pos());
 
       QList<QTreeWidgetItem*> selected_items = selectedItems();
@@ -415,6 +420,11 @@ namespace snuffbox
 
       if (item_b != nullptr)
       {
+        if (item_a->parent() == item_b && was_dropped_on == true)
+        {
+          return;
+        }
+
         parent = item_b->parent();
         if (was_dropped_on == true)
         {
