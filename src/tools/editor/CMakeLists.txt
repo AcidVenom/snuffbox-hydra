@@ -69,8 +69,8 @@ SET(PropertyEditorSources
   "property-editor/property_value.cc"
   "property-editor/property_view.h"
   "property-editor/property_view.cc"
-  "property-editor/property_editor.h"
-  "property-editor/property_editor.cc"
+  "property-editor/property_value_edit.h"
+  "property-editor/property_value_edit.cc"
   "property-editor/property_mappings.h"
   "property-editor/property_mappings.cc"
 )
