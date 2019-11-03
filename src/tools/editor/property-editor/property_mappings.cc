@@ -8,14 +8,16 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    PropertyMap PropertyMappings::kEntityMapping;
     PropertyMap PropertyMappings::kComponentsMapping
       [static_cast<int>(engine::Components::kCount)];
-
-    PropertyMap PropertyMappings::kEntityMapping;
 
     //--------------------------------------------------------------------------
     void PropertyMappings::InitializeMappings()
     {
+      //------------------------------------------------------------------------
+      // snuffbox::engine::Entity
+      //------------------------------------------------------------------------
       kEntityMapping =
       {
         CreatePropertyPair<foundation::String, engine::Entity>(
@@ -43,6 +45,9 @@ namespace snuffbox
         ),
       };
 
+      //------------------------------------------------------------------------
+      // snuffbox::engine::TransformComponent
+      //------------------------------------------------------------------------
       kComponentsMapping[static_cast<int>(engine::Components::kTransform)] =
       {
         CreatePropertyPair<glm::vec3, engine::TransformComponent>(
