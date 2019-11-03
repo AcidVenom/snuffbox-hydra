@@ -64,15 +64,25 @@ SET(SceneEditorSources
   "scene-editor/entity_commands.cc"
 )
 
-SOURCE_GROUP("\\"             FILES ${RootSources})
-SOURCE_GROUP("application"    FILES ${ApplicationSources})
-SOURCE_GROUP("asset-browser"  FILES ${AssetBrowserSources})
-SOURCE_GROUP("editor-widgets" FILES ${EditorWidgetsSources})
-SOURCE_GROUP("input"          FILES ${InputSources})
-SOURCE_GROUP("project"        FILES ${ProjectSources})
-SOURCE_GROUP("windows"        FILES ${WindowsSources})
-SOURCE_GROUP("custom-layouts" FILES ${CustomLayoutSources})
-SOURCE_GROUP("scene-editor"   FILES ${SceneEditorSources})
+SET(PropertyEditorSources
+  "property-editor/property_value.h"
+  "property-editor/property_value.cc"
+  "property-editor/property_view.h"
+  "property-editor/property_view.cc"
+  "property-editor/property_editor.h"
+  "property-editor/property_editor.cc"
+)
+
+SOURCE_GROUP("\\"               FILES ${RootSources})
+SOURCE_GROUP("application"      FILES ${ApplicationSources})
+SOURCE_GROUP("asset-browser"    FILES ${AssetBrowserSources})
+SOURCE_GROUP("editor-widgets"   FILES ${EditorWidgetsSources})
+SOURCE_GROUP("input"            FILES ${InputSources})
+SOURCE_GROUP("project"          FILES ${ProjectSources})
+SOURCE_GROUP("windows"          FILES ${WindowsSources})
+SOURCE_GROUP("custom-layouts"   FILES ${CustomLayoutSources})
+SOURCE_GROUP("scene-editor"     FILES ${SceneEditorSources})
+SOURCE_GROUP("property-editor"  FILES ${PropertyEditorSources})
 
 SET(EditorSources
   ${RootSources}
@@ -84,6 +94,7 @@ SET(EditorSources
   ${WindowsSources}
   ${CustomLayoutSources}
   ${SceneEditorSources}
+  ${PropertyEditorSources}
 )
 
 ADD_EXECUTABLE(snuffbox-editor ${EditorSources})
