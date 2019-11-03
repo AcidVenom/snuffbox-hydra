@@ -4,9 +4,6 @@ using namespace snuffbox;
 using namespace foundation;
 using namespace editor;
 
-#include "tools/editor/property-editor/property_value.h"
-#include <engine/ecs/entity.h>
-
 int main(int argc, char** argv)
 {
   EditorApplication::Configuration cfg;

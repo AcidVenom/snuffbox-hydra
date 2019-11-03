@@ -8,6 +8,8 @@
 
 #include "tools/editor/asset-browser/asset_icon.h"
 
+#include "tools/editor/property-editor/property_mappings.h"
+
 #include <QDockWidget>
 #include <QVBoxLayout>
 #include <QMenuBar>
@@ -35,6 +37,8 @@ namespace snuffbox
       game_view_(nullptr),
       asset_browser_(nullptr)
     {
+      PropertyMappings::InitializeMappings();
+
       setObjectName(QStringLiteral("MainWindow"));
       CreateMenuBar();
 
@@ -316,6 +320,8 @@ namespace snuffbox
     MainWindow::~MainWindow()
     {
       foundation::Logger::RedirectOutput(nullptr, nullptr);
+
+      PropertyMappings::ClearMappings();
     }
   }
 }

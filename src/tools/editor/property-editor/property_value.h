@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 
 #include <EASTL/type_traits.h>
+#include <cinttypes>
 
 namespace snuffbox
 {
@@ -70,19 +71,6 @@ namespace snuffbox
       * @return Is this property a list of different properties?
       */
       virtual bool IsList() const;
-
-      /**
-      * @brief Checks if this specific property within an object has been
-      *        changed
-      *
-      * @param[in] object The object to operate on
-      *
-      * @return Has this property for that object been changed?
-      *
-      * @remarks This should automatically update the value within the
-      *          property, so that a newer call will evaluate to false
-      */
-      virtual bool HasChanged(void* object) = 0;
 
       /**
       * @brief Sets a boolean value
@@ -147,6 +135,26 @@ namespace snuffbox
       * @param[in] value The new value
       */
       virtual void Set(void* object, const engine::SerializableAsset& value);
+
+      /**
+      * @brief Gets a contained value as raw data
+      *
+      * @param[in] opject The object to retrieve the value from
+      * @param[in] buffer The buffer to write to, or nullptr if only
+      *                   checking for size
+      *
+      * @param[in|out] required The required size of the buffer. This will
+      *                         contain the required size of the buffer in the
+      *                         case that nullptr has been passed for 
+      *                         that buffer, or used as a reference for filling
+      *                         the buffer when a non-null buffer is provided.
+      *
+      * @return Was this a valid operation?
+      */
+      virtual bool GetRaw(
+        void* object, 
+        uint8_t* buffer, 
+        size_t* required) const = 0;
     };
 
     /**
@@ -230,14 +238,18 @@ namespace snuffbox
       bool IsAsset() const override;
 
       /**
-      * @see PropertyValue::HasChanged
-      */
-      bool HasChanged(void* object) override;
-
-      /**
       * @see PropertyValue::Set
       */
       void Set(void* object, const T& value) override;
+
+      /**
+      * @see PropertyValue::GetRaw
+      */
+      bool GetRaw(
+        void* object, 
+        uint8_t* buffer, 
+        size_t* required) const override;
+      
 
       /**
       * @brief Retrieves a value from within the object that is being operated
@@ -253,7 +265,6 @@ namespace snuffbox
 
     private:
 
-      T value_; //!< The value contained in this property to check for changes
       Setter setter_; //!< The setter binding
       Getter getter_; //!< The getter binding
     };
@@ -300,6 +311,15 @@ namespace snuffbox
           getter));
     }
 
+    template <typename T, typename Y>
+    PropertyPair CreatePropertyPair(
+      const foundation::String& name,
+      typename Property<T, Y>::Setter setter,
+      typename Property<T, Y>::Getter getter)
+    {
+      return PropertyPair(name, CreateProperty<T, Y>(setter, getter));
+    }
+
     /**
     * @brief Defines a list of properties, which in turn can be used as
     *        a PropertyValue again
@@ -322,11 +342,6 @@ namespace snuffbox
       * @see PropertyValue::IsList
       */
       bool IsList() const override;
-
-      /**
-      * @see PropertyValue::HasChanged
-      */
-      bool HasChanged(void* object) override;
 
       /**
       * @brief Adds a new property value to the list
@@ -470,23 +485,6 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T, typename Y>
-    inline bool Property<T, Y>::HasChanged(void* object)
-    {
-      Y* ptr = reinterpret_cast<Y*>(object);
-      T new_value = Get(ptr);
-
-      bool changed = value_ == new_value;
-
-      if (changed == true)
-      {
-        value_ = new_value;
-      }
-
-      return changed;
-    }
-
-    //--------------------------------------------------------------------------
-    template <typename T, typename Y>
     inline void Property<T, Y>::Set(void* object, const T& value)
     {
       if (setter_ == nullptr)
@@ -496,8 +494,80 @@ namespace snuffbox
 
       Y* ptr = reinterpret_cast<Y*>(object);
       setter_(ptr, value);
+    }
 
-      value_ = value;
+    //--------------------------------------------------------------------------
+    template <typename T>
+    struct PropertyDataCopy
+    {
+
+      template <typename Q = T>
+      static typename std::enable_if<
+        std::is_same<Q, foundation::String>::value, void>::type Copy(
+        uint8_t* buffer, 
+        const T& value, 
+        size_t size)
+      {
+        memcpy(buffer, value.c_str(), size);
+        memset(buffer + size, '\0', 1);
+      }
+
+      template <typename Q = T>
+      static typename std::enable_if<
+        !std::is_same<Q, foundation::String>::value, void>::type Copy(
+        uint8_t* buffer,
+        const T& value,
+        size_t size)
+      {
+        memcpy(buffer, &value, size);
+      }
+
+      template <typename Q = T>
+      static typename std::enable_if<
+        std::is_same<Q, foundation::String>::value, size_t>::type 
+        Required(const T& value)
+      {
+        return value.size() + 1;
+      }
+
+      template <typename Q = T>
+      static typename std::enable_if<
+        !std::is_same<Q, foundation::String>::value, size_t>::type
+        Required(const T& value)
+      {
+        return sizeof(value);
+      }
+    };
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename Y>
+    inline bool Property<T, Y>::GetRaw(
+      void* object, 
+      uint8_t* buffer, 
+      size_t* required) const
+    {
+      size_t req = 0;
+      if (object != nullptr)
+      {
+        T value = Get(reinterpret_cast<Y*>(object));
+
+        if (buffer != nullptr && required != nullptr)
+        {
+          PropertyDataCopy<T>::Copy(buffer, value, *required);
+          req = *required;
+        }
+        else
+        {
+          req = PropertyDataCopy<T>::Required(value);
+        }
+      }
+
+      if (required != nullptr)
+      {
+        *required = req;
+      }
+
+      return req != 0;
     }
 
     //--------------------------------------------------------------------------

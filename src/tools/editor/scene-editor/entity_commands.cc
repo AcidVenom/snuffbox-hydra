@@ -3,6 +3,8 @@
 #include "tools/editor/scene-editor/hierarchy_view.h"
 #include "tools/editor/scene-editor/hierarchy_view_item.h"
 
+#include "tools/editor/property-editor/property_mappings.h"
+
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>
 #include <foundation/containers/function.h>
@@ -346,6 +348,177 @@ namespace snuffbox
       }
 
       hierarchy->UpdateSortIndices();
+    }
+
+    //--------------------------------------------------------------------------
+    PropertyEntityCommand::PropertyEntityCommand(
+      const foundation::UUID& uuid,
+      HierarchyView* view,
+      const foundation::String& prop_name,
+      engine::Components component_type,
+      int component_index) :
+      EntityCommand(uuid, view),
+      prop_name_(prop_name),
+      component_type_(component_type),
+      component_index_(component_index)
+    {
+      memset(old_data_, 0, kMaxDataSize_);
+      memset(data_, 0, kMaxDataSize_);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(bool value)
+    {
+      type_ = PropertyTypes::kBoolean;
+      SetupData<bool>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(double value)
+    {
+      type_ = PropertyTypes::kNumber;
+      SetupData<double>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const foundation::String& value)
+    {
+      type_ = PropertyTypes::kString;
+      SetupData<foundation::String>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const foundation::UUID& value)
+    {
+      type_ = PropertyTypes::kUUID;
+      SetupData<foundation::UUID>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const glm::vec2& value)
+    {
+      type_ = PropertyTypes::kVec2;
+      SetupData<glm::vec2>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const glm::vec3& value)
+    {
+      type_ = PropertyTypes::kVec3;
+      SetupData<glm::vec3>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const glm::vec4& value)
+    {
+      type_ = PropertyTypes::kVec4;
+      SetupData<glm::vec4>(value);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::RedoImpl()
+    {
+      void* object = nullptr;
+
+      PropertyValue* prop = GetProp(&object);
+      SetPropertyData(object, prop, data_);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::UndoImpl()
+    {
+      void* object = nullptr;
+
+      PropertyValue* prop = GetProp(&object);
+      SetPropertyData(object, prop, old_data_);
+    }
+
+    //--------------------------------------------------------------------------
+    PropertyValue* PropertyEntityCommand::GetProp(void** object)
+    {
+      engine::Entity* self = GetSelf()->entity();
+
+      PropertyMap mapping;
+      void* found_object = nullptr;
+
+      if (
+        component_type_ == engine::Components::kCount ||
+        component_index_ < 0)
+      {
+        mapping = PropertyMappings::kEntityMapping;
+        found_object = self;
+      }
+      else
+      {
+        mapping = PropertyMappings::kComponentsMapping
+          [static_cast<int>(component_index_)];
+
+        found_object = 
+          self->GetComponents(component_type_).at(component_index_);
+      }
+
+      PropertyMap::iterator it = mapping.find(prop_name_);
+      if (it != mapping.end())
+      {
+        if (object != nullptr)
+        {
+          *object = found_object;
+        }
+
+        return it->second.get();
+      }
+
+      return nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyEntityCommand::SetPropertyData(
+      void* object, 
+      PropertyValue* prop, 
+      uint8_t* data)
+    {
+      if (object == nullptr || prop == nullptr)
+      {
+        return;
+      }
+
+      switch (type_)
+      {
+      case PropertyTypes::kBoolean:
+        prop->Set(object, *reinterpret_cast<bool*>(data));
+        break;
+
+      case PropertyTypes::kNumber:
+        prop->Set(object, *reinterpret_cast<double*>(data));
+        break;
+
+      case PropertyTypes::kString:
+        prop->Set(
+          object,
+          foundation::String(reinterpret_cast<char*>(data)));
+        break;
+
+      case PropertyTypes::kVec2:
+        prop->Set(object, *reinterpret_cast<glm::vec2*>(data));
+        break;
+
+      case PropertyTypes::kVec3:
+        prop->Set(object, *reinterpret_cast<glm::vec3*>(data));
+        break;
+
+      case PropertyTypes::kVec4:
+        prop->Set(object, *reinterpret_cast<glm::vec4*>(data));
+        break;
+
+      case PropertyTypes::kAsset:
+        prop->Set(
+          object,
+          *reinterpret_cast<engine::SerializableAsset*>(data));
+        break;
+
+      default:
+        break;
+      }
     }
   }
 }

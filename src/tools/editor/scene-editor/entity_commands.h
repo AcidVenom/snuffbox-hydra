@@ -1,5 +1,9 @@
 #pragma once
 
+#include "tools/editor/property-editor/property_value.h"
+
+#include <engine/definitions/components.h>
+
 #include <foundation/containers/uuid.h>
 
 #include <QUndoCommand>
@@ -232,5 +236,216 @@ namespace snuffbox
       int index_from_; //!< The index from which this item was moved
       int index_to_; //!< The index to which this item was moved
     };
+
+    //--------------------------------------------------------------------------
+
+    /**
+    * @see EntityCommand::EntityCommand
+    *
+    * @brief Used to set different properties on an entity, both in the
+    *        entity itself and its components
+    *
+    * @author Daniel Konings
+    */
+    class PropertyEntityCommand : public EntityCommand
+    {
+
+    private:
+
+      /**
+      * @brief The different property types that exist
+      */
+      enum class PropertyTypes
+      {
+        kBoolean,
+        kNumber,
+        kString,
+        kUUID,
+        kVec2,
+        kVec3,
+        kVec4,
+        kAsset
+      };
+
+      /**
+      * @brief The maximum number of bytes that can be stored within a
+      *        property command's data fields
+      */
+      static const int kMaxDataSize_ = 256;
+
+    public:
+
+      /**
+      * @see EntityCommand::EntityCommand
+      *
+      * @brief Construct through a property name to set and the indexes to
+      *        reach the affected component, or unspecified for edits on the
+      *        root entity itself
+      *
+      * @param[in] prop_name The name of the property to edit
+      * @param[in] component_type The type of the component to edit,
+      *                           default = Components::kCount
+      * @param[in] component_index The index of the component to edit,
+      *                            default = -1
+      */
+      PropertyEntityCommand(
+        const foundation::UUID& uuid,
+        HierarchyView* view,
+        const foundation::String& prop_name,
+        engine::Components component_type = engine::Components::kCount,
+        int component_index = -1);
+
+      /**
+      * @brief Sets a boolean value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(bool value);
+
+      /**
+      * @brief Sets a number value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(double value);
+
+      /**
+      * @brief Sets a string value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const foundation::String& value);
+
+      /**
+      * @brief Sets a UUID value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const foundation::UUID& value);
+
+      /**
+      * @brief Sets a vec2 value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const glm::vec2& value);
+
+      /**
+      * @brief Sets a vec3 value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const glm::vec3& value);
+
+      /**
+      * @brief Sets a vec4 value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const glm::vec4& value);
+      
+      /**
+      * @see EntityCommand::RedoImpl
+      */
+      void RedoImpl() override;
+
+      /**
+      * @see EntityCommand::UndoImpl
+      */
+      void UndoImpl() override;
+      
+    protected:
+
+      /**
+      * @brief Used to internally setup the old data of the entity and its
+      *        corresponding new data
+      *
+      * @remarks This uses raw retrieval of data, thus it could potentially
+      *          go wrong if input data is > kMaxDataSize, this is however
+      *          checked at runtime
+      *
+      * @param[in] value The new data to set
+      */
+      template <typename T>
+      void SetupData(const T& value);
+
+    private:
+
+      /**
+      * @brief Retrieves the corresponding property value from the list
+      *        of mappings in PropertyMapping
+      *
+      * @param[out] object The object associated with the property value
+      *
+      * @return The property value, or nullptr if not found
+      */
+      PropertyValue* GetProp(void** object);
+
+      /**
+      * @brief Sets the data of a property, based on our typing and the buffer
+      *        that is specified
+      *
+      * @param[in] object The object to operate on
+      * @param[in] prop The property to set the data for
+      * @param[in] data The data buffer to be set, which will be casted
+      *                 internally following our current type
+      */
+      void SetPropertyData(void* object, PropertyValue* prop, uint8_t* data);
+
+    private:
+
+      foundation::String prop_name_; //!< The name of the property to set
+
+      /**
+      * @brief The component type, only valid for component-based operations
+      */
+      engine::Components component_type_;
+
+      /**
+      * @brief The component index in the entity,
+      *        only valid for component-based operations
+      */
+      int component_index_;
+
+      PropertyTypes type_; //!< The type of value we are setting
+
+      uint8_t old_data_[kMaxDataSize_]; //!< The old data before setting
+      uint8_t data_[kMaxDataSize_]; //!< The new data to set
+    };
+
+    //--------------------------------------------------------------------------
+    template <typename T>
+    inline void PropertyEntityCommand::SetupData(const T& value)
+    {
+      size_t size = PropertyDataCopy<T>::Required(value);
+      foundation::Logger::Assert(size <= kMaxDataSize_,
+        "Attempted to set property data for an entity that exceeds"
+        " the maximum allowed size");
+
+      if (size > kMaxDataSize_)
+      {
+        return;
+      }
+
+      PropertyDataCopy<T>::Copy(data_, value, size);
+
+      void* object = nullptr;
+      PropertyValue* prop = GetProp(&object);
+
+      size_t required = 0;
+      if (prop->GetRaw(object, nullptr, &required) == true)
+      {
+        foundation::Logger::Assert(required <= kMaxDataSize_,
+          "Attempted to set old property data for an entity that exceeds"
+          " the maximum allowed size");
+
+        if (required > kMaxDataSize_)
+        {
+          return;
+        }
+
+        prop->GetRaw(object, old_data_, &required);
+      }
+    }
   }
 }

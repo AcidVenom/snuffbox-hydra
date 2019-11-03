@@ -548,13 +548,19 @@ namespace snuffbox
     void HierarchyView::OnItemChanged(QTreeWidgetItem* item, int column)
     {
       HierarchyViewItem* edited_item = static_cast<HierarchyViewItem*>(item);
+      engine::Entity* ent = edited_item->entity();
 
-      QString old_name = edited_item->entity()->name().c_str();
+      QString old_name = ent->name().c_str();
       QString new_name = edited_item->text(0);
 
       if (old_name != new_name)
       {
-        edited_item->entity()->set_name(new_name.toLatin1().data());
+        PropertyEntityCommand* cmd = 
+          new PropertyEntityCommand(ent->uuid(), this, "name");
+
+        cmd->Set(foundation::String(new_name.toLatin1().data()));
+
+        undo_stack_.push(cmd);
       }
     }
 

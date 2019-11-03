@@ -118,30 +118,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool PropertyList::HasChanged(void* object)
-    {
-      bool changed = false;
-      if (was_changed_ == false)
-      {
-        for (size_t i = 0; i < values_.size(); ++i)
-        {
-          if (values_.at(i)->HasChanged(object) == true)
-          {
-            changed = true;
-            break;
-          }
-        }
-      }
-      else
-      {
-        was_changed_ = false;
-        changed = true;
-      }
-
-      return changed;
-    }
-
-    //--------------------------------------------------------------------------
     void PropertyList::Add(const foundation::SharedPtr<PropertyValue>& value)
     {
       values_.push_back(value);

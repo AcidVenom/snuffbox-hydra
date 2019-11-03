@@ -71,6 +71,8 @@ SET(PropertyEditorSources
   "property-editor/property_view.cc"
   "property-editor/property_editor.h"
   "property-editor/property_editor.cc"
+  "property-editor/property_mappings.h"
+  "property-editor/property_mappings.cc"
 )
 
 SOURCE_GROUP("\\"               FILES ${RootSources})
