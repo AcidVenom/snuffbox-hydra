@@ -5,6 +5,12 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
+    bool PropertyValue::IsBoolean() const
+    {
+      return false;
+    }
+
+    //--------------------------------------------------------------------------
     bool PropertyValue::IsNumber() const
     {
       return false;
@@ -38,6 +44,13 @@ namespace snuffbox
     bool PropertyValue::IsList() const
     {
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValue::Set(void* object, const bool& value)
+    {
+      foundation::Logger::Assert(IsBoolean() == true,
+        "Attempted to set a boolean value on a non-boolean property");
     }
 
     //--------------------------------------------------------------------------

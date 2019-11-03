@@ -4,6 +4,7 @@
 #include <foundation/containers/string.h>
 #include <foundation/containers/uuid.h>
 #include <foundation/containers/vector.h>
+#include <foundation/containers/map.h>
 #include <foundation/memory/memory.h>
 
 #include <engine/assets/asset.h>
@@ -30,6 +31,11 @@ namespace snuffbox
     {
 
     public:
+
+      /**
+      * @return Is this property a boolean type?
+      */
+      virtual bool IsBoolean() const;
 
       /**
       * @return Is this property a number type?
@@ -77,6 +83,14 @@ namespace snuffbox
       *          property, so that a newer call will evaluate to false
       */
       virtual bool HasChanged(void* object) = 0;
+
+      /**
+      * @brief Sets a boolean value
+      *
+      * @param[in] object The object to operate on
+      * @param[in] value The new value
+      */
+      virtual void Set(void* object, const bool& value);
 
       /**
       * @brief Sets a number value
@@ -136,6 +150,18 @@ namespace snuffbox
     };
 
     /**
+    * @brief Used to build a map of properties that we can update by name
+    */
+    using PropertyMap =
+      foundation::Map<foundation::String, foundation::SharedPtr<PropertyValue>>;
+
+    /**
+    * @brief Used to insert items into the property map
+    */
+    using PropertyPair =
+      eastl::pair<foundation::String, foundation::SharedPtr<PropertyValue>>;
+
+    /**
     * @brief A property strongly typed property value, with both the
     *        type of the property and the type of the object to operate on
     *
@@ -172,6 +198,11 @@ namespace snuffbox
       * @param[in] getter The getter binding
       */
       Property(Setter setter, Getter getter);
+
+      /**
+      * @see PropertyValue::IsBoolean
+      */
+      bool IsBoolean() const override;
 
       /**
       * @see PropertyValue::IsNumber
@@ -226,6 +257,48 @@ namespace snuffbox
       Setter setter_; //!< The setter binding
       Getter getter_; //!< The getter binding
     };
+
+    /**
+    * @brief Used to cast abstract, shared, properties to their respective
+    *        typed property
+    *
+    * @tparam T The expected property type
+    * @tparam Y The expected object type the property operates on
+    *
+    * @param[in] value The abstract property to cast
+    *
+    * @return The casted property
+    */
+    template <typename T, typename Y>
+    foundation::SharedPtr<Property<T, Y>> PropertyCast(
+      const foundation::SharedPtr<PropertyValue>& value)
+    {
+      return eastl::static_shared_pointer_cast<Property<T, Y>, PropertyValue>(
+        value);
+    }
+
+    /**
+    * @brief A short hand to create a property, because else it could get
+    *        a bit messy in-code..
+    *
+    * @tparam T The type of the property
+    * @tparam Y The tpye of the object to operate on
+    *
+    * Self explanatory, simply calls ConstructShared to create a new shared
+    * pointer of a typed property
+    */
+    template <typename T, typename Y>
+    foundation::SharedPtr<PropertyValue> CreateProperty(
+      typename Property<T, Y>::Setter setter, 
+      typename Property<T, Y>::Getter getter)
+    {
+      using P = Property<T, Y>;
+      return eastl::static_shared_pointer_cast<PropertyValue, P>(
+        foundation::Memory::ConstructShared<P>(
+          &foundation::Memory::default_allocator(),
+          setter,
+          getter));
+    }
 
     /**
     * @brief Defines a list of properties, which in turn can be used as
@@ -338,6 +411,13 @@ namespace snuffbox
       getter_(getter)
     {
 
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename Y>
+    inline bool Property<T, Y>::IsBoolean() const
+    {
+      return eastl::is_same<bool, T>::value;
     }
 
     //--------------------------------------------------------------------------
