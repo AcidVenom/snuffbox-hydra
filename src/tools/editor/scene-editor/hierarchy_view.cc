@@ -399,6 +399,7 @@ namespace snuffbox
     {
       clear();
       entity_to_item_.clear();
+      undo_stack_.clear();
     }
 
     //--------------------------------------------------------------------------
