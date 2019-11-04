@@ -261,6 +261,7 @@ namespace snuffbox
         kNumber,
         kString,
         kUUID,
+        kEnum,
         kVec2,
         kVec3,
         kVec4,
@@ -343,6 +344,13 @@ namespace snuffbox
       * @param[in] value The value to set
       */
       void Set(const glm::vec4& value);
+
+      /**
+      * @brief Sets a combo box value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void SetComboValue(EnumProperty value);
       
       /**
       * @see EntityCommand::RedoImpl

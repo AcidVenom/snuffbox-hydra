@@ -416,6 +416,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void PropertyEntityCommand::SetComboValue(EnumProperty value)
+    {
+      type_ = PropertyTypes::kEnum;
+      SetupData<EnumProperty>(value);
+    }
+
+    //--------------------------------------------------------------------------
     void PropertyEntityCommand::RedoImpl()
     {
       void* object = nullptr;
@@ -496,6 +503,14 @@ namespace snuffbox
         prop->Set(
           object,
           foundation::String(reinterpret_cast<char*>(data)));
+        break;
+
+      case PropertyTypes::kUUID:
+        prop->Set(object, *reinterpret_cast<foundation::UUID*>(data));
+        break;
+
+      case PropertyTypes::kEnum:
+        prop->SetComboValue(object, *reinterpret_cast<EnumProperty*>(data));
         break;
 
       case PropertyTypes::kVec2:

@@ -2,6 +2,7 @@
 
 #include <engine/ecs/entity.h>
 #include <engine/components/transform_component.h>
+#include <engine/components/camera_component.h>
 
 namespace snuffbox
 {
@@ -86,6 +87,34 @@ namespace snuffbox
           }
         ),
       };
+
+      //------------------------------------------------------------------------
+      // snuffbox::engine::CameraComponent
+      //------------------------------------------------------------------------
+      int camera_index = static_cast<int>(engine::Components::kCamera);
+      kComponentsMapping[camera_index] =
+      {
+        CreatePropertyPair<EnumProperty, engine::CameraComponent>(
+          "projection",
+          [](engine::CameraComponent* c, const EnumProperty& value)
+          {
+            engine::CameraProjection p = 
+              static_cast<engine::CameraProjection>(value);
+
+            c->set_projection(p);
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<EnumProperty>(c->projection());
+          }
+        )
+      };
+
+      kComponentsMapping[camera_index]["projection"]->set_combo_box_values(
+      {
+        "Perspective",
+        "Orthographic"
+      });
     }
 
     //--------------------------------------------------------------------------

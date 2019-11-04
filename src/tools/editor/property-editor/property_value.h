@@ -19,6 +19,11 @@ namespace snuffbox
   namespace editor
   {
     /**
+    * @brief Enum properties should always be int32_t
+    */
+    using EnumProperty = int32_t;
+
+    /**
     * @brief The base class for every property to use
     * 
     * Properties are an abstract data type that can be used to apply and
@@ -61,6 +66,11 @@ namespace snuffbox
       * @return Is this property a Vec2, Vec3 or Vec4 type?
       */
       virtual bool IsVector(int length) const;
+
+      /**
+      * @return Is this property an enumerator type?
+      */
+      virtual bool IsEnum() const;
 
       /**
       * @return Is this property an asset type?
@@ -129,6 +139,14 @@ namespace snuffbox
       virtual void Set(void* object, const glm::vec4& value);
 
       /**
+      * @brief Sets an enumerator value
+      *
+      * @param[in] object The object to operate on
+      * @param[in] value The new value
+      */
+      virtual void Set(void* object, const EnumProperty& value);
+
+      /**
       * @brief Sets an asset value
       *
       * @param[in] object The object to operate on
@@ -155,6 +173,38 @@ namespace snuffbox
         void* object, 
         uint8_t* buffer, 
         size_t* required) const = 0;
+
+      /**
+      * @brief Sets a value by combo box index
+      *
+      * @remarks This function will only work for enumerator properties
+      *
+      * @param[in] object The object to operate on
+      * @param[in] combo_idx The index of the combo box values to set
+      */
+      virtual void SetComboValue(void* object, int combo_idx);
+
+      /**
+      * @brief We can set a list of combo box values so that we can set values
+      *        on this property by name. This is currently mostly useful
+      *        for enumerator values.
+      *
+      * @param[in] values The values to set
+      */
+      void set_combo_box_values(
+        const foundation::Vector<foundation::String>& values);
+
+      /**
+      * @return The list of combo box values
+      */
+      const foundation::Vector<foundation::String>& combo_box_values() const;
+
+    private:
+
+      /**
+      * @brief The list of combo box values
+      */
+      foundation::Vector<foundation::String> combo_box_values_;
     };
 
     /**
@@ -233,6 +283,11 @@ namespace snuffbox
       bool IsVector(int length) const override;
 
       /**
+      * @see PropertyValue::IsEnum
+      */
+      bool IsEnum() const override;
+
+      /**
       * @see PropertyValue::IsAsset
       */
       bool IsAsset() const override;
@@ -241,6 +296,11 @@ namespace snuffbox
       * @see PropertyValue::Set
       */
       void Set(void* object, const T& value) override;
+
+      /**
+      * @see PropertyValue::SetComboValue
+      */
+      void SetComboValue(void* object, int combo_idx) override;
 
       /**
       * @see PropertyValue::GetRaw
@@ -505,6 +565,49 @@ namespace snuffbox
     };
 
     //--------------------------------------------------------------------------
+
+    /**
+    * @brief Used to set combo box values, but only for enum properties
+    *
+    * @author Daniel Konings
+    */
+    template <typename T, typename Y>
+    struct PropertyComboBox
+    {
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief Enum value
+      */
+      template <typename Q = T>
+      inline static typename eastl::enable_if<
+        eastl::is_same<Q, EnumProperty>::value, void>::type
+        Set(Y* object, int idx, typename Property<T, Y>::Setter setter)
+      {
+        if (setter == nullptr)
+        {
+          return;
+        }
+
+        setter(object, static_cast<EnumProperty>(idx));
+      }
+
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief Non-enum value
+      */
+      template <typename Q = T>
+      inline static typename eastl::enable_if<
+        !eastl::is_same<Q, EnumProperty>::value, void>::type
+        Set(Y* object, int idx, typename Property<T, Y>::Setter setter)
+      {
+        foundation::Logger::Assert(false,
+          "Attempted to set a combo box value on a non-enum property");
+      }
+    };
+
+    //--------------------------------------------------------------------------
     template <typename T, typename Y>
     inline Property<T, Y>::Property(Setter setter, Getter getter) :
       setter_(setter),
@@ -563,6 +666,13 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     template <typename T, typename Y>
+    inline bool Property<T, Y>::IsEnum() const
+    {
+      return eastl::is_same<EnumProperty, T>::value;
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename Y>
     inline bool Property<T, Y>::IsAsset() const
     {
       return eastl::is_same<engine::SerializableAsset, T>::value;
@@ -579,6 +689,24 @@ namespace snuffbox
 
       Y* ptr = reinterpret_cast<Y*>(object);
       setter_(ptr, value);
+    }
+
+    //--------------------------------------------------------------------------
+    template <typename T, typename Y>
+    inline void Property<T, Y>::SetComboValue(void* object, int combo_idx)
+    {
+      if (IsEnum() == false)
+      {
+        return;
+      }
+
+      if (combo_idx < 0 || combo_idx >= combo_box_values().size())
+      {
+        return;
+      }
+
+      Y* ptr = reinterpret_cast<Y*>(object);
+      PropertyComboBox<T, Y>::Set(ptr, combo_idx, setter_);
     }
 
     //--------------------------------------------------------------------------
