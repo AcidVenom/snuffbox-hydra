@@ -510,8 +510,8 @@ namespace snuffbox
       * @brief String copy
       */
       template <typename Q = T>
-      static typename std::enable_if<
-        std::is_same<Q, foundation::String>::value, void>::type 
+      static typename eastl::enable_if<
+        eastl::is_same<Q, foundation::String>::value, void>::type 
         Copy(
           uint8_t* buffer, 
           const T& value, 
@@ -527,8 +527,8 @@ namespace snuffbox
       * @brief Regular copy
       */
       template <typename Q = T>
-      static typename std::enable_if<
-        !std::is_same<Q, foundation::String>::value, void>::type 
+      static typename eastl::enable_if<
+        !eastl::is_same<Q, foundation::String>::value, void>::type 
         Copy(
           uint8_t* buffer,
           const T& value,
@@ -543,8 +543,8 @@ namespace snuffbox
       * @brief String size
       */
       template <typename Q = T>
-      static typename std::enable_if<
-        std::is_same<Q, foundation::String>::value, size_t>::type 
+      static typename eastl::enable_if<
+        eastl::is_same<Q, foundation::String>::value, size_t>::type 
         Required(const T& value)
       {
         return value.size() + 1;
@@ -556,8 +556,8 @@ namespace snuffbox
       * @brief Regular size
       */
       template <typename Q = T>
-      static typename std::enable_if<
-        !std::is_same<Q, foundation::String>::value, size_t>::type
+      static typename eastl::enable_if<
+        !eastl::is_same<Q, foundation::String>::value, size_t>::type
         Required(const T& value)
       {
         return sizeof(value);

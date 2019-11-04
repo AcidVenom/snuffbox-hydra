@@ -196,7 +196,7 @@ namespace snuffbox
       AssetTree* tree_; //!< The tree view to navigate the asset tree
       FlowLayout* asset_list_; //!< The asset list layout
       QSplitter* splitter_; //!< The splitter
-      QFrame* browser_frame_; //!< The frame that contains the browser
+      QWidget* browser_frame_; //!< The frame that contains the browser
       AssetBrowserItem* selected_item_; //!< The currently selected item
       AssetBrowserItem* hovered_item_; //!< The currently hovered item
       AssetBrowserItem* last_hovered_item_; //!< The last hovered item

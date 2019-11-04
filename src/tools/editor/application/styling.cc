@@ -20,8 +20,8 @@ namespace snuffbox
       using Group = QPalette::ColorGroup;
 
       QPalette palette;
-      palette.setColor(Role::Background, QColor(50, 50, 50));
-      palette.setColor(Role::Base, QColor(30, 30, 30));
+      palette.setColor(Role::Background, QColor(50, 50, 60));
+      palette.setColor(Role::Base, QColor(30, 30, 40));
       palette.setColor(Role::Text, QColor(Qt::white));
       palette.setColor(Role::HighlightedText, QColor(Qt::black));
       palette.setColor(Role::ButtonText, QColor(Qt::white));
@@ -29,8 +29,8 @@ namespace snuffbox
       palette.setColor(Role::BrightText, QColor(Qt::white));
       palette.setColor(Group::Disabled, Role::Text, QColor(Qt::darkGray));
       palette.setColor(Group::Disabled, Role::Light, QColor(Qt::black));
-      palette.setColor(Role::Button, QColor(65, 70, 65));
-      palette.setColor(Role::Highlight, QColor(100, 200, 0));
+      palette.setColor(Role::Button, QColor(55, 70, 80));
+      palette.setColor(Role::Highlight, QColor(50, 200, 0));
       palette.setColor(Role::ToolTipBase, QColor(200, 255, 100));
       palette.setColor(Role::ToolTipText, QColor(Qt::black));
 
@@ -45,9 +45,9 @@ namespace snuffbox
       static bool initialized_roles = false;
       if (initialized_roles == false)
       {
-        kColorRoles_[ColorRole::kSelected] = "rgba(50, 100, 0, %0)";
-        kColorRoles_[ColorRole::kClickable] = "rgba(61, 75, 67, %0)";
-        kColorRoles_[ColorRole::kHighlight] = "rgba(100, 200, 0, %0)";
+        kColorRoles_[ColorRole::kSelected] = "rgba(40, 120, 60, %0)";
+        kColorRoles_[ColorRole::kClickable] = "rgba(40, 70, 70, %0)";
+        kColorRoles_[ColorRole::kHighlight] = "rgba(50, 200, 0, %0)";
         initialized_roles = true;
       }
 

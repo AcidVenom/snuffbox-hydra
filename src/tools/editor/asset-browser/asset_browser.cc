@@ -42,7 +42,7 @@ namespace snuffbox
     };
 
     //--------------------------------------------------------------------------
-    class ClickableFrame : public QFrame
+    class ClickableFrame : public QWidget
     {
 
     public:
@@ -50,10 +50,11 @@ namespace snuffbox
       ClickableFrame(
         const foundation::Function<void()>& callback, 
         QWidget* parent = nullptr) :
-        QFrame(parent),
+        QWidget(parent),
         callback_(callback)
       {
-
+        setBackgroundRole(QPalette::ColorRole::Base);
+        setAutoFillBackground(true);
       }
 
     protected:
@@ -66,7 +67,7 @@ namespace snuffbox
           callback_();
         }
 
-        QFrame::mouseReleaseEvent(evt);
+        QWidget::mouseReleaseEvent(evt);
       }
 
     private:
@@ -115,8 +116,6 @@ namespace snuffbox
         Qt::ContextMenuPolicy::CustomContextMenu);
 
       browser_frame->setObjectName(QStringLiteral("AssetBrowserFrame"));
-      browser_frame->setFrameStyle(
-        QFrame::Shape::StyledPanel | QFrame::Shadow::Sunken);
 
       const int s = kFlowLayoutSpacing_;
       const int scrollbar_width = 32;

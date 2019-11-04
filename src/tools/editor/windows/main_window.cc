@@ -5,6 +5,7 @@
 #include "tools/editor/editor-widgets/console_widget.h"
 #include "tools/editor/asset-browser/asset_browser.h"
 #include "tools/editor/scene-editor/hierarchy_view.h"
+#include "tools/editor/property-editor/property_view.h"
 
 #include "tools/editor/asset-browser/asset_icon.h"
 
@@ -78,6 +79,12 @@ namespace snuffbox
       scene_widget->setWindowTitle(QStringLiteral("Scene"));
       scene_widget->setObjectName(QStringLiteral("MainWindowSceneDock"));
 
+      QDockWidget* property_widget = new QDockWidget(this);
+      PropertyView* properties = new PropertyView(hierarchy, property_widget);
+      property_widget->setWidget(properties);
+      property_widget->setWindowTitle(QStringLiteral("Properties"));
+      property_widget->setObjectName(QStringLiteral("MainWindowPropertyDock"));
+
       connect(
         app_->asset_importer(),
         &AssetImporter::SceneChanged,
@@ -98,6 +105,7 @@ namespace snuffbox
 
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, scene_widget);
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, property_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
       addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
 

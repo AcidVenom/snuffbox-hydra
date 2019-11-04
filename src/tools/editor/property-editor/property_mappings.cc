@@ -121,7 +121,11 @@ namespace snuffbox
     void PropertyMappings::ClearMappings()
     {
       kEntityMapping.clear();
-      kComponentsMapping->clear();
+      
+      for (int i = 0; i < static_cast<int>(engine::Components::kCount); ++i)
+      {
+        kComponentsMapping[i].clear();
+      }
     }
   }
 }
