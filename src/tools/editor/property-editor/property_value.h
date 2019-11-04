@@ -311,6 +311,14 @@ namespace snuffbox
           getter));
     }
 
+    /**
+    * @brief A short hand to create a property pair to add to a property map
+    *
+    * @tparam T The type of the property
+    * @tparam Y The type of the object to operate on
+    *
+    * @see CreateProperty
+    */
     template <typename T, typename Y>
     PropertyPair CreatePropertyPair(
       const foundation::String& name,
@@ -420,6 +428,83 @@ namespace snuffbox
     };
 
     //--------------------------------------------------------------------------
+
+    /**
+    * @brief Used to copy property files by raw data
+    *
+    * Usually we can just memcpy our data over, however;
+    * this can be different for different property types. Take for instance
+    * a string, its container can be located elsewhere, perhaps it doesn't
+    * have contiguous memory. This struct provides helper functionality for
+    * such classes utilizing SFINAE.
+    *
+    * @author Daniel Konings
+    */
+    template <typename T>
+    struct PropertyDataCopy
+    {
+
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief String copy
+      */
+      template <typename Q = T>
+      static typename std::enable_if<
+        std::is_same<Q, foundation::String>::value, void>::type 
+        Copy(
+          uint8_t* buffer, 
+          const T& value, 
+          size_t size)
+      {
+        memcpy(buffer, value.c_str(), size);
+        memset(buffer + size, '\0', 1);
+      }
+
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief Regular copy
+      */
+      template <typename Q = T>
+      static typename std::enable_if<
+        !std::is_same<Q, foundation::String>::value, void>::type 
+        Copy(
+          uint8_t* buffer,
+          const T& value,
+          size_t size)
+      {
+        memcpy(buffer, &value, size);
+      }
+
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief String size
+      */
+      template <typename Q = T>
+      static typename std::enable_if<
+        std::is_same<Q, foundation::String>::value, size_t>::type 
+        Required(const T& value)
+      {
+        return value.size() + 1;
+      }
+
+      //------------------------------------------------------------------------
+
+      /**
+      * @brief Regular size
+      */
+      template <typename Q = T>
+      static typename std::enable_if<
+        !std::is_same<Q, foundation::String>::value, size_t>::type
+        Required(const T& value)
+      {
+        return sizeof(value);
+      }
+    };
+
+    //--------------------------------------------------------------------------
     template <typename T, typename Y>
     inline Property<T, Y>::Property(Setter setter, Getter getter) :
       setter_(setter),
@@ -495,49 +580,6 @@ namespace snuffbox
       Y* ptr = reinterpret_cast<Y*>(object);
       setter_(ptr, value);
     }
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    struct PropertyDataCopy
-    {
-
-      template <typename Q = T>
-      static typename std::enable_if<
-        std::is_same<Q, foundation::String>::value, void>::type Copy(
-        uint8_t* buffer, 
-        const T& value, 
-        size_t size)
-      {
-        memcpy(buffer, value.c_str(), size);
-        memset(buffer + size, '\0', 1);
-      }
-
-      template <typename Q = T>
-      static typename std::enable_if<
-        !std::is_same<Q, foundation::String>::value, void>::type Copy(
-        uint8_t* buffer,
-        const T& value,
-        size_t size)
-      {
-        memcpy(buffer, &value, size);
-      }
-
-      template <typename Q = T>
-      static typename std::enable_if<
-        std::is_same<Q, foundation::String>::value, size_t>::type 
-        Required(const T& value)
-      {
-        return value.size() + 1;
-      }
-
-      template <typename Q = T>
-      static typename std::enable_if<
-        !std::is_same<Q, foundation::String>::value, size_t>::type
-        Required(const T& value)
-      {
-        return sizeof(value);
-      }
-    };
 
     //--------------------------------------------------------------------------
     template <typename T, typename Y>
