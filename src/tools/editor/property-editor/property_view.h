@@ -1,6 +1,10 @@
 #pragma once
 
+#include <foundation/containers/vector.h>
+
 #include <QWidget>
+
+class QVBoxLayout;
 
 namespace snuffbox
 {
@@ -12,6 +16,7 @@ namespace snuffbox
   namespace editor
   {
     class HierarchyView;
+    class PropertyValueEdit;
 
     /**
     * @brief Used to show a multitude of PropertyValueEdits based on the
@@ -38,9 +43,41 @@ namespace snuffbox
       */
       PropertyView(HierarchyView* hierarchy, QWidget* parent = nullptr);
 
+      /**
+      * @brief Shows a property view for an entity
+      *
+      * This will also show all property edits for the components contained
+      * within the entity. PropertyView::Clear should be called after the
+      * entity was deselected.
+      *
+      * This pushes commands onto the undo stack to edit the properties of
+      * an entity.
+      *
+      * @param[in] ent The entity to show the properties of
+      */
+      void ShowForEntity(engine::Entity* ent);
+
+      /**
+      * @brief Updates all current property value edits if they have been
+      *        changed
+      */
+      void Update();
+
+      /**
+      * @brief Clears the property view after deselection
+      */
+      void Clear();
+
     private:
 
       HierarchyView* hierarchy_; //!< The hierarchy view
+
+      /**
+      * @brief The list of value edit items to update accordingly
+      */
+      foundation::Vector<PropertyValueEdit*> items_;
+
+      QVBoxLayout* layout_; //!< The main layout of this widget
     };
   }
 }

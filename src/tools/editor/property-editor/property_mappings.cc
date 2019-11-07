@@ -9,8 +9,8 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    PropertyMap PropertyMappings::kEntityMapping;
-    PropertyMap PropertyMappings::kComponentsMapping
+    PropertyMap PropertyMappings::kEntityMapping_;
+    PropertyMap PropertyMappings::kComponentsMapping_
       [static_cast<int>(engine::Components::kCount)];
 
     //--------------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace snuffbox
       //------------------------------------------------------------------------
       // snuffbox::engine::Entity
       //------------------------------------------------------------------------
-      kEntityMapping =
+      kEntityMapping_ =
       {
         CreatePropertyPair<foundation::String, engine::Entity>(
           "name",
@@ -49,7 +49,7 @@ namespace snuffbox
       //------------------------------------------------------------------------
       // snuffbox::engine::TransformComponent
       //------------------------------------------------------------------------
-      kComponentsMapping[static_cast<int>(engine::Components::kTransform)] =
+      kComponentsMapping_[static_cast<int>(engine::Components::kTransform)] =
       {
         CreatePropertyPair<glm::vec3, engine::TransformComponent>(
           "position",
@@ -92,7 +92,7 @@ namespace snuffbox
       // snuffbox::engine::CameraComponent
       //------------------------------------------------------------------------
       int camera_index = static_cast<int>(engine::Components::kCamera);
-      kComponentsMapping[camera_index] =
+      kComponentsMapping_[camera_index] =
       {
         CreatePropertyPair<EnumProperty, engine::CameraComponent>(
           "projection",
@@ -110,7 +110,7 @@ namespace snuffbox
         )
       };
 
-      kComponentsMapping[camera_index]["projection"]->set_combo_box_values(
+      kComponentsMapping_[camera_index]["projection"]->set_combo_box_values(
       {
         "Perspective",
         "Orthographic"
@@ -120,12 +120,25 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void PropertyMappings::ClearMappings()
     {
-      kEntityMapping.clear();
+      kEntityMapping_.clear();
       
       for (int i = 0; i < static_cast<int>(engine::Components::kCount); ++i)
       {
-        kComponentsMapping[i].clear();
+        kComponentsMapping_[i].clear();
       }
+    }
+
+    //--------------------------------------------------------------------------
+    const PropertyMap& PropertyMappings::GetEntityMap()
+    {
+      return kEntityMapping_;
+    }
+
+    //--------------------------------------------------------------------------
+    const PropertyMap& PropertyMappings::GetComponentMap(
+      engine::Components type)
+    {
+      return kComponentsMapping_[static_cast<int>(type)];
     }
   }
 }

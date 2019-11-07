@@ -452,13 +452,12 @@ namespace snuffbox
         component_type_ == engine::Components::kCount ||
         component_index_ < 0)
       {
-        mapping = PropertyMappings::kEntityMapping;
+        mapping = PropertyMappings::GetEntityMap();
         found_object = self;
       }
       else
       {
-        mapping = PropertyMappings::kComponentsMapping
-          [static_cast<int>(component_index_)];
+        mapping = PropertyMappings::GetComponentMap(component_type_);
 
         found_object = 
           self->GetComponents(component_type_).at(component_index_);

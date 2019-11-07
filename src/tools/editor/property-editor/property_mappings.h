@@ -15,16 +15,8 @@ namespace snuffbox
     */
     struct PropertyMappings
     {
-      /**
-      * @brief The mappings of properties for an entity
-      */
-      static PropertyMap kEntityMapping;
 
-      /**
-      * @brief The mappings of properties for each type of component
-      */
-      static PropertyMap kComponentsMapping
-        [static_cast<int>(engine::Components::kCount)];
+    public:
 
       /**
       * @brief Initializes the mappings, ready for use
@@ -36,6 +28,33 @@ namespace snuffbox
       *        PropertyMappings::InitializeMappings
       */
       static void ClearMappings();
+
+      /**
+      * @return An entity's property map
+      */
+      static const PropertyMap& GetEntityMap();
+
+      /**
+      * @brief Retrieves the property map of a specific component type
+      *
+      * @param[in] type The type of the component to retrieve
+      *
+      * @return The retrieved property map
+      */
+      static const PropertyMap& GetComponentMap(engine::Components type);
+
+    private:
+
+      /**
+      * @brief The mappings of properties for an entity
+      */
+      static PropertyMap kEntityMapping_;
+
+      /**
+      * @brief The mappings of properties for each type of component
+      */
+      static PropertyMap kComponentsMapping_
+        [static_cast<int>(engine::Components::kCount)];
     };
   }
 }
