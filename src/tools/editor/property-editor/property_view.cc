@@ -19,26 +19,36 @@ namespace snuffbox
       hierarchy_(hierarchy),
       layout_(nullptr)
     {
+      int min_width = 200;
+
       setObjectName(QStringLiteral("PropertyView"));
-      setMinimumSize(200, 100);
+      setMinimumSize(min_width, 100);
 
-      setBackgroundRole(QPalette::ColorRole::Base);
-      setAutoFillBackground(true);
+      QVBoxLayout* main_layout = new QVBoxLayout(this);
+      main_layout->setContentsMargins(0, 0, 0, 0);
+      main_layout->setSpacing(0);
 
-      layout_ = new QVBoxLayout();
-      layout_->setMargin(5);
+      QWidget* frame = new QWidget(this);
+      layout_ = new QVBoxLayout(frame);
+      layout_->setContentsMargins(0, 0, 0, 0);
+      layout_->setSpacing(2);
 
-      setLayout(layout_);
-
-      /*QScrollArea* scroll_area = new QScrollArea();
+      QScrollArea* scroll_area = new QScrollArea(this);
       scroll_area->setObjectName(QStringLiteral("PropertyViewScrollArea"));
-      scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
       scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
       scroll_area->setWidgetResizable(true);
-      scroll_area->setWidget(this);
+      scroll_area->setWidget(frame);
 
-      engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(&foundation::Memory::default_allocator());
-      ShowForEntity(ent);*/
+      frame->setLayout(layout_);
+      frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+
+      main_layout->addWidget(scroll_area);
+
+      setAutoFillBackground(true);
+      setBackgroundRole(QPalette::ColorRole::Base);
+
+      setLayout(main_layout);
     }
 
     //--------------------------------------------------------------------------
@@ -46,19 +56,41 @@ namespace snuffbox
     {
       Clear();
 
-      const PropertyMap& map = PropertyMappings::GetEntityMap();
+      auto AddElements = [&](const PropertyMap& mapping, void* object)
+      {
+        for (
+          PropertyMap::const_iterator it = mapping.begin();
+          it != mapping.end();
+          ++it)
+        {
+          PropertyValueEdit* edit = 
+            new PropertyValueEdit(this, object, it->first, it->second, this);
+
+          items_.push_back(edit);
+
+          layout_->addWidget(edit, 0, Qt::AlignTop);
+        }
+      };
+
+      const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
+
+      AddElements(entity_map, ent);
 
       for (
-        PropertyMap::const_iterator it = map.begin();
-        it != map.end();
-        ++it)
+        engine::Components c = engine::Components::kTransform;
+        c != engine::Components::kCount;
+        c = static_cast<engine::Components>(static_cast<int>(c) + 1))
       {
-        PropertyValueEdit* edit = 
-          new PropertyValueEdit(this, ent, it->first, it->second, this);
+        const PropertyMap& component_map = PropertyMappings::GetComponentMap(c);
+        
+        foundation::Vector<engine::IComponent*> components = 
+          ent->GetComponents(c);
 
-        items_.push_back(edit);
-
-        layout_->addWidget(edit);
+        for (int i = 0; i < components.size(); ++i)
+        {
+          engine::IComponent* component = components.at(i);
+          AddElements(component_map, component);
+        }
       }
     }
 

@@ -38,7 +38,7 @@ namespace snuffbox
       setMinimumSize(kMaxItemSize);
       setMaximumSize(kMaxItemSize);
 
-      QVBoxLayout* layout = new QVBoxLayout();
+      QVBoxLayout* layout = new QVBoxLayout(this);
       layout->addWidget(icon_);
       layout->setAlignment(Qt::AlignCenter);
       layout->setContentsMargins(0, 0, 0, 20);

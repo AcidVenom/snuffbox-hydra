@@ -25,7 +25,7 @@ namespace snuffbox
 
       QString q_base_dir = base_dir.ToString().c_str();
 
-      model_ = new QFileSystemModel();
+      model_ = new QFileSystemModel(this);
       model_->setRootPath(q_base_dir);
       model_->setReadOnly(true);
       model_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);

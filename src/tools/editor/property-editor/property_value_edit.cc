@@ -32,8 +32,7 @@ namespace snuffbox
       widget_(nullptr)
     {
       memset(old_data_, 0, kMaxDataSize_);
-
-      setObjectName(QStringLiteral("PropertyValueEdit"));
+      setObjectName(QStringLiteral("PropertyValueEditInner"));
 
       if (prop->IsBoolean() == true)
       {
@@ -64,22 +63,44 @@ namespace snuffbox
         }
       }
 
-      QHBoxLayout* row = new QHBoxLayout();
+      QWidget* frame = new QWidget(this);
+      frame->setObjectName(QStringLiteral("PropertyValueEditInner"));
+      frame->setStyleSheet(
+        "#PropertyValueEditInner {"
+        " background: rgb(30, 50, 60);"
+        " border-radius: 5px;"
+        " border: 1px solid rgb(0, 0, 40);"
+      "}");
+
+      QHBoxLayout* row = new QHBoxLayout(this);
       widget_ = CreateWidget();
 
       QLabel* name_label = new QLabel(this);
-      name_label->setText(name_);
+      QString name_text = name_;
+
+      QString first = name_text.at(0);
+      name_text = first.toUpper() + name_text.mid(1);
+
+      name_label->setText(name_text);
+      name_label->setFixedWidth(64);
 
       row->addWidget(name_label);
       row->addWidget(widget_);
 
-      row->setMargin(20);
-
-      setLayout(row);
-
+      row->setMargin(10);
       row->setAlignment(Qt::AlignLeft);
+
+      int c = 7;
+      row->setContentsMargins(c * 2, c, c * 2, c);
+
+      frame->setLayout(row);
+      frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+
+      QVBoxLayout* main_layout = new QVBoxLayout(this);
+      main_layout->addWidget(frame);
+
+      setLayout(main_layout);
       
-      setStyleSheet("background: rgb(255, 0, 0);");
       setAutoFillBackground(true);
       setAttribute(Qt::WA_StyleSheet);
     }
@@ -142,7 +163,7 @@ namespace snuffbox
     QWidget* PropertyValueEdit::CreateVectorEdit(int length)
     {
       QWidget* frame = new QWidget(this);
-      QHBoxLayout* layout = new QHBoxLayout();
+      QHBoxLayout* layout = new QHBoxLayout(frame);
 
       const char* label_texts[] =
       {
@@ -151,25 +172,26 @@ namespace snuffbox
 
       const char* label_colors[] =
       {
-        "255, 0, 0",
-        "0, 255, 0",
-        "0, 0, 255",
+        "200, 30, 30",
+        "0, 125, 0",
+        "0, 125, 255",
         "0, 0, 0"
       };
 
-      QString stylesheet = "background: rgb(%0); color: white;";
+      QString stylesheet = 
+        "background: rgb(%0); color: white; border-radius: 5px;";
 
       for (int i = 0; i < length; ++i)
       {
-
         const char* label_text = label_texts[i];
 
         QLabel* label = new QLabel(frame);
         label->setText(label_text);
+        label->setAlignment(Qt::AlignCenter);
 
-        int label_size = 16;
+        int label_size = 24;
         label->setMinimumWidth(label_size);
-        label->setMaximumWidth(label_size);
+        label->setMinimumHeight(label_size);
 
         label->setStyleSheet(stylesheet.arg(label_colors[i]));
 
@@ -177,7 +199,7 @@ namespace snuffbox
 
         QLineEdit* edit = new QLineEdit(frame);
 
-        int edit_size = 64;
+        int edit_size = 70;
         edit->setMinimumWidth(edit_size);
         edit->setMaximumWidth(edit_size);
 
@@ -186,6 +208,7 @@ namespace snuffbox
 
       layout->setMargin(5);
       frame->setLayout(layout);
+      frame->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
       return frame;
     }

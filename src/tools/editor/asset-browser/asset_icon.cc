@@ -61,7 +61,9 @@ namespace snuffbox
       name_label_ = new QLabel(this);
       name_label_->setObjectName(QStringLiteral("AssetIconNameLabel"));
 
-      QGraphicsDropShadowEffect* drop_shadow = new QGraphicsDropShadowEffect();
+      QGraphicsDropShadowEffect* drop_shadow = 
+        new QGraphicsDropShadowEffect(name_label_);
+
       drop_shadow->setBlurRadius(10);
       drop_shadow->setOffset(2, 4);
       drop_shadow->setColor(QColor(0, 0, 0, 30));

@@ -103,7 +103,7 @@ namespace snuffbox
     {
       setObjectName(QStringLiteral("AssetBrowser"));
 
-      QHBoxLayout* main_layout = new QHBoxLayout();
+      QHBoxLayout* main_layout = new QHBoxLayout(this);
 
       tree_ = new AssetTree(build_path_, this);
 
@@ -127,7 +127,7 @@ namespace snuffbox
 
       browser_frame->setLayout(asset_list_);
 
-      QScrollArea* scroll_area = new QScrollArea();
+      QScrollArea* scroll_area = new QScrollArea(this);
       scroll_area->setObjectName(QStringLiteral("AssetBrowserFrameScrollArea"));
       scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
       scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
