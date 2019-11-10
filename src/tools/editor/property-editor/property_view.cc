@@ -2,9 +2,11 @@
 
 #include "tools/editor/property-editor/property_value_edit.h"
 #include "tools/editor/property-editor/property_mappings.h"
+#include "tools/editor/property-editor/property_group_view.h"
 
 #include <QVBoxLayout>
 #include <QScrollArea>
+#include <QLabel>
 
 #include <engine/ecs/entity.h>
 
@@ -17,6 +19,7 @@ namespace snuffbox
     PropertyView::PropertyView(HierarchyView* hierarchy, QWidget* parent) :
       QWidget(parent),
       hierarchy_(hierarchy),
+      frame_(nullptr),
       layout_(nullptr)
     {
       int min_width = 200;
@@ -28,20 +31,20 @@ namespace snuffbox
       main_layout->setContentsMargins(0, 0, 0, 0);
       main_layout->setSpacing(0);
 
-      QWidget* frame = new QWidget(this);
-      layout_ = new QVBoxLayout(frame);
+      frame_ = new QWidget(this);
+      layout_ = new QVBoxLayout(frame_);
       layout_->setContentsMargins(0, 0, 0, 0);
-      layout_->setSpacing(2);
+      layout_->setSpacing(0);
 
       QScrollArea* scroll_area = new QScrollArea(this);
       scroll_area->setObjectName(QStringLiteral("PropertyViewScrollArea"));
       scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
       scroll_area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
       scroll_area->setWidgetResizable(true);
-      scroll_area->setWidget(frame);
+      scroll_area->setWidget(frame_);
 
-      frame->setLayout(layout_);
-      frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+      frame_->setLayout(layout_);
+      frame_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
       main_layout->addWidget(scroll_area);
 
@@ -49,6 +52,7 @@ namespace snuffbox
       setBackgroundRole(QPalette::ColorRole::Base);
 
       setLayout(main_layout);
+      setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
     //--------------------------------------------------------------------------
@@ -56,25 +60,28 @@ namespace snuffbox
     {
       Clear();
 
-      auto AddElements = [&](const PropertyMap& mapping, void* object)
-      {
-        for (
-          PropertyMap::const_iterator it = mapping.begin();
-          it != mapping.end();
-          ++it)
-        {
-          PropertyValueEdit* edit = 
-            new PropertyValueEdit(this, object, it->first, it->second, this);
-
-          items_.push_back(edit);
-
-          layout_->addWidget(edit, 0, Qt::AlignTop);
-        }
-      };
-
       const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
 
-      AddElements(entity_map, ent);
+      PropertyGroupView* view = 
+        new PropertyGroupView(QStringLiteral("Entity"), entity_map, ent);
+
+      layout_->addWidget(view);
+      views_.push_back(view);
+
+      QString header_names[static_cast<int>(engine::Components::kCount)];
+      
+      auto DefineName = [&header_names](engine::Components c, const char* name)
+      {
+        header_names[static_cast<int>(c)] = QString(name);
+      };
+
+      using Comp = engine::Components;
+
+      DefineName(Comp::kTransform, "Transform Component");
+      DefineName(Comp::kScript, "Script Component");
+      DefineName(Comp::kMesh, "Mesh Component");
+      DefineName(Comp::kMeshRenderer, "Mesh Renderer Component");
+      DefineName(Comp::kCamera, "Camera Component");
 
       for (
         engine::Components c = engine::Components::kTransform;
@@ -89,7 +96,11 @@ namespace snuffbox
         for (int i = 0; i < components.size(); ++i)
         {
           engine::IComponent* component = components.at(i);
-          AddElements(component_map, component);
+          view = 
+            new PropertyGroupView(header_names[i], component_map, component);
+
+          layout_->addWidget(view);
+          views_.push_back(view);
         }
       }
     }
@@ -103,12 +114,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void PropertyView::Clear()
     {
-      for (int i = 0; i < items_.size(); ++i)
+      for (int i = 0; i < views_.size(); ++i)
       {
-        delete items_.at(i);
+        delete views_.at(i);
       }
 
-      items_.clear();
+      views_.clear();
     }
   }
 }

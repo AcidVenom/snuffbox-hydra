@@ -78,11 +78,6 @@ namespace snuffbox
       virtual bool IsAsset() const;
 
       /**
-      * @return Is this property a list of different properties?
-      */
-      virtual bool IsList() const;
-
-      /**
       * @brief Sets a boolean value
       *
       * @param[in] object The object to operate on
@@ -387,105 +382,6 @@ namespace snuffbox
     {
       return PropertyPair(name, CreateProperty<T, Y>(setter, getter));
     }
-
-    /**
-    * @brief Defines a list of properties, which in turn can be used as
-    *        a PropertyValue again
-    *
-    * @remarks All contained values are ref counted using shared pointers
-    *
-    * @author Daniel Konings
-    */
-    class PropertyList : public PropertyValue
-    {
-
-    public:
-
-      /**
-      * @brief Default constructor
-      */
-      PropertyList();
-
-      /**
-      * @see PropertyValue::IsList
-      */
-      bool IsList() const override;
-
-      /**
-      * @brief Adds a new property value to the list
-      *
-      * @param[in] value The value to add
-      */
-      void Add(const foundation::SharedPtr<PropertyValue>& value);
-
-      /**
-      * @brief Inserts a new property at a provided index
-      *
-      * @param[in] index The index to insert at
-      * @param[in] value The value to insert
-      */
-      void Insert(
-        int index, 
-        const foundation::SharedPtr<PropertyValue>& value);
-
-      /**
-      * @brief Removes a property value by value
-      *
-      * @param[in] value The value to remove
-      */
-      void Remove(const foundation::SharedPtr<PropertyValue>& value);
-
-      /**
-      * @brief Removes a property value at a given index
-      *
-      * @param[in] index The index of the property value to remove
-      */
-      void RemoveAt(int index);
-
-      /**
-      * @brief Finds the index of a provided property value
-      *
-      * @param[in] value The value to find
-      *
-      * @return The index of the item, or -1 if it was not found
-      */
-      int IndexOf(const foundation::SharedPtr<PropertyValue>& value);
-
-      /**
-      * @brief Retrieves a property value at the specified index
-      *
-      * @param[in] index The index of the property value to retrieve
-      *
-      * @return The retrieved property value, or nullptr if the index
-      *         was out of bounds
-      */
-      foundation::SharedPtr<PropertyValue> At(int index) const;
-
-      /**
-      * @return The number of property values stored within this list
-      */
-      int Count() const;
-
-      /**
-      * @brief Clears all property values in this list, reducing their ref
-      *        count by 1
-      */
-      void Clear();
-
-      /**
-      * @brief Clears the entire list
-      */
-      ~PropertyList();
-
-    private:
-
-      bool was_changed_; //!< Was this list changed?
-
-      /**
-      * @brief The entire list of property values
-      */
-      foundation::Vector<foundation::SharedPtr<PropertyValue>> values_;
-    };
 
     //--------------------------------------------------------------------------
 

@@ -153,7 +153,7 @@ namespace snuffbox
         Styling::ColorRole::kSelected : Styling::ColorRole::kClickable;
 
       QString format = "QLabel { background: %0; border-radius: 10px; }";
-      name_label_->setStyleSheet(format.arg(Styling::GetStyleColor(cr)));
+      name_label_->setStyleSheet(format.arg(Styling::GetStyleColorCSS(cr)));
     }
 
     //--------------------------------------------------------------------------

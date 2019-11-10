@@ -47,6 +47,7 @@ namespace snuffbox
 
     public:
 
+      //------------------------------------------------------------------------
       ClickableFrame(
         const foundation::Function<void()>& callback, 
         QWidget* parent = nullptr) :
@@ -59,6 +60,7 @@ namespace snuffbox
 
     protected:
 
+      //------------------------------------------------------------------------
       void mouseReleaseEvent(QMouseEvent* evt) override
       {
         Qt::MouseButton button = evt->button();

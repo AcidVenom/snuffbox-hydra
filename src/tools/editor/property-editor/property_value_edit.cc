@@ -1,6 +1,7 @@
 #include "tools/editor/property-editor/property_value_edit.h"
 
 #include "tools/editor/property-editor/property_value.h"
+#include "tools/editor/application/styling.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -15,16 +16,19 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const size_t PropertyValueEdit::kMaxDataSize_;
+    const int PropertyValueEdit::kSpacing_ = 20;
+    const int PropertyValueEdit::kLabelWidth_ = 80;
+    const int PropertyValueEdit::kMaxEditWidth_ = 180;
+    const int PropertyValueEdit::kVectorLabelSize_ = 21;
+    const int PropertyValueEdit::kVectorSpacing_ = 5;
 
     //--------------------------------------------------------------------------
     PropertyValueEdit::PropertyValueEdit(
-      PropertyView* view,
       void* object,
       const foundation::String& name,
       const foundation::SharedPtr<PropertyValue>& prop,
       QWidget* parent) :
       QWidget(parent),
-      view_(view),
       object_(object),
       name_(name.c_str()),
       prop_(prop),
@@ -63,46 +67,48 @@ namespace snuffbox
         }
       }
 
-      QWidget* frame = new QWidget(this);
-      frame->setObjectName(QStringLiteral("PropertyValueEditInner"));
-      frame->setStyleSheet(
-        "#PropertyValueEditInner {"
-        " background: rgb(30, 50, 60);"
-        " border-radius: 5px;"
-        " border: 1px solid rgb(0, 0, 40);"
-      "}");
+      QVBoxLayout* main_layout = new QVBoxLayout(this);
 
-      QHBoxLayout* row = new QHBoxLayout(this);
-      widget_ = CreateWidget();
+      QWidget* row = new QWidget(this);
 
-      QLabel* name_label = new QLabel(this);
+      QString bg = Styling::GetStyleColorCSS(Styling::ColorRole::kBackground);
+
+      row->setObjectName(QStringLiteral("PropertyEditRow"));
+      row->setStyleSheet(
+        QString("#PropertyEditRow { background: %0; border-radius: 5px; }")
+        .arg(bg));
+
+      row->setContentsMargins(0, 0, 0, 0);
+
+      QHBoxLayout* row_layout = new QHBoxLayout(row);
+      row_layout->setSpacing(kSpacing_);
+      row_layout->setAlignment(Qt::AlignLeft);
+
+      main_layout->addWidget(row);
+      main_layout->setContentsMargins(0, 0, 0, 0);
+      
+      setContentsMargins(0, 0, 0, 0);
+      setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+
+      QLabel* name_label = new QLabel(row);
+
       QString name_text = name_;
 
-      QString first = name_text.at(0);
-      name_text = first.toUpper() + name_text.mid(1);
-
-      name_label->setText(name_text);
-      name_label->setFixedWidth(64);
-
-      row->addWidget(name_label);
-      row->addWidget(widget_);
-
-      row->setMargin(10);
-      row->setAlignment(Qt::AlignLeft);
-
-      int c = 7;
-      row->setContentsMargins(c * 2, c, c * 2, c);
-
-      frame->setLayout(row);
-      frame->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-
-      QVBoxLayout* main_layout = new QVBoxLayout(this);
-      main_layout->addWidget(frame);
-
-      setLayout(main_layout);
+      if (name_text.size() > 0)
+      {
+        QString first_char = name_text.mid(0, 1);
+        name_text = first_char.toUpper() + name_text.mid(1);
+      }
       
-      setAutoFillBackground(true);
-      setAttribute(Qt::WA_StyleSheet);
+      name_label->setText(name_text);
+      name_label->setFixedWidth(kLabelWidth_);
+      name_label->setContentsMargins(0, 0, 0, 0);
+
+      row_layout->addWidget(name_label);
+      row_layout->addWidget(CreateWidget());
+
+      row->setLayout(row_layout);
+      setLayout(main_layout);
     }
 
     //--------------------------------------------------------------------------
@@ -146,6 +152,7 @@ namespace snuffbox
       case EditTypes::kNumberEdit:
       case EditTypes::kLineEdit:
         widget = new QLineEdit(this);
+        widget->setMaximumWidth(kMaxEditWidth_);
         break;
 
       case EditTypes::kVec2Edit:
@@ -154,6 +161,11 @@ namespace snuffbox
         widget = CreateVectorEdit(
           static_cast<int>(type_) - static_cast<int>(EditTypes::kVec2Edit) + 2);
         break;
+      }
+
+      if (widget != nullptr)
+      {
+        widget->setContentsMargins(0, 0, 0, 0);
       }
 
       return widget;
@@ -170,16 +182,10 @@ namespace snuffbox
         "x", "y", "z", "w"
       };
 
-      const char* label_colors[] =
-      {
-        "200, 30, 30",
-        "0, 125, 0",
-        "0, 125, 255",
-        "0, 0, 0"
-      };
-
       QString stylesheet = 
-        "background: rgb(%0); color: white; border-radius: 5px;";
+        "background: %0; color: white; border-radius: 5px;";
+
+      int first_col = Styling::ColorRole::kXAxis;
 
       for (int i = 0; i < length; ++i)
       {
@@ -188,25 +194,24 @@ namespace snuffbox
         QLabel* label = new QLabel(frame);
         label->setText(label_text);
         label->setAlignment(Qt::AlignCenter);
+        label->setFixedSize(kVectorLabelSize_, kVectorLabelSize_);
 
-        int label_size = 24;
-        label->setMinimumWidth(label_size);
-        label->setMinimumHeight(label_size);
+        QString color = Styling::GetStyleColorCSS(
+          static_cast<Styling::ColorRole>(first_col + i));
 
-        label->setStyleSheet(stylesheet.arg(label_colors[i]));
+        label->setStyleSheet(stylesheet.arg(color));
 
         layout->addWidget(label);
 
         QLineEdit* edit = new QLineEdit(frame);
-
-        int edit_size = 70;
-        edit->setMinimumWidth(edit_size);
-        edit->setMaximumWidth(edit_size);
+        edit->setFixedWidth(kMaxEditWidth_ * 0.5);
 
         layout->addWidget(edit);
       }
 
-      layout->setMargin(5);
+      layout->setContentsMargins(0, 0, 0, 0);
+      layout->setSpacing(kVectorSpacing_);
+
       frame->setLayout(layout);
       frame->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 

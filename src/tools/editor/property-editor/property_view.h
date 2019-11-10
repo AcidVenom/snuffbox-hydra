@@ -16,7 +16,7 @@ namespace snuffbox
   namespace editor
   {
     class HierarchyView;
-    class PropertyValueEdit;
+    class PropertyGroupView;
 
     /**
     * @brief Used to show a multitude of PropertyValueEdits based on the
@@ -73,10 +73,11 @@ namespace snuffbox
       HierarchyView* hierarchy_; //!< The hierarchy view
 
       /**
-      * @brief The list of value edit items to update accordingly
+      * @brief The list of property group views to update accordingly
       */
-      foundation::Vector<PropertyValueEdit*> items_;
+      foundation::Vector<PropertyGroupView*> views_;
 
+      QWidget* frame_; //!< The main frame of this widget
       QVBoxLayout* layout_; //!< The main layout of this widget
     };
   }

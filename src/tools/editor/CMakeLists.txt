@@ -73,6 +73,8 @@ SET(PropertyEditorSources
   "property-editor/property_value_edit.cc"
   "property-editor/property_mappings.h"
   "property-editor/property_mappings.cc"
+  "property-editor/property_group_view.h"
+  "property-editor/property_group_view.cc"
 )
 
 SOURCE_GROUP("\\"               FILES ${RootSources})

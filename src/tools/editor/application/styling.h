@@ -3,6 +3,7 @@
 class QApplication;
 
 #include <QString>
+#include <QColor>
 
 namespace snuffbox
 {
@@ -23,9 +24,25 @@ namespace snuffbox
       */
       enum ColorRole : int
       {
+        kBackground,
+        kBase,
+        kText,
+        kHighlightedText,
+        kButtonText,
+        kWindowText,
+        kBrightText,
+        kDisabledText,
+        kDisabledLight,
+        kButton,
+        kHighlight,
+        kTooltipBase,
+        kTooltipText,
         kSelected,
         kClickable,
-        kHighlight,
+        kXAxis,
+        kYAxis,
+        kZAxis,
+        kWAxis,
         kCount
       };
 
@@ -40,18 +57,47 @@ namespace snuffbox
       * @brief Retrieves a color from a provided color role
       *
       * @param[in] role The color role to retrieve
-      * @param[in] a The alpha, default = 1.0
+      * @param[in] a The alpha, default = 255
+      *
+      * @return The retrieved color
+      */
+      static QColor GetStyleColor(ColorRole role, int a = 255);
+
+      /**
+      * @brief Converts a QColor to its respective CSS string
+      *
+      * @param[in] color The color to convert
       *
       * @return The stringified color as "rgba(r, g, b, a)" string
       */
-      static QString GetStyleColor(ColorRole role, float a = 1.0f);
+      static QString GetCSSColor(const QColor& color);
+
+      /**
+      * @see Styling::GetStyleColor
+      * @see Styling::GetCSSColor
+      */
+      static QString GetStyleColorCSS(ColorRole role, int a = 255);
+
+      /**
+      * @brief Creates a qlineargradient CSS style rule from two colors
+      *
+      * @param[in] a The first color
+      * @param[in] b The second color to interpolate to
+      * @param[in] horizontal Is this a horizontal gradient? Default = false
+      *
+      * @return The style rule
+      */
+      static QString GradientCSS(
+        const QColor& a, 
+        const QColor& b, 
+        bool horizontal = false);
 
     private:
 
       /**
       * @brief The different color roles that exist
       */
-      static const char* kColorRoles_[ColorRole::kCount];
+      static QColor kColorRoles_[ColorRole::kCount];
     };
   }
 }

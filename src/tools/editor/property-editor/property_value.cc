@@ -47,12 +47,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    bool PropertyValue::IsList() const
-    {
-      return false;
-    }
-
-    //--------------------------------------------------------------------------
     void PropertyValue::Set(void* object, const bool& value)
     {
       foundation::Logger::Assert(IsBoolean() == true,
@@ -136,102 +130,6 @@ namespace snuffbox
       PropertyValue::combo_box_values() const
     {
       return combo_box_values_;
-    }
-
-    //--------------------------------------------------------------------------
-    PropertyList::PropertyList() :
-      was_changed_(false)
-    {
-
-    }
-
-    //--------------------------------------------------------------------------
-    bool PropertyList::IsList() const
-    {
-      return true;
-    }
-
-    //--------------------------------------------------------------------------
-    void PropertyList::Add(const foundation::SharedPtr<PropertyValue>& value)
-    {
-      values_.push_back(value);
-      was_changed_ = true;
-    }
-
-    //--------------------------------------------------------------------------
-    void PropertyList::Insert(
-      int index, 
-      const foundation::SharedPtr<PropertyValue>& value)
-    {
-      values_.insert(values_.begin() + index, value);
-      was_changed_ = true;
-    }
-
-    //--------------------------------------------------------------------------
-    void PropertyList::Remove(const foundation::SharedPtr<PropertyValue>& value)
-    {
-      int idx = IndexOf(value);
-
-      if (idx < 0)
-      {
-        return;
-      }
-
-      values_.erase(values_.begin() + idx);
-    }
-
-    //--------------------------------------------------------------------------
-    void PropertyList::RemoveAt(int index)
-    {
-      if (index < 0 || index >= Count())
-      {
-        return;
-      }
-
-      values_.erase(values_.begin() + index);
-    }
-
-    //--------------------------------------------------------------------------
-    int PropertyList::IndexOf(const foundation::SharedPtr<PropertyValue>& value)
-    {
-      for (int i = 0; i < values_.size(); ++i)
-      {
-        if (values_.at(i) == value)
-        {
-          return i;
-        }
-      }
-
-      return -1;
-    }
-
-    //--------------------------------------------------------------------------
-    foundation::SharedPtr<PropertyValue> PropertyList::At(int index) const
-    {
-      if (index < 0 || index >= Count())
-      {
-        return nullptr;
-      }
-
-      return values_.at(index);
-    }
-
-    //--------------------------------------------------------------------------
-    int PropertyList::Count() const
-    {
-      return static_cast<int>(values_.size());
-    }
-
-    //--------------------------------------------------------------------------
-    void PropertyList::Clear()
-    {
-      values_.clear();
-    }
-
-    //--------------------------------------------------------------------------
-    PropertyList::~PropertyList()
-    {
-      Clear();
     }
   }
 }

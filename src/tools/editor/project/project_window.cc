@@ -113,7 +113,7 @@ namespace snuffbox
 
       QString style =
         QString("QListView::item:selected { background-color: %0; }")
-        .arg(Styling::GetStyleColor(Styling::ColorRole::kSelected));
+        .arg(Styling::GetStyleColorCSS(Styling::ColorRole::kSelected));
 
       recent_projects_->setStyleSheet(style);
 

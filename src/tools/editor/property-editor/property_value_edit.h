@@ -54,7 +54,6 @@ namespace snuffbox
       * @param[in] parent The parent of this value edit
       */
       PropertyValueEdit(
-        PropertyView* view,
         void* object,
         const foundation::String& name,
         const foundation::SharedPtr<PropertyValue>& prop, 
@@ -97,8 +96,19 @@ namespace snuffbox
       * @brief The maximum data size contained within an editable value
       */
       static const size_t kMaxDataSize_ = 256;
+      static const int kSpacing_; //!< The spacing between the name and edit
+      static const int kLabelWidth_; //!< The width of the name label
+      static const int kMaxEditWidth_; //!< The maximum width of edit boxes
 
-      PropertyView* view_; //!< The view this value edit is owned by
+      /**
+      * @brief The size of a vector component label
+      */
+      static const int kVectorLabelSize_;
+
+      /**
+      * @brief The maximum spacing between vector components
+      */
+      static const int kVectorSpacing_;
 
       QString name_; //!< The name of this property value edit
 

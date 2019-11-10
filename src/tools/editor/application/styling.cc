@@ -9,50 +9,119 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    const char* Styling::kColorRoles_[Styling::ColorRole::kCount];
+    QColor Styling::kColorRoles_[Styling::ColorRole::kCount];
 
     //--------------------------------------------------------------------------
     void Styling::ApplyStyle(QApplication* app)
     {
       app->setStyle("fusion");
 
-      using Role = QPalette::ColorRole;
-      using Group = QPalette::ColorGroup;
+      using R = QPalette::ColorRole;
+      using G = QPalette::ColorGroup;
+      using CR = ColorRole;
 
-      QPalette palette;
-      palette.setColor(Role::Background, QColor(50, 50, 60));
-      palette.setColor(Role::Base, QColor(30, 30, 40));
-      palette.setColor(Role::Text, QColor(Qt::white));
-      palette.setColor(Role::HighlightedText, QColor(Qt::black));
-      palette.setColor(Role::ButtonText, QColor(Qt::white));
-      palette.setColor(Role::WindowText, QColor(Qt::white));
-      palette.setColor(Role::BrightText, QColor(Qt::white));
-      palette.setColor(Group::Disabled, Role::Text, QColor(Qt::darkGray));
-      palette.setColor(Group::Disabled, Role::Light, QColor(Qt::black));
-      palette.setColor(Role::Button, QColor(55, 70, 80));
-      palette.setColor(Role::Highlight, QColor(50, 200, 0));
-      palette.setColor(Role::ToolTipBase, QColor(200, 255, 100));
-      palette.setColor(Role::ToolTipText, QColor(Qt::black));
+      QPalette p;
+      p.setColor(R::Background, GetStyleColor(CR::kBackground));
+      p.setColor(R::Base, GetStyleColor(CR::kBase));
+      p.setColor(R::Text, GetStyleColor(CR::kText));
+      p.setColor(R::HighlightedText, GetStyleColor(CR::kHighlightedText));
+      p.setColor(R::ButtonText, GetStyleColor(CR::kButtonText));
+      p.setColor(R::WindowText, GetStyleColor(CR::kWindowText));
+      p.setColor(R::BrightText, GetStyleColor(CR::kBrightText));
+      p.setColor(G::Disabled, R::Text, GetStyleColor(CR::kDisabledText));
+      p.setColor(G::Disabled, R::Light, GetStyleColor(CR::kDisabledLight));
+      p.setColor(R::Button, GetStyleColor(CR::kButton));
+      p.setColor(R::Highlight, GetStyleColor(CR::kHighlight));
+      p.setColor(R::ToolTipBase, GetStyleColor(CR::kTooltipBase));
+      p.setColor(R::ToolTipText, GetStyleColor(CR::kTooltipText));
 
-      QToolTip::setPalette(palette);
-
-      app->setPalette(palette);
+      QToolTip::setPalette(p);
+      app->setPalette(p);
     }
 
     //--------------------------------------------------------------------------
-    QString Styling::GetStyleColor(ColorRole role, float a)
+    QColor Styling::GetStyleColor(ColorRole role, int a)
     {
       static bool initialized_roles = false;
       if (initialized_roles == false)
       {
-        kColorRoles_[ColorRole::kSelected] = "rgba(40, 120, 60, %0)";
-        kColorRoles_[ColorRole::kClickable] = "rgba(40, 70, 70, %0)";
-        kColorRoles_[ColorRole::kHighlight] = "rgba(50, 200, 0, %0)";
+        kColorRoles_[ColorRole::kBackground] = QColor(50, 50, 60);
+        kColorRoles_[ColorRole::kBase] = QColor(30, 30, 40);
+        kColorRoles_[ColorRole::kText] = QColor(Qt::white);
+        kColorRoles_[ColorRole::kHighlightedText] = QColor(Qt::black);
+        kColorRoles_[ColorRole::kButtonText] = QColor(Qt::white);
+        kColorRoles_[ColorRole::kWindowText] = QColor(Qt::white);
+        kColorRoles_[ColorRole::kBrightText] = QColor(Qt::white);
+        kColorRoles_[ColorRole::kDisabledText] = QColor(Qt::darkGray);
+        kColorRoles_[ColorRole::kDisabledLight] = QColor(Qt::black);
+        kColorRoles_[ColorRole::kButton] = QColor(55, 70, 80);
+        kColorRoles_[ColorRole::kHighlight] = QColor(50, 200, 0);
+        kColorRoles_[ColorRole::kTooltipBase] = QColor(200, 255, 100);
+        kColorRoles_[ColorRole::kTooltipText] = QColor(Qt::black);
+        kColorRoles_[ColorRole::kSelected] = QColor(40, 120, 60);
+        kColorRoles_[ColorRole::kClickable] = QColor(40, 70, 70);
+        kColorRoles_[ColorRole::kXAxis] = QColor(200, 30, 30);
+        kColorRoles_[ColorRole::kYAxis] = QColor(0, 125, 0);
+        kColorRoles_[ColorRole::kZAxis] = QColor(0, 125, 255);
+        kColorRoles_[ColorRole::kWAxis] = QColor(Qt::black);
+
         initialized_roles = true;
       }
 
-      QString format = kColorRoles_[role];
-      return format.arg(std::to_string(a).c_str());
+      QColor col = kColorRoles_[role];
+      col.setAlpha(a);
+
+      return col;
+    }
+
+    //--------------------------------------------------------------------------
+    QString Styling::GetCSSColor(const QColor& color)
+    {
+      return QString("rgba(%0, %1, %2, %3)").arg(
+        QString::number(color.red()), 
+        QString::number(color.green()), 
+        QString::number(color.blue()), 
+        QString::number(static_cast<float>(color.alpha()) / 255.0f));
+    }
+
+    //--------------------------------------------------------------------------
+    QString Styling::GetStyleColorCSS(ColorRole role, int a)
+    {
+      QColor color = GetStyleColor(role, a);
+      return GetCSSColor(color);
+    }
+
+    //--------------------------------------------------------------------------
+    QString Styling::GradientCSS(
+      const QColor& a, 
+      const QColor& b, 
+      bool horizontal)
+    {
+      float x1 = 0.0f;
+      float y1 = 0.0f;
+
+      float x2 = horizontal == true ? 1.0f : 0.0f;
+      float y2 = horizontal == true ? 0.0f : 1.0f;
+
+      QString css_a = GetCSSColor(a);
+      QString css_b = GetCSSColor(b);
+
+      QString format = 
+        "qlineargradient("
+        "spread: pad,"
+        "x1: %0,"
+        "y1: %1,"
+        "x2: %2,"
+        "y2: %3,"
+        "stop: 0 %4, stop: 1 %5);";
+
+      return format.arg(
+        QString::number(x1), 
+        QString::number(y1), 
+        QString::number(x2),
+        QString::number(y2), 
+        css_a, 
+        css_b);
     }
   }
 }

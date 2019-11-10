@@ -164,10 +164,10 @@ namespace snuffbox
     void AssetBrowserItem::SetHighlighted(bool highlighted)
     {
       QString highlight_col = 
-        Styling::GetStyleColor(Styling::ColorRole::kHighlight);
+        Styling::GetStyleColorCSS(Styling::ColorRole::kHighlight);
 
       QString highlight_col_bg =
-        Styling::GetStyleColor(Styling::ColorRole::kHighlight, 0.4f);
+        Styling::GetStyleColorCSS(Styling::ColorRole::kHighlight, 100);
 
       QString style = highlighted == true ?
         QString(
