@@ -155,6 +155,10 @@ namespace snuffbox
 
       /**
       * @see EntityCommand::RedoImpl
+      *
+      * @remarks This temporarily stops the signal blocking during execution
+      *          so that the hierarchy can emit a signal of a selection change
+      *          in the case a selected entity was deleted
       */
       void RedoImpl() override;
 
@@ -162,12 +166,6 @@ namespace snuffbox
       * @see EntityCommand::UndoImpl
       */
       void UndoImpl() override;
-
-      /**
-      * @brief Makes sure the deleted entity is reparented to its original
-      *        entity
-      */
-      void PostUndo() override;
 
     private:
 

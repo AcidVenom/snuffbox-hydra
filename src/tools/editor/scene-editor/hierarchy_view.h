@@ -220,6 +220,15 @@ namespace snuffbox
       */
       HierarchyViewItem* GetSelectedItem() const;
 
+      /**
+      * @brief Called when a specific entity has been deleted; makes sure
+      *        the entity is deselected if the currently selected item was
+      *        containing that deleted entity
+      *
+      * @param[in] ent The entity that was deleted
+      */
+      void OnEntityDeleted(engine::Entity* ent);
+
     protected slots:
 
       /**

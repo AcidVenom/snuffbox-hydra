@@ -158,6 +158,10 @@ namespace snuffbox
       foundation::SaveArchive archive;
       archive(ent);
 
+      hierarchy->blockSignals(false);
+      hierarchy->OnEntityDeleted(ent);
+      hierarchy->blockSignals(true);
+
       serialization_data_ = archive.ToMemory().c_str();
       ent->Destroy();
     }
@@ -186,15 +190,6 @@ namespace snuffbox
 
         HierarchyViewItem* self = GetFromUUID(uuid());
         hierarchy->UpdateParentIndex(self);
-      }
-    }
-
-    //--------------------------------------------------------------------------
-    void DeleteEntityCommand::PostUndo()
-    {
-      if (deleted_from_.IsNull() == false)
-      {
-        
       }
     }
 

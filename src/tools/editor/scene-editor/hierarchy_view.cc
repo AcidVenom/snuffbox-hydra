@@ -559,6 +559,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::OnEntityDeleted(engine::Entity* ent)
+    {
+      HierarchyViewItem* item = GetSelectedItem();
+      if (item != nullptr && ent == item->entity())
+      {
+        emit ItemSelectionChanged(nullptr);
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::CustomContextMenu(const QPoint& pos)
     {
       hovered_item_ = static_cast<HierarchyViewItem*>(itemAt(pos));
@@ -628,11 +638,6 @@ namespace snuffbox
         to_delete->uuid(),
         this, 
         delete_index);
-
-      if (hovered_item_ == GetSelectedItem())
-      {
-        emit ItemSelectionChanged(nullptr);
-      }
 
       undo_stack_.push(command);
     }
