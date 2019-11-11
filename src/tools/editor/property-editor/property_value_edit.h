@@ -75,15 +75,6 @@ namespace snuffbox
       QWidget* CreateWidget();
 
       /**
-      * @brief Creates a vector edit widget
-      *
-      * @param[in] length The length of the input vector
-      *
-      * @return The created widget
-      */
-      QWidget* CreateVectorEdit(int length);
-
-      /**
       * @brief Updates the value within this property value edit
       *
       * @param[in] new_data The new data to set
@@ -100,16 +91,6 @@ namespace snuffbox
       static const int kLabelWidth_; //!< The width of the name label
       static const int kMaxEditWidth_; //!< The maximum width of edit boxes
 
-      /**
-      * @brief The size of a vector component label
-      */
-      static const int kVectorLabelSize_;
-
-      /**
-      * @brief The maximum spacing between vector components
-      */
-      static const int kVectorSpacing_;
-
       QString name_; //!< The name of this property value edit
 
       void* object_; //!< The object this property belongs to
@@ -123,7 +104,7 @@ namespace snuffbox
       * @brief The old data of the assigned property, used to update the
       *        value edit accordingly
       */
-      uint8_t* old_data_[kMaxDataSize_];
+      uint8_t old_data_[kMaxDataSize_];
 
       EditTypes type_; //!< The edit type for this value edit
       QWidget* widget_; //!< The widget contained in this value edit

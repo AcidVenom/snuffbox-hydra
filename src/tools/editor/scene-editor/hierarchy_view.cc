@@ -522,6 +522,8 @@ namespace snuffbox
       {
         selectionModel()->clearSelection();
       }
+
+      QTreeWidget::mouseReleaseEvent(evt);
     }
 
     //--------------------------------------------------------------------------

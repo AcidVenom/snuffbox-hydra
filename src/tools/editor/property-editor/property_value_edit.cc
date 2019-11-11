@@ -1,6 +1,9 @@
 #include "tools/editor/property-editor/property_value_edit.h"
 
 #include "tools/editor/property-editor/property_value.h"
+#include "tools/editor/property-editor/property_vector_edit.h"
+#include "tools/editor/property-editor/property_number_edit.h"
+
 #include "tools/editor/application/styling.h"
 
 #include <QCheckBox>
@@ -15,12 +18,9 @@ namespace snuffbox
   namespace editor
   {
     //--------------------------------------------------------------------------
-    const size_t PropertyValueEdit::kMaxDataSize_;
     const int PropertyValueEdit::kSpacing_ = 20;
     const int PropertyValueEdit::kLabelWidth_ = 80;
     const int PropertyValueEdit::kMaxEditWidth_ = 180;
-    const int PropertyValueEdit::kVectorLabelSize_ = 21;
-    const int PropertyValueEdit::kVectorSpacing_ = 5;
 
     //--------------------------------------------------------------------------
     PropertyValueEdit::PropertyValueEdit(
@@ -105,10 +105,14 @@ namespace snuffbox
       name_label->setContentsMargins(0, 0, 0, 0);
 
       row_layout->addWidget(name_label);
-      row_layout->addWidget(CreateWidget());
+
+      widget_ = CreateWidget();
+      row_layout->addWidget(widget_);
 
       row->setLayout(row_layout);
       setLayout(main_layout);
+
+      Update();
     }
 
     //--------------------------------------------------------------------------
@@ -124,7 +128,7 @@ namespace snuffbox
       {
         if (prop_->GetRaw(object_, new_data, &required) == true)
         {
-          changed = memcmp(old_data_, new_data, required) == 0;
+          changed = memcmp(old_data_, new_data, required) != 0;
         }
       }
 
@@ -150,6 +154,10 @@ namespace snuffbox
         break;
 
       case EditTypes::kNumberEdit:
+        widget = new PropertyNumberEdit(this);
+        widget->setMaximumWidth(kMaxEditWidth_);
+        break;
+
       case EditTypes::kLineEdit:
         widget = new QLineEdit(this);
         widget->setMaximumWidth(kMaxEditWidth_);
@@ -158,70 +166,89 @@ namespace snuffbox
       case EditTypes::kVec2Edit:
       case EditTypes::kVec3Edit:
       case EditTypes::kVec4Edit:
-        widget = CreateVectorEdit(
-          static_cast<int>(type_) - static_cast<int>(EditTypes::kVec2Edit) + 2);
+        widget = new PropertyVectorEdit(
+          static_cast<int>(type_) - static_cast<int>(EditTypes::kVec2Edit) + 2,
+          this);
         break;
       }
 
       if (widget != nullptr)
       {
         widget->setContentsMargins(0, 0, 0, 0);
+
+        if (type_ == EditTypes::kComboBox)
+        {
+          const foundation::Vector<foundation::String>& combo_values =
+            prop_->combo_box_values();
+
+          QComboBox* combo_box = static_cast<QComboBox*>(widget);
+          for (int i = 0; i < combo_values.size(); ++i)
+          {
+            combo_box->addItem(combo_values.at(i).c_str());
+          }
+        }
       }
 
       return widget;
     }
 
     //--------------------------------------------------------------------------
-    QWidget* PropertyValueEdit::CreateVectorEdit(int length)
-    {
-      QWidget* frame = new QWidget(this);
-      QHBoxLayout* layout = new QHBoxLayout(frame);
-
-      const char* label_texts[] =
-      {
-        "x", "y", "z", "w"
-      };
-
-      QString stylesheet = 
-        "background: %0; color: white; border-radius: 5px;";
-
-      int first_col = Styling::ColorRole::kXAxis;
-
-      for (int i = 0; i < length; ++i)
-      {
-        const char* label_text = label_texts[i];
-
-        QLabel* label = new QLabel(frame);
-        label->setText(label_text);
-        label->setAlignment(Qt::AlignCenter);
-        label->setFixedSize(kVectorLabelSize_, kVectorLabelSize_);
-
-        QString color = Styling::GetStyleColorCSS(
-          static_cast<Styling::ColorRole>(first_col + i));
-
-        label->setStyleSheet(stylesheet.arg(color));
-
-        layout->addWidget(label);
-
-        QLineEdit* edit = new QLineEdit(frame);
-        edit->setFixedWidth(kMaxEditWidth_ * 0.5);
-
-        layout->addWidget(edit);
-      }
-
-      layout->setContentsMargins(0, 0, 0, 0);
-      layout->setSpacing(kVectorSpacing_);
-
-      frame->setLayout(layout);
-      frame->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-
-      return frame;
-    }
-
-    //--------------------------------------------------------------------------
     void PropertyValueEdit::UpdateValue(const uint8_t* data)
     {
       memcpy(old_data_, data, kMaxDataSize_);
+
+      if (widget_ == nullptr)
+      {
+        return;
+      }
+
+      switch (type_)
+      {
+      case EditTypes::kCheckBox:
+        {
+          bool checked = *reinterpret_cast<const bool*>(data);
+          static_cast<QCheckBox*>(widget_)->setChecked(checked);
+        }
+        break;
+
+      case EditTypes::kComboBox:
+        {
+          EnumProperty enum_idx = *reinterpret_cast<const EnumProperty*>(data);
+          static_cast<QComboBox*>(widget_)->setCurrentIndex(enum_idx);
+        }
+        break;
+
+      case EditTypes::kNumberEdit:
+        {
+          double number = *reinterpret_cast<const double*>(data);
+          static_cast<PropertyNumberEdit*>(widget_)->setValue(number);
+        }
+        break;
+
+      case EditTypes::kLineEdit:
+        {
+          foundation::String value = reinterpret_cast<const char*>(data);
+          static_cast<QLineEdit*>(widget_)->setText(value.c_str());
+        }
+        break;
+
+      case EditTypes::kVec2Edit:
+      case EditTypes::kVec3Edit:
+      case EditTypes::kVec4Edit:
+        {
+          int start = static_cast<int>(EditTypes::kVec2Edit);
+          int length = static_cast<int>(type_) - start + 2;
+
+          glm::vec4 value = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+          for (int i = 0; i < length; ++i)
+          {
+            value[i] = reinterpret_cast<const float*>(data)[i];
+          }
+
+          static_cast<PropertyVectorEdit*>(widget_)->SetValue(value);
+        }
+      }
     }
   }
 }
