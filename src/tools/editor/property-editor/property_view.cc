@@ -60,6 +60,11 @@ namespace snuffbox
     {
       Clear();
 
+      if (ent == nullptr)
+      {
+        return;
+      }
+
       const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
 
       PropertyGroupView* view = 
@@ -106,7 +111,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void PropertyView::Update()
+    void PropertyView::Refresh()
     {
 
     }

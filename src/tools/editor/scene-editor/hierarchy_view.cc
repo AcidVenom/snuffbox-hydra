@@ -11,6 +11,7 @@
 
 #include <QMenu>
 #include <QDropEvent>
+#include <QMetaType>
 
 namespace snuffbox
 {
@@ -68,6 +69,12 @@ namespace snuffbox
         &QTreeWidget::itemChanged,
         this,
         &HierarchyView::OnItemChanged);
+
+      connect(
+        this,
+        &QTreeWidget::itemSelectionChanged,
+        this,
+        &HierarchyView::OnSelectionChanged);
 
       RefreshForCurrentScene();
     }
@@ -509,6 +516,15 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::mouseReleaseEvent(QMouseEvent* evt)
+    {
+      if (itemAt(evt->pos()) == nullptr)
+      {
+        selectionModel()->clearSelection();
+      }
+    }
+
+    //--------------------------------------------------------------------------
     HierarchyViewItem* HierarchyView::CreateNewEntity()
     {
       engine::Entity* ent = foundation::Memory::Construct<engine::Entity>(
@@ -528,6 +544,16 @@ namespace snuffbox
       {
         entity_to_item_.erase(it);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    HierarchyViewItem* HierarchyView::GetSelectedItem() const
+    {
+      QList<QTreeWidgetItem*> selected_items = selectedItems();
+      HierarchyViewItem* selected_item = selected_items.size() == 0 ?
+        nullptr : static_cast<HierarchyViewItem*>(selected_items.first());
+
+      return selected_item;
     }
 
     //--------------------------------------------------------------------------
@@ -594,12 +620,25 @@ namespace snuffbox
         delete_index = indexOfTopLevelItem(hovered_item_);
       }
 
+      engine::Entity* to_delete = hovered_item_->entity();
+
       DeleteEntityCommand* command = new DeleteEntityCommand(
-        hovered_item_->entity()->uuid(), 
+        to_delete->uuid(),
         this, 
         delete_index);
 
+      if (hovered_item_ == GetSelectedItem())
+      {
+        emit ItemSelectionChanged(nullptr);
+      }
+
       undo_stack_.push(command);
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::OnSelectionChanged()
+    {
+      emit ItemSelectionChanged(GetSelectedItem());
     }
 
     //--------------------------------------------------------------------------

@@ -192,6 +192,14 @@ namespace snuffbox
       void dropEvent(QDropEvent* evt) override;
 
       /**
+      * @brief Makes sure all entities are deselected when not clicking
+      *        on a specific entity item
+      *
+      * @param[in] evt The mouse event
+      */
+      void mouseReleaseEvent(QMouseEvent* evt) override;
+
+      /**
       * @brief Called after the command from "Create entity" resolves
       *        or a delete undo has been done
       *
@@ -205,6 +213,12 @@ namespace snuffbox
       * @param[in] item The item to unmap
       */
       void UnmapItem(const HierarchyViewItem* item);
+
+      /**
+      * @return The currently selected entity item, or nullptr if there is no
+      *         current selection
+      */
+      HierarchyViewItem* GetSelectedItem() const;
 
     protected slots:
 
@@ -235,6 +249,11 @@ namespace snuffbox
       */
       void OnDeleteEntity();
 
+      /**
+      * @brief Called when the selection within the tree model has been changed
+      */
+      void OnSelectionChanged();
+
     public slots:
 
       /**
@@ -254,6 +273,19 @@ namespace snuffbox
       * @brief Undo the last entity command
       */
       void Undo();
+
+    signals:
+      
+      /**
+      * @brief Called when the current selection has changed
+      *
+      * @remarks This signal is also emitted with a nullptr if the current
+      *          selection was valid, but is invalidated due to a deselect
+      *          or entity delete
+      *
+      * @param[in] ent The entity item that was selected
+      */
+      void ItemSelectionChanged(HierarchyViewItem* item);
 
     private:
 

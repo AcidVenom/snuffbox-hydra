@@ -57,11 +57,13 @@ namespace snuffbox
       */
       void ShowForEntity(engine::Entity* ent);
 
+    protected:
+
       /**
       * @brief Updates all current property value edits if they have been
       *        changed
       */
-      void Update();
+      void Refresh();
 
       /**
       * @brief Clears the property view after deselection

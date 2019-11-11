@@ -5,6 +5,7 @@
 #include "tools/editor/editor-widgets/console_widget.h"
 #include "tools/editor/asset-browser/asset_browser.h"
 #include "tools/editor/scene-editor/hierarchy_view.h"
+#include "tools/editor/scene-editor/hierarchy_view_item.h"
 #include "tools/editor/property-editor/property_view.h"
 
 #include "tools/editor/asset-browser/asset_icon.h"
@@ -102,6 +103,15 @@ namespace snuffbox
         &MainWindow::Redone,
         hierarchy,
         &HierarchyView::Redo);
+
+      connect(
+        hierarchy,
+        &HierarchyView::ItemSelectionChanged,
+        properties,
+        [properties](HierarchyViewItem* item)
+        {
+          properties->ShowForEntity(item == nullptr ? nullptr : item->entity());
+        });
 
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, scene_widget);
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
