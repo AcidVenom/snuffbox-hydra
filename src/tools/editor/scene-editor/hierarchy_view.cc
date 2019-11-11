@@ -264,6 +264,12 @@ namespace snuffbox
         }
       }
 
+      bool was_blocked = signalsBlocked() == true;
+      if (was_blocked == true)
+      {
+        blockSignals(false);
+      }
+
       for (int i = 0; i < count; ++i)
       {
         engine::Entity* removed_entity = to_remove.at(i);
@@ -271,8 +277,14 @@ namespace snuffbox
 
         if (it != entity_to_item_.end())
         {
+          OnEntityDeleted(removed_entity);
           delete it->second;
         }
+      }
+
+      if (was_blocked == true)
+      {
+        blockSignals(true);
       }
     }
 
