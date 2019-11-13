@@ -25,6 +25,8 @@ namespace snuffbox
       length_(length)
     {
       memset(edits_, 0x0, sizeof(QDoubleSpinBox*) * 4);
+      memset(old_values_, 0, sizeof(double) * 4);
+
       length_ = std::max(0, std::min(length_, 4));
 
       QHBoxLayout* layout = new QHBoxLayout(this);
@@ -58,6 +60,11 @@ namespace snuffbox
         PropertyNumberEdit* edit = new PropertyNumberEdit(this);
         edit->setFixedWidth(kVectorEditWidth_);
 
+        connect(edit, &PropertyNumberEdit::ValueChanged, this, [=](double val)
+        {
+          emit ValueChanged(i, val);
+        });
+
         layout->addWidget(edit);
 
         edits_[i] = edit;
@@ -83,7 +90,8 @@ namespace snuffbox
         }
 
         double component_value = static_cast<double>(value[i]);
-        spin_box->setValue(component_value);
+        old_values_[i] = component_value;
+        spin_box->SetValue(component_value);
       }
     }
 
@@ -101,7 +109,7 @@ namespace snuffbox
           return result;
         }
 
-        result[i] = static_cast<float>(spin_box->value());
+        result[i] = static_cast<float>(spin_box->Value());
       }
 
       return result;

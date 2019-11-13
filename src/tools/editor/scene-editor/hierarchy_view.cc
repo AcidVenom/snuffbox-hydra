@@ -72,7 +72,7 @@ namespace snuffbox
 
       connect(
         this,
-        &QTreeWidget::itemSelectionChanged,
+        &QTreeWidget::itemPressed,
         this,
         &HierarchyView::OnSelectionChanged);
 
@@ -416,6 +416,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::Clear()
     {
+      ClearSelection();
       clear();
       entity_to_item_.clear();
       undo_stack_.clear();
@@ -532,7 +533,7 @@ namespace snuffbox
     {
       if (itemAt(evt->pos()) == nullptr)
       {
-        selectionModel()->clearSelection();
+        ClearSelection();
       }
 
       QTreeWidget::mouseReleaseEvent(evt);
@@ -552,6 +553,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::UnmapItem(const HierarchyViewItem* item)
     {
+      if (GetSelectedItem() == item)
+      {
+        ClearSelection();
+      }
+
       EntityMap::iterator it = entity_to_item_.find(item->entity());
 
       if (it != entity_to_item_.end())
@@ -576,8 +582,15 @@ namespace snuffbox
       HierarchyViewItem* item = GetSelectedItem();
       if (item != nullptr && ent == item->entity())
       {
-        emit ItemSelectionChanged(nullptr);
+        ClearSelection();
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::ClearSelection()
+    {
+      selectionModel()->clearSelection();
+      emit ItemSelectionChanged(nullptr);
     }
 
     //--------------------------------------------------------------------------
@@ -655,9 +668,9 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void HierarchyView::OnSelectionChanged()
+    void HierarchyView::OnSelectionChanged(QTreeWidgetItem* item, int column)
     {
-      emit ItemSelectionChanged(GetSelectedItem());
+      emit ItemSelectionChanged(static_cast<HierarchyViewItem*>(item));
     }
 
     //--------------------------------------------------------------------------
@@ -687,6 +700,12 @@ namespace snuffbox
       }
 
       undo_stack_.redo();
+    }
+
+    //--------------------------------------------------------------------------
+    void HierarchyView::PushUndoCommand(QUndoCommand* cmd)
+    {
+      undo_stack_.push(cmd);
     }
   }
 }

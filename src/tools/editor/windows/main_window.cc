@@ -37,7 +37,8 @@ namespace snuffbox
       QMainWindow(parent),
       app_(app),
       game_view_(nullptr),
-      asset_browser_(nullptr)
+      asset_browser_(nullptr),
+      properties_(nullptr)
     {
       PropertyMappings::InitializeMappings();
 
@@ -81,8 +82,8 @@ namespace snuffbox
       scene_widget->setObjectName(QStringLiteral("MainWindowSceneDock"));
 
       QDockWidget* property_widget = new QDockWidget(this);
-      PropertyView* properties = new PropertyView(hierarchy, property_widget);
-      property_widget->setWidget(properties);
+      properties_ = new PropertyView(hierarchy, property_widget);
+      property_widget->setWidget(properties_);
       property_widget->setWindowTitle(QStringLiteral("Properties"));
       property_widget->setObjectName(QStringLiteral("MainWindowPropertyDock"));
 
@@ -107,10 +108,11 @@ namespace snuffbox
       connect(
         hierarchy,
         &HierarchyView::ItemSelectionChanged,
-        properties,
-        [properties](HierarchyViewItem* item)
+        properties_,
+        [this](HierarchyViewItem* item)
         {
-          properties->ShowForEntity(item == nullptr ? nullptr : item->entity());
+          properties_->ShowForEntity(
+            item == nullptr ? nullptr : item->entity());
         });
 
       addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, scene_widget);
@@ -332,6 +334,12 @@ namespace snuffbox
       const QString& full_path)
     {
       app_->asset_importer()->ImportAsset(type, full_path.toLatin1().data());
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnUpdate()
+    {
+      properties_->Update();
     }
 
     //--------------------------------------------------------------------------

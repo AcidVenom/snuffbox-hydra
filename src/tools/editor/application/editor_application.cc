@@ -133,6 +133,8 @@ namespace snuffbox
         builder.IdleNotification();
 
         CheckForBuildChanges();
+
+        main_window_->OnUpdate();
       }
 
       builder.Shutdown();

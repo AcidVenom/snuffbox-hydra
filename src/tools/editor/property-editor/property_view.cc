@@ -67,8 +67,13 @@ namespace snuffbox
 
       const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
 
-      PropertyGroupView* view = 
-        new PropertyGroupView(QStringLiteral("Entity"), entity_map, ent);
+      PropertyGroupView* view = new PropertyGroupView(
+        hierarchy_,
+        QStringLiteral("Entity"), 
+        entity_map, 
+        ent, 
+        nullptr, 
+        this);
 
       layout_->addWidget(view);
       views_.push_back(view);
@@ -101,8 +106,13 @@ namespace snuffbox
         for (int i = 0; i < components.size(); ++i)
         {
           engine::IComponent* component = components.at(i);
-          view = 
-            new PropertyGroupView(header_names[i], component_map, component);
+          view = new PropertyGroupView(
+            hierarchy_,
+            header_names[i], 
+            component_map, 
+            ent, 
+            component,
+            this);
 
           layout_->addWidget(view);
           views_.push_back(view);
@@ -111,9 +121,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void PropertyView::Refresh()
+    void PropertyView::Update()
     {
-
+      for (int i = 0; i < views_.size(); ++i)
+      {
+        views_.at(i)->UpdateValues();
+      }
     }
 
     //--------------------------------------------------------------------------

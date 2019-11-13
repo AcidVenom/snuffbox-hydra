@@ -1,5 +1,7 @@
 #pragma once
 
+#include <engine/definitions/components.h>
+
 #include <foundation/containers/string.h>
 #include <foundation/memory/memory.h>
 
@@ -7,10 +9,18 @@
 
 namespace snuffbox
 {
+  namespace engine
+  {
+    class Entity;
+    class IComponent;
+  }
+
   namespace editor
   {
     class PropertyView;
     class PropertyValue;
+    class PropertyEntityCommand;
+    class HierarchyView;
 
     /**
     * @brief Used to edit property values with their respective Qt widget
@@ -45,18 +55,21 @@ namespace snuffbox
     public:
 
       /**
-      * @brief Construct through a property view and the widget's parent
+      * @brief Construct through a hierarchy view and the widget's parent
       *
-      * @param[in] view The view this value edit is owned by
-      * @param[in] object The object this property belongs to
+      * @param[in] hierarchy The hierarchy the editable entity lives in
+      * @param[in] entity The entity this property edit belongs to
+      * @param[in] component The component this property belongs to
       * @param[in] name The name of the property that was in the mapping
       * @param[in] prop The property this edit operates on
       * @param[in] parent The parent of this value edit
       */
       PropertyValueEdit(
-        void* object,
+        HierarchyView* hierarchy,
+        engine::Entity* entity,
+        engine::IComponent* component,
         const foundation::String& name,
-        const foundation::SharedPtr<PropertyValue>& prop, 
+        const foundation::SharedPtr<PropertyValue>& prop,
         QWidget* parent = nullptr);
 
       /**
@@ -81,6 +94,53 @@ namespace snuffbox
       */
       void UpdateValue(const uint8_t* new_data);
 
+      /**
+      * @return Returns the actual object to be modified, which can either
+      *         be the entity or the component
+      */
+      void* GetRawObject() const;
+
+      /**
+      * @return A new set command to set a value within
+      */
+      PropertyEntityCommand* CreateSetCommand();
+
+    protected slots:
+
+      /**
+      * @brief Called when a checkbox has been toggled
+      */
+      void OnCheckboxChanged(bool toggled);
+
+      /**
+      * @brief Called when the index within a combo box value changes
+      *
+      * @param[in] index The new index
+      */
+      void OnComboBoxChanged(int index);
+
+      /**
+      * @brief Called when a number within a number edit value changes
+      *
+      * @param[in] number The new number
+      */
+      void OnNumberChanged(double number);
+
+      /**
+      * @brief Called when a string value edit has changed
+      *
+      * @param[in] str The new value
+      */
+      void OnStringChanged(const QString& str);
+
+      /**
+      * @brief Called when a vector value has changed
+      *
+      * @param[in] comp The component that was changed
+      * @param[in] value The new value of that component
+      */
+      void OnVectorChanged(int comp, double value);
+
     private:
 
       /**
@@ -93,21 +153,24 @@ namespace snuffbox
 
       QString name_; //!< The name of this property value edit
 
-      void* object_; //!< The object this property belongs to
+      HierarchyView* hierarchy_; //!< The hierarchy to operate on
+      engine::Entity* entity_; //!< The entity to edit with this value
+      engine::IComponent* component_; //!< The component to edit, if any
 
       /**
       * @brief The property this edit operates on
       */
       foundation::SharedPtr<PropertyValue> prop_;
 
+      EditTypes type_; //!< The edit type for this value edit
+
+      QWidget* widget_; //!< The widget contained in this value edit
+
       /**
       * @brief The old data of the assigned property, used to update the
       *        value edit accordingly
       */
       uint8_t old_data_[kMaxDataSize_];
-
-      EditTypes type_; //!< The edit type for this value edit
-      QWidget* widget_; //!< The widget contained in this value edit
     };
   }
 }

@@ -12,7 +12,8 @@ namespace snuffbox
     *        step increments of 0.01f
     *
     * @remarks This class also makes sure '.' are always used as decimal
-    *          separator
+    *          separator. Another nice thing is that the 'editingFinished'
+    *          signal will not be emitted twice from this..
     *
     * @author Daniel Konings
     */
@@ -40,7 +41,32 @@ namespace snuffbox
       */
       QString textFromValue(double value) const override;
 
+    public:
+
+      /**
+      * @brief Sets the value of this number edit
+      *
+      * @param[in] val The value to set
+      */
+      void SetValue(double val);
+
+      /**
+      * @return The value of this number edit
+      */
+      double Value() const;
+
+    signals:
+
+      /**
+      * @brief Emitted when the inner value has been changed
+      *
+      * @param[in] value The new value
+      */
+      void ValueChanged(double value);
+
     private:
+
+      double old_value_; //!< The inner value to compare with
 
       static const int kPrecision_; //!< The precision of decimals
       static const double kStepSize_; //!< The step size increment

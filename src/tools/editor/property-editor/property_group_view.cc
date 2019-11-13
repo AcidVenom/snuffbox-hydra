@@ -52,9 +52,11 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     PropertyGroupView::PropertyGroupView(
+      HierarchyView* hierarchy,
       const QString& header,
       const PropertyMap& map,
-      void* object,
+      engine::Entity* entity,
+      engine::IComponent* component,
       QWidget* parent) :
       QWidget(parent)
     {
@@ -138,10 +140,25 @@ namespace snuffbox
         it != map.end();
         ++it)
       {
-        PropertyValueEdit* edit = 
-          new PropertyValueEdit(object, it->first, it->second, inner);
+        PropertyValueEdit* edit = new PropertyValueEdit(
+          hierarchy,
+          entity, 
+          component, 
+          it->first, 
+          it->second, 
+          inner);
 
         inner_layout->addWidget(edit);
+        edits_.push_back(edit);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyGroupView::UpdateValues()
+    {
+      for (int i = 0; i < edits_.size(); ++i)
+      {
+        edits_.at(i)->Update();
       }
     }
   }

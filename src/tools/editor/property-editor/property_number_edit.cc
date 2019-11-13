@@ -18,15 +18,43 @@ namespace snuffbox
       setDecimals(kPrecision_);
       setLocale(QLocale::English);
       setSingleStep(kStepSize_);
+
+      connect(this, &QDoubleSpinBox::editingFinished, this, [=]()
+      {
+        clearFocus();
+
+        double val = value();
+
+        if (val == old_value_)
+        {
+          return;
+        }
+
+        old_value_ = val;
+        emit ValueChanged(val);
+      });
     }
 
     //--------------------------------------------------------------------------
     QString PropertyNumberEdit::textFromValue(double value) const
     {
       QString stringified =
-        locale().toString(value, 'g', QLocale::FloatingPointShortest);
+        locale().toString(value, 'g', kPrecision_);
 
       return stringified.replace(',', "");
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyNumberEdit::SetValue(double val)
+    {
+      old_value_ = val;
+      setValue(val);
+    }
+
+    //--------------------------------------------------------------------------
+    double PropertyNumberEdit::Value() const
+    {
+      return value();
     }
   }
 }

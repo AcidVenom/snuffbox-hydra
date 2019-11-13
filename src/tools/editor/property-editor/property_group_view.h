@@ -2,13 +2,24 @@
 
 #include "tools/editor/property-editor/property_mappings.h"
 
+#include <foundation/containers/vector.h>
+
 #include <QWidget>
 #include <QString>
 
 namespace snuffbox
 {
+  namespace engine
+  {
+    class Entity;
+    class IComponent;
+  }
+
   namespace editor
   {
+    class HierarchyView;
+    class PropertyValueEdit;
+
     /**
     * @brief Used to group multiple PropertyValueEdit objects together
     *        for e.g. an entity or component, to be used in the PropertyView
@@ -28,16 +39,26 @@ namespace snuffbox
       *
       * @param[in] header The header text
       * @param[in] map The map to retrieve property values from
-      * @param[in] object The object to operate on
+      * @param[in] entity The entity to operate on
+      * @param[in] component The component to operate on
       * @param[in] parent The parent of this widget, default = nullptr
       */
       PropertyGroupView(
+        HierarchyView* hierarchy,
         const QString& header, 
         const PropertyMap& map,
-        void* object,
+        engine::Entity* entity,
+        engine::IComponent* component,
         QWidget* parent = nullptr);
 
+      /**
+      * @brief Updates all values currently in the view
+      */
+      void UpdateValues();
+
     private:
+
+      foundation::Vector<PropertyValueEdit*> edits_; //!< All value edits
 
       static const int kHeaderHeight_; //!< The height of the header
       static const int kHeaderPadding_; //!< The padding of the header

@@ -14,6 +14,7 @@ namespace snuffbox
     class EditorApplication;
     class AssetBrowser;
     class GameView;
+    class PropertyView;
 
     /**
     * @brief The main window that contains all main editor functionalities
@@ -123,6 +124,11 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Called when a frame has finished
+      */
+      void OnUpdate();
+
+      /**
       * @brief Stop redirecting log output
       */
       ~MainWindow();
@@ -132,6 +138,7 @@ namespace snuffbox
       EditorApplication* app_; //!< The editor application
       GameView* game_view_; //!< The game view
       AssetBrowser* asset_browser_; //!< The asset browser
+      PropertyView* properties_; //!< The current property view
 
       static const int kMinWidth_; //!< The minimum width of the window
       static const int kMinHeight_; //!< The minumum height of the window

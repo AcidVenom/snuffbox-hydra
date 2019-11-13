@@ -229,6 +229,11 @@ namespace snuffbox
       */
       void OnEntityDeleted(engine::Entity* ent);
 
+      /**
+      * @brief Clear the current selection
+      */
+      void ClearSelection();
+
     protected slots:
 
       /**
@@ -260,8 +265,11 @@ namespace snuffbox
 
       /**
       * @brief Called when the selection within the tree model has been changed
+      *
+      * @param[in] item The item that was clicked
+      * @param[in] column The column of the item that was clicked
       */
-      void OnSelectionChanged();
+      void OnSelectionChanged(QTreeWidgetItem* item, int column);
 
     public slots:
 
@@ -295,6 +303,15 @@ namespace snuffbox
       * @param[in] ent The entity item that was selected
       */
       void ItemSelectionChanged(HierarchyViewItem* item);
+
+    public:
+
+      /**
+      * @brief Pushes an undo command onto the undo stack
+      *
+      * @param[in] cmd The command to push
+      */
+      void PushUndoCommand(QUndoCommand* cmd);
 
     private:
 

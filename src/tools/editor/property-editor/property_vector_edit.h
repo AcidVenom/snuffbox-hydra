@@ -49,10 +49,26 @@ namespace snuffbox
       */
       glm::vec4 Value() const;
 
+    signals:
+
+      /**
+      * @brief Emitted when a single component value has changed
+      *
+      * @param[in] component The component that was changed
+      * @param[in] value The new value for that component
+      */
+      void ValueChanged(int component, double value);
+
     private:
 
       int length_; //!< The length of this vector edit
       PropertyNumberEdit* edits_[4]; //!< The boxes for editing
+
+      /**
+      * @brief Keep track of the old values to make sure we only emit a
+      *        "ValueChanged" signal if the data is actually different
+      */
+      double old_values_[4];
 
       /**
       * @brief The size of a vector component label

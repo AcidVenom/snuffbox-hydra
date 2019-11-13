@@ -3,12 +3,17 @@
 #include "tools/editor/property-editor/property_value.h"
 #include "tools/editor/property-editor/property_vector_edit.h"
 #include "tools/editor/property-editor/property_number_edit.h"
+#include "tools/editor/property-editor/property_line_edit.h"
+
+#include "tools/editor/scene-editor/entity_commands.h"
+#include "tools/editor/scene-editor/hierarchy_view.h"
 
 #include "tools/editor/application/styling.h"
 
+#include <engine/ecs/entity.h>
+
 #include <QCheckBox>
 #include <QComboBox>
-#include <QLineEdit>
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -24,12 +29,16 @@ namespace snuffbox
 
     //--------------------------------------------------------------------------
     PropertyValueEdit::PropertyValueEdit(
-      void* object,
+      HierarchyView* hierarchy,
+      engine::Entity* ent,
+      engine::IComponent* component,
       const foundation::String& name,
       const foundation::SharedPtr<PropertyValue>& prop,
       QWidget* parent) :
       QWidget(parent),
-      object_(object),
+      hierarchy_(hierarchy),
+      entity_(ent),
+      component_(component),
       name_(name.c_str()),
       prop_(prop),
       type_(EditTypes::kCount),
@@ -107,6 +116,7 @@ namespace snuffbox
       row_layout->addWidget(name_label);
 
       widget_ = CreateWidget();
+
       row_layout->addWidget(widget_);
 
       row->setLayout(row_layout);
@@ -122,11 +132,12 @@ namespace snuffbox
       memset(new_data, 0, kMaxDataSize_);
 
       bool changed = false;
+      void* object = GetRawObject();
 
       size_t required;
-      if (prop_->GetRaw(object_, nullptr, &required) == true)
+      if (prop_->GetRaw(object, nullptr, &required) == true)
       {
-        if (prop_->GetRaw(object_, new_data, &required) == true)
+        if (prop_->GetRaw(object, new_data, &required) == true)
         {
           changed = memcmp(old_data_, new_data, required) != 0;
         }
@@ -143,32 +154,78 @@ namespace snuffbox
     {
       QWidget* widget = nullptr;
 
+      using PVE = PropertyValueEdit;
+
       switch (type_)
       {
       case EditTypes::kCheckBox:
-        widget = new QCheckBox(this);
+        {
+          QCheckBox* checkbox = new QCheckBox(this);
+          connect(checkbox, &QCheckBox::toggled, this, &PVE::OnCheckboxChanged);
+          widget = checkbox;
+        }
         break;
 
       case EditTypes::kComboBox:
-        widget = new QComboBox(this);
+        {
+          QComboBox* combo = new QComboBox(this);
+          connect(
+            combo, 
+            qOverload<int>(&QComboBox::currentIndexChanged), 
+            this, 
+            &PVE::OnComboBoxChanged);
+          widget = combo;
+        }
         break;
 
       case EditTypes::kNumberEdit:
-        widget = new PropertyNumberEdit(this);
-        widget->setMaximumWidth(kMaxEditWidth_);
+        {
+          PropertyNumberEdit* num = new PropertyNumberEdit(this);
+          connect(num, &PropertyNumberEdit::editingFinished, this, [this, num]()
+          {
+            QSignalBlocker blocker(num);
+            OnNumberChanged(num->value());
+          });
+
+          widget = num;
+          widget->setMaximumWidth(kMaxEditWidth_);
+        }
         break;
 
       case EditTypes::kLineEdit:
-        widget = new QLineEdit(this);
-        widget->setMaximumWidth(kMaxEditWidth_);
+        {
+          PropertyLineEdit* line = new PropertyLineEdit(this);
+          connect(
+            line, 
+            &PropertyLineEdit::ValueChanged, 
+            this, 
+            [this](const QString& value)
+            {
+              OnStringChanged(value);
+            });
+
+          widget = line;
+          widget->setMaximumWidth(kMaxEditWidth_);
+        }
         break;
 
       case EditTypes::kVec2Edit:
       case EditTypes::kVec3Edit:
       case EditTypes::kVec4Edit:
-        widget = new PropertyVectorEdit(
-          static_cast<int>(type_) - static_cast<int>(EditTypes::kVec2Edit) + 2,
-          this);
+        {
+          PropertyVectorEdit* vec = new PropertyVectorEdit(
+            static_cast<int>(type_) - 
+            static_cast<int>(EditTypes::kVec2Edit) + 2,
+            this);
+
+          connect(
+            vec, 
+            &PropertyVectorEdit::ValueChanged, 
+            this, 
+            &PVE::OnVectorChanged);
+
+          widget = vec;
+        }
         break;
       }
 
@@ -202,6 +259,8 @@ namespace snuffbox
         return;
       }
 
+      QSignalBlocker blocker(widget_);
+
       switch (type_)
       {
       case EditTypes::kCheckBox:
@@ -228,7 +287,7 @@ namespace snuffbox
       case EditTypes::kLineEdit:
         {
           foundation::String value = reinterpret_cast<const char*>(data);
-          static_cast<QLineEdit*>(widget_)->setText(value.c_str());
+          static_cast<PropertyLineEdit*>(widget_)->SetValue(value.c_str());
         }
         break;
 
@@ -249,6 +308,131 @@ namespace snuffbox
           static_cast<PropertyVectorEdit*>(widget_)->SetValue(value);
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void* PropertyValueEdit::GetRawObject() const
+    {
+      return component_ == nullptr ? 
+        reinterpret_cast<void*>(entity_) : 
+        reinterpret_cast<void*>(component_);
+    }
+
+    //--------------------------------------------------------------------------
+    PropertyEntityCommand* PropertyValueEdit::CreateSetCommand()
+    {
+      engine::Components component_type = engine::Components::kCount;
+      int component_index = -1;
+
+      if (component_ != nullptr)
+      {
+        int start = static_cast<int>(engine::Components::kTransform);
+        int end = static_cast<int>(engine::Components::kCount);
+
+        for (int c = start; c < end; ++c)
+        {
+          engine::Components type = static_cast<engine::Components>(c);
+          const foundation::Vector<engine::IComponent*>& comps =
+            entity_->GetComponents(type);
+
+          for (int i = 0; i < comps.size(); ++i)
+          {
+            if (comps.at(i) == component_)
+            {
+              component_type = type;
+              component_index = i;
+              break;
+            }
+          }
+
+          if (component_type != engine::Components::kCount)
+          {
+            break;
+          }
+        }
+      }
+
+      const foundation::UUID& uuid = entity_->uuid();
+      foundation::String prop_name = name_.toLatin1().data();
+
+      if (component_index == -1 || component_type == engine::Components::kCount)
+      {
+        return new PropertyEntityCommand(uuid, hierarchy_, prop_name);
+      }
+
+      return new PropertyEntityCommand(
+        uuid, 
+        hierarchy_, 
+        prop_name, 
+        component_type, 
+        component_index);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnCheckboxChanged(bool toggled)
+    {
+      PropertyEntityCommand* cmd = CreateSetCommand();
+      cmd->Set(toggled);
+
+      hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnComboBoxChanged(int index)
+    {
+      PropertyEntityCommand* cmd = CreateSetCommand();
+      cmd->SetComboValue(index);
+
+      hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnNumberChanged(double value)
+    {
+      PropertyEntityCommand* cmd = CreateSetCommand();
+      cmd->Set(value);
+
+      hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnStringChanged(const QString& value)
+    {
+      PropertyEntityCommand* cmd = CreateSetCommand();
+
+      foundation::String str = value.toLatin1().data();
+      cmd->Set(str);
+
+      hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnVectorChanged(int comp, double value)
+    {
+      glm::vec4 vec = static_cast<PropertyVectorEdit*>(widget_)->Value();
+
+      PropertyEntityCommand* cmd = CreateSetCommand();
+      
+      switch (type_)
+      {
+      case EditTypes::kVec2Edit:
+        cmd->Set(glm::vec2(vec.x, vec.y));
+        break;
+
+      case EditTypes::kVec3Edit:
+        cmd->Set(glm::vec3(vec.x, vec.y, vec.z));
+        break;
+
+      case EditTypes::kVec4Edit:
+        cmd->Set(vec);
+        break;
+
+      default:
+        cmd->Set(vec);
+        break;
+      }
+
+      hierarchy_->PushUndoCommand(cmd);
     }
   }
 }
