@@ -156,7 +156,6 @@ namespace snuffbox
         widget->Show();
       });
 
-      layout_->addSpacing(10);
       layout_->addWidget(add_component_);
     }
 
