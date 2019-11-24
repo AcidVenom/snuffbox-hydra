@@ -43,6 +43,7 @@ namespace snuffbox
         kYAxis,
         kZAxis,
         kWAxis,
+        kBlueButton,
         kCount
       };
 

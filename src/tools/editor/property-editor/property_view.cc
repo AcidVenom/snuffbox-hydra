@@ -4,9 +4,13 @@
 #include "tools/editor/property-editor/property_mappings.h"
 #include "tools/editor/property-editor/property_group_view.h"
 
+#include "tools/editor/application/styling.h"
+#include "tools/editor/editor-widgets/searcher_widget.h"
+
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QLabel>
+#include <QPushButton>
 
 #include <engine/ecs/entity.h>
 
@@ -20,7 +24,8 @@ namespace snuffbox
       QWidget(parent),
       hierarchy_(hierarchy),
       frame_(nullptr),
-      layout_(nullptr)
+      layout_(nullptr),
+      add_component_(nullptr)
     {
       int min_width = 200;
 
@@ -118,6 +123,41 @@ namespace snuffbox
           views_.push_back(view);
         }
       }
+
+      add_component_ = new QPushButton(this);
+      add_component_->setObjectName(QStringLiteral("AddComponentButton"));
+      add_component_->setText(QStringLiteral("Add component"));
+
+      QString col = Styling::GetStyleColorCSS(Styling::ColorRole::kBlueButton);
+      add_component_->setStyleSheet("background: " + col);
+
+      connect(add_component_, &QPushButton::released, this, [=]()
+      {
+        SearcherWidget* widget = new SearcherWidget();
+        widget->AddItem("Transform Component");
+        widget->AddItem("Mesh Component");
+        widget->AddItem("Some Other Component");
+        widget->AddItem("Camera Component");
+        widget->AddItem("We just keep going on component");
+        widget->AddItem("this/is/an/asset/path");
+        widget->AddItem("and/this/is/another/one");
+        widget->AddItem("Let's put some num83r5 in");
+        widget->AddItem("Transform Component 2");
+        widget->AddItem("Mesh Component 2");
+        widget->AddItem("Some Other Component 2");
+        widget->AddItem("Camera Component 2");
+        widget->AddItem("We just keep going on component 2");
+        widget->AddItem("this/is/an/asset/path 2");
+        widget->AddItem("and/this/is/another/one 2");
+        widget->AddItem("short");
+        widget->AddItem("Let's put some num83r5 in 2");
+        widget->AddItem("looooooooooooooooooooooooooong");
+
+        widget->Show();
+      });
+
+      layout_->addSpacing(10);
+      layout_->addWidget(add_component_);
     }
 
     //--------------------------------------------------------------------------
@@ -138,6 +178,9 @@ namespace snuffbox
       }
 
       views_.clear();
+
+      delete add_component_;
+      add_component_ = nullptr;
     }
   }
 }

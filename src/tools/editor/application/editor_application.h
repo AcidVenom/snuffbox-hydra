@@ -72,6 +72,11 @@ namespace snuffbox
       void SetSceneInWindowTitle(const QString& scene_name);
 
       /**
+      * @return The main window of the application
+      */
+      MainWindow* main_window() const;
+
+      /**
       * @return The current asset importer
       */
       AssetImporter* asset_importer() const;

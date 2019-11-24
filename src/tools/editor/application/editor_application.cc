@@ -182,6 +182,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    MainWindow* EditorApplication::main_window() const
+    {
+      return main_window_.get();
+    }
+
+    //--------------------------------------------------------------------------
     AssetImporter* EditorApplication::asset_importer() const
     {
       return asset_importer_.get();

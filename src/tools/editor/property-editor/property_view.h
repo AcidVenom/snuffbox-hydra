@@ -5,6 +5,7 @@
 #include <QWidget>
 
 class QVBoxLayout;
+class QPushButton;
 
 namespace snuffbox
 {
@@ -81,6 +82,7 @@ namespace snuffbox
 
       QWidget* frame_; //!< The main frame of this widget
       QVBoxLayout* layout_; //!< The main layout of this widget
+      QPushButton* add_component_; //!< The "add component" button
     };
   }
 }

@@ -27,6 +27,8 @@ SET(EditorWidgetsSources
   "editor-widgets/game_view.cc"
   "editor-widgets/console_widget.h"
   "editor-widgets/console_widget.cc"
+  "editor-widgets/searcher_widget.h"
+  "editor-widgets/searcher_widget.cc"
 )
 
 SET(InputSources
