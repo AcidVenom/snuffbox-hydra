@@ -48,19 +48,32 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    IComponent* Entity::AddComponentInternal(Components id)
+    IComponent* Entity::AddComponentInternal(Components id, int index)
     {
       IComponent* ptr = CreateComponentByID(id);
       ptr->Create();
 
-      components_[static_cast<int>(id)]
-        .push_back(foundation::Memory::MakeUnique(ptr));
+      ComponentArray& arr = components_[static_cast<int>(id)];
+
+      int last_index = static_cast<int>(arr.size());
+      if (index < 0 || index >= arr.size())
+      {
+        index = last_index;
+      }
+
+      arr.insert(arr.begin() + index, foundation::Memory::MakeUnique(ptr));
 
       return ptr;
     }
 
     //--------------------------------------------------------------------------
     IComponent* Entity::AddComponent(Components id)
+    {
+      return AddComponentAt(id, -1);
+    }
+
+    //--------------------------------------------------------------------------
+    IComponent* Entity::AddComponentAt(Components id, int index)
     {
       if (
         id == Components::kTransform &&
@@ -69,11 +82,17 @@ namespace snuffbox
         return GetComponent(Components::kTransform);
       }
 
-      return AddComponentInternal(id);
+      return AddComponentInternal(id, index);
     }
 
     //--------------------------------------------------------------------------
     void Entity::RemoveComponent(Components id)
+    {
+      RemoveComponentAt(id, 0);
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::RemoveComponentAt(Components id, int index)
     {
       if (id == Components::kTransform)
       {
@@ -82,12 +101,12 @@ namespace snuffbox
 
       ComponentArray& arr = components_[static_cast<int>(id)];
 
-      if (arr.size() == 0)
+      if (index < 0 || index >= arr.size())
       {
         return;
       }
 
-      ComponentArray::iterator it = arr.begin();
+      ComponentArray::iterator it = arr.begin() + index;
       (*it)->Destroy();
 
       arr.erase(it);
@@ -239,6 +258,19 @@ namespace snuffbox
       }
 
       return active_;
+    }
+
+    //--------------------------------------------------------------------------
+    int Entity::ComponentCount() const
+    {
+      int count = 0;
+
+      for (size_t i = 0; i < static_cast<size_t>(Components::kCount); ++i)
+      {
+        count += static_cast<int>(components_[i].size());
+      }
+
+      return count;
     }
 
     //--------------------------------------------------------------------------
@@ -475,6 +507,28 @@ namespace snuffbox
 
       Components c = args.Get<Components>(0, Components::kCount);
       IComponent* ptr = self->AddComponent(c);
+
+      scripting::ScriptObjectHandle h =
+        Entity::CreateScriptComponent(self, ptr, c);
+
+      args.AddReturnValue(h);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    SPARSE_CUSTOM(Entity, AddComponentAt)
+    {
+      Entity* self = args.GetSelf<Entity>();
+      if (self == nullptr || args.Check("NN") == false)
+      {
+        return false;
+      }
+
+      Components c = args.Get<Components>(0, Components::kCount);
+      int index = args.Get<int>(1, -1);
+
+      IComponent* ptr = self->AddComponentAt(c, index);
 
       scripting::ScriptObjectHandle h = 
         Entity::CreateScriptComponent(self, ptr, c);

@@ -2,13 +2,19 @@
 
 #include "tools/editor/property-editor/property_value_edit.h"
 
+#include "tools/editor/scene-editor/entity_commands.h"
+#include "tools/editor/scene-editor/hierarchy_view.h"
+
 #include "tools/editor/application/styling.h"
 
 #include <foundation/containers/function.h>
 
+#include <engine/ecs/entity.h>
+
 #include <QFrame>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 namespace snuffbox
 {
@@ -57,6 +63,8 @@ namespace snuffbox
       const PropertyMap& map,
       engine::Entity* entity,
       engine::IComponent* component,
+      engine::Components component_type,
+      int component_index,
       QWidget* parent) :
       QWidget(parent)
     {
@@ -89,6 +97,30 @@ namespace snuffbox
 
       QColor bg_col_a = Styling::GetStyleColor(Styling::ColorRole::kButton);
       QColor bg_col_b = bg_col_a.darker(125);
+
+      QPushButton* remove_button = nullptr;
+      if (
+        component != nullptr &&
+        component_type != engine::Components::kTransform)
+      {
+        remove_button = new QPushButton(group_label);
+
+        connect(remove_button, &QPushButton::released, this, [=]()
+        {
+          RemoveComponentEntityCommand* cmd = new RemoveComponentEntityCommand(
+            entity->uuid(),
+            hierarchy,
+            component_type,
+            component_index);
+
+          hierarchy->PushUndoCommand(cmd);
+        });
+
+        remove_button->setText("X");
+        remove_button->setFixedWidth(24);
+        remove_button->setStyleSheet("background: " +
+          Styling::GetStyleColorCSS(Styling::ColorRole::kBlueButton));
+      }
 
       ClickableLabel* expand_toggle = new ClickableLabel(
         group_label, 
@@ -129,6 +161,12 @@ namespace snuffbox
       top_bar->setContentsMargins(0, 0, 0, 0);
 
       top_bar_layout->addWidget(group_label);
+
+      if (remove_button != nullptr)
+      {
+        top_bar_layout->addWidget(remove_button, 1, Qt::AlignRight);
+      }
+
       top_bar_layout->addWidget(expand_toggle, 0, Qt::AlignRight);
       top_bar_layout->setContentsMargins(ph * 2, ph, ph * 2, ph);
 

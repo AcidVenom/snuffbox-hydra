@@ -7,6 +7,9 @@
 #include "tools/editor/application/styling.h"
 #include "tools/editor/editor-widgets/searcher_widget.h"
 
+#include "tools/editor/scene-editor/entity_commands.h"
+#include "tools/editor/scene-editor/hierarchy_view.h"
+
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QLabel>
@@ -25,7 +28,9 @@ namespace snuffbox
       hierarchy_(hierarchy),
       frame_(nullptr),
       layout_(nullptr),
-      add_component_(nullptr)
+      add_component_(nullptr),
+      entity_(nullptr),
+      old_component_count_(0)
     {
       int min_width = 200;
 
@@ -70,6 +75,9 @@ namespace snuffbox
         return;
       }
 
+      entity_ = ent;
+      old_component_count_ = entity_->ComponentCount();
+
       const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
 
       PropertyGroupView* view = new PropertyGroupView(
@@ -77,7 +85,9 @@ namespace snuffbox
         QStringLiteral("Entity"), 
         entity_map, 
         ent, 
-        nullptr, 
+        nullptr,
+        engine::Components::kCount,
+        -1,
         this);
 
       layout_->addWidget(view);
@@ -85,7 +95,7 @@ namespace snuffbox
 
       QString header_names[static_cast<int>(engine::Components::kCount)];
       
-      auto DefineName = [&header_names](engine::Components c, const char* name)
+      auto DefineName = [&](engine::Components c, const char* name)
       {
         header_names[static_cast<int>(c)] = QString(name);
       };
@@ -108,15 +118,18 @@ namespace snuffbox
         foundation::Vector<engine::IComponent*> components = 
           ent->GetComponents(c);
 
+        const QString& header_name = header_names[static_cast<int>(c)];
         for (int i = 0; i < components.size(); ++i)
         {
           engine::IComponent* component = components.at(i);
           view = new PropertyGroupView(
             hierarchy_,
-            header_names[i], 
+            header_name,
             component_map, 
             ent, 
             component,
+            c,
+            i,
             this);
 
           layout_->addWidget(view);
@@ -133,27 +146,21 @@ namespace snuffbox
 
       connect(add_component_, &QPushButton::released, this, [=]()
       {
-        SearcherWidget* widget = new SearcherWidget();
-        widget->AddItem("Transform Component");
-        widget->AddItem("Mesh Component");
-        widget->AddItem("Some Other Component");
-        widget->AddItem("Camera Component");
-        widget->AddItem("We just keep going on component");
-        widget->AddItem("this/is/an/asset/path");
-        widget->AddItem("and/this/is/another/one");
-        widget->AddItem("Let's put some num83r5 in");
-        widget->AddItem("Transform Component 2");
-        widget->AddItem("Mesh Component 2");
-        widget->AddItem("Some Other Component 2");
-        widget->AddItem("Camera Component 2");
-        widget->AddItem("We just keep going on component 2");
-        widget->AddItem("this/is/an/asset/path 2");
-        widget->AddItem("and/this/is/another/one 2");
-        widget->AddItem("short");
-        widget->AddItem("Let's put some num83r5 in 2");
-        widget->AddItem("looooooooooooooooooooooooooong");
+        SearcherWidget* searcher = new SearcherWidget();
+        for (engine::Components c = engine::Components::kScript;
+          c != engine::Components::kCount;
+          c = static_cast<engine::Components>(static_cast<int>(c) + 1))
+        {
+          searcher->AddItem(header_names[static_cast<int>(c)]);
+        }
 
-        widget->Show();
+        connect(
+          searcher, 
+          &SearcherWidget::Selected, 
+          this, 
+          &PropertyView::OnAddComponent);
+
+        searcher->Show();
       });
 
       layout_->addWidget(add_component_);
@@ -162,6 +169,17 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void PropertyView::Update()
     {
+      if (entity_ == nullptr)
+      {
+        return;
+      }
+
+      if (entity_->ComponentCount() != old_component_count_)
+      {
+        ShowForEntity(entity_);
+        return;
+      }
+
       for (int i = 0; i < views_.size(); ++i)
       {
         views_.at(i)->UpdateValues();
@@ -180,6 +198,24 @@ namespace snuffbox
 
       delete add_component_;
       add_component_ = nullptr;
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyView::OnAddComponent(int index)
+    {
+      engine::Components id = static_cast<engine::Components>(index + 1);
+      
+      if (entity_ == nullptr)
+      {
+        return;
+      }
+
+      AddComponentEntityCommand* cmd = new AddComponentEntityCommand(
+        entity_->uuid(),
+        hierarchy_,
+        id);
+
+      hierarchy_->PushUndoCommand(cmd);
     }
   }
 }

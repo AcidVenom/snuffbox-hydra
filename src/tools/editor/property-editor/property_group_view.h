@@ -41,6 +41,8 @@ namespace snuffbox
       * @param[in] map The map to retrieve property values from
       * @param[in] entity The entity to operate on
       * @param[in] component The component to operate on
+      * @param[in] component_type The type of the component
+      * @param[in] component_index The index of the component in the entity
       * @param[in] parent The parent of this widget, default = nullptr
       */
       PropertyGroupView(
@@ -49,6 +51,8 @@ namespace snuffbox
         const PropertyMap& map,
         engine::Entity* entity,
         engine::IComponent* component,
+        engine::Components component_type,
+        int component_index,
         QWidget* parent = nullptr);
 
       /**

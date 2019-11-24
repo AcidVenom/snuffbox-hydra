@@ -9,6 +9,7 @@
 #include <QFocusEvent>
 #include <QLabel>
 #include <QScrollArea>
+#include <QMouseEvent>
 
 namespace snuffbox
 {
@@ -53,10 +54,12 @@ namespace snuffbox
       //------------------------------------------------------------------------
       SearchResult(
         SearcherWidget* searcher, 
-        const QString& text, 
+        const QString& text,
+        int index,
         QWidget* parent = nullptr) :
         QLabel(parent),
-        searcher_(searcher)
+        searcher_(searcher),
+        index_(index)
       {
         setText(text);
         setContentsMargins(4, 4, 4, 4);
@@ -77,9 +80,22 @@ namespace snuffbox
         setStyleSheet("");
       }
 
+      //------------------------------------------------------------------------
+      void mouseReleaseEvent(QMouseEvent* evt) override
+      {
+        if (evt->button() != Qt::MouseButton::LeftButton)
+        {
+          return;
+        }
+
+        emit searcher_->Selected(index_);
+        searcher_->CloseWindow();
+      }
+
     private:
 
       SearcherWidget* searcher_;
+      int index_;
     };
 
     //--------------------------------------------------------------------------
@@ -199,6 +215,18 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void SearcherWidget::CloseWindow()
+    {
+      if (gOpenedSearcherWidget_ == this)
+      {
+        close();
+        deleteLater();
+
+        gOpenedSearcherWidget_ = nullptr;
+      }
+    }
+
+    //--------------------------------------------------------------------------
     void SearcherWidget::PositionWindow()
     {
       QRect geom;
@@ -246,22 +274,22 @@ namespace snuffbox
       }
 
       auto ForEachItem = [&](
-        const foundation::Function<void(const QString& item)>& cb)
+        const foundation::Function<void(const QString&, int)>& cb)
       {
         for (
           QMap<QString, int>::iterator it = search_items_.begin();
           it != search_items_.end();
           ++it)
         {
-          cb(it.key());
+          cb(it.key(), it.value());
         }
       };
 
       if (current.size() == 0)
       {
-        ForEachItem([&](const QString& item)
+        ForEachItem([&](const QString& item, int index)
         {
-          SearchResult* result = new SearchResult(this, item, results_);
+          SearchResult* result = new SearchResult(this, item, index, results_);
           results_layout_->addWidget(result);
         });
 
@@ -271,6 +299,7 @@ namespace snuffbox
       struct SortPair
       {
         QString item;
+        int index;
         int distance;
         
         bool operator<(const SortPair& other) const
@@ -282,7 +311,7 @@ namespace snuffbox
       QVector<SortPair> sorted;
       QStringList split_current = current.split(' ');
 
-      ForEachItem([&](const QString& item)
+      ForEachItem([&](const QString& item, int index)
       {
         int distance = 0;
 
@@ -303,15 +332,16 @@ namespace snuffbox
 
         distance += FuzzyMatch(item, current);
         
-        sorted.push_back(SortPair{ item, distance });
+        sorted.push_back(SortPair{ item, index, distance });
       });
 
       qSort(sorted);
 
       for (int j = 0; j < std::min(sorted.size(), kMaxItems_); ++j)
       {
+        const SortPair& pair = sorted.at(j);
         SearchResult* result = 
-          new SearchResult(this, sorted.at(j).item, results_);
+          new SearchResult(this, pair.item, pair.index, results_);
 
         results_layout_->addWidget(result);
       }
@@ -339,18 +369,6 @@ namespace snuffbox
       if (geometry().contains(QCursor::pos()) == false)
       {
         CloseWindow();
-      }
-    }
-
-    //--------------------------------------------------------------------------
-    void SearcherWidget::CloseWindow()
-    {
-      if (gOpenedSearcherWidget_ == this)
-      {
-        close();
-        deleteLater();
-
-        gOpenedSearcherWidget_ = nullptr;
       }
     }
 

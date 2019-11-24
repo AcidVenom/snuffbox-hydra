@@ -238,8 +238,86 @@ namespace snuffbox
     //--------------------------------------------------------------------------
 
     /**
-    * @see EntityCommand::EntityCommand
+    * @brief Used to add components to entities by component ID
     *
+    * @author Daniel Konings
+    */
+    class AddComponentEntityCommand : public EntityCommand
+    {
+
+    public:
+
+      /**
+      * @see EntityCommand::EntityCommand
+      *
+      * @param[in] comp The ID of the component to add
+      */
+      AddComponentEntityCommand(
+        const foundation::UUID& uuid,
+        HierarchyView* view,
+        engine::Components comp);
+
+      /**
+      * @see EntityCommand::RedoImpl
+      */
+      void RedoImpl() override;
+
+      /**
+      * @see EntityCommand::UndoImpl
+      */
+      void UndoImpl() override;
+
+    private:
+
+      engine::Components comp_; //!< The component type to add
+      int new_index_; //!< The index that the component will be inserted at
+    };
+
+    //--------------------------------------------------------------------------
+
+    /**
+    * @brief Used to remove components from their respective entity
+    *
+    * @author Daniel Konings
+    */
+    class RemoveComponentEntityCommand : public EntityCommand
+    {
+
+    public:
+
+      /**
+      * @see EntityCommand::EntityCommand
+      *
+      * @param[in] comp The ID of the component to remove
+      * @param[in] to_remove The index of the component to remove
+      */
+      RemoveComponentEntityCommand(
+        const foundation::UUID& uuid,
+        HierarchyView* view,
+        engine::Components comp,
+        int to_remove);
+
+      /**
+      * @see EntityCommand::RedoImpl
+      */
+      void RedoImpl() override;
+
+      /**
+      * @see EntityCommand::UndoImpl
+      */
+      void UndoImpl() override;
+
+    private:
+
+      engine::Components comp_; //!< The component to be removed
+      int removed_from_; //!< The index the component was removed from
+
+      QString serialization_data_; //!< The serialized component
+    };
+
+    //--------------------------------------------------------------------------
+
+    /**
     * @brief Used to set different properties on an entity, both in the
     *        entity itself and its components
     *

@@ -43,6 +43,11 @@ namespace snuffbox
       */
       void Show();
 
+      /**
+      * @brief Closes this window and deletes it later
+      */
+      void CloseWindow();
+
     protected:
 
       /**
@@ -88,11 +93,6 @@ namespace snuffbox
       void CloseIfNotFocussed();
 
       /**
-      * @brief Closes this window and deletes it later
-      */
-      void CloseWindow();
-
-      /**
       * @brief Does fuzzy matching using Levenshtein distance to get a distance
       *        value to appropriately sort the search results with
       *
@@ -106,6 +106,15 @@ namespace snuffbox
       * @see http://rosettacode.org/wiki/Levenshtein_distance#C.2B.2B
       */
       static int FuzzyMatch(const QString& a, const QString& b);
+
+    signals:
+
+      /**
+      * @brief Emitted when an item has been selected
+      *
+      * @param[in] index The index of the selected item
+      */
+      void Selected(int index);
 
     private:
 

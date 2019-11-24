@@ -24,7 +24,7 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     const int PropertyValueEdit::kSpacing_ = 20;
-    const int PropertyValueEdit::kLabelWidth_ = 80;
+    const int PropertyValueEdit::kLabelWidth_ = 90;
     const int PropertyValueEdit::kMaxEditWidth_ = 180;
 
     //--------------------------------------------------------------------------
@@ -105,9 +105,14 @@ namespace snuffbox
 
       if (name_text.size() > 0)
       {
-        QString first_char = name_text.mid(0, 1);
-        name_text = first_char.toUpper() + name_text.mid(1);
+        int semicolon = name_text.lastIndexOf(':');
+        int first_char_at = semicolon + 1;
+
+        QString first_char = name_text.mid(first_char_at, 1);
+        name_text = first_char.toUpper() + name_text.mid(first_char_at + 1);
       }
+
+      name_text = name_text.replace('_', ' ');
       
       name_label->setText(name_text);
       name_label->setFixedWidth(kLabelWidth_);
@@ -231,6 +236,7 @@ namespace snuffbox
 
       if (widget != nullptr)
       {
+        QSignalBlocker blocker(widget);
         widget->setContentsMargins(0, 0, 0, 0);
 
         if (type_ == EditTypes::kComboBox)

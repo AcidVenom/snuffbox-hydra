@@ -71,6 +71,18 @@ namespace snuffbox
       */
       void Clear();
 
+    protected slots:
+
+      /**
+      * @brief Called when a new component has been added through the search
+      *        dialog
+      *
+      * @param[in] index The index of the component in the search dialog, which
+      *                  is a direct mapping to the component + 1, as we skip
+      *                  Transform components
+      */
+      void OnAddComponent(int index);
+
     private:
 
       HierarchyView* hierarchy_; //!< The hierarchy view
@@ -83,6 +95,9 @@ namespace snuffbox
       QWidget* frame_; //!< The main frame of this widget
       QVBoxLayout* layout_; //!< The main layout of this widget
       QPushButton* add_component_; //!< The "add component" button
+
+      engine::Entity* entity_; //!< The current entity
+      int old_component_count_; //!< The old component count of the entity
     };
   }
 }

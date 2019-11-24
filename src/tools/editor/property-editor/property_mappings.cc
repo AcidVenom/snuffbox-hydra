@@ -1,8 +1,17 @@
 #include "tools/editor/property-editor/property_mappings.h"
 
 #include <engine/ecs/entity.h>
+
 #include <engine/components/transform_component.h>
 #include <engine/components/camera_component.h>
+#include <engine/components/script_component.h>
+#include <engine/components/mesh_component.h>
+#include <engine/components/mesh_renderer_component.h>
+
+#include <engine/assets/model_asset.h>
+
+#undef near
+#undef far
 
 namespace snuffbox
 {
@@ -22,7 +31,7 @@ namespace snuffbox
       kEntityMapping_ =
       {
         CreatePropertyPair<foundation::String, engine::Entity>(
-          "name",
+          "0:name",
           [](engine::Entity* entity, const foundation::String& value)
           {
             entity->set_name(value);
@@ -34,7 +43,7 @@ namespace snuffbox
         ),
 
         CreatePropertyPair<bool, engine::Entity>(
-          "active",
+          "1:active",
           [](engine::Entity* entity, const bool& value)
           {
             entity->set_active(value);
@@ -52,7 +61,7 @@ namespace snuffbox
       kComponentsMapping_[static_cast<int>(engine::Components::kTransform)] =
       {
         CreatePropertyPair<glm::vec3, engine::TransformComponent>(
-          "position",
+          "0:position",
           [](engine::TransformComponent* t, const glm::vec3& value)
           {
             t->SetLocalPosition(value);
@@ -64,7 +73,7 @@ namespace snuffbox
         ),
 
         CreatePropertyPair<glm::vec3, engine::TransformComponent>(
-          "rotation",
+          "1:rotation",
           [](engine::TransformComponent* t, const glm::vec3& value)
           {
             t->SetRotationEuler(value);
@@ -76,7 +85,7 @@ namespace snuffbox
         ),
 
         CreatePropertyPair<glm::vec3, engine::TransformComponent>(
-          "scale",
+          "2:scale",
           [](engine::TransformComponent* t, const glm::vec3& value)
           {
             t->SetScale(value);
@@ -89,13 +98,91 @@ namespace snuffbox
       };
 
       //------------------------------------------------------------------------
+      // snuffbox::engine::ScriptComponent
+      //------------------------------------------------------------------------
+      kComponentsMapping_[static_cast<int>(engine::Components::kScript)] =
+      {
+        CreatePropertyPair<foundation::String, engine::ScriptComponent>(
+          "0:behavior",
+          [](engine::ScriptComponent* s, const foundation::String& value)
+          {
+            s->SetBehavior(value);
+          },
+          [](engine::ScriptComponent* s)
+          {
+            return s->behavior();
+          }
+        )
+      };
+
+      //------------------------------------------------------------------------
       // snuffbox::engine::CameraComponent
       //------------------------------------------------------------------------
       int camera_index = static_cast<int>(engine::Components::kCamera);
       kComponentsMapping_[camera_index] =
       {
+        CreatePropertyPair<double, engine::CameraComponent>(
+          "0:near",
+          [](engine::CameraComponent* c, const double& value)
+          {
+            c->set_near(static_cast<float>(value));
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<double>(c->near());
+          }
+        ),
+
+        CreatePropertyPair<double, engine::CameraComponent>(
+          "1:far",
+          [](engine::CameraComponent* c, const double& value)
+          {
+            c->set_far(static_cast<float>(value));
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<double>(c->far());
+          }
+        ),
+
+        CreatePropertyPair<double, engine::CameraComponent>(
+          "2:fov",
+          [](engine::CameraComponent* c, const double& value)
+          {
+            c->set_fov(static_cast<float>(value));
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<double>(c->fov());
+          }
+        ),
+
+        CreatePropertyPair<double, engine::CameraComponent>(
+          "3:aspect",
+          [](engine::CameraComponent* c, const double& value)
+          {
+            c->set_aspect(static_cast<float>(value));
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<double>(c->aspect());
+          }
+        ),
+
+        CreatePropertyPair<double, engine::CameraComponent>(
+          "4:orthographic_size",
+          [](engine::CameraComponent* c, const double& value)
+          {
+            c->set_orthographic_size(static_cast<float>(value));
+          },
+          [](engine::CameraComponent* c)
+          {
+            return static_cast<double>(c->orthographic_size());
+          }
+        ),
+
         CreatePropertyPair<EnumProperty, engine::CameraComponent>(
-          "projection",
+          "5:projection",
           [](engine::CameraComponent* c, const EnumProperty& value)
           {
             engine::CameraProjection p = 
@@ -110,7 +197,7 @@ namespace snuffbox
         )
       };
 
-      kComponentsMapping_[camera_index]["projection"]->set_combo_box_values(
+      kComponentsMapping_[camera_index]["5:projection"]->set_combo_box_values(
       {
         "Perspective",
         "Orthographic"

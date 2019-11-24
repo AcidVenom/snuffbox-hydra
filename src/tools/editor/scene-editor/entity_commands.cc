@@ -346,6 +346,70 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    AddComponentEntityCommand::AddComponentEntityCommand(
+      const foundation::UUID& uuid,
+      HierarchyView* view,
+      engine::Components comp) :
+      EntityCommand(uuid, view),
+      comp_(comp)
+    {
+      engine::Entity* add_to = GetSelf()->entity();
+      foundation::Vector<engine::IComponent*> comps = 
+        add_to->GetComponents(comp_);
+
+      new_index_ = static_cast<int>(comps.size());
+    }
+
+    //--------------------------------------------------------------------------
+    void AddComponentEntityCommand::RedoImpl()
+    {
+      GetSelf()->entity()->AddComponent(comp_);
+    }
+
+    //--------------------------------------------------------------------------
+    void AddComponentEntityCommand::UndoImpl()
+    {
+      GetSelf()->entity()->RemoveComponentAt(comp_, new_index_);
+    }
+
+    //--------------------------------------------------------------------------
+    RemoveComponentEntityCommand::RemoveComponentEntityCommand(
+      const foundation::UUID& uuid,
+      HierarchyView* view,
+      engine::Components comp,
+      int to_remove) :
+      EntityCommand(uuid, view),
+      comp_(comp),
+      removed_from_(to_remove)
+    {
+      engine::Entity* ent = GetSelf()->entity();
+      engine::IComponent* c = ent->GetComponents(comp).at(to_remove);
+
+      foundation::SaveArchive archive;
+      archive(c);
+
+      serialization_data_ = archive.ToMemory().c_str();
+    }
+
+    //--------------------------------------------------------------------------
+    void RemoveComponentEntityCommand::RedoImpl()
+    {
+      GetSelf()->entity()->RemoveComponentAt(comp_, removed_from_);
+    }
+
+    //--------------------------------------------------------------------------
+    void RemoveComponentEntityCommand::UndoImpl()
+    {
+      engine::Entity* ent = GetSelf()->entity();
+      engine::IComponent* c = ent->AddComponentAt(comp_, removed_from_);
+
+      foundation::LoadArchive archive;
+      archive.FromJson(serialization_data_.toLatin1().data());
+
+      archive(&c);
+    }
+
+    //--------------------------------------------------------------------------
     PropertyEntityCommand::PropertyEntityCommand(
       const foundation::UUID& uuid,
       HierarchyView* view,

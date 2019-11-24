@@ -104,6 +104,19 @@ namespace snuffbox
       * @see Entity::CreateComponentByID
       */
       SCRIPT_FUNC(custom) IComponent* AddComponent(Components id);
+
+      /**
+      * @brief Adds a component by ID at a specific index
+      *
+      * @remarks If the index is greater than the size, it will be clamped to
+      *          the size and insert at the end, you can also use -1 for this
+      *
+      * @param[in] id The component ID
+      * @param[in] index The index to insert at
+      *
+      * @see Entity::CreateComponentById
+      */
+      SCRIPT_FUNC(custom) IComponent* AddComponentAt(Components id, int index);
       
       /**
       * @brief Removes the first found typed component
@@ -119,6 +132,14 @@ namespace snuffbox
       * @param[in] id The ID of the component to remove
       */
       SCRIPT_FUNC() void RemoveComponent(Components id);
+
+      /**
+      * @brief Removes a component at a specific index by ID
+      *
+      * @param[in] id The ID of the component to remove
+      * @param[in] index The index of the component to remove
+      */
+      SCRIPT_FUNC() void RemoveComponentAt(Components id, int index);
 
       /**
       * @brief Removes a component by reference
@@ -246,6 +267,12 @@ namespace snuffbox
       SCRIPT_FUNC() bool IsActive() const;
 
       /**
+      * @return The total number of components on this entity, including its
+      *         transform component
+      */
+      SCRIPT_FUNC() int ComponentCount() const;
+
+      /**
       * @return Is this an internal entity?
       */
       bool is_internal() const;
@@ -261,10 +288,11 @@ namespace snuffbox
       * @brief Adds a component to the entity by ID
       *
       * @param[in] id The ID of the component to add
+      * @param[in] index The index to insert the component at
       *
       * @return The created component
       */
-      IComponent* AddComponentInternal(Components id);
+      IComponent* AddComponentInternal(Components id, int index = -1);
 
       /**
       * @brief Checks if a component type is actually derived from its
