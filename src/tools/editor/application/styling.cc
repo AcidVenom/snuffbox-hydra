@@ -65,6 +65,8 @@ namespace snuffbox
         kColorRoles_[ColorRole::kZAxis] = QColor(0, 125, 255);
         kColorRoles_[ColorRole::kWAxis] = QColor(Qt::black);
         kColorRoles_[ColorRole::kBlueButton] = QColor(10, 70, 130);
+        kColorRoles_[ColorRole::kValid] = QColor(0, 85, 30);
+        kColorRoles_[ColorRole::kInvalid] = QColor(125, 30, 30);
 
         initialized_roles = true;
       }

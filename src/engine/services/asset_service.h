@@ -10,6 +10,8 @@
 #include <foundation/containers/map.h>
 #include <foundation/memory/memory.h>
 
+#include <mutex>
+
 namespace snuffbox
 {
   namespace engine
@@ -234,6 +236,16 @@ namespace snuffbox
       IAsset* Get(compilers::AssetTypes type, const foundation::String& path);
 
       /**
+      * @brief Retrieves all registered assets of a specific type
+      *
+      * @param[in] type The type of the asset to retrieve
+      *
+      * @return The registered assets of a specific type
+      */
+      foundation::Vector<const IAsset*> GetRegistered(
+        compilers::AssetTypes type) const;
+
+      /**
       * @see AssetService::Get
       *
       * @remarks Integer overload for script function generation
@@ -280,6 +292,8 @@ namespace snuffbox
       */
       AssetMap registered_;
       foundation::Path build_directory_; //!< The current build directory
+
+      std::mutex mutex_; //!< The mutex for modification of registered assets
     };
   }
 }

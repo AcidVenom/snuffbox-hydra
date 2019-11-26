@@ -422,6 +422,13 @@ namespace snuffbox
       void Set(const glm::vec4& value);
 
       /**
+      * @brief Sets an asset value for this command
+      *
+      * @param[in] value The value to set
+      */
+      void Set(const engine::SerializableAsset& value);
+
+      /**
       * @brief Sets a combo box value for this command
       *
       * @param[in] value The value to set

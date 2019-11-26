@@ -4,6 +4,7 @@
 #include "tools/editor/property-editor/property_vector_edit.h"
 #include "tools/editor/property-editor/property_number_edit.h"
 #include "tools/editor/property-editor/property_line_edit.h"
+#include "tools/editor/property-editor/property_asset_edit.h"
 
 #include "tools/editor/scene-editor/entity_commands.h"
 #include "tools/editor/scene-editor/hierarchy_view.h"
@@ -62,6 +63,10 @@ namespace snuffbox
       else if (prop->IsString() == true || prop->IsUUID() == true)
       {
         type_ = EditTypes::kLineEdit;
+      }
+      else if (prop->IsAsset() == true)
+      {
+        type_ = EditTypes::kAssetEdit;
       }
       
       int vec_start = static_cast<int>(EditTypes::kVec2Edit);
@@ -144,6 +149,9 @@ namespace snuffbox
       {
         if (prop_->GetRaw(object, new_data, &required) == true)
         {
+          foundation::Logger::Assert(required <= kMaxDataSize_,
+            "Attempted to store more data than allowed in a value edit");
+
           changed = memcmp(old_data_, new_data, required) != 0;
         }
       }
@@ -204,13 +212,30 @@ namespace snuffbox
             line, 
             &PropertyLineEdit::ValueChanged, 
             this, 
-            [this](const QString& value)
-            {
-              OnStringChanged(value);
-            });
+            &PVE::OnStringChanged);
 
           widget = line;
           widget->setMaximumWidth(kMaxEditWidth_);
+        }
+        break;
+
+      case EditTypes::kAssetEdit:
+        {
+          PropertyAssetEdit* asset = new PropertyAssetEdit(this);
+
+          connect(
+            asset,
+            &PropertyAssetEdit::AssetChanged,
+            this,
+            &PVE::OnAssetChanged);
+
+          connect(
+            asset,
+            &PropertyAssetEdit::AssetCleared,
+            this,
+            &PVE::OnAssetCleared);
+
+          widget = asset;
         }
         break;
 
@@ -294,6 +319,14 @@ namespace snuffbox
         {
           foundation::String value = reinterpret_cast<const char*>(data);
           static_cast<PropertyLineEdit*>(widget_)->SetValue(value.c_str());
+        }
+        break;
+
+      case EditTypes::kAssetEdit:
+        {
+          engine::SerializableAsset value = 
+            *reinterpret_cast<const engine::SerializableAsset*>(data);
+          static_cast<PropertyAssetEdit*>(widget_)->set_asset(value);
         }
         break;
 
@@ -410,6 +443,23 @@ namespace snuffbox
       cmd->Set(str);
 
       hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnAssetChanged(const QString& asset_name)
+    {
+      PropertyEntityCommand* cmd = CreateSetCommand();
+
+      PropertyAssetEdit* edit = static_cast<PropertyAssetEdit*>(widget_);
+      cmd->Set(edit->asset());
+
+      hierarchy_->PushUndoCommand(cmd);
+    }
+
+    //--------------------------------------------------------------------------
+    void PropertyValueEdit::OnAssetCleared()
+    {
+      OnAssetChanged("");
     }
 
     //--------------------------------------------------------------------------

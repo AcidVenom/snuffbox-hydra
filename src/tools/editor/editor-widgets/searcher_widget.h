@@ -123,8 +123,16 @@ namespace snuffbox
       QWidget* results_; //!< The results frame
       QVBoxLayout* results_layout_; //!< The results layout of the widget
 
+      bool initial_focus_; //!< Has this widget been initially focussed?
+
       static const QSize kSearcherSize_; //!< The size of the searcher dialog
       static const int kMaxItems_; //!< The maximum items to show after a search
+      
+      /**
+      * @brief The vertical offset from the mouse position to 
+      *        position the window at
+      */
+      static const int kVerticalOffset_; 
 
       /**
       * @brief There can only be one instance of a searcher widget,

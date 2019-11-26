@@ -116,6 +116,38 @@ namespace snuffbox
       };
 
       //------------------------------------------------------------------------
+      // snuffbox::engine::MeshComponent
+      //------------------------------------------------------------------------
+      kComponentsMapping_[static_cast<int>(engine::Components::kMesh)] =
+      {
+        CreatePropertyPair<engine::SerializableAsset, engine::MeshComponent>(
+          "0:mesh",
+          [](engine::MeshComponent* m, const engine::SerializableAsset& value)
+          {
+            engine::Mesh mesh(value.handle, m->scene_index());
+            m->SetMesh(&mesh);
+          },
+          [](engine::MeshComponent* m)
+          {
+            return *m->asset();
+          }
+        ),
+
+        CreatePropertyPair<double, engine::MeshComponent>(
+          "1:scene_index",
+          [](engine::MeshComponent* m, const double& value)
+          {
+            engine::Mesh mesh(m->asset()->handle, static_cast<int>(value));
+            m->SetMesh(&mesh);
+          },
+          [](engine::MeshComponent* m)
+          {
+            return static_cast<double>(m->scene_index());
+          }
+        )
+      };
+
+      //------------------------------------------------------------------------
       // snuffbox::engine::CameraComponent
       //------------------------------------------------------------------------
       int camera_index = static_cast<int>(engine::Components::kCamera);

@@ -76,7 +76,7 @@ namespace snuffbox
 
       if (sa.handle != nullptr)
       {
-        sa.name = sa.handle->name();
+        sa.SetName(sa.handle->name());
       }
 
       materials_.at(idx) = *material;

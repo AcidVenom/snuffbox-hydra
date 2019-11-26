@@ -281,6 +281,12 @@ namespace snuffbox
       const builder::Builder* builder, 
       const builder::BuildItem& item)
     {
+      if (item.type != compilers::AssetTypes::kDirectory)
+      {
+        engine::AssetService* as = GetService<engine::AssetService>();
+        as->RemoveAsset(item.type, item.relative);
+      }
+
       BuildChanged();
     }
 

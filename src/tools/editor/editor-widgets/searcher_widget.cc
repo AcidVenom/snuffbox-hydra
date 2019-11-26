@@ -101,6 +101,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     const QSize SearcherWidget::kSearcherSize_ = QSize(256, 200);
     const int SearcherWidget::kMaxItems_ = 5;
+    const int SearcherWidget::kVerticalOffset_ = 16;
 
     SearcherWidget* SearcherWidget::gOpenedSearcherWidget_ = nullptr;
 
@@ -108,7 +109,8 @@ namespace snuffbox
     SearcherWidget::SearcherWidget() :
       QWidget(EditorApplication::Instance()->main_window()),
       results_(nullptr),
-      results_layout_(nullptr)
+      results_layout_(nullptr),
+      initial_focus_(false)
     {
       setObjectName(QStringLiteral("SearcherWidget"));
       setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -232,6 +234,8 @@ namespace snuffbox
       QRect geom;
       QPoint mouse_pos = QCursor::pos();
 
+      mouse_pos.setY(mouse_pos.y() + kVerticalOffset_);
+
       int w = kSearcherSize_.width();
       int h = kSearcherSize_.height();
 
@@ -350,8 +354,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void SearcherWidget::focusInEvent(QFocusEvent* evt)
     {
-      CloseIfNotFocussed();
+      if (initial_focus_ == true)
+      {
+        CloseIfNotFocussed();
+      }
 
+      initial_focus_ = true;
       QWidget::focusInEvent(evt);
     }
 

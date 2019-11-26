@@ -46,6 +46,7 @@ namespace snuffbox
         kComboBox, //!< Used for enumerators
         kNumberEdit, //!< Used for numbers (doubles/floats)
         kLineEdit, //!< Used for strings and UUIDs
+        kAssetEdit, //!< Used to edit assets
         kVec2Edit, //!< Used for Vector2 values
         kVec3Edit, //!< Used for Vector3 values
         kVec4Edit, //!< Used for Vector4 values
@@ -132,6 +133,18 @@ namespace snuffbox
       * @param[in] str The new value
       */
       void OnStringChanged(const QString& str);
+
+      /**
+      * @brief Called when an asset value has changed
+      *
+      * @param[in] asset_name The new name of the asset
+      */
+      void OnAssetChanged(const QString& asset_name);
+
+      /**
+      * @brief Called when an asset value has been cleared
+      */
+      void OnAssetCleared();
 
       /**
       * @brief Called when a vector value has changed

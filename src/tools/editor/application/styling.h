@@ -44,6 +44,8 @@ namespace snuffbox
         kZAxis,
         kWAxis,
         kBlueButton,
+        kValid,
+        kInvalid,
         kCount
       };
 

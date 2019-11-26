@@ -475,6 +475,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void PropertyEntityCommand::Set(const engine::SerializableAsset& value)
+    {
+      type_ = PropertyTypes::kAsset;
+      SetupData<engine::SerializableAsset>(value);
+    }
+
+    //--------------------------------------------------------------------------
     void PropertyEntityCommand::SetComboValue(EnumProperty value)
     {
       type_ = PropertyTypes::kEnum;

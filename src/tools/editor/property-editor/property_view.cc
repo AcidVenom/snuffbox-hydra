@@ -69,13 +69,13 @@ namespace snuffbox
     void PropertyView::ShowForEntity(engine::Entity* ent)
     {
       Clear();
+      entity_ = ent;
 
       if (ent == nullptr)
       {
         return;
       }
 
-      entity_ = ent;
       old_component_count_ = entity_->ComponentCount();
 
       const PropertyMap& entity_map = PropertyMappings::GetEntityMap();
