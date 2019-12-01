@@ -39,6 +39,16 @@ namespace snuffbox
     public:
 
       /**
+      * @brief Used to mask out different playback functionality
+      */
+      enum PlaybackFlags : int
+      {
+        kPlayButton = 0 << 1,
+        kStopButton = 1 << 1,
+        kNextButton = 2 << 1
+      };
+
+      /**
       * @brief Construct through a parent
       *
       * @param[in] parent The parent widget of the controls, default = nullptr
@@ -50,11 +60,13 @@ namespace snuffbox
       *        for disabling the playback controls when the builder is still
       *        building items.
       *
-      * @param[in] enabled Should the playback controls be enabled?
+      * @param[in] flags The mask to enable buttons with
+      *
+      * @see PlaybackControls::PlaybackFlags
       *
       * @author Daniel Konings
       */
-      void SetEnabled(bool enabled);
+      void SetEnabled(int flags);
 
     protected:
 
@@ -77,6 +89,11 @@ namespace snuffbox
       *          PlaybackButton::kPause and PlaybackButton::kPlay
       */
       void TogglePlayButton(PlaybackButton state = PlaybackButton::kNone);
+
+      /**
+      * @brief Updates the style sheets of every button
+      */
+      void UpdateStyleSheets();
 
     private:
 

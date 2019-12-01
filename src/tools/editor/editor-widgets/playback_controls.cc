@@ -1,6 +1,9 @@
 #include "tools/editor/editor-widgets/playback_controls.h"
 
 #include "tools/editor/application/styling.h"
+#include "tools/editor/application/editor_application.h"
+
+#include <foundation/containers/function.h>
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -51,16 +54,70 @@ namespace snuffbox
       setLayout(main_layout);
       setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
-      connect(buttons_[PlaybackButton::kPlay], &QPushButton::released, this, [=]()
+      SetEnabled(PlaybackFlags::kPlayButton);
+
+      auto ConnectButton = [&](
+        PlaybackButton button, 
+        const foundation::Function<void()>& cb)
       {
+        connect(buttons_[button], &QPushButton::released, this, cb);
+      };
+
+      ConnectButton(PlaybackButton::kPlay, [=]()
+      {
+        EditorApplication* app = EditorApplication::Instance();
+        EditorApplication::EditorStates desired =
+          app->state() == EditorApplication::EditorStates::kPlaying ?
+          EditorApplication::EditorStates::kPaused :
+          EditorApplication::EditorStates::kPlaying;
+          
+        app->SwitchState(desired);
+
         TogglePlayButton();
+
+        int mask = PlaybackFlags::kPlayButton | PlaybackFlags::kStopButton;
+
+        if (desired == EditorApplication::EditorStates::kPaused)
+        {
+          mask |= PlaybackFlags::kNextButton;
+        }
+
+        SetEnabled(mask);
+      });
+
+      ConnectButton(PlaybackButton::kStop, [=]()
+      {
+        EditorApplication::Instance()->SwitchState(
+          EditorApplication::EditorStates::kEditing);
+
+        TogglePlayButton(PlaybackButton::kPlay);
+        SetEnabled(PlaybackFlags::kPlayButton);
+      });
+
+      ConnectButton(PlaybackButton::kNextFrame, [=]()
+      {
+        EditorApplication::Instance()->SwitchState(
+          EditorApplication::EditorStates::kFrame);
       });
     }
 
     //--------------------------------------------------------------------------
-    void PlaybackControls::SetEnabled(bool enabled)
+    void PlaybackControls::SetEnabled(int flags)
     {
+      bool play_enabled = 
+        (flags & PlaybackFlags::kPlayButton) == PlaybackFlags::kPlayButton;
 
+      bool stop_enabled =
+        (flags & PlaybackFlags::kStopButton) == PlaybackFlags::kStopButton;
+
+      bool next_frame_enabled =
+        (flags & PlaybackFlags::kNextButton) == PlaybackFlags::kNextButton;
+
+      buttons_[PlaybackButton::kPlay]->setEnabled(play_enabled);
+      buttons_[PlaybackButton::kStop]->setEnabled(stop_enabled);
+      buttons_[PlaybackButton::kNextFrame]->setEnabled(next_frame_enabled);
+
+      UpdateStyleSheets();
     }
 
     //--------------------------------------------------------------------------
@@ -103,16 +160,11 @@ namespace snuffbox
       {
         text = GetButtonText(PlaybackButton::kPause);
         font_size = kPauseFontSize_;
-
-        style = "background: " + 
-          Styling::GetStyleColorCSS(Styling::ColorRole::kBlueButton);
       }
       else
       {
         text = GetButtonText(PlaybackButton::kPlay);
         font_size = kFontSize_;
-
-        style = "";
       }
 
       QFont font;
@@ -120,7 +172,48 @@ namespace snuffbox
 
       play_button->setText(QString::fromWCharArray(text));
       play_button->setFont(font);
-      play_button->setStyleSheet(style);
+
+      UpdateStyleSheets();
+    }
+
+    //--------------------------------------------------------------------------
+    void PlaybackControls::UpdateStyleSheets()
+    {
+      EditorApplication* app = EditorApplication::Instance();
+
+      QString on_style = "background: %0;";
+      on_style = on_style.arg(
+        Styling::GetStyleColorCSS(Styling::ColorRole::kBlueButton));
+
+      QString off_style = "";
+
+      QColor disabled_col = Styling::GetStyleColor(Styling::ColorRole::kButton);
+      disabled_col = disabled_col.dark(150);
+
+      QColor disabled_text_col = disabled_col.light(200);
+
+      QString disabled_style = "background: %0; color: %1;";
+      disabled_style = disabled_style.arg(
+        Styling::GetCSSColor(disabled_col),
+        Styling::GetCSSColor(disabled_text_col));
+
+      for (int i = 0; i < PlaybackButton::kCount; ++i)
+      {
+        QPushButton* button = buttons_[i];
+        
+        QString style = button->isEnabled() ? off_style : disabled_style;
+        if (i == PlaybackButton::kPlay)
+        {
+          if (
+            app->state() != EditorApplication::EditorStates::kEditing && 
+            button->isEnabled())
+          {
+            style = on_style;
+          }
+        }
+
+        button->setStyleSheet(style);
+      }
     }
   }
 }

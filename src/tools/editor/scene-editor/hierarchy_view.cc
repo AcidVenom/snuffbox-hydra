@@ -201,10 +201,17 @@ namespace snuffbox
           idx = indexOfTopLevelItem(item);
         }
 
-        if (idx != ent->sort_index())
+        if (ent->sort_index() != -1)
         {
-          QTreeWidgetItem* taken_item = takeTopLevelItem(idx);
-          insertTopLevelItem(ent->sort_index(), taken_item);
+          if (idx != ent->sort_index())
+          {
+            QTreeWidgetItem* taken_item = takeTopLevelItem(idx);
+            insertTopLevelItem(ent->sort_index(), taken_item);
+          }
+        }
+        else
+        {
+          ent->set_sort_index(idx);
         }
       }
       else
@@ -236,10 +243,17 @@ namespace snuffbox
           idx = parent_item->indexOfChild(item);
         }
         
-        if (idx != ent->sort_index())
+        if (ent->sort_index() != -1)
         {
-          QTreeWidgetItem* taken_item = parent_item->takeChild(idx);
-          parent_item->insertChild(ent->sort_index(), taken_item);
+          if (idx != ent->sort_index())
+          {
+            QTreeWidgetItem* taken_item = parent_item->takeChild(idx);
+            parent_item->insertChild(ent->sort_index(), taken_item);
+          }
+        }
+        else
+        {
+          ent->set_sort_index(idx);
         }
       }
     }
@@ -525,7 +539,7 @@ namespace snuffbox
         from_index,
         to_index);
 
-      undo_stack_.push(cmd);
+      PushUndoCommand(cmd);
     }
 
     //--------------------------------------------------------------------------
@@ -594,6 +608,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool HierarchyView::CanUndoRedo() const
+    {
+      return EditorApplication::Instance()->state() == 
+        EditorApplication::EditorStates::kEditing;
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::CustomContextMenu(const QPoint& pos)
     {
       hovered_item_ = static_cast<HierarchyViewItem*>(itemAt(pos));
@@ -624,7 +645,7 @@ namespace snuffbox
 
         cmd->Set(foundation::String(new_name.toLatin1().data()));
 
-        undo_stack_.push(cmd);
+        PushUndoCommand(cmd);
       }
     }
 
@@ -634,7 +655,7 @@ namespace snuffbox
       CreateEntityCommand* command =
         new CreateEntityCommand(foundation::UUID::Create(), this);
 
-      undo_stack_.push(command);
+      PushUndoCommand(command);
     }
 
     //--------------------------------------------------------------------------
@@ -664,7 +685,7 @@ namespace snuffbox
         this, 
         delete_index);
 
-      undo_stack_.push(command);
+      PushUndoCommand(command);
     }
 
     //--------------------------------------------------------------------------
@@ -681,8 +702,19 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void HierarchyView::OnSceneRefreshed()
+    {
+      Clear();
+    }
+
+    //--------------------------------------------------------------------------
     void HierarchyView::Undo()
     {
+      if (CanUndoRedo() == false)
+      {
+        return;
+      }
+
       if (undo_stack_.canUndo() == false)
       {
         return;
@@ -694,6 +726,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::Redo()
     {
+      if (CanUndoRedo() == false)
+      {
+        return;
+      }
+
       if (undo_stack_.canRedo() == false)
       {
         return;
@@ -705,6 +742,13 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void HierarchyView::PushUndoCommand(QUndoCommand* cmd)
     {
+      if (CanUndoRedo() == false)
+      {
+        cmd->redo();
+        delete cmd;
+        return;
+      }
+
       undo_stack_.push(cmd);
     }
   }

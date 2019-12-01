@@ -33,6 +33,17 @@ namespace snuffbox
     public:
 
       /**
+      * @brief The different states the editor can globally be in
+      */
+      enum class EditorStates
+      {
+        kEditing,
+        kPlaying,
+        kPaused,
+        kFrame
+      };
+
+      /**
       * @see Application::Application
       *
       * @param[in] qapp The Qt application to update each frame
@@ -72,6 +83,13 @@ namespace snuffbox
       void SetSceneInWindowTitle(const QString& scene_name);
 
       /**
+      * @brief Switches the state of the editor application to a new one
+      *
+      * @param[in] state The state to switch to
+      */
+      void SwitchState(EditorStates state);
+
+      /**
       * @return The main window of the application
       */
       MainWindow* main_window() const;
@@ -85,6 +103,11 @@ namespace snuffbox
       * @return The current project
       */
       Project& project();
+
+      /**
+      * @return The current state of the editor application
+      */
+      EditorStates state() const;
 
     protected:
 
@@ -147,6 +170,29 @@ namespace snuffbox
       */
       void CheckForBuildChanges();
 
+      /**
+      * @brief Called when we initially start editing again
+      */
+      void OnStartEditing();
+
+      /**
+      * @brief Called when we initially start playing
+      *
+      * @remarks This serializes the scene, to deserialize it when we
+      *          go out of play mode
+      */
+      void OnStartPlaying();
+
+      /**
+      * @brief Serializes the current scene, for deserialization later
+      */
+      void SerializeCurrentScene();
+
+      /**
+      * @brief Deserializes the current scene
+      */
+      void DeserializeCurrentScene();
+
     private:
 
       QApplication qapp_; //!< The Qt application
@@ -163,6 +209,9 @@ namespace snuffbox
       std::unique_ptr<AssetImporter> asset_importer_; //!< The asset importer
 
       bool project_changed_; //!< Was the project changed and should we restart?
+
+      EditorStates state_; //!< The current state of the editor application
+      foundation::String serialized_scene_; //!< The currently serialized scene
 
       /**
       * @brief The minimum amount of time, in milliseconds, to wait inbetween

@@ -121,6 +121,11 @@ namespace snuffbox
       */
       void Redone();
 
+      /**
+      * @brief Emitted when the current scene should be refreshed
+      */
+      void SceneRefresh();
+
     public:
 
       /**

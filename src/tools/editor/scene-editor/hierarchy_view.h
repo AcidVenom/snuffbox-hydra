@@ -234,6 +234,11 @@ namespace snuffbox
       */
       void ClearSelection();
 
+      /**
+      * @return Are we currently editing within the editor?
+      */
+      bool CanUndoRedo() const;
+
     protected slots:
 
       /**
@@ -280,6 +285,11 @@ namespace snuffbox
       *                       it is a new scene
       */
       void OnSceneChanged(const QString& scene_name);
+
+      /**
+      * @brief Called when a scene should be refreshed
+      */
+      void OnSceneRefreshed();
       
       /**
       * @brief Redo the last entity command

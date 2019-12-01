@@ -106,6 +106,12 @@ namespace snuffbox
         &HierarchyView::Redo);
 
       connect(
+        this,
+        &MainWindow::SceneRefresh,
+        hierarchy,
+        &HierarchyView::OnSceneRefreshed);
+
+      connect(
         hierarchy,
         &HierarchyView::ItemSelectionChanged,
         properties_,
@@ -277,6 +283,8 @@ namespace snuffbox
         return;
       }
 
+      emit SceneRefresh();
+
       if (reply == QMessageBox::Yes)
       {
         app_->asset_importer()->SaveCurrentScene();
@@ -288,12 +296,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::OnSaveScene()
     {
+      emit SceneRefresh();
       app_->asset_importer()->SaveCurrentScene();
     }
 
     //--------------------------------------------------------------------------
     void MainWindow::OnSaveSceneAs()
     {
+      emit SceneRefresh();
       app_->asset_importer()->SaveCurrentScene(true);
     }
 

@@ -14,9 +14,13 @@
 
 #include <engine/services/renderer_service.h>
 #include <engine/services/asset_service.h>
+#include <engine/services/scene_service.h>
 
 #include <foundation/auxiliary/logger.h>
 #include <foundation/auxiliary/timer.h>
+
+#include <foundation/serialization/save_archive.h>
+#include <foundation/serialization/load_archive.h>
 
 #include <QApplication>
 #include <memory>
@@ -41,7 +45,8 @@ namespace snuffbox
       build_dir_changed_(false),
       main_window_(nullptr),
       asset_importer_(nullptr),
-      project_changed_(false)
+      project_changed_(false),
+      state_(EditorStates::kEditing)
     {
       QCoreApplication::setOrganizationName(
         QStringLiteral("Daniel Konings"));
@@ -131,6 +136,16 @@ namespace snuffbox
           renderer->Render(dt);
         }
 
+        if (state_ == EditorStates::kPlaying || state_ == EditorStates::kFrame)
+        {
+          Update(dt);
+
+          if (state_ == EditorStates::kFrame)
+          {
+            state_ = EditorStates::kPaused;
+          }
+        }
+
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
 
@@ -186,6 +201,31 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void EditorApplication::SwitchState(EditorStates state)
+    {
+      if (state == state_)
+      {
+        return;
+      }
+
+      switch (state)
+      {
+      case EditorStates::kEditing:
+        OnStartEditing();
+        break;
+
+      case EditorStates::kPlaying:
+        OnStartPlaying();
+        break;
+
+      default:
+        break;
+      }
+
+      state_ = state;
+    }
+
+    //--------------------------------------------------------------------------
     MainWindow* EditorApplication::main_window() const
     {
       return main_window_.get();
@@ -204,9 +244,16 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    EditorApplication::EditorStates EditorApplication::state() const
+    {
+      return state_;
+    }
+
+    //--------------------------------------------------------------------------
     void EditorApplication::OnRestart()
     {
       should_quit_ = false;
+      state_ = EditorStates::kEditing;
     }
 
     //--------------------------------------------------------------------------
@@ -320,6 +367,57 @@ namespace snuffbox
           foundation::LogSeverity::kDebug,
           "Build directory changed");
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnStartEditing()
+    {
+#ifndef SNUFF_NSCRIPTING
+      GetService<engine::ScriptService>()->Restart();
+#endif
+
+      DeserializeCurrentScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnStartPlaying()
+    {
+      if (state_ != EditorStates::kEditing)
+      {
+        return;
+      } 
+      
+      SerializeCurrentScene();
+
+      RunScripts();
+      SCRIPT_CALLBACK(Start);
+      GetService<engine::SceneService>()->Start();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::SerializeCurrentScene()
+    {
+      foundation::SaveArchive archive;
+      archive(GetService<engine::SceneService>()->current_scene());
+
+      serialized_scene_ = archive.ToMemory();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::DeserializeCurrentScene()
+    {
+      if (serialized_scene_.empty() == true)
+      {
+        return;
+      }
+
+      foundation::LoadArchive archive;
+      archive.FromJson(serialized_scene_);
+
+      engine::Scene* current =
+        GetService<engine::SceneService>()->current_scene();
+
+      archive(&current);
     }
   }
 }
