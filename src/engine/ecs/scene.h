@@ -115,6 +115,14 @@ namespace snuffbox
       void Clear();
 
       /**
+      * @brief Renders all entities within the scene, that are capable
+      *        of doing so
+      *
+      * @param[in] dt The current delta-time of the application
+      */
+      void RenderEntities(float dt);
+
+      /**
       * @return The transform hierarchy with the upper-level transforms
       */
       foundation::Vector<TransformComponent*> TopLevelTransforms() const;

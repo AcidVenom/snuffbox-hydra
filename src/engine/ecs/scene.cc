@@ -4,6 +4,9 @@
 #include "engine/application/application.h"
 #include "engine/services/scene_service.h"
 
+#include "engine/components/camera_component.h"
+#include "engine/components/mesh_renderer_component.h"
+
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>
 
@@ -158,6 +161,37 @@ namespace snuffbox
       batch_changed_ = false;
 
       OnSceneChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    void Scene::RenderEntities(float dt)
+    {
+      ForEachEntity([dt](Entity* e)
+      {
+        if (e->active() == false)
+        {
+          return true;
+        }
+
+        bool renderable = false;
+        if (e->HasComponent<MeshRendererComponent>() == true)
+        {
+          MeshRendererComponent* mrc = e->GetComponent<MeshRendererComponent>();
+          mrc->Update(dt);
+          renderable = true;
+        }
+        else if (e->HasComponent<CameraComponent>() == true)
+        {
+          CameraComponent* cc = e->GetComponent<CameraComponent>();
+          cc->Update(dt);
+          renderable = true;
+        }
+
+        TransformComponent* tc = e->GetComponent<TransformComponent>();
+        tc->Update(dt);
+
+        return true;
+      });
     }
 
     //--------------------------------------------------------------------------

@@ -123,6 +123,7 @@ namespace snuffbox
       GetService<engine::AssetService>()->Refresh(builder.build_directory());
 
       engine::RendererService* renderer = GetService<engine::RendererService>();
+      engine::SceneService* scene_service = GetService<engine::SceneService>();
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
@@ -145,6 +146,10 @@ namespace snuffbox
           {
             state_ = EditorStates::kPaused;
           }
+        }
+        else
+        {
+          scene_service->current_scene()->RenderEntities(dt);
         }
 
         delta_time.Stop();
