@@ -162,7 +162,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::SetPosition(const glm::vec3& position)
     {
-      position_ += InvTransformPoint(position);
+      glm::vec3 current_world_pos = GetPosition();
+
+      position_ += position - current_world_pos;
       MarkDirty(DirtyFlags::kSelf);
     }
 
