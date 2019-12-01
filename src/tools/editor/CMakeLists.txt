@@ -29,6 +29,8 @@ SET(EditorWidgetsSources
   "editor-widgets/console_widget.cc"
   "editor-widgets/searcher_widget.h"
   "editor-widgets/searcher_widget.cc"
+  "editor-widgets/playback_controls.h"
+  "editor-widgets/playback_controls.cc"
 )
 
 SET(InputSources

@@ -125,7 +125,11 @@ namespace snuffbox
         delta_time.Start();
 
         qapp_.processEvents();
-        renderer->Render(dt);
+
+        if (main_window_->IsResizing() == false)
+        {
+          renderer->Render(dt);
+        }
 
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);

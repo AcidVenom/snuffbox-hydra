@@ -129,6 +129,11 @@ namespace snuffbox
       void OnUpdate();
 
       /**
+      * @return Is the game view currently being resized?
+      */
+      bool IsResizing() const;
+
+      /**
       * @brief Stop redirecting log output
       */
       ~MainWindow();

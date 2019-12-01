@@ -343,6 +343,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    bool MainWindow::IsResizing() const
+    {
+      return game_view_->IsResizing();
+    }
+
+    //--------------------------------------------------------------------------
     MainWindow::~MainWindow()
     {
       foundation::Logger::RedirectOutput(nullptr, nullptr);

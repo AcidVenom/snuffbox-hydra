@@ -10,6 +10,8 @@ namespace snuffbox
 {
   namespace editor
   {
+    class PlaybackControls;
+
     /**
     * @brief Used to show the rendering of Snuffbox within the editor
     *
@@ -51,6 +53,11 @@ namespace snuffbox
       */
       void BindResizeCallback(const OnResize& on_resize);
 
+      /**
+      * @return Is the window currently being resized?
+      */
+      bool IsResizing() const;
+
     protected:
 
       /**
@@ -68,9 +75,25 @@ namespace snuffbox
       */
       void resizeEvent(QResizeEvent* evt) override;
 
+      /**
+      * @brief Called when the resizing timer ends, updating the actual size
+      *        of the renderer
+      *
+      * @param[in] evt The timer event
+      */
+      void timerEvent(QTimerEvent* evt) override;
+
     private:
 
       OnResize on_resize_; //!< The on resize callback
+      QWidget* graphics_view_; //!< The window that we will render to
+      PlaybackControls* playback_; //!< The playback controls
+
+      QSize desired_size_; //!< The desired size of the rendering frame
+
+      int size_timer_; //!< The time between resizing events
+
+      static const int kResizeDelay_; //!< The delay inbetween resizes in ms
     };
   }
 }
