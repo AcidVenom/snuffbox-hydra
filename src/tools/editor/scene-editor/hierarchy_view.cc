@@ -296,6 +296,11 @@ namespace snuffbox
         }
       }
 
+      if (GetSelectedItem() == nullptr)
+      {
+        emit ItemSelectionChanged(nullptr);
+      }
+
       if (was_blocked == true)
       {
         blockSignals(true);
