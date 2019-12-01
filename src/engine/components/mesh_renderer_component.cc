@@ -61,7 +61,7 @@ namespace snuffbox
       int idx, 
       Material* material)
     {
-      if (material == nullptr || material->asset() == nullptr)
+      if (material == nullptr)
       {
         return;
       }
