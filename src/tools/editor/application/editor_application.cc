@@ -135,10 +135,7 @@ namespace snuffbox
 
         qapp_.processEvents();
 
-        if (main_window_->IsResizing() == false)
-        {
-          renderer->Render(dt);
-        }
+        renderer->Render(dt);
 
         if (state_ == EditorStates::kPlaying || state_ == EditorStates::kFrame)
         {

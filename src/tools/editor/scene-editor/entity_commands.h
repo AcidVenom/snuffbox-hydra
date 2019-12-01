@@ -523,6 +523,11 @@ namespace snuffbox
       void* object = nullptr;
       PropertyValue* prop = GetProp(&object);
 
+      if (prop == nullptr)
+      {
+        return;
+      }
+
       size_t required = 0;
       if (prop->GetRaw(object, nullptr, &required) == true)
       {

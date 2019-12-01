@@ -1,5 +1,6 @@
 #include "graphics/ogl/resources/ogl_material.h"
 #include "graphics/ogl/resources/ogl_shader.h"
+#include "graphics/ogl/ogl_utils.h"
 #include "graphics/definitions/shader_constants.h"
 
 #include <foundation/auxiliary/logger.h>
@@ -85,10 +86,26 @@ namespace snuffbox
         ShaderConstants::GetUniformLocation(ShaderUniforms::kPerFrameData),
         0);
 
+      if (OGLUtils::CheckError() == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kWarning,
+          "Could not find per-frame-data uniform location in material");
+      }
+
       glUniformBlockBinding(
         program_, 
         ShaderConstants::GetUniformLocation(ShaderUniforms::kPerObjectData),
         1);
+
+      if (OGLUtils::CheckError() == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEngine,
+          foundation::LogSeverity::kWarning,
+          "Could not find per-object-data uniform location in material");
+      }
 
       return true;
     }

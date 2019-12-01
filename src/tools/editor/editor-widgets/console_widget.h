@@ -104,7 +104,7 @@ namespace snuffbox
         foundation::LogSeverity severity, 
         const foundation::String& msg);
 
-    protected:
+    protected slots:
 
       /**
       * @see ConsoleWidget:::OnLog
@@ -113,9 +113,17 @@ namespace snuffbox
       *          correct colors
       */
       void OnMessageReceived(
-        foundation::LogChannel channel, 
-        foundation::LogSeverity severity, 
+        int channel, 
+        int severity, 
         const QString& msg);
+
+    signals:
+
+      /**
+      * @brief A signal that is emitted when a log has been received, to do
+      *        thread-safe logging
+      */
+      void MessageReceived(int channel, int severity, const QString& msg);
 
     private:
 

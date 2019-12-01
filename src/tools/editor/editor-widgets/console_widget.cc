@@ -197,6 +197,12 @@ namespace snuffbox
         tab_widget_->addTab(new_tab, names.at(i) + " (0)");
         tabs_.push_back(new_tab);
       }
+
+      connect(
+        this,
+        &ConsoleWidget::MessageReceived,
+        this,
+        &ConsoleWidget::OnMessageReceived);
     }
 
     //--------------------------------------------------------------------------
@@ -212,20 +218,28 @@ namespace snuffbox
       }
 
       ConsoleWidget* widget = reinterpret_cast<ConsoleWidget*>(ud);
-      widget->OnMessageReceived(channel, severity, QString(msg.c_str()));
+      emit widget->MessageReceived(
+        static_cast<int>(channel), 
+        static_cast<int>(severity), 
+        QString(msg.c_str()));
     }
 
     //--------------------------------------------------------------------------
     void ConsoleWidget::OnMessageReceived(
-      foundation::LogChannel channel,
-      foundation::LogSeverity severity,
+      int channel,
+      int severity,
       const QString& msg)
     {
-      tabs_[0]->WriteLine(msg, severity);
+      foundation::LogChannel c = 
+        static_cast<foundation::LogChannel>(channel);
+      foundation::LogSeverity s = 
+        static_cast<foundation::LogSeverity>(severity);
 
-      if (channel != foundation::LogChannel::kUnspecified)
+      tabs_[0]->WriteLine(msg, s);
+
+      if (c != foundation::LogChannel::kUnspecified)
       {
-        tabs_[static_cast<int>(channel)]->WriteLine(msg, severity);
+        tabs_[channel]->WriteLine(msg, s);
       }
     }
   }

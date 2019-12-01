@@ -55,6 +55,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Material::SetMaterialAsset(IAsset* asset)
     {
+      if (asset == nullptr)
+      {
+        asset_ = nullptr;
+        return;
+      }
+
       if (asset->type() != compilers::AssetTypes::kMaterial)
       {
         return;
@@ -82,6 +88,21 @@ namespace snuffbox
     MaterialAsset* Material::asset() const
     {
       return asset_;
+    }
+
+    //--------------------------------------------------------------------------
+    SerializableAsset Material::GetSerializableAsset() const
+    {
+      SerializableAsset sa;
+      sa.handle = asset_;
+      sa.type = compilers::AssetTypes::kMaterial;
+
+      if (asset_ != nullptr)
+      {
+        sa.SetName(asset_->name());
+      }
+
+      return sa;
     }
   }
 }

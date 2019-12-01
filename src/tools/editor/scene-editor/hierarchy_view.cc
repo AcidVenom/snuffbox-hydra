@@ -646,7 +646,7 @@ namespace snuffbox
       if (old_name != new_name)
       {
         PropertyEntityCommand* cmd = 
-          new PropertyEntityCommand(ent->uuid(), this, "name");
+          new PropertyEntityCommand(ent->uuid(), this, "0:name");
 
         cmd->Set(foundation::String(new_name.toLatin1().data()));
 

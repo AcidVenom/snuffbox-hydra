@@ -539,6 +539,16 @@ namespace snuffbox
 
         return it->second.get();
       }
+      else
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kError,
+          "Could not find property with name '{0}' for a property set command,"
+          "\nfor entity with UUID '{1}'",
+          prop_name_,
+          uuid());
+      }
 
       return nullptr;
     }

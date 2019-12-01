@@ -87,7 +87,9 @@ namespace snuffbox
 
       RendererService* renderer_; //!< The renderer service
 
-      static const int kMaxMaterials_; //!< The maximum number of materials
+    public:
+
+      static const int kMaxMaterials; //!< The maximum number of materials
     };
 
     //--------------------------------------------------------------------------

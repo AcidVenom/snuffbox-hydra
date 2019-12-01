@@ -13,6 +13,23 @@
 #undef near
 #undef far
 
+#define CREATE_MATERIAL_PROP(id, i)\
+{\
+PropertyPair pair =\
+CreatePropertyPair<engine::SerializableAsset, engine::MeshRendererComponent>(\
+#i ":material_" #i,\
+[](engine::MeshRendererComponent* m, const engine::SerializableAsset& value)\
+{\
+  engine::Material mat(value.handle);\
+  m->SetMaterial(i, &mat);\
+},\
+[](engine::MeshRendererComponent* m)\
+{\
+  return m->GetMaterial(i)->GetSerializableAsset();\
+});\
+kComponentsMapping_[id].emplace(pair);\
+}
+
 namespace snuffbox
 {
   namespace editor
@@ -146,6 +163,21 @@ namespace snuffbox
           }
         )
       };
+
+      //------------------------------------------------------------------------
+      // snuffbox::engine::MeshRendererComponent
+      //------------------------------------------------------------------------
+      int mrc_id = static_cast<int>(engine::Components::kMeshRenderer);
+      kComponentsMapping_[mrc_id] = {};
+
+      CREATE_MATERIAL_PROP(mrc_id, 0);
+      CREATE_MATERIAL_PROP(mrc_id, 1);
+      CREATE_MATERIAL_PROP(mrc_id, 2);
+      CREATE_MATERIAL_PROP(mrc_id, 3);
+      CREATE_MATERIAL_PROP(mrc_id, 4);
+      CREATE_MATERIAL_PROP(mrc_id, 5);
+      CREATE_MATERIAL_PROP(mrc_id, 6);
+      CREATE_MATERIAL_PROP(mrc_id, 7);
 
       //------------------------------------------------------------------------
       // snuffbox::engine::CameraComponent
