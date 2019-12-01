@@ -20,7 +20,9 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     PlaybackControls::PlaybackControls(QWidget* parent) :
       QWidget(parent),
-      play_toggled_(false)
+      disabled_(false),
+      play_toggled_(false),
+      enable_flags_(0)
     {
       memset(buttons_, 0, sizeof(QPushButton*) * PlaybackButton::kCount);
 
@@ -113,11 +115,33 @@ namespace snuffbox
       bool next_frame_enabled =
         (flags & PlaybackFlags::kNextButton) == PlaybackFlags::kNextButton;
 
+      if (disabled_ == true)
+      {
+        play_enabled = stop_enabled = next_frame_enabled = false;
+      }
+
       buttons_[PlaybackButton::kPlay]->setEnabled(play_enabled);
       buttons_[PlaybackButton::kStop]->setEnabled(stop_enabled);
       buttons_[PlaybackButton::kNextFrame]->setEnabled(next_frame_enabled);
 
+      enable_flags_ = flags;
+
       UpdateStyleSheets();
+    }
+
+    //--------------------------------------------------------------------------
+    void PlaybackControls::DisableAll(bool disabled)
+    {
+      if (
+        disabled == disabled_ || 
+        EditorApplication::Instance()->state() != 
+        EditorApplication::EditorStates::kEditing)
+      {
+        return;
+      }
+
+      disabled_ = disabled;
+      SetEnabled(enable_flags_);
     }
 
     //--------------------------------------------------------------------------

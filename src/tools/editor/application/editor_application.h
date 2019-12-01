@@ -178,10 +178,12 @@ namespace snuffbox
       /**
       * @brief Called when we initially start playing
       *
+      * @param[in] old The old state the editor was in
+      *
       * @remarks This serializes the scene, to deserialize it when we
       *          go out of play mode
       */
-      void OnStartPlaying();
+      void OnStartPlaying(EditorStates old);
 
       /**
       * @brief Serializes the current scene, for deserialization later
@@ -192,6 +194,11 @@ namespace snuffbox
       * @brief Deserializes the current scene
       */
       void DeserializeCurrentScene();
+
+      /**
+      * @brief Reloads all scripts and sets whether we have an error or not
+      */
+      void ReloadScripts();
 
     private:
 
@@ -212,6 +219,8 @@ namespace snuffbox
 
       EditorStates state_; //!< The current state of the editor application
       foundation::String serialized_scene_; //!< The currently serialized scene
+
+      bool has_script_error_; //!< Do we currently have a scripting error?
 
       /**
       * @brief The minimum amount of time, in milliseconds, to wait inbetween

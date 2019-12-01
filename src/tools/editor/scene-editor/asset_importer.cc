@@ -7,6 +7,12 @@
 #include <foundation/io/file.h>
 #include <foundation/serialization/save_archive.h>
 
+#ifndef SNUFF_NSCRIPTING
+#include <engine/components/script_component.h>
+#endif
+
+#include <engine/ecs/entity.h>
+
 #include <QMessageBox>
 #include <QFileDialog>
 
@@ -65,6 +71,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetImporter::OpenSceneDialog(const foundation::String& scene_path)
     {
+      if (app_->state() != EditorApplication::EditorStates::kEditing)
+      {
+        return;
+      }
+
       if (current_scene_ == scene_path)
       {
         return;
@@ -93,6 +104,11 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void AssetImporter::OpenScene(const foundation::String& scene_path)
     {
+      if (app_->state() != EditorApplication::EditorStates::kEditing)
+      {
+        return;
+      }
+
       engine::SceneService* ss = app_->GetService<engine::SceneService>();
       
       if (ss->SwitchScene(scene_path) == true)
@@ -179,6 +195,39 @@ namespace snuffbox
       }
 
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    bool AssetImporter::ReloadScripts()
+    {
+#ifndef SNUFF_NSCRIPTING
+      engine::Scene* scene =
+        app_->GetService<engine::SceneService>()->current_scene();
+
+      engine::AssetService* a = app_->GetService<engine::AssetService>();
+
+      bool error = false;
+      if (a->LoadAll(compilers::AssetTypes::kScript) == false)
+      {
+        return false;
+      }
+
+      scene->ForEachEntity([](engine::Entity* ent)
+      {
+        foundation::Vector<engine::ScriptComponent*> comps =
+          ent->GetComponents<engine::ScriptComponent>();
+
+        for (size_t i = 0; i < comps.size(); ++i)
+        {
+          engine::ScriptComponent* c = comps.at(i);
+          c->SetBehavior(c->behavior());
+        }
+
+        return true;
+      });
+
+      return true;
+#endif
     }
   }
 }

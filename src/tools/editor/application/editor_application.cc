@@ -46,7 +46,9 @@ namespace snuffbox
       main_window_(nullptr),
       asset_importer_(nullptr),
       project_changed_(false),
-      state_(EditorStates::kEditing)
+      state_(EditorStates::kEditing),
+      serialized_scene_(""),
+      has_script_error_(false)
     {
       QCoreApplication::setOrganizationName(
         QStringLiteral("Daniel Konings"));
@@ -124,6 +126,8 @@ namespace snuffbox
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
+
+      ReloadScripts();
 
       while (should_quit() == false && main_window_->isVisible() == true)
       {
@@ -208,6 +212,9 @@ namespace snuffbox
         return;
       }
 
+      EditorStates old = state_;
+      state_ = state;
+
       switch (state)
       {
       case EditorStates::kEditing:
@@ -215,14 +222,17 @@ namespace snuffbox
         break;
 
       case EditorStates::kPlaying:
-        OnStartPlaying();
+        OnStartPlaying(old);
         break;
 
       default:
         break;
       }
 
-      state_ = state;
+      if (main_window_ != nullptr)
+      {
+        main_window_->EditorStateChanged();
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -362,6 +372,8 @@ namespace snuffbox
         build_dir_changed_ = false;
         main_window_->RefreshAssetList();
 
+        ReloadScripts();
+
         foundation::Logger::LogVerbosity<3>(
           foundation::LogChannel::kBuilder,
           foundation::LogSeverity::kDebug,
@@ -377,12 +389,14 @@ namespace snuffbox
 #endif
 
       DeserializeCurrentScene();
+
+      ReloadScripts();
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::OnStartPlaying()
+    void EditorApplication::OnStartPlaying(EditorStates old)
     {
-      if (state_ != EditorStates::kEditing)
+      if (old != EditorStates::kEditing)
       {
         return;
       } 
@@ -418,6 +432,26 @@ namespace snuffbox
         GetService<engine::SceneService>()->current_scene();
 
       archive(&current);
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::ReloadScripts()
+    {
+      bool error = asset_importer_->ReloadScripts() == false;
+
+      if (error == true && has_script_error_ == false)
+      {
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kWarning,
+          "Found script errors, disabling playback controls until resolved");
+      }
+
+      has_script_error_ = error;
+      if (state_ == EditorStates::kEditing)
+      {
+        main_window_->SetPlaybackEnabled(has_script_error_ == false);
+      }
     }
   }
 }

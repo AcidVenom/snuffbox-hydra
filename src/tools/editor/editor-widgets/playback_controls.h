@@ -68,6 +68,14 @@ namespace snuffbox
       */
       void SetEnabled(int flags);
 
+      /**
+      * @brief Sets if all playback should be disabled, disregarding flags
+      *        that are currently set
+      *
+      * @param[in] disabled Should all controls be disabled?
+      */
+      void DisableAll(bool disabled);
+
     protected:
 
       /**
@@ -102,7 +110,9 @@ namespace snuffbox
       */
       QPushButton* buttons_[PlaybackButton::kCount];
 
+      bool disabled_; //!< Are playback controls disabled?
       bool play_toggled_; //!< Is the play button toggled to a pause button?
+      int enable_flags_; //!< The flags for which buttons are enabled
 
       static const int kButtonSize_; //!< The size of each individual button
       static const int kFontSize_; //!< The font size in buttons

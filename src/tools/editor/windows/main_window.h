@@ -139,6 +139,18 @@ namespace snuffbox
       bool IsResizing() const;
 
       /**
+      * @brief Sets if playback should be enabled within the game view
+      *
+      * @param[in] enabled The new value
+      */
+      void SetPlaybackEnabled(bool enabled);
+
+      /**
+      * @brief Called when the editor state has been changed
+      */
+      void EditorStateChanged();
+
+      /**
       * @brief Stop redirecting log output
       */
       ~MainWindow();
@@ -149,6 +161,11 @@ namespace snuffbox
       GameView* game_view_; //!< The game view
       AssetBrowser* asset_browser_; //!< The asset browser
       PropertyView* properties_; //!< The current property view
+
+      /**
+      * @brief The list of actions disabled in play mode
+      */
+      QList<QAction*> disabled_in_play_mode_;
 
       static const int kMinWidth_; //!< The minimum width of the window
       static const int kMinHeight_; //!< The minumum height of the window

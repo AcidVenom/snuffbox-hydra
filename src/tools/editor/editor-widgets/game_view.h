@@ -58,6 +58,13 @@ namespace snuffbox
       */
       bool IsResizing() const;
 
+      /**
+      * @brief Sets if playback should be enabled
+      *
+      * @param[in] enabled The new value
+      */
+      void SetPlaybackEnabled(bool enabled);
+
     protected:
 
       /**

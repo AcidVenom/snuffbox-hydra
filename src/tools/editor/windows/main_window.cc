@@ -137,6 +137,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void MainWindow::CreateMenuBar()
     {
+      disabled_in_play_mode_.clear();
+
       QMenu* file_menu = menuBar()->addMenu("File");
       QMenu* edit_menu = menuBar()->addMenu("Edit");
 
@@ -144,12 +146,15 @@ namespace snuffbox
       open_project->setShortcut(Qt::CTRL + Qt::Key_O);
 
       QAction* new_scene = new QAction("New scene");
+      disabled_in_play_mode_.push_back(new_scene);
       new_scene->setShortcut(Qt::CTRL + Qt::Key_N);
 
       QAction* save_scene = new QAction("Save scene");
+      disabled_in_play_mode_.push_back(save_scene);
       save_scene->setShortcut(Qt::CTRL + Qt::Key_S);
 
       QAction* save_scene_as = new QAction("Save scene as");
+      disabled_in_play_mode_.push_back(save_scene_as);
       save_scene_as->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
 
       QAction* exit_app = new QAction("Exit");
@@ -181,9 +186,11 @@ namespace snuffbox
       });
 
       QAction* undo = new QAction("Undo");
+      disabled_in_play_mode_.push_back(undo);
       undo->setShortcut(Qt::CTRL + Qt::Key_Z);
 
       QAction* redo = new QAction("Redo");
+      disabled_in_play_mode_.push_back(redo);
       redo->setShortcut(Qt::CTRL + Qt::Key_Y);
 
       connect(undo, &QAction::triggered, this, [&]()
@@ -356,6 +363,24 @@ namespace snuffbox
     bool MainWindow::IsResizing() const
     {
       return game_view_->IsResizing();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::SetPlaybackEnabled(bool enabled)
+    {
+      game_view_->SetPlaybackEnabled(enabled);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::EditorStateChanged()
+    {
+      EditorApplication::EditorStates state = app_->state();
+      bool disabled = state != EditorApplication::EditorStates::kEditing;
+
+      for (int i = 0; i < disabled_in_play_mode_.size(); ++i)
+      {
+        disabled_in_play_mode_.at(i)->setDisabled(disabled);
+      }
     }
 
     //--------------------------------------------------------------------------

@@ -68,6 +68,12 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    void GameView::SetPlaybackEnabled(bool enabled)
+    {
+      playback_->DisableAll(enabled == false);
+    }
+
+    //--------------------------------------------------------------------------
     void GameView::paintEvent(QPaintEvent* evt)
     {
       Q_UNUSED(evt);

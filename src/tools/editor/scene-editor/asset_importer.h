@@ -87,6 +87,13 @@ namespace snuffbox
         const foundation::String& relative_path,
         foundation::Path* saved_at) const;
 
+      /**
+      * @brief Reloads all scripts and resets every entity's behavior
+      *
+      * @return Were there no errors loading the scripts?
+      */
+      bool ReloadScripts();
+
     signals:
 
       /**
