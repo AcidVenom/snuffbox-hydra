@@ -60,6 +60,8 @@ namespace snuffbox
         return;
       }
 
+      glm::vec3 old_position = child->GetPosition();
+
       if (child->parent_ != nullptr)
       {
         child->parent_->Detach(child);
@@ -67,6 +69,8 @@ namespace snuffbox
 
       children_.push_back(child);
       child->SetParentRaw(this);
+
+      child->SetPosition(old_position);
     }
 
     //--------------------------------------------------------------------------
@@ -78,8 +82,12 @@ namespace snuffbox
         return;
       }
 
+      glm::vec3 old_position = child->GetPosition();
+
       children_.erase(children_.begin() + idx);
       child->SetParentRaw(nullptr);
+
+      child->SetPosition(old_position);
     }
 
     //--------------------------------------------------------------------------
