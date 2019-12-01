@@ -12,6 +12,7 @@
 #endif
 
 #include <engine/ecs/entity.h>
+#include <engine/assets/model_asset.h>
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -52,6 +53,10 @@ namespace snuffbox
       {
       case compilers::AssetTypes::kScene:
         OpenSceneDialog(asset_path);
+        break;
+
+      case compilers::AssetTypes::kModel:
+        InstantiateModel(asset_path);
         break;
 
       default:
@@ -167,6 +172,22 @@ namespace snuffbox
             save_path);
         }
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void AssetImporter::InstantiateModel(const foundation::String& asset_path)
+    {
+      compilers::AssetTypes type = compilers::AssetTypes::kModel;
+      if (app_->GetService<engine::AssetService>()->Load(
+        type, asset_path) == false)
+      {
+        return;
+      }
+
+      engine::AssetService* as = app_->GetService<engine::AssetService>();
+
+      static_cast<engine::ModelAsset*>(
+        as->Get(type, asset_path))->Instantiate();
     }
 
     //--------------------------------------------------------------------------

@@ -74,6 +74,13 @@ namespace snuffbox
       void SaveCurrentScene(bool force_dialog = false);
 
       /**
+      * @brief Instantiates a model's entire scene hierarchy as entities
+      *
+      * @param[in] asset_path The path to the model
+      */
+      void InstantiateModel(const foundation::String& asset_path);
+
+      /**
       * @brief Checks whether or not an asset is already saved to the current
       *        source directory
       *

@@ -195,8 +195,7 @@ namespace snuffbox
 
       TransformComponent* current = GetComponent<TransformComponent>();
 
-      const foundation::Vector<TransformComponent*>& children =
-        current->children();
+      foundation::Vector<TransformComponent*> children = current->children();
 
       Entity* child = nullptr;
       for (size_t i = 0; i < children.size(); ++i)
