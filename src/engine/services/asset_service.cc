@@ -268,6 +268,8 @@ namespace snuffbox
       compilers::AssetTypes type,
       const foundation::Path& relative_path)
     {
+      std::unique_lock<std::mutex> lock(mutex_);
+
       foundation::Path no_ext = relative_path.NoExtension();
       foundation::String no_ext_s = no_ext.ToString();
 
@@ -335,6 +337,8 @@ namespace snuffbox
       compilers::AssetTypes type,
       const foundation::Path& relative_path)
     {
+      std::unique_lock<std::mutex> lock(mutex_);
+
       AssetMap::iterator it = registered_.find(relative_path.ToString());
 
       if (it != registered_.end())
@@ -381,6 +385,27 @@ namespace snuffbox
 
       foundation::String p = NoExtensionToBuildPath(type, path);
       return registered_.at(p).get();
+    }
+
+    //--------------------------------------------------------------------------
+    foundation::Vector<const IAsset*> AssetService::GetRegistered(
+      compilers::AssetTypes type) const
+    {
+      foundation::Vector<const IAsset*> result;
+
+      for (
+        AssetMap::const_iterator it = registered_.begin();
+        it != registered_.end();
+        ++it)
+      {
+        const IAsset* asset = it->second.get();
+        if (asset->type() == type)
+        {
+          result.push_back(asset);
+        }
+      }
+
+      return result;
     }
 
     //--------------------------------------------------------------------------

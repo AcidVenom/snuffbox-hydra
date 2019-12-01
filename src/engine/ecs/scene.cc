@@ -13,8 +13,8 @@ namespace snuffbox
   {
     //--------------------------------------------------------------------------
     Scene::Scene() :
-      current_id_(0),
-      deleted_(false)
+      deleted_(false),
+      batch_changed_(false)
     {
 
     }
@@ -26,9 +26,6 @@ namespace snuffbox
       {
         return;
       }
-
-      entity->set_id(current_id_);
-      ++current_id_;
 
       entities_.push_back(entity);
     }
@@ -89,30 +86,6 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    size_t Scene::GetNextAvailableID()
-    {
-      if (entities_.size() == 0)
-      {
-        return 0;
-      }
-
-      size_t last = 0;
-
-      ForEachEntity([&last](Entity* e)
-      {
-        size_t id = e->id();
-        if (id > last)
-        {
-          last = id;
-        }
-
-        return true;
-      });
-
-      return last + 1;
-    }
-
-    //--------------------------------------------------------------------------
     void Scene::RemoveNullEntities()
     {
       foundation::Vector<Entity*> result;
@@ -165,6 +138,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void Scene::Clear()
     {
+      batch_changed_ = true;
+
       Entity* e = nullptr;
       for (int i = static_cast<int>(entities_.size()) - 1; i >= 0; --i)
       {
@@ -179,6 +154,10 @@ namespace snuffbox
       }
 
       RemoveNullEntities();
+
+      batch_changed_ = false;
+
+      OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -228,27 +207,13 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    Entity* Scene::FindEntityByID(size_t id)
-    {
-      Entity* found = nullptr;
-
-      ForEachEntity([&found, id](Entity* e)
-      {
-        if (e->id() == id)
-        {
-          found = e;
-          return false;
-        }
-
-        return true;
-      });
-
-      return found;
-    }
-
-    //--------------------------------------------------------------------------
     void Scene::OnSceneChanged()
     {
+      if (batch_changed_ == true)
+      {
+        return;
+      }
+
       Application::Instance()->GetService<SceneService>()->OnSceneChanged(this);
     }
 
@@ -273,6 +238,8 @@ namespace snuffbox
     {
       Clear();
 
+      batch_changed_ = true;
+
       size_t n = archive.GetArraySize("entities");
 
       foundation::Vector<Entity*> entities;
@@ -293,7 +260,9 @@ namespace snuffbox
 
       archive(GET_ARCHIVE_PROP(entities));
 
-      current_id_ = GetNextAvailableID();
+      batch_changed_ = false;
+
+      OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------

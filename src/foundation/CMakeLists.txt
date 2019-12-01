@@ -29,6 +29,8 @@ SET(ContainerSources
   "containers/map.h"
   "containers/queue.h"
   "containers/function.h"
+  "containers/uuid.h"
+  "containers/uuid.cc"
 )
 
 SET(AuxiliarySources

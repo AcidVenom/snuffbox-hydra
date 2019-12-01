@@ -1,526 +1,408 @@
 #include "tools/editor/application/editor_application.h"
-#include "tools/editor/application/editor_camera.h"
-#include "tools/editor/definitions/project.h"
+#include "tools/editor/windows/main_window.h"
 
-#include <engine/ecs/entity.h>
-#include <engine/components/transform_component.h>
-#include <engine/components/mesh_renderer_component.h>
-#include <engine/components/camera_component.h>
+#include "tools/editor/editor-widgets/game_view.h"
 
-#include <engine/services/renderer_service.h>
-#include <engine/services/cvar_service.h>
-#include <engine/services/scene_service.h>
-#include <engine/services/asset_service.h>
-#include <engine/services/input_service.h>
-#include <engine/assets/scene_asset.h>
+#include "tools/editor/project/project_window.h"
+#include "tools/editor/application/styling.h"
+
+#include "tools/builder/builder.h"
 
 #ifndef SNUFF_NSCRIPTING
-#include <engine/components/script_component.h>
 #include <engine/services/script_service.h>
 #endif
 
+#include <engine/services/renderer_service.h>
+#include <engine/services/asset_service.h>
+#include <engine/services/scene_service.h>
+
+#include <foundation/auxiliary/logger.h>
 #include <foundation/auxiliary/timer.h>
+
 #include <foundation/serialization/save_archive.h>
 #include <foundation/serialization/load_archive.h>
-#include <foundation/io/file.h>
 
-#if defined(SNUFF_LINUX) && defined(Unsorted)
-#undef Unsorted
-#endif
-
-#include <qfiledialog.h>
-#include <qmessagebox.h>
+#include <QApplication>
+#include <memory>
 
 namespace snuffbox
 {
   namespace editor
   {
     //--------------------------------------------------------------------------
-    EditorApplication::EditorApplication(
-      int& argc,
-      char** argv,
-      const engine::Application::Configuration& cfg)
-      :
-      Application(argc, argv, cfg),
-      QApplication(argc, argv),
-      window_(nullptr),
-      camera_(nullptr),
-      project_dir_(""),
-      assets_dir_(""),
-      loaded_scene_(""),
-      scene_changed_(false),
-      state_(States::kUninitialized),
-      has_error_(false)
-    {
+    const int EditorApplication::kMinBuildChangeWait_ = 200;
+    const QString EditorApplication::kTitleFormat_ =
+      "Snuffbox Editor - %0";
 
+    //--------------------------------------------------------------------------
+    EditorApplication::EditorApplication(
+      int argc, char** argv, const Configuration& cfg)
+      :
+      engine::Application(argc, argv, cfg),
+      qapp_(argc, argv),
+      project_(nullptr),
+      build_change_timer_("BuildChangeTimer"),
+      build_dir_changed_(false),
+      main_window_(nullptr),
+      asset_importer_(nullptr),
+      project_changed_(false),
+      state_(EditorStates::kEditing),
+      serialized_scene_(""),
+      has_script_error_(false)
+    {
+      QCoreApplication::setOrganizationName(
+        QStringLiteral("Daniel Konings"));
+
+      QCoreApplication::setOrganizationDomain(
+        QStringLiteral("www.danielkonings.com"));
+
+      QCoreApplication::setApplicationName(cfg.application_name);
+
+      Styling::ApplyStyle(&qapp_);
+    }
+
+    //--------------------------------------------------------------------------
+    EditorApplication* EditorApplication::Instance()
+    {
+      return static_cast<EditorApplication*>(Application::Instance());
     }
 
     //--------------------------------------------------------------------------
     foundation::ErrorCodes EditorApplication::Run()
     {
-      ApplyConfiguration();
+      SetAsInstance();
 
-      foundation::Logger::LogVerbosity<2>(
-        foundation::LogChannel::kEditor,
-        foundation::LogSeverity::kDebug,
-        "Initializing the editor"
-        );
+      bool was_restarted = project_changed_ == true;
 
-      window_ = foundation::Memory::ConstructUnique<MainWindow>(
-        &foundation::Memory::default_allocator(),
-        this);
-
-      foundation::ErrorCodes err = Initialize();
-
-      if (err != foundation::ErrorCodes::kSuccess)
+      if (was_restarted)
       {
-        Shutdown();
+        OnRestart();
+      }
+
+      project_changed_ = false;
+
+      foundation::ErrorCodes err = foundation::ErrorCodes::kSuccess;
+      if (was_restarted == false && ShowProjectWindow() == false)
+      {
         return err;
       }
 
+      ApplyConfiguration();
+
+      if ((err = Initialize()) != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
+
+      asset_importer_ = std::unique_ptr<AssetImporter>(new AssetImporter(this));
+
+      main_window_ = CreateMainWindow(&err);
+      if (err != foundation::ErrorCodes::kSuccess)
+      {
+        return err;
+      }
+
+      builder::Builder builder;
+      if (builder.Initialize(
+        project_.project_path().toLatin1().data(),
+        Project::kAssetDirectory,
+        Project::kBuildDirectory,
+        [&](const builder::BuildItem& item)
+        {
+          OnBuilderFinished(&builder, item);
+        },
+        [&](const builder::BuildItem& item)
+        {
+          OnBuilderChanged(&builder, item);
+        }
+      ) == false)
+      {
+        return foundation::ErrorCodes::kBuilderInitializationFailed;
+      }
+
+      GetService<engine::AssetService>()->Refresh(builder.build_directory());
+
       engine::RendererService* renderer = GetService<engine::RendererService>();
-      engine::SceneService* scene_service = GetService<engine::SceneService>();
-
-      window_->CreateHierarchy(scene_service);
-      window_->RegisterInputFilter();
-
-      window_->BindResizeCallback([&](uint16_t width, uint16_t height)
-      {
-        renderer->OnResize(width, height);
-      });
-
-      window_->show();
-
-      scene_service->set_on_scene_changed([=](engine::Scene* scene)
-      {
-        OnSceneChanged(scene);
-      });
-
-      SwitchState(States::kEditing);
-      NewEditorCamera(scene_service->current_scene());
 
       foundation::Timer delta_time("delta_time");
       float dt = 0.0f;
 
-      engine::InputService* input = GetService<engine::InputService>();
+      ReloadScripts();
 
-      while (should_quit() == false)
+      while (should_quit() == false && main_window_->isVisible() == true)
       {
         delta_time.Start();
 
-        processEvents();
-
-        if (state_ == States::kPlaying)
-        {
-          Update(dt);
-        }
-        else
-        {
-          input->Flush();
-          RenderOnly(dt);
-        }
+        qapp_.processEvents();
 
         renderer->Render(dt);
-        builder_.IdleNotification();
 
-        CheckSceneChanged();
+        if (state_ == EditorStates::kPlaying || state_ == EditorStates::kFrame)
+        {
+          Update(dt);
+
+          if (state_ == EditorStates::kFrame)
+          {
+            state_ = EditorStates::kPaused;
+          }
+        }
 
         delta_time.Stop();
         dt = delta_time.Elapsed(foundation::TimeUnits::kSecond);
+
+        builder.IdleNotification();
+
+        CheckForBuildChanges();
+
+        main_window_->OnUpdate();
       }
 
+      builder.Shutdown();
       Shutdown();
 
-      return foundation::ErrorCodes::kSuccess;
+      main_window_.reset();
+      asset_importer_.reset();
+
+      return project_changed_ ? 
+        foundation::ErrorCodes::kRestart : foundation::ErrorCodes::kSuccess;
     }
 
     //--------------------------------------------------------------------------
-    bool EditorApplication::SetProjectDirectory(const foundation::Path& path)
+    void EditorApplication::TryOpenProject()
     {
-      NewScene();
-
-      if (foundation::Directory::Exists(path) == false)
+      if (ShowProjectWindow() == true)
       {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kEditor,
-          foundation::LogSeverity::kError,
-          "Set an invalid project directory: {0}, it does not exist",
-          path
-          );
-
-        return false;
+        project_changed_ = true;
+        NotifyQuit();
       }
-
-      if (builder_.Initialize(
-        path,
-        Project::kAssetFolder,
-        Project::kBuildFolder) == false)
-      {
-        foundation::Logger::LogVerbosity<1>(
-          foundation::LogChannel::kEditor,
-          foundation::LogSeverity::kError,
-          "Could not initialize the builder on project directory '{0}'",
-          path
-          );
-
-        return false;
-      }
-
-      project_dir_ = path.ToString().c_str();
-      assets_dir_ = project_dir_ + "/" + Project::kAssetFolder;
-
-      InitializeAssets(builder_.build_directory());
-
-      return true;
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::SwitchState(States state)
+    QSettings& EditorApplication::GlobalSettings() const
     {
+      const Configuration& cfg = config();
+
+      static QSettings settings(
+        QStringLiteral("Daniel Konings"), 
+        cfg.application_name);
+
+      return settings;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::SetSceneInWindowTitle(const QString& scene_name)
+    {
+      QString title = kTitleFormat_.arg(scene_name);
+      qapp_.setApplicationDisplayName(title);
+
+      if (main_window_ != nullptr)
+      {
+        main_window_->setWindowTitle(title);
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::SwitchState(EditorStates state)
+    {
+      if (state == state_)
+      {
+        return;
+      }
+
+      EditorStates old = state_;
       state_ = state;
 
       switch (state)
       {
-      case States::kEditing:
+      case EditorStates::kEditing:
         OnStartEditing();
         break;
 
-      case States::kPlaying:
-        Play();
+      case EditorStates::kPlaying:
+        OnStartPlaying(old);
         break;
 
       default:
         break;
       }
+
+      if (main_window_ != nullptr)
+      {
+        main_window_->EditorStateChanged();
+      }
     }
 
     //--------------------------------------------------------------------------
-    bool EditorApplication::NewScene(bool prompt)
+    MainWindow* EditorApplication::main_window() const
     {
-      if (prompt == true && ShowSceneSaveDialog() == false)
-      {
-        return false;
-      }
-
-      if (camera_ != nullptr)
-      {
-        camera_->Destroy();
-      }
-
-      engine::SceneService* ss = GetService<engine::SceneService>();
-
-      ss->SwitchScene(nullptr);
-      loaded_scene_ = "";
-      serialized_scene_ = "";
-
-      scene_changed_ = true;
-
-      NewEditorCamera(ss->current_scene());
-
-      return true;
+      return main_window_.get();
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::OpenScene(const foundation::Path& path)
+    AssetImporter* EditorApplication::asset_importer() const
     {
-      if (loaded_scene_ == path.ToString())
-      {
-        return;
-      }
-
-      if (ShowSceneSaveDialog() == false)
-      {
-        return;
-      }
-
-      if (camera_ != nullptr)
-      {
-        camera_->Destroy();
-      }
-
-      engine::SceneService* ss = GetService<engine::SceneService>();
-
-      loaded_scene_ = path.ToString();
-
-      foundation::String asset = path.NoExtension().ToString();
-      ss->SwitchScene(asset);
-
-      scene_changed_ = true;
-
-      NewEditorCamera(ss->current_scene());
+      return asset_importer_.get();
     }
 
     //--------------------------------------------------------------------------
-    bool EditorApplication::SaveCurrentScene(bool dialog)
+    Project& EditorApplication::project()
     {
-      engine::Scene* scene =
-        GetService<engine::SceneService>()->current_scene();
-
-      bool show_dialog = true;
-      QString path = "";
-
-      if (loaded_scene_.size() > 0)
-      {
-        foundation::Path dir = assets_dir_.toStdString().c_str();
-        dir = dir / loaded_scene_;
-
-        if (foundation::File::Exists(dir) == true)
-        {
-          path = dir.ToString().c_str();
-          show_dialog = false;
-        }
-      }
-
-      if (dialog == true || show_dialog == true)
-      {
-        path = QFileDialog::getSaveFileName(window_.get(),
-         "Save scene", assets_dir_, "Scene files (*.scene)");
-      }
-
-      if (path.size() > 0)
-      {
-        foundation::SaveArchive archive;
-        archive(scene);
-
-        std::string s_path = path.toStdString();
-        foundation::Path full_path = s_path.c_str();
-
-        if (archive.WriteFile(full_path) == false)
-        {
-          foundation::Logger::LogVerbosity<1>(
-            foundation::LogChannel::kEditor,
-            foundation::LogSeverity::kError,
-            "Could not save scene file '{0}'",
-            full_path);
-
-          return false;
-        }
-
-        std::string assets_path = assets_dir_.toStdString();
-
-        loaded_scene_ = full_path.StripPath(
-          foundation::Path(assets_path.c_str())).ToString();
-
-        return true;
-      }
-
-      return false;
+      return project_;
     }
 
     //--------------------------------------------------------------------------
-    QString EditorApplication::GetLoadedScene()
-    {
-      return loaded_scene_.c_str();
-    }
-
-    //--------------------------------------------------------------------------
-    EditorApplication::States EditorApplication::state() const
+    EditorApplication::EditorStates EditorApplication::state() const
     {
       return state_;
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::CreateRenderer()
+    void EditorApplication::OnRestart()
     {
-      CreateService<engine::RendererService>(window_->GetGraphicsWindow());
+      should_quit_ = false;
+      state_ = EditorStates::kEditing;
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::InitializeAssets(const foundation::Path& build_dir)
+    bool EditorApplication::ShowProjectWindow()
     {
-      GetService<engine::AssetService>()->Refresh(build_dir);
-      ReloadScripts();
+      std::unique_ptr<ProjectWindow>
+        project_window(new ProjectWindow(&project_));
 
-      builder_.set_on_finished([=](const builder::BuildItem& item)
-      {
-        OnReload(item);
-      });
+      project_window->show();
 
-      builder_.set_on_removed([=](const builder::BuildItem& item)
+      if (project_window->exec() == QDialog::Rejected)
       {
-        OnRemoved(item);
-      });
+        return false;
+      }
+
+      return true;
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::OnReload(const builder::BuildItem& item)
+    std::unique_ptr<MainWindow> EditorApplication::CreateMainWindow(
+      foundation::ErrorCodes* err)
+    {
+      std::unique_ptr<MainWindow> main_window(new MainWindow(this));
+
+      foundation::Logger::LogVerbosity<2>(
+        foundation::LogChannel::kEditor,
+        foundation::LogSeverity::kDebug,
+        "Initializing the editor\n\tOpening project: {0}",
+        project_.project_path().toLatin1().data());
+
+      GameView* game_view = main_window->game_view();
+
+      if (*err == foundation::ErrorCodes::kSuccess)
+      {
+        *err = CreateRenderer(game_view->GetGraphicsWindow());
+      }
+
+      if (*err != foundation::ErrorCodes::kSuccess)
+      {
+        Shutdown();
+        return nullptr;
+      }
+
+      main_window->show();
+
+      engine::RendererService* renderer = GetService<engine::RendererService>();
+      game_view->BindResizeCallback([renderer](uint16_t w, uint16_t h)
+      {
+        renderer->OnResize(w, h);
+      });
+
+      return main_window;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnBuilderFinished(
+      const builder::Builder* builder, 
+      const builder::BuildItem& item)
     {
       engine::AssetService* as = GetService<engine::AssetService>();
+      as->RegisterAsset(item.relative);
 
-      compilers::AssetTypes type = item.type;
-      const foundation::Path& relative = item.relative;
+      foundation::String asset_path = item.relative.NoExtension().ToString();
+      as->Reload(item.type, asset_path);
 
-      as->RegisterAsset(type, relative);
-
-      if (type == compilers::AssetTypes::kScript)
+      if (builder->IsBuilding() == true)
       {
+        return;
+      }
+
+      BuildChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::OnBuilderChanged(
+      const builder::Builder* builder, 
+      const builder::BuildItem& item)
+    {
+      if (item.type != compilers::AssetTypes::kDirectory)
+      {
+        engine::AssetService* as = GetService<engine::AssetService>();
+        as->RemoveAsset(item.type, item.relative);
+      }
+
+      BuildChanged();
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::BuildChanged()
+    {
+      std::unique_lock<std::mutex> lock_guard(build_mutex_);
+
+      build_change_timer_.Stop();
+      build_change_timer_.Start();
+
+      build_dir_changed_ = true;
+    }
+
+    //--------------------------------------------------------------------------
+    void EditorApplication::CheckForBuildChanges()
+    {
+      if (
+        build_change_timer_.Elapsed() > kMinBuildChangeWait_ &&
+        build_dir_changed_ == true)
+      {
+        build_dir_changed_ = false;
+        main_window_->RefreshAssetList();
+
         ReloadScripts();
-        return;
-      }
 
-      foundation::String path = relative.NoExtension().ToString();
-      as->Reload(type, path);
-    }
-
-    //--------------------------------------------------------------------------
-    void EditorApplication::OnRemoved(const builder::BuildItem& item)
-    {
-      engine::AssetService* as = GetService<engine::AssetService>();
-
-      compilers::AssetTypes type = item.type;
-      const foundation::Path& relative = item.relative;
-
-      if (relative == loaded_scene_)
-      {
-        NewScene(false);
-      }
-
-      as->RemoveAsset(type, relative);
-    }
-
-    //--------------------------------------------------------------------------
-    void EditorApplication::NewEditorCamera(engine::Scene* scene)
-    {
-      camera_ = foundation::Memory::Construct<EditorCamera>(
-        &foundation::Memory::default_allocator(), scene);
-    }
-
-    //--------------------------------------------------------------------------
-    void EditorApplication::ReloadScripts()
-    {
-#ifndef SNUFF_NSCRIPTING
-      engine::Scene* scene = 
-        GetService<engine::SceneService>()->current_scene();
-
-      engine::AssetService* a = GetService<engine::AssetService>();
-
-      if (a->LoadAll(compilers::AssetTypes::kScript) == false)
-      {
-        has_error_ = true;
-
-        if (state_ == States::kEditing)
-        {
-          foundation::Logger::LogVerbosity<1>(
-            foundation::LogChannel::kEditor,
-            foundation::LogSeverity::kError,
-            "Please fix script compilation errors before entering play mode");
-
-          window_->SetPlaybackEnabled(false);
-        }
-
-        return;
-      }
-
-      scene->ForEachEntity([](engine::Entity* ent)
-      {
-        foundation::Vector<engine::ScriptComponent*> comps =
-          ent->GetComponents<engine::ScriptComponent>();
-
-        engine::ScriptComponent* c = nullptr;
-        for (size_t i = 0; i < comps.size(); ++i)
-        {
-          c = comps.at(i);
-          c->SetBehavior(c->behavior());
-        }
-
-        return true;
-      });
-
-      window_->SetPlaybackEnabled(true);
-      has_error_ = false;
-#endif
-    }
-
-    //--------------------------------------------------------------------------
-    void EditorApplication::RenderOnly(float dt)
-    {
-      engine::Scene* current = 
-        GetService<engine::SceneService>()->current_scene();
-
-      if (current != nullptr)
-      {
-        current->ForEachEntity([dt](engine::Entity* e)
-        {
-          if (e->IsActive() == false)
-          {
-            return true;
-          }
-
-          if (e->HasComponent<engine::MeshRendererComponent>() == true)
-          {
-            e->GetComponent<engine::MeshRendererComponent>()->Update(dt);
-          }
-
-          e->GetComponent<engine::TransformComponent>()->Update(dt);
-
-          return true;
-        });
-
-        if (camera_ != nullptr)
-        {
-          camera_->Update(dt);
-        }
+        foundation::Logger::LogVerbosity<3>(
+          foundation::LogChannel::kBuilder,
+          foundation::LogSeverity::kDebug,
+          "Build directory changed");
       }
     }
 
     //--------------------------------------------------------------------------
     void EditorApplication::OnStartEditing()
     {
-      if (has_error_ == true)
-      {
-        window_->SetPlaybackEnabled(false);
-      }
-
-      if (camera_ != nullptr)
-      {
-        camera_->set_active(true);
-      }
-
 #ifndef SNUFF_NSCRIPTING
       GetService<engine::ScriptService>()->Restart();
 #endif
 
       DeserializeCurrentScene();
 
-      window_->OnSceneChanged();
-      scene_changed_ = false;
+      ReloadScripts();
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::Play()
+    void EditorApplication::OnStartPlaying(EditorStates old)
     {
-      if (camera_ != nullptr)
+      if (old != EditorStates::kEditing)
       {
-        camera_->set_active(false);
-      }
-
+        return;
+      } 
+      
       SerializeCurrentScene();
 
       RunScripts();
       SCRIPT_CALLBACK(Start);
       GetService<engine::SceneService>()->Start();
-    }
-
-    //--------------------------------------------------------------------------
-    bool EditorApplication::ShowSceneSaveDialog()
-    {
-      QMessageBox::StandardButton reply;
-
-      reply = QMessageBox::question(window_.get(), 
-        "Save current scene?",
-        "Do you want to save the current scene?",
-        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-      if (reply == QMessageBox::Yes)
-      {
-        SaveCurrentScene();
-      } 
-      else if (reply == QMessageBox::Cancel)
-      {
-        return false;
-      }
-
-      return true;
     }
 
     //--------------------------------------------------------------------------
@@ -535,7 +417,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void EditorApplication::DeserializeCurrentScene()
     {
-      if (serialized_scene_.size() == 0)
+      if (serialized_scene_.empty() == true)
       {
         return;
       }
@@ -543,34 +425,29 @@ namespace snuffbox
       foundation::LoadArchive archive;
       archive.FromJson(serialized_scene_);
 
-      engine::Scene* current = 
+      engine::Scene* current =
         GetService<engine::SceneService>()->current_scene();
 
       archive(&current);
     }
 
     //--------------------------------------------------------------------------
-    void EditorApplication::OnSceneChanged(engine::Scene* scene)
+    void EditorApplication::ReloadScripts()
     {
-      scene_changed_ = true;
-    }
+      bool error = asset_importer_->ReloadScripts() == false;
 
-    //--------------------------------------------------------------------------
-    void EditorApplication::CheckSceneChanged()
-    {
-      if (scene_changed_ == true)
+      if (error == true && has_script_error_ == false)
       {
-        window_->OnSceneChanged();
-        scene_changed_ = false;
+        foundation::Logger::LogVerbosity<1>(
+          foundation::LogChannel::kEditor,
+          foundation::LogSeverity::kWarning,
+          "Found script errors, disabling playback controls until resolved");
       }
-    }
 
-    //--------------------------------------------------------------------------
-    void EditorApplication::OnShutdown()
-    {
-      if (camera_ != nullptr)
+      has_script_error_ = error;
+      if (state_ == EditorStates::kEditing)
       {
-        camera_->Destroy();
+        main_window_->SetPlaybackEnabled(has_script_error_ == false);
       }
     }
   }

@@ -7,6 +7,7 @@
 #include <foundation/containers/vector.h>
 #include <foundation/memory/memory.h>
 #include <foundation/auxiliary/logger.h>
+#include <foundation/containers/uuid.h>
 
 #include <cstddef>
 
@@ -103,6 +104,19 @@ namespace snuffbox
       * @see Entity::CreateComponentByID
       */
       SCRIPT_FUNC(custom) IComponent* AddComponent(Components id);
+
+      /**
+      * @brief Adds a component by ID at a specific index
+      *
+      * @remarks If the index is greater than the size, it will be clamped to
+      *          the size and insert at the end, you can also use -1 for this
+      *
+      * @param[in] id The component ID
+      * @param[in] index The index to insert at
+      *
+      * @see Entity::CreateComponentById
+      */
+      SCRIPT_FUNC(custom) IComponent* AddComponentAt(Components id, int index);
       
       /**
       * @brief Removes the first found typed component
@@ -118,6 +132,14 @@ namespace snuffbox
       * @param[in] id The ID of the component to remove
       */
       SCRIPT_FUNC() void RemoveComponent(Components id);
+
+      /**
+      * @brief Removes a component at a specific index by ID
+      *
+      * @param[in] id The ID of the component to remove
+      * @param[in] index The index of the component to remove
+      */
+      SCRIPT_FUNC() void RemoveComponentAt(Components id, int index);
 
       /**
       * @brief Removes a component by reference
@@ -245,6 +267,12 @@ namespace snuffbox
       SCRIPT_FUNC() bool IsActive() const;
 
       /**
+      * @return The total number of components on this entity, including its
+      *         transform component
+      */
+      SCRIPT_FUNC() int ComponentCount() const;
+
+      /**
       * @return Is this an internal entity?
       */
       bool is_internal() const;
@@ -260,10 +288,11 @@ namespace snuffbox
       * @brief Adds a component to the entity by ID
       *
       * @param[in] id The ID of the component to add
+      * @param[in] index The index to insert the component at
       *
       * @return The created component
       */
-      IComponent* AddComponentInternal(Components id);
+      IComponent* AddComponentInternal(Components id, int index = -1);
 
       /**
       * @brief Checks if a component type is actually derived from its
@@ -351,14 +380,6 @@ namespace snuffbox
       */
       IComponent* CreateComponentByID(Components id);
 
-      /**
-      * @brief Sets the ID of this entity, used by the scene to initially
-      *        assign an ID, or when an entity is deserialized
-      *
-      * @param[in] id The ID to set
-      */
-      void set_id(size_t id);
-
     public:
 
 
@@ -393,9 +414,29 @@ namespace snuffbox
       Scene* scene() const;
 
       /**
-      * @return The ID of this entity
+      * @return The UUID of this entity
       */
-      size_t id() const;
+      const foundation::UUID& uuid() const;
+
+      /**
+      * @brief Sets a new UUID for this entity
+      *
+      * @param[in] uuid The UUID to set
+      */
+      void set_uuid(const foundation::UUID& uuid);
+      
+      /**
+      * @return The sort index of the entity, used in editor
+      */
+      int sort_index() const;
+
+      /**
+      * @brief Sets the sort index of this entity, so that we can re-order
+      *        entities within the hierarchy view of the editor
+      *
+      * @param[in] idx The new sort index
+      */
+      void set_sort_index(int idx);
 
       /**
       * @see ISerializable::Serialize
@@ -437,7 +478,9 @@ namespace snuffbox
       bool is_internal_;
 
       Scene* scene_; //!< The scene this entity was spawned in
-      size_t id_; //!< The ID of this entity, from within the current scene
+      foundation::UUID uuid_; //!< The UUID of this entity
+
+      int sort_index_; //!< The sorting index of the entity, used in editor
 
       static const char* kDefaultName_; //!< The default name for entities
     };

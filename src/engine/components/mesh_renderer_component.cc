@@ -22,14 +22,14 @@ namespace snuffbox
   namespace engine
   {
     //--------------------------------------------------------------------------
-    const int MeshRendererComponent::kMaxMaterials_ = 8;
+    const int MeshRendererComponent::kMaxMaterials = 8;
 
     //--------------------------------------------------------------------------
     MeshRendererComponent::MeshRendererComponent(Entity* entity) :
       ComponentBase<MeshRendererComponent, Components::kMeshRenderer>(entity),
       renderer_(Application::Instance()->GetService<RendererService>())
     {
-      shared_materials_.resize(kMaxMaterials_);
+      shared_materials_.resize(kMaxMaterials);
       
       for (size_t i = 0; i < shared_materials_.size(); ++i)
       {
@@ -61,12 +61,12 @@ namespace snuffbox
       int idx, 
       Material* material)
     {
-      if (material == nullptr || material->asset() == nullptr)
+      if (material == nullptr)
       {
         return;
       }
 
-      if (idx >= kMaxMaterials_ || idx < 0)
+      if (idx >= kMaxMaterials || idx < 0)
       {
         return;
       }
@@ -76,7 +76,7 @@ namespace snuffbox
 
       if (sa.handle != nullptr)
       {
-        sa.name = sa.handle->name();
+        sa.SetName(sa.handle->name());
       }
 
       materials_.at(idx) = *material;
@@ -85,7 +85,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     Material* MeshRendererComponent::GetMaterial(int idx)
     {
-      if (idx >= kMaxMaterials_ || idx < 0)
+      if (idx >= kMaxMaterials || idx < 0)
       {
         return nullptr;
       }

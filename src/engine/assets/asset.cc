@@ -129,5 +129,24 @@ namespace snuffbox
     {
 
     }
+
+    //--------------------------------------------------------------------------
+    SerializableAsset::SerializableAsset() :
+      type(compilers::AssetTypes::kCount),
+      handle(nullptr)
+    {
+      memset(name, '\0', kMaxPathLength);
+    }
+
+    //--------------------------------------------------------------------------
+    void SerializableAsset::SetName(const foundation::String& new_name)
+    {
+      memset(name, '\0', kMaxPathLength);
+
+      if (new_name.size() > 0)
+      {
+        memcpy(name, new_name.c_str(), new_name.size());
+      }
+    }
   }
 }

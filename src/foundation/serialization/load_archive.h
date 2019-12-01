@@ -6,6 +6,7 @@
 #include "foundation/io/path.h"
 #include "foundation/containers/vector.h"
 #include "foundation/auxiliary/string_utils.h"
+#include "foundation/containers/uuid.h"
 
 #include "foundation/memory/allocators/rapidjson_allocator.h"
 
@@ -402,6 +403,22 @@ namespace snuffbox
       }
 
       *out = v.GetString();
+    }
+
+    //--------------------------------------------------------------------------
+    template <>
+    inline void LoadArchive::ReadValue(
+      const JsonValue& v,
+      UUID* out,
+      enable_if_n_serializable<UUID>*)
+    {
+      if (v.IsString() == false)
+      {
+        *out = UUID();
+        return;
+      }
+
+      *out = UUID::FromString(v.GetString());
     }
 
     //--------------------------------------------------------------------------

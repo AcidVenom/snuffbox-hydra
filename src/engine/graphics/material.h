@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/assets/asset.h"
+
 #include <scripting/script_class.h>
 
 namespace snuffbox
@@ -48,6 +50,11 @@ namespace snuffbox
       * @return The wrapped material asset
       */
       MaterialAsset* asset() const;
+
+      /**
+      * @return The serializable asset of this material
+      */
+      SerializableAsset GetSerializableAsset() const;
 
     protected:
 

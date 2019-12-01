@@ -75,7 +75,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void SceneService::SwitchScene(Scene* scene)
+    bool SceneService::SwitchScene(Scene* scene)
     {
       if (current_scene_ == &default_scene_)
       {
@@ -94,10 +94,13 @@ namespace snuffbox
       {
         default_scene_ = Scene();
         current_scene_ = &default_scene_;
-        return;
+        return true;
       }
 
       current_scene_ = scene;
+      current_scene_->OnSceneChanged();
+
+      return true;
     }
 
     //--------------------------------------------------------------------------
@@ -110,7 +113,7 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void SceneService::SwitchScene(const foundation::String& path)
+    bool SceneService::SwitchScene(const foundation::String& path)
     {
       Application* app = Application::Instance();
       AssetService* as = app->GetService<AssetService>();
@@ -134,10 +137,10 @@ namespace snuffbox
         loaded_scene_ = nullptr;
         SwitchScene(nullptr);
 
-        return;
+        return false;
       }
 
-      SwitchScene(loaded_scene_->scene());
+      return SwitchScene(loaded_scene_->scene());
     }
 
     //--------------------------------------------------------------------------

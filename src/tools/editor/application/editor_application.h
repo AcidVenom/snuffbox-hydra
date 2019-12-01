@@ -1,244 +1,233 @@
 #pragma once
 
+#include "tools/editor/project/project.h"
 #include "tools/editor/windows/main_window.h"
+#include "tools/editor/scene-editor/asset_importer.h"
 
 #include <engine/application/application.h>
-#include <tools/builder/builder.h>
+#include <foundation/auxiliary/timer.h>
 
-#include <qapplication.h>
-
-#ifdef SNUFF_WIN32
-#ifdef CreateService
-#undef CreateService
-#endif
-#endif
+#include <QApplication>
+#include <QSettings>
 
 namespace snuffbox
 {
+  namespace builder
+  {
+    class Builder;
+    struct BuildItem;
+  }
+
   namespace editor
   {
-    class EditorCamera;
+    class MainWindow;
 
     /**
-    * @brief The editor application that runs the engine in editor mode
-    *
-    * This class derives from QApplication to be useful with all Qt widgets
-    * and windows as well. By deriving from Application, we can provide
-    * custom functionality while in editor mode or when in "play" mode.
-    *
-    * @see Application
+    * @brief The application instance for the editor version of the engine
     *
     * @author Daniel Konings
     */
-    class EditorApplication : public engine::Application, public QApplication
+    class EditorApplication : public engine::Application
     {
 
     public:
 
       /**
-      * @brief The different states the editor application can be in
+      * @brief The different states the editor can globally be in
       */
-      enum class States
+      enum class EditorStates
       {
-        kUninitialized,
         kEditing,
         kPlaying,
-        kPaused
+        kPaused,
+        kFrame
       };
 
       /**
       * @see Application::Application
       *
-      * @remarks Apparently QApplication needs the argc argument
-      *          to be a reference, thus it is a reference in this
-      *          constructor
+      * @param[in] qapp The Qt application to update each frame
       */
-      EditorApplication(
-        int& argc,
-        char** argv, 
-        const engine::Application::Configuration& cfg);
+      EditorApplication(int argc, char** argv, const Configuration& cfg);
+
+      /**
+      * @see Application::Instance
+      */
+      static EditorApplication* Instance();
 
       /**
       * @see Application::Run
+      *
+      * Makes sure the engine is ran from within the Qt interfaces, instead
+      * of creating a separate window for the renderer instance
       */
       foundation::ErrorCodes Run() override;
 
       /**
-      * @brief Sets the project directory and starts the builder on that
-      *        directory
+      * @brief Attempts to open a new project through the dialog
       *
-      * @param[in] path The path to the existing source directory
-      *
-      * @return Was the source directory a valid directory?
+      * @remarks If accepted, this will reset the entire application
       */
-      bool SetProjectDirectory(const foundation::Path& path);
+      void TryOpenProject();
 
       /**
-      * @brief Sets the state of the editor application and changes all
-      *        windows to reflect on that change
-      *
-      * @param[in] state The state to set
+      * @return The global settings of the application
       */
-      void SwitchState(States state);
+      QSettings& GlobalSettings() const;
 
       /**
-      * @brief Opens a new scene
+      * @brief Sets the current scene within the window title
       *
-      * @param[in] prompt Should the user be prompted to save the 
-      *                   previous scene?
-      *
-      * @return Was the action not cancelled?
+      * @param[in] scene_name The name of the scene
       */
-      bool NewScene(bool prompt = true);
+      void SetSceneInWindowTitle(const QString& scene_name);
 
       /**
-      * @brief Opens a scene by relative path in the build directory
+      * @brief Switches the state of the editor application to a new one
       *
-      * @param[in] path The scene to open
+      * @param[in] state The state to switch to
       */
-      void OpenScene(const foundation::Path& path);
+      void SwitchState(EditorStates state);
 
       /**
-      * @brief Saves the current scene
-      *
-      * @param[in] dialog Do we want to force a file picker dialog?
-      *
-      * @remarks This opens a file dialog if the scene does not exist yet
-      *
-      * @return Was the scene actually saved?
+      * @return The main window of the application
       */
-      bool SaveCurrentScene(bool dialog = false);
+      MainWindow* main_window() const;
 
       /**
-      * @return The currently loaded scene name
+      * @return The current asset importer
       */
-      QString GetLoadedScene();
+      AssetImporter* asset_importer() const;
 
       /**
-      * @return The state of the editor
+      * @return The current project
       */
-      States state() const;
+      Project& project();
+
+      /**
+      * @return The current state of the editor application
+      */
+      EditorStates state() const;
 
     protected:
 
       /**
-      * @see Application::CreateRenderer
+      * @brief Sets the default values after a restart
       */
-      void CreateRenderer() override;
+      void OnRestart();
 
       /**
-      * @brief Initializes the asset handles when the build directory
-      *        changes
+      * @brief Shows a project window, to pick a new or existing project from
       *
-      * @param[in] build_dir The path to the build directory
+      * @return Should we continue execution, or did the user exit?
       */
-      void InitializeAssets(const foundation::Path& build_dir);
+      bool ShowProjectWindow();
 
       /**
-      * @brief Called when an asset is reloaded
+      * @brief Creates the main window, that contains the graphics view
+      *        and all other editor panes
       *
-      * @param[in] item The build item that finished building
-      */
-      void OnReload(const builder::BuildItem& item);
-
-      /**
-      * @brief Called when an asset is removed from the build directory
+      * @param[out] An error code, or foundation::ErrorCodes::kSuccess if no
+      *             errors occurred
       *
-      * @param[in] item The build item that was removed
+      * @return The created main window, or nullptr if initialization failed
       */
-      void OnRemoved(const builder::BuildItem& item);
+      std::unique_ptr<MainWindow> CreateMainWindow(foundation::ErrorCodes* err);
 
       /**
-      * @brief Creates the editor camera for a particular scene as an internal
-      *        entity
+      * @brief Called when the builder has finished building one of
+      *        its current items
       *
-      * @param[in] scene The scene to create the camera for
+      * @param[in] builder The builder that invoked this call
+      * @param[in] item The item that was finished
       */
-      void NewEditorCamera(engine::Scene* scene);
+      void OnBuilderFinished(
+        const builder::Builder* builder, 
+        const builder::BuildItem& item);
 
       /**
-      * @brief Reloads all script-related content when a new script was added
-      *        or reloaded
+      * @brief Called when the builder has removed a file because it was no
+      *        longer in the source directory, or a directory changed
       *
-      * Entities have their callbacks assign anew, whereas the asset system
-      * recompiles all current scripts and checks them for errors.
+      * @param[in] builder The builder that invoked this call
+      * @param[in] item The item that was removed, or the directory that changed
+      */
+      void OnBuilderChanged(
+        const builder::Builder* builder, 
+        const builder::BuildItem& item);
+
+      /**
+      * @brief Mark that the current build has changed
+      */
+      void BuildChanged();
+
+      /**
+      * @brief Checks if the build directory has changed and if it did,
+      *        refresh the current asset listing
       *
-      * @remarks If there are any errors, the playback button will be disabled
-      *          until they have been fixed
+      * @remarks We do not constantly want to update this, so we make sure to
+      *          wait a while inbetween changes in the case of mass-deletes
       */
-      void ReloadScripts();
+      void CheckForBuildChanges();
 
       /**
-      * @see Scene::RenderEntities
-      */
-      void RenderOnly(float dt);
-
-      /**
-      * @brief Checks if we had errors during playmode and if so; disable
-      *        the play button until those errors are fixed
+      * @brief Called when we initially start editing again
       */
       void OnStartEditing();
 
       /**
-      * @brief Called when the editor state is initially switched to play mode
-      */
-      void Play();
-
-      /**
-      * @brief Shows a scene save dialog and asks the user whether they
-      *        want to cancel as well
+      * @brief Called when we initially start playing
       *
-      * @return Should we continue?
+      * @param[in] old The old state the editor was in
+      *
+      * @remarks This serializes the scene, to deserialize it when we
+      *          go out of play mode
       */
-      bool ShowSceneSaveDialog();
+      void OnStartPlaying(EditorStates old);
 
       /**
-      * @brief Serializes the current scene, called before playing
+      * @brief Serializes the current scene, for deserialization later
       */
       void SerializeCurrentScene();
 
       /**
-      * @brief Deserializes the current scene, called after entering edit mode
+      * @brief Deserializes the current scene
       */
       void DeserializeCurrentScene();
 
       /**
-      * @brief Called when a scene has been changed
-      *
-      * A flag is set to reload the hierarchy view within the editor after
-      * finishing the current frame.
-      *
-      * @param[in] scene The scene that has been changed
+      * @brief Reloads all scripts and sets whether we have an error or not
       */
-      void OnSceneChanged(engine::Scene* scene);
-
-      /**
-      * @brief Checks if the scene changed this frame and if it did, updates
-      *        the hierarchy in the main window
-      */
-      void CheckSceneChanged();
-
-      /**
-      * @brief Destroys the editor camera
-      */
-      void OnShutdown() override;
+      void ReloadScripts();
 
     private:
 
-      builder::Builder builder_; //!< The builder service
-      foundation::UniquePtr<MainWindow> window_; //!< The main window
-      EditorCamera* camera_; //!< The editor camera
+      QApplication qapp_; //!< The Qt application
+      Project project_; //!< The current project
 
-      QString project_dir_; //!< The current project directory
-      QString assets_dir_; //!< The current assets directory
+      /**
+      * @brief The grace period timer for build changes
+      */
+      foundation::Timer build_change_timer_;
+      bool build_dir_changed_; //!< Has the build directory changed?
+      std::mutex build_mutex_; //!< The mutex for any building callbacks
 
-      foundation::String loaded_scene_; //!< The currently loaded scene
-      foundation::String serialized_scene_; //!< The current scene, serialized
+      std::unique_ptr<MainWindow> main_window_; //!< The main window
+      std::unique_ptr<AssetImporter> asset_importer_; //!< The asset importer
 
-      bool scene_changed_; //!< Has the current scene changed this frame?
+      bool project_changed_; //!< Was the project changed and should we restart?
 
-      States state_; //!< The state of the editor
-      bool has_error_; //!< Are there any errors?
+      EditorStates state_; //!< The current state of the editor application
+      foundation::String serialized_scene_; //!< The currently serialized scene
+
+      bool has_script_error_; //!< Do we currently have a scripting error?
+
+      /**
+      * @brief The minimum amount of time, in milliseconds, to wait inbetween
+      *        build changes during removal
+      */
+      static const int kMinBuildChangeWait_;
+      static const QString kTitleFormat_; //!< The format of the window title
     };
   }
 }

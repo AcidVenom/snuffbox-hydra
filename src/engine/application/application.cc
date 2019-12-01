@@ -51,16 +51,20 @@ namespace snuffbox
       config_(config),
       should_quit_(false)
     {
-      assert(
-        instance_ == nullptr && 
-        "There can only be one instance of a Snuffbox application");
-
-      instance_ = this;
-
       if (argc > 1 && argv != nullptr)
       {
         cli_ = CommandLineParser::Parse(argc, argv);
       }
+    }
+
+    //--------------------------------------------------------------------------
+    void Application::SetAsInstance()
+    {
+      assert(
+        instance_ == nullptr &&
+        "There can only be one instance of a Snuffbox application");
+
+      instance_ = this;
     }
 
     //--------------------------------------------------------------------------
@@ -90,6 +94,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     foundation::ErrorCodes Application::Run()
     {
+      SetAsInstance();
+
       ApplyConfiguration();
 
       Debug::LogVerbosity<2>(
@@ -98,6 +104,11 @@ namespace snuffbox
         );
 
       foundation::ErrorCodes err = Initialize();
+
+      if (err == foundation::ErrorCodes::kSuccess)
+      {
+        err = CreateRenderer(GetService<WindowService>()->GetGraphicsWindow());
+      }
 
       if (err != foundation::ErrorCodes::kSuccess)
       {
@@ -219,18 +230,6 @@ namespace snuffbox
         }
       }
 
-      CreateRenderer();
-      err = InitializeRenderer();
-
-      if (err != foundation::ErrorCodes::kSuccess)
-      {
-        Debug::LogVerbosity<1>(
-          foundation::LogSeverity::kFatal,
-          "Could not initialize the renderer service");
-
-        return err;
-      }
-
       return foundation::ErrorCodes::kSuccess;
     }
 
@@ -246,17 +245,20 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Application::CreateRenderer()
+    foundation::ErrorCodes Application::CreateRenderer(
+      const graphics::GraphicsWindow& window)
     {
-      CreateService<RendererService>(
-        GetService<WindowService>()->GetGraphicsWindow());
-    }
+      RendererService* renderer = CreateService<RendererService>(window);
 
-    //--------------------------------------------------------------------------
-    foundation::ErrorCodes Application::InitializeRenderer()
-    {
-      RendererService* renderer = GetService<RendererService>();
-      return reinterpret_cast<IService*>(renderer)->OnInitialize(*this);
+      if (renderer == nullptr)
+      {
+        return foundation::ErrorCodes::kNoRendererCreated;
+      }
+
+      IService* service = reinterpret_cast<IService*>(renderer);
+      service->RegisterCVars(GetService<CVarService>());
+
+      return service->OnInitialize(*this);
     }
 
     //--------------------------------------------------------------------------

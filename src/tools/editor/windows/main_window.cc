@@ -1,470 +1,394 @@
 #include "tools/editor/windows/main_window.h"
-#include "tools/editor/windows/console.h"
 #include "tools/editor/application/editor_application.h"
-#include "tools/editor/definitions/editor_colors.h"
 
-#include <engine/services/scene_service.h>
-#include <engine/services/asset_service.h>
-#include <engine/services/input_service.h>
-#include <engine/ecs/scene.h>
-#include <engine/assets/model_asset.h>
+#include "tools/editor/editor-widgets/game_view.h"
+#include "tools/editor/editor-widgets/console_widget.h"
+#include "tools/editor/asset-browser/asset_browser.h"
+#include "tools/editor/scene-editor/hierarchy_view.h"
+#include "tools/editor/scene-editor/hierarchy_view_item.h"
+#include "tools/editor/property-editor/property_view.h"
 
-#include <qstylefactory.h>
-#include <qevent.h>
-#include <qfiledialog.h>
-#include <qsettings.h>
+#include "tools/editor/asset-browser/asset_icon.h"
+
+#include "tools/editor/property-editor/property_mappings.h"
+
+#include <QDockWidget>
+#include <QVBoxLayout>
+#include <QMenuBar>
+#include <QCloseEvent>
+#include <QMessageBox>
+
+#define RESET_WINDOW_GEOMETRY 0
 
 namespace snuffbox
 {
   namespace editor
   {
     //--------------------------------------------------------------------------
-    const char* MainWindow::kCompanyName_ = "Snuffbox";
-    const char* MainWindow::kAppName_ = "snuffbox-hydra-editor";
-    const char* MainWindow::kSaveGeometry_ = "geometry";
-    const char* MainWindow::kSaveWindow_ = "window";
-    const char* MainWindow::kSaveSplitterA_ = "splitter_a";
-    const char* MainWindow::kSaveSplitterB_ = "splitter_b";
+    const int MainWindow::kMinWidth_ = 1280;
+    const int MainWindow::kMinHeight_ = 720;
+
+    const QString MainWindow::kSettingsGeometryKey_ = "MainWindow.Geometry";
+    const QString MainWindow::kSettingsStateKey_ = "MainWindow.State";
+    const QString MainWindow::kSettingsSizeKey_ = "MainWindow.Size";
 
     //--------------------------------------------------------------------------
-    MainWindow::MainWindow(EditorApplication* app) :
+    MainWindow::MainWindow(EditorApplication* app, QWidget* parent) :
+      QMainWindow(parent),
       app_(app),
-      console_(nullptr),
-      hierarchy_(nullptr),
-      inspector_(nullptr),
+      game_view_(nullptr),
       asset_browser_(nullptr),
-      project_dir_(""),
-      current_scene_("New scene"),
-      on_resize_(nullptr)
+      properties_(nullptr)
     {
-      ui_.setupUi(this);
+      PropertyMappings::InitializeMappings();
 
-      ApplyStyle(app);
+      setObjectName(QStringLiteral("MainWindow"));
+      CreateMenuBar();
 
-      CreateConsole();
-      CreateInspector();
-      CreateAssetBrowser();
-      CreateEventFilter();
+      setMinimumSize(kMinWidth_, kMinHeight_);
+      LoadWindowSize();
 
-      BindEvents();
+      QDockWidget* game_view_widget = new QDockWidget(this);
+      game_view_ = new GameView(game_view_widget);
+      game_view_widget->setWidget(game_view_);
+      game_view_widget->setWindowTitle(QStringLiteral("Game view"));
+      game_view_widget->setObjectName(QStringLiteral("MainWindowGameDock"));
+      game_view_widget->setMinimumSize(kMinWidth_ * 0.5, kMinHeight_ * 0.5);
 
-      LoadLayout();
+      Project& current_project = app->project();
+      QString build_path = 
+        current_project.GetCurrentBuildPath() + '/' + Project::kAssetDirectory;
+
+      QString asset_path = current_project.GetCurrentAssetsPath();
+
+      QDockWidget* assets_widget = new QDockWidget(this);
+      asset_browser_ = 
+        new AssetBrowser(this, asset_path, build_path, assets_widget);
+
+      assets_widget->setWidget(asset_browser_);
+      assets_widget->setWindowTitle(QStringLiteral("Assets"));
+      assets_widget->setObjectName(QStringLiteral("MainWindowAssetsDock"));
+
+      QDockWidget* console_widget = new QDockWidget(this);
+      ConsoleWidget* console = new ConsoleWidget(console_widget);
+      console_widget->setWidget(console);
+      console_widget->setWindowTitle(QStringLiteral("Console"));
+      console_widget->setObjectName(QStringLiteral("MainWindowConsoleDock"));
+
+      QDockWidget* scene_widget = new QDockWidget(this);
+      HierarchyView* hierarchy = new HierarchyView(app_, scene_widget);
+      scene_widget->setWidget(hierarchy);
+      scene_widget->setWindowTitle(QStringLiteral("Scene"));
+      scene_widget->setObjectName(QStringLiteral("MainWindowSceneDock"));
+
+      QDockWidget* property_widget = new QDockWidget(this);
+      properties_ = new PropertyView(hierarchy, property_widget);
+      property_widget->setWidget(properties_);
+      property_widget->setWindowTitle(QStringLiteral("Properties"));
+      property_widget->setObjectName(QStringLiteral("MainWindowPropertyDock"));
+
+      connect(
+        app_->asset_importer(),
+        &AssetImporter::SceneChanged,
+        hierarchy,
+        &HierarchyView::OnSceneChanged);
+
+      connect(
+        this,
+        &MainWindow::Undone,
+        hierarchy,
+        &HierarchyView::Undo);
+
+      connect(
+        this,
+        &MainWindow::Redone,
+        hierarchy,
+        &HierarchyView::Redo);
+
+      connect(
+        this,
+        &MainWindow::SceneRefresh,
+        hierarchy,
+        &HierarchyView::OnSceneRefreshed);
+
+      connect(
+        hierarchy,
+        &HierarchyView::ItemSelectionChanged,
+        properties_,
+        [this](HierarchyViewItem* item)
+        {
+          properties_->ShowForEntity(
+            item == nullptr ? nullptr : item->entity());
+        });
+
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, scene_widget);
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, game_view_widget);
+      addDockWidget(Qt::DockWidgetArea::TopDockWidgetArea, property_widget);
+      addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, assets_widget);
+      addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, console_widget);
+
+      LoadWindowGeometry();
+
+      foundation::Logger::RedirectOutput(&ConsoleWidget::OnLog, console);
+
+      RefreshAssetList();
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::ApplyStyle(QApplication* app)
+    void MainWindow::CreateMenuBar()
     {
-      app->setStyle(QStyleFactory::create("Fusion"));
-      app->setPalette(EditorColors::DefaultPalette());
+      disabled_in_play_mode_.clear();
 
-      QString qdock_col = EditorColors::ColorToCSS(EditorColors::DockColor());
+      QMenu* file_menu = menuBar()->addMenu("File");
+      QMenu* edit_menu = menuBar()->addMenu("Edit");
 
-      app->setStyleSheet("                      \
-        QMainWindow::separator                  \
-        {                                       \
-          background-color: " + qdock_col + ";  \
-        }                                       \
-        QDockWidget::title                      \
-        {                                       \
-          background-color: " + qdock_col + ";  \
-          border: 1px solid rgb(88, 106, 80);   \
-        }                                       \
-        QDockWidget                             \
-        {                                       \
-          color: white;                         \
-        }"
-      );
+      QAction* open_project = new QAction("Open project");
+      open_project->setShortcut(Qt::CTRL + Qt::Key_O);
+
+      QAction* new_scene = new QAction("New scene");
+      disabled_in_play_mode_.push_back(new_scene);
+      new_scene->setShortcut(Qt::CTRL + Qt::Key_N);
+
+      QAction* save_scene = new QAction("Save scene");
+      disabled_in_play_mode_.push_back(save_scene);
+      save_scene->setShortcut(Qt::CTRL + Qt::Key_S);
+
+      QAction* save_scene_as = new QAction("Save scene as");
+      disabled_in_play_mode_.push_back(save_scene_as);
+      save_scene_as->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+
+      QAction* exit_app = new QAction("Exit");
+      exit_app->setShortcut(Qt::CTRL + Qt::Key_Q);
+
+      connect(open_project, &QAction::triggered, this, [&]()
+      {
+        OnOpenProject();
+      });
+
+      connect(new_scene, &QAction::triggered, this, [&]()
+      {
+        OnNewScene();
+      });
+
+      connect(save_scene, &QAction::triggered, this, [&]()
+      {
+        OnSaveScene();
+      });
+
+      connect(save_scene_as, &QAction::triggered, this, [&]()
+      {
+        OnSaveSceneAs();
+      });
+
+      connect(exit_app, &QAction::triggered, this, [&]()
+      {
+        ConfirmExit();
+      });
+
+      QAction* undo = new QAction("Undo");
+      disabled_in_play_mode_.push_back(undo);
+      undo->setShortcut(Qt::CTRL + Qt::Key_Z);
+
+      QAction* redo = new QAction("Redo");
+      disabled_in_play_mode_.push_back(redo);
+      redo->setShortcut(Qt::CTRL + Qt::Key_Y);
+
+      connect(undo, &QAction::triggered, this, [&]()
+      {
+        emit Undone();
+      });
+
+      connect(redo, &QAction::triggered, this, [&]()
+      {
+        emit Redone();
+      });
+
+      file_menu->addAction(open_project);
+      file_menu->addSeparator();
+      file_menu->addAction(new_scene);
+      file_menu->addAction(save_scene);
+      file_menu->addAction(save_scene_as);
+      file_menu->addSeparator();
+      file_menu->addAction(exit_app);
+
+      edit_menu->addAction(undo);
+      edit_menu->addAction(redo);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::RefreshAssetList()
+    {
+      asset_browser_->Refresh();
+    }
+
+    //--------------------------------------------------------------------------
+    GameView* MainWindow::game_view() const
+    {
+      return game_view_;
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::SaveWindowGeometry()
+    {
+      QSettings& settings = EditorApplication::Instance()->GlobalSettings();
+      settings.setValue(kSettingsGeometryKey_, saveGeometry());
+      settings.setValue(kSettingsStateKey_, saveState());
+      settings.setValue(kSettingsSizeKey_, size());
+
+      asset_browser_->SaveState(&settings);
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::LoadWindowGeometry()
+    {
+#if RESET_WINDOW_GEOMETRY
+      return;
+#endif
+      QSettings& settings = EditorApplication::Instance()->GlobalSettings();
+
+      if (
+        settings.contains(kSettingsGeometryKey_) == true &&
+        settings.contains(kSettingsStateKey_) == true)
+      {
+        restoreGeometry(settings.value(kSettingsGeometryKey_).toByteArray());
+        restoreState(settings.value(kSettingsStateKey_).toByteArray());
+      }
+
+      asset_browser_->LoadState(&settings);
+    }
+    //--------------------------------------------------------------------------
+    void MainWindow::LoadWindowSize()
+    {
+#if RESET_WINDOW_GEOMETRY
+      return;
+#endif
+      QSettings& settings = EditorApplication::Instance()->GlobalSettings();
+
+      if (settings.contains(kSettingsSizeKey_) == true)
+      {
+        resize(settings.value(kSettingsSizeKey_).toSize());
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnOpenProject()
+    {
+      app_->TryOpenProject();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnNewScene()
+    {
+      QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "New scene",
+        "Do you want to save the changes in the current scene?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+      if (reply == QMessageBox::Cancel)
+      {
+        return;
+      }
+
+      emit SceneRefresh();
+
+      if (reply == QMessageBox::Yes)
+      {
+        app_->asset_importer()->SaveCurrentScene();
+      }
+
+      app_->asset_importer()->NewScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSaveScene()
+    {
+      emit SceneRefresh();
+      app_->asset_importer()->SaveCurrentScene();
+    }
+
+    //--------------------------------------------------------------------------
+    void MainWindow::OnSaveSceneAs()
+    {
+      emit SceneRefresh();
+      app_->asset_importer()->SaveCurrentScene(true);
+    }
+
+    //--------------------------------------------------------------------------
+    bool MainWindow::ConfirmExit()
+    {
+      QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "Close",
+        "Are you sure you want to close the application?"
+        "\nAny unsaved data will be lost",
+        QMessageBox::Yes | QMessageBox::No);
+
+      bool accepted = reply == QMessageBox::Yes;
+      if (accepted == true)
+      {
+        app_->NotifyQuit();
+      }
+
+      return accepted;
     }
 
     //--------------------------------------------------------------------------
     void MainWindow::closeEvent(QCloseEvent* evt)
     {
-      app_->NotifyQuit();
-      SaveLayout();
-
-      evt->accept();
-    }
-
-    //--------------------------------------------------------------------------
-    bool MainWindow::eventFilter(QObject* obj, QEvent* evt)
-    {
-      if (evt->type() == QEvent::Paint)
+      if (ConfirmExit() == false)
       {
-        if (on_resize_ != nullptr)
-        {
-          on_resize_(ui_.gameWindow->width(), ui_.gameWindow->height());
-        }
-
-        return false;
+        evt->ignore();
+        return;
       }
 
-      return input_event_filter_->eventFilter(obj, evt);
+      SaveWindowGeometry();
     }
 
     //--------------------------------------------------------------------------
-    graphics::GraphicsWindow MainWindow::GetGraphicsWindow() const
+    void MainWindow::OnAssetImported(
+      compilers::AssetTypes type, 
+      const QString& full_path)
     {
-      graphics::GraphicsWindow gw;
-      gw.width = ui_.gameWindow->width();
-      gw.height = ui_.gameWindow->height();
-      gw.handle = reinterpret_cast<void*>(ui_.gameWindow->winId());
-
-      return gw;
+      app_->asset_importer()->ImportAsset(type, full_path.toLatin1().data());
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::BindResizeCallback(
-      const graphics::GraphicsWindow::SizeCallback& cb)
+    void MainWindow::OnUpdate()
     {
-      on_resize_ = cb;
+      properties_->Update();
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::BindEvents()
+    bool MainWindow::IsResizing() const
     {
-      connect(
-        ui_.actionOpen_Project,
-        &QAction::triggered,
-        this,
-        &MainWindow::OpenProject);
-
-      connect(
-        ui_.actionNew_Scene,
-        &QAction::triggered,
-        this,
-        &MainWindow::NewScene);
-
-      connect(
-        ui_.actionSave_Scene,
-        &QAction::triggered,
-        this,
-        &MainWindow::SaveScene);
-
-      connect(
-        ui_.actionSave_Scene_As,
-        &QAction::triggered,
-        this,
-        &MainWindow::SaveSceneAs);
-
-      connect(
-        ui_.playButton,
-        &QPushButton::pressed,
-        this,
-        &MainWindow::OnPlay);
-
-      ui_.gameWindow->installEventFilter(this);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::CreateConsole()
-    {
-      QTextBrowser* output_windows[] =
-      {
-        ui_.allOutput,
-        ui_.engineOutput,
-        ui_.editorOutput,
-        ui_.playerOutput,
-        ui_.scriptOutput,
-        ui_.builderOutput
-      };
-
-      console_ = foundation::Memory::ConstructUnique<Console>(
-        &foundation::Memory::default_allocator(),
-        ui_.outputTabs,
-        output_windows);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::CreateHierarchy(engine::SceneService* scene_service)
-    {
-      hierarchy_ = foundation::Memory::ConstructUnique<HierarchyView>(
-        &foundation::Memory::default_allocator(),
-        ui_.hierarchyView,
-        scene_service);
-
-      connect(
-        hierarchy_.get(),
-        SIGNAL(SelectEntity(engine::Entity*)),
-        this,
-        SLOT(OnSelectEntity(engine::Entity*)));
-
-      connect(
-        this,
-        SIGNAL(SceneChanged()),
-        hierarchy_.get(),
-        SLOT(OnHierarchyChanged()));
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::CreateInspector()
-    {
-      inspector_ = foundation::Memory::ConstructUnique<Inspector>(
-        &foundation::Memory::default_allocator(),
-        ui_.inspectorTree);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::CreateAssetBrowser()
-    {
-      asset_browser_ = foundation::Memory::ConstructUnique<AssetBrowser>(
-        &foundation::Memory::default_allocator(),
-        ui_.buildDirectoryBrowser,
-        ui_.assetLayout);
-
-      connect(
-        asset_browser_.get(),
-        SIGNAL(DoubleClickedAsset(QString, int)),
-        this,
-        SLOT(OnDoubleClickedAsset(QString, int)));
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::CreateEventFilter()
-    {
-      input_event_filter_ = 
-        foundation::Memory::ConstructUnique<EditorEventFilter>(
-          &foundation::Memory::default_allocator());
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::RegisterInputFilter()
-    {
-      app_->GetService<engine::InputService>()->RegisterInputFilter(
-        input_event_filter_.get());
-
-      ui_.gameWindow->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::LoadLayout()
-    {
-#ifdef SNUFF_WIN32
-      /**
-      * @brief On Windows, the splitter within the console dock messes up
-      *        after the dock is resized, this is a workaround to "fix" that
-      *        issue
-      */
-      resizeDocks({ ui_.consoleDock }, { 100 }, Qt::Vertical);
-#endif
-
-      QSettings settings(kCompanyName_, kAppName_);
-
-      restoreGeometry(settings.value(kSaveGeometry_).toByteArray());
-      restoreState(settings.value(kSaveWindow_).toByteArray());
-
-      ui_.assetSplitter->restoreState(
-        settings.value(kSaveSplitterA_).toByteArray());
-
-      ui_.consoleSplitter->restoreState(
-        settings.value(kSaveSplitterB_).toByteArray());
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::SaveLayout()
-    {
-      QSettings settings(kCompanyName_, kAppName_);
-
-      settings.setValue(kSaveGeometry_, saveGeometry());
-      settings.setValue(kSaveWindow_, saveState());
-
-      settings.setValue(kSaveSplitterA_, ui_.assetSplitter->saveState());
-      settings.setValue(kSaveSplitterB_, ui_.consoleSplitter->saveState());
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::MarkPlaybackButton(QPushButton* button, bool enabled)
-    {
-      const QString css = EditorColors::ColorToCSS(EditorColors::BlueButton());
-      const QString sheet_e = "QPushButton{ background-color: " + css + "; }";
-      const QString sheet = "QPushButton{}";
-
-      button->setStyleSheet(enabled == true ? sheet_e : sheet);
+      return game_view_->IsResizing();
     }
 
     //--------------------------------------------------------------------------
     void MainWindow::SetPlaybackEnabled(bool enabled)
     {
-      ui_.playButton->setEnabled(enabled);
+      game_view_->SetPlaybackEnabled(enabled);
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::RefreshWindowTitle()
+    void MainWindow::EditorStateChanged()
     {
-      setWindowTitle(
-        "Snuffbox Editor - " + current_scene_ + " (" + project_dir_ + ")");
-    }
+      EditorApplication::EditorStates state = app_->state();
+      bool disabled = state != EditorApplication::EditorStates::kEditing;
 
-    //--------------------------------------------------------------------------
-    void MainWindow::OnSceneChanged()
-    {
-      engine::SceneService* ss = app_->GetService<engine::SceneService>();
-      engine::Scene* scene = ss->current_scene();
-      engine::Entity* selected = inspector_->selected();
-
-      if (selected != nullptr)
+      for (int i = 0; i < disabled_in_play_mode_.size(); ++i)
       {
-        bool found = false;
-        scene->ForEachEntity([&found, selected](engine::Entity* e)
-        {
-          if (e == selected)
-          {
-            found = true;
-            return false;
-          }
-
-          return true;
-        });
-
-        if (found == false)
-        {
-          inspector_->ShowEntity(nullptr);
-        }
-      }
-
-      emit SceneChanged();
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::InstantiateModel(QString relative, int type)
-    {
-      if (static_cast<compilers::AssetTypes>(type) 
-        != compilers::AssetTypes::kModel)
-      {
-        return;
-      }
-
-      foundation::Path asset = relative.toStdString().c_str();
-      foundation::String no_ext = asset.NoExtension().ToString();
-
-      if (app_->GetService<engine::AssetService>()->Load(type, no_ext) == false)
-      {
-        return;
-      }
-
-      engine::AssetService* as = app_->GetService<engine::AssetService>();
-      static_cast<engine::ModelAsset*>(as->Get(type, no_ext))->Instantiate();
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::OpenProject()
-    {
-      QString dir = QFileDialog::getExistingDirectory(
-        this, 
-        "Open Project",
-        project_dir_,
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-      if (dir.size() == 0)
-      {
-        return;
-      }
-
-      if (app_->SetProjectDirectory(dir.toStdString().c_str()) == true)
-      {
-        project_dir_ = dir;
-        std::string str = (project_dir_ + "/.build").toStdString();
-        asset_browser_->Refresh(str.c_str());
-
-        RefreshWindowTitle();
+        disabled_in_play_mode_.at(i)->setDisabled(disabled);
       }
     }
 
     //--------------------------------------------------------------------------
-    void MainWindow::NewScene()
+    MainWindow::~MainWindow()
     {
-      inspector_->ShowEntity(nullptr);
-      if (app_->NewScene() == true)
-      {
-        current_scene_ = "New scene";
-      }
+      foundation::Logger::RedirectOutput(nullptr, nullptr);
 
-      RefreshWindowTitle();
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::SaveScene()
-    {
-      inspector_->ShowEntity(nullptr);
-      if (app_->SaveCurrentScene() == true)
-      {
-        current_scene_ = app_->GetLoadedScene();
-      }
-
-      RefreshWindowTitle();
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::SaveSceneAs()
-    {
-      inspector_->ShowEntity(nullptr);
-      if (app_->SaveCurrentScene(true) == true)
-      {
-        current_scene_ = app_->GetLoadedScene();
-      }
-
-      RefreshWindowTitle();
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::OnSelectEntity(engine::Entity* entity)
-    {
-      inspector_->ShowEntity(entity);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::OnPlay()
-    {
-      EditorApplication::States state = app_->state();
-
-      EditorApplication::States next = 
-        state == EditorApplication::States::kEditing ?
-      EditorApplication::States::kPlaying : EditorApplication::States::kEditing;
-
-      bool enabled = next == EditorApplication::States::kPlaying;
-
-      ui_.pauseButton->setEnabled(enabled);
-      ui_.speedDownButton->setEnabled(enabled);
-      ui_.speedUpButton->setEnabled(enabled);
-
-      MarkPlaybackButton(ui_.playButton, enabled);
-
-      bool scene_controls = enabled == false;
-
-      ui_.actionOpen_Project->setEnabled(scene_controls);
-      ui_.actionSave_Scene->setEnabled(scene_controls);
-      ui_.actionSave_Scene_As->setEnabled(scene_controls);
-      ui_.actionNew_Scene->setEnabled(scene_controls);
-
-      app_->SwitchState(next);
-    }
-
-    //--------------------------------------------------------------------------
-    void MainWindow::OnDoubleClickedAsset(QString relative, int type)
-    {
-      compilers::AssetTypes t = static_cast<compilers::AssetTypes>(type);
-
-      switch (t)
-      {
-      case compilers::AssetTypes::kScene:
-        app_->OpenScene(relative.toStdString().c_str());
-        break;
-
-      case compilers::AssetTypes::kModel:
-        InstantiateModel(relative, type);
-        break;
-
-      default:
-        break;
-      }
-
-      current_scene_ = app_->GetLoadedScene();
-      RefreshWindowTitle();
-    }
-
-    //--------------------------------------------------------------------------
-    EditorApplication* MainWindow::app() const
-    {
-      return app_;
+      PropertyMappings::ClearMappings();
     }
   }
 }

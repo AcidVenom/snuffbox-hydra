@@ -28,7 +28,11 @@ namespace snuffbox
 
       if (asset_.handle != nullptr)
       {
-        asset_.name = asset_.handle->name();
+        asset_.SetName(asset_.handle->name());
+      }
+      else
+      {
+        asset_.SetName("");
       }
     }
 

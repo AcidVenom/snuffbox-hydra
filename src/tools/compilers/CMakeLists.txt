@@ -16,6 +16,14 @@ SET(DefinitionsSources
   "definitions/magic.h"
   "definitions/asset_types.h"
   "definitions/asset_types.cc"
+  "definitions/default_assets.h"
+)
+
+SET(DefinitionsDefaultAssetsSources
+  "definitions/default-assets/default_vertex_shader.h"
+  "definitions/default-assets/default_pixel_shader.h"
+  "definitions/default-assets/default_geometry_shader.h"
+  "definitions/default-assets/default_scene.h"
 )
 
 SET(UtilsSources
@@ -33,13 +41,15 @@ IF (SNUFF_WIN32)
   )
 ENDIF ()
 
-SOURCE_GROUP("compilers"    FILES ${CompilersSources})
-SOURCE_GROUP("definitions"  FILES ${DefinitionsSources})
-SOURCE_GROUP("utils"        FILES ${UtilsSources})
+SOURCE_GROUP("compilers"                    FILES ${CompilersSources})
+SOURCE_GROUP("definitions"                  FILES ${DefinitionsSources})
+SOURCE_GROUP("definitions\\default-assets"  FILES ${DefinitionsDefaultAssetsSources})
+SOURCE_GROUP("utils"                        FILES ${UtilsSources})
 
 SET(ProjectSources
   ${CompilersSources}
   ${DefinitionsSources}
+  ${DefinitionsDefaultAssetsSources}
   ${UtilsSources}
 )
 

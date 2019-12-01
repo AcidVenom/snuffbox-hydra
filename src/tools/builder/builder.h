@@ -84,6 +84,8 @@ namespace snuffbox
       * @param[in] source_dir The source directory
       * @param[in] assets The asset directory in the source directory
       * @param[in] build The name to put the build directory under
+      * @param[in] on_finished @see Builder::set_on_finished, default = nullptr
+      * @param[in] on_changed @see Builder::set_on_changed, default = nullptr
       *
       * @see BuildScheduler::Refresh
       *
@@ -92,7 +94,9 @@ namespace snuffbox
       bool Initialize(
         const foundation::Path& source_dir,
         const char* assets,
-        const char* build);
+        const char* build,
+        const OnFinishedCallback& on_finished = nullptr,
+        const OnFinishedCallback& on_changed = nullptr);
 
       /**
       * @brief Notify the builder that the application is idle and that the
@@ -201,21 +205,30 @@ namespace snuffbox
       *        an item
       *
       * @param[in] cb The callback to set
+      *
+      * @remarks This function is not called from the main thread
       */
       void set_on_finished(const OnFinishedCallback& cb);
 
       /**
       * @brief Sets the callback for when the builder has removed a file
-      *        from the build directory
+      *        from the build directory, or a directory changed
       *
       * @param[in] cb The callback to set
+      *
+      * @remarks This function is not called from the main thread
       */
-      void set_on_removed(const OnFinishedCallback& cb);
+      void set_on_changed(const OnFinishedCallback& cb);
 
       /**
       * @return The current build directory
       */
       const foundation::Path& build_directory() const;
+
+      /**
+      * @return Are we still building?
+      */
+      bool IsBuilding() const;
 
       /**
       * @brief Stops the builder if it was running
@@ -249,9 +262,9 @@ namespace snuffbox
 
       /**
       * @brief The callback for when the builder has removed a file
-      *        from the build directory
+      *        from the build directory, or a directory has changed
       */
-      OnFinishedCallback on_removed_;
+      OnFinishedCallback on_changed_;
 
       /**
       * @brief The extension for the time stamp files

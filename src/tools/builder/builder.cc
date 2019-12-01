@@ -17,7 +17,7 @@ namespace snuffbox
       is_ok_(false),
       build_directory_(""),
       on_finished_(nullptr),
-      on_removed_(nullptr)
+      on_changed_(nullptr)
     {
       compilers::Glslang::Initialize();
     }
@@ -26,12 +26,17 @@ namespace snuffbox
     bool Builder::Initialize(
       const foundation::Path& source_dir,
       const char* assets,
-      const char* build)
+      const char* build,
+      const OnFinishedCallback& on_finished,
+      const OnFinishedCallback& on_changed)
     {
       listener_.Stop();
 
       assets_ = assets;
       build_ = build;
+
+      on_finished_ = on_finished;
+      on_changed_ = on_changed;
 
       if (foundation::Directory::Exists(source_dir) == false)
       {
@@ -259,6 +264,16 @@ namespace snuffbox
             {
               continue;
             }
+
+            if (on_changed_ != nullptr)
+            {
+              BuildItem dir_item;
+              dir_item.in = item.path();
+              dir_item.relative = current;
+              dir_item.type = compilers::AssetTypes::kDirectory;
+
+              on_changed_(dir_item);
+            }
           }
 
           SyncItems(item.children());
@@ -275,6 +290,19 @@ namespace snuffbox
       foundation::String out_ext;
       BuildItem build_item;
 
+      auto OnItemRemoved = [&](const foundation::Path& removed_path)
+      {
+        if (on_changed_ != nullptr)
+        {
+          build_item.in = source_file;
+          build_item.relative = removed_path.StripPath(build_directory_);
+          build_item.type = compilers::AssetTypesFromBuildExtension(
+            removed_path.extension().c_str());
+
+          on_changed_(build_item);
+        }
+      };
+
       for (size_t i = 0; i < build_items.size(); ++i)
       {
         const foundation::DirectoryTreeItem& item = build_items.at(i);
@@ -288,6 +316,7 @@ namespace snuffbox
           if (foundation::Directory::Exists(current_source) == false)
           {
             foundation::Directory::Remove(item_path);
+            OnItemRemoved(item_path);
             continue;
           }
 
@@ -302,6 +331,7 @@ namespace snuffbox
           if (foundation::File::Exists(source_file) == false)
           {
             foundation::File::Remove(item_path);
+            OnItemRemoved(item_path);
           }
         }
         else
@@ -315,16 +345,7 @@ namespace snuffbox
             if (foundation::File::Exists(source_file) == false)
             {
               foundation::File::Remove(item_path);
-              
-              if (on_removed_ != nullptr)
-              {
-                build_item.in = source_file;
-                build_item.relative = item_path.StripPath(build_directory_);
-                build_item.type = compilers::AssetTypesFromBuildExtension(
-                  item_path.extension().c_str());
-
-                on_removed_(build_item);
-              }
+              OnItemRemoved(item_path);
             }
           }
         }
@@ -431,15 +452,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    void Builder::set_on_removed(const OnFinishedCallback& cb)
+    void Builder::set_on_changed(const OnFinishedCallback& cb)
     {
-      on_removed_ = cb;
+      on_changed_ = cb;
     }
 
     //--------------------------------------------------------------------------
     const foundation::Path& Builder::build_directory() const
     {
       return build_directory_;
+    }
+
+    //--------------------------------------------------------------------------
+    bool Builder::IsBuilding() const
+    {
+      return scheduler_.IsBuilding();
     }
 
     //--------------------------------------------------------------------------

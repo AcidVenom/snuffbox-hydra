@@ -164,9 +164,26 @@ namespace snuffbox
     */
     struct SerializableAsset
     {
+      /**
+      * @brief The maximum path length for assets
+      */
+      static const int kMaxPathLength = 200;
+
+      /**
+      * @brief Default constructor
+      */
+      SerializableAsset();
+
       compilers::AssetTypes type; //!< The type of the asset
-      foundation::String name; //!< The name of the asset
+      char name[kMaxPathLength]; //!< The name of the asset
       IAsset* handle; //!< The handle to the asset
+
+      /**
+      * @brief Sets the name of this serializable asset by string value
+      *
+      * @param[in] new_name The new name to set
+      */
+      void SetName(const foundation::String& new_name);
     };
   }
 
@@ -202,7 +219,7 @@ namespace snuffbox
         GET_ARCHIVE_PROP(name));
 
       out->type = type;
-      out->name = name;
+      out->SetName(name);
 
       engine::AssetService* as = 
         engine::Application::Instance()->GetService<engine::AssetService>();

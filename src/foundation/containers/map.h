@@ -6,6 +6,7 @@
 
 #include <EASTL/map.h>
 #include <EASTL/unordered_map.h>
+#include <EASTL/hash_set.h>
 
 namespace snuffbox
 {
@@ -23,5 +24,12 @@ namespace snuffbox
     template <typename Key, typename Value>
     using UMap = eastl::hash_map<
       Key, Value, eastl::hash<Key>, eastl::equal_to<Key>, EASTLAllocator>;
+
+    /**
+    * @brief An EASTL hash set with a custom allocator
+    */
+    template <typename Value>
+    using HashSet = eastl::hash_set<
+      Value, eastl::hash<Value>, eastl::equal_to<Value>, EASTLAllocator>;
   }
 }

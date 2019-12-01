@@ -39,7 +39,8 @@ namespace snuffbox
       active_(true),
       is_internal_(internal),
       scene_(scene),
-      id_(0)
+      uuid_(foundation::UUID::Create()),
+      sort_index_(-1)
     {
       AddComponentInternal(Components::kTransform);
       scene_->AddEntity(this);
@@ -47,19 +48,32 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    IComponent* Entity::AddComponentInternal(Components id)
+    IComponent* Entity::AddComponentInternal(Components id, int index)
     {
       IComponent* ptr = CreateComponentByID(id);
       ptr->Create();
 
-      components_[static_cast<int>(id)]
-        .push_back(foundation::Memory::MakeUnique(ptr));
+      ComponentArray& arr = components_[static_cast<int>(id)];
+
+      int last_index = static_cast<int>(arr.size());
+      if (index < 0 || index >= arr.size())
+      {
+        index = last_index;
+      }
+
+      arr.insert(arr.begin() + index, foundation::Memory::MakeUnique(ptr));
 
       return ptr;
     }
 
     //--------------------------------------------------------------------------
     IComponent* Entity::AddComponent(Components id)
+    {
+      return AddComponentAt(id, -1);
+    }
+
+    //--------------------------------------------------------------------------
+    IComponent* Entity::AddComponentAt(Components id, int index)
     {
       if (
         id == Components::kTransform &&
@@ -68,11 +82,17 @@ namespace snuffbox
         return GetComponent(Components::kTransform);
       }
 
-      return AddComponentInternal(id);
+      return AddComponentInternal(id, index);
     }
 
     //--------------------------------------------------------------------------
     void Entity::RemoveComponent(Components id)
+    {
+      RemoveComponentAt(id, 0);
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::RemoveComponentAt(Components id, int index)
     {
       if (id == Components::kTransform)
       {
@@ -81,12 +101,12 @@ namespace snuffbox
 
       ComponentArray& arr = components_[static_cast<int>(id)];
 
-      if (arr.size() == 0)
+      if (index < 0 || index >= arr.size())
       {
         return;
       }
 
-      ComponentArray::iterator it = arr.begin();
+      ComponentArray::iterator it = arr.begin() + index;
       (*it)->Destroy();
 
       arr.erase(it);
@@ -175,13 +195,13 @@ namespace snuffbox
 
       TransformComponent* current = GetComponent<TransformComponent>();
 
-      const foundation::Vector<TransformComponent*>& children =
-        current->children();
+      foundation::Vector<TransformComponent*> children = current->children();
 
       Entity* child = nullptr;
       for (size_t i = 0; i < children.size(); ++i)
       {
         child = children.at(i)->entity();
+        child->transform()->SetParent(nullptr);
         child->Destroy();
       }
 
@@ -190,8 +210,9 @@ namespace snuffbox
         components_[i].clear();
       }
 
-      scene_->OnSceneChanged();
+      engine::Scene* deleted_from = scene_;
       scene_->RemoveEntity(this);
+      deleted_from->OnSceneChanged();
     }
 
     //--------------------------------------------------------------------------
@@ -236,6 +257,19 @@ namespace snuffbox
       }
 
       return active_;
+    }
+
+    //--------------------------------------------------------------------------
+    int Entity::ComponentCount() const
+    {
+      int count = 0;
+
+      for (size_t i = 0; i < static_cast<size_t>(Components::kCount); ++i)
+      {
+        count += static_cast<int>(components_[i].size());
+      }
+
+      return count;
     }
 
     //--------------------------------------------------------------------------
@@ -286,13 +320,6 @@ namespace snuffbox
       const ComponentCreateArray& c = ComponentCreators();
       return c.at(static_cast<size_t>(id))(this);
     }
-
-    //--------------------------------------------------------------------------
-    void Entity::set_id(size_t id)
-    {
-      id_ = id;
-    }
-
 
     //--------------------------------------------------------------------------
     void Entity::Start()
@@ -355,9 +382,27 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
-    size_t Entity::id() const
+    const foundation::UUID& Entity::uuid() const
     {
-      return id_;
+      return uuid_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_uuid(const foundation::UUID& uuid)
+    {
+      uuid_ = uuid;
+    }
+
+    //--------------------------------------------------------------------------
+    int Entity::sort_index() const
+    {
+      return sort_index_;
+    }
+
+    //--------------------------------------------------------------------------
+    void Entity::set_sort_index(int idx)
+    {
+      sort_index_ = idx;
     }
 
     //--------------------------------------------------------------------------
@@ -366,7 +411,8 @@ namespace snuffbox
       archive(
         SET_ARCHIVE_PROP(name_), 
         SET_ARCHIVE_PROP(active_),
-        SET_ARCHIVE_PROP(id_));
+        SET_ARCHIVE_PROP(uuid_),
+        SET_ARCHIVE_PROP(sort_index_));
 
       foundation::Vector<SerializedComponent> components;
 
@@ -398,7 +444,8 @@ namespace snuffbox
       archive(
         GET_ARCHIVE_PROP(name_), 
         GET_ARCHIVE_PROP(active_),
-        GET_ARCHIVE_PROP(id_));
+        GET_ARCHIVE_PROP(uuid_),
+        GET_ARCHIVE_PROP(sort_index_));
 
       foundation::Vector<SerializedComponent> components;
 
@@ -459,6 +506,28 @@ namespace snuffbox
 
       Components c = args.Get<Components>(0, Components::kCount);
       IComponent* ptr = self->AddComponent(c);
+
+      scripting::ScriptObjectHandle h =
+        Entity::CreateScriptComponent(self, ptr, c);
+
+      args.AddReturnValue(h);
+
+      return true;
+    }
+
+    //--------------------------------------------------------------------------
+    SPARSE_CUSTOM(Entity, AddComponentAt)
+    {
+      Entity* self = args.GetSelf<Entity>();
+      if (self == nullptr || args.Check("NN") == false)
+      {
+        return false;
+      }
+
+      Components c = args.Get<Components>(0, Components::kCount);
+      int index = args.Get<int>(1, -1);
+
+      IComponent* ptr = self->AddComponentAt(c, index);
 
       scripting::ScriptObjectHandle h = 
         Entity::CreateScriptComponent(self, ptr, c);
