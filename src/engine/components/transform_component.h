@@ -192,6 +192,11 @@ namespace snuffbox
       SCRIPT_FUNC() const glm::vec3& GetScale() const;
 
       /**
+      * @return The scale of this transform component in world space
+      */
+      SCRIPT_FUNC() glm::vec3 GetWorldScale() const;
+
+      /**
       * @brief Transforms a point using the local-to-world matrix
       *
       * @remarks This updates the underlying matrices, if dirty

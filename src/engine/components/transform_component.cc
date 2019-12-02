@@ -61,6 +61,9 @@ namespace snuffbox
       }
 
       glm::vec3 old_position = child->GetPosition();
+      glm::vec3 old_up = child->Up();
+      glm::vec3 old_forward = child->Forward();
+      glm::vec3 old_scale = child->GetWorldScale();
 
       if (child->parent_ != nullptr)
       {
@@ -71,6 +74,15 @@ namespace snuffbox
       child->SetParentRaw(this);
 
       child->SetPosition(old_position);
+
+      child->SetRotation(glm::quatLookAtLH(
+        InvTransformDirection(old_forward), 
+        InvTransformDirection(old_up)));
+
+      glm::vec3 inv_scale = glm::vec3(1.0f, 1.0f, 1.0f) / GetWorldScale();
+      child->SetScale(old_scale * inv_scale);
+
+      UpdateFromTop();
     }
 
     //--------------------------------------------------------------------------
@@ -83,11 +95,18 @@ namespace snuffbox
       }
 
       glm::vec3 old_position = child->GetPosition();
+      glm::vec3 old_up = child->Up();
+      glm::vec3 old_forward = child->Forward();
+      glm::vec3 old_scale = child->GetWorldScale();
 
       children_.erase(children_.begin() + idx);
       child->SetParentRaw(nullptr);
 
       child->SetPosition(old_position);
+      child->SetRotation(glm::quatLookAtLH(old_forward, old_up));
+      child->SetScale(old_scale);
+
+      UpdateFromTop();
     }
 
     //--------------------------------------------------------------------------
@@ -162,9 +181,14 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::SetPosition(const glm::vec3& position)
     {
-      glm::vec3 current_world_pos = GetPosition();
-
-      position_ += position - current_world_pos;
+      if (parent_ != nullptr)
+      {
+        position_ = parent_->InvTransformPoint(position);
+      }
+      else
+      {
+        position_ = position;
+      }
       MarkDirty(DirtyFlags::kSelf);
     }
 
@@ -244,6 +268,21 @@ namespace snuffbox
     }
 
     //--------------------------------------------------------------------------
+    glm::vec3 TransformComponent::GetWorldScale() const
+    {
+      glm::vec3 scale = scale_;
+      TransformComponent* p = parent_;
+
+      while (p != nullptr)
+      {
+        scale *= p->scale_;
+        p = p->parent_;
+      }
+
+      return scale;
+    }
+
+    //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::TransformPoint(const glm::vec3& point)
     {
       UpdateFromTop();
@@ -264,7 +303,7 @@ namespace snuffbox
     {
       UpdateFromTop();
       glm::vec4 to_transform{ direction.x, direction.y, direction.z, 0.0f };
-      return local_to_world_ * to_transform;
+      return glm::normalize(local_to_world_ * glm::normalize(to_transform));
     }
 
     //--------------------------------------------------------------------------
