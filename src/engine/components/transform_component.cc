@@ -13,6 +13,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
+
 namespace snuffbox
 {
   namespace engine
@@ -60,6 +62,8 @@ namespace snuffbox
         return;
       }
 
+      child->entity()->set_sort_index(-1);
+
       glm::vec3 old_position = child->GetPosition();
       glm::vec3 old_up = child->Up();
       glm::vec3 old_forward = child->Forward();
@@ -90,6 +94,8 @@ namespace snuffbox
       {
         return;
       }
+
+      child->entity()->set_sort_index(-1);
 
       glm::vec3 old_position = child->GetPosition();
       glm::vec3 old_up = child->Up();
@@ -488,6 +494,12 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::Update(float dt)
     {
+      std::sort(children_.begin(), children_.end(), 
+        [](const TransformComponent* a, const TransformComponent* b)
+      {
+        return a->entity()->sort_index() < b->entity()->sort_index();
+      });
+
       if (parent_ != nullptr)
       {
         return;

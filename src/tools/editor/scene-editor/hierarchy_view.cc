@@ -185,7 +185,7 @@ namespace snuffbox
     {
       engine::Entity* ent = item->entity();
       engine::TransformComponent* parent = ent->transform()->parent();
-
+      
       if (parent == nullptr)
       {
         int idx = indexOfTopLevelItem(item);
@@ -205,8 +205,9 @@ namespace snuffbox
         {
           if (idx != ent->sort_index())
           {
+            int sidx = std::min(topLevelItemCount() - 1, ent->sort_index());
             QTreeWidgetItem* taken_item = takeTopLevelItem(idx);
-            insertTopLevelItem(ent->sort_index(), taken_item);
+            insertTopLevelItem(sidx, taken_item);
           }
         }
         else
@@ -247,8 +248,9 @@ namespace snuffbox
         {
           if (idx != ent->sort_index())
           {
+            int sidx = std::min(topLevelItemCount() - 1, ent->sort_index());
             QTreeWidgetItem* taken_item = parent_item->takeChild(idx);
-            parent_item->insertChild(ent->sort_index(), taken_item);
+            parent_item->insertChild(sidx, taken_item);
           }
         }
         else
@@ -495,7 +497,7 @@ namespace snuffbox
               return;
             }
 
-            --to_index;
+            to_index = std::max(0, to_index - 1);
           }
         }
         else
@@ -503,9 +505,26 @@ namespace snuffbox
           to_index = parent == nullptr ?
             indexOfTopLevelItem(item_b) : parent->indexOfChild(item_b);
 
-          if (was_below == true)
+          int child_count = parent == nullptr ? 
+            topLevelItemCount() : parent->childCount();
+
+          if (item_a->parent() == item_b->parent())
           {
-            ++to_index;
+            if (to_index > from_index && was_above == true)
+            {
+              --to_index;
+            }
+            else if (to_index < from_index && was_below == true)
+            {
+              ++to_index;
+            }
+          }
+          else
+          {
+            if (was_below == true)
+            {
+              to_index = std::min(child_count, to_index + 1);
+            }
           }
 
           item_b = static_cast<HierarchyViewItem*>(parent);
