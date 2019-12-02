@@ -62,7 +62,7 @@ namespace snuffbox
         return;
       }
 
-      child->entity()->set_sort_index(-1);
+      child->entity()->set_sort_index(static_cast<int>(children_.size()));
 
       glm::vec3 old_position = child->GetPosition();
       glm::vec3 old_up = child->Up();
@@ -95,7 +95,8 @@ namespace snuffbox
         return;
       }
 
-      child->entity()->set_sort_index(-1);
+      child->entity()->set_sort_index(
+        static_cast<int>(entity()->scene()->TopLevelTransforms().size()));
 
       glm::vec3 old_position = child->GetPosition();
       glm::vec3 old_up = child->Up();
