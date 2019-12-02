@@ -149,6 +149,19 @@ namespace snuffbox
       SCRIPT_FUNC() void SetRotation(const glm::quat& rotation);
 
       /**
+      * @brief Sets the rotation of this transform component, from a world-space
+      *        forward and up axis
+      *
+      * @param[in] forward The forward axis
+      * @param[in] up The up axis
+      *
+      * @remarks This requires a uniform scaling matrix to function properly
+      */
+      SCRIPT_FUNC() void SetWorldRotation(
+        const glm::vec3& forward, 
+        const glm::vec3& up);
+
+      /**
       * @brief Sets the rotation of this transform component, by euler angles
       *
       * @param[in] rotation The rotation euler angle vector
@@ -185,6 +198,15 @@ namespace snuffbox
       * @param[in] scale The scale to set
       */
       SCRIPT_FUNC() void SetScale(const glm::vec3& scale);
+
+      /**
+      * @brief Sets the scale of this transform component in world-space
+      *
+      * @param[in] scale The scale to set
+      *
+      * @remarks For this to function properly, the scaling needs to be uniform
+      */
+      SCRIPT_FUNC() void SetWorldScale(const glm::vec3& scale);
 
       /**
       * @return The scale of this transform component
