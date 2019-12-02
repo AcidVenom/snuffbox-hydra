@@ -379,6 +379,7 @@ namespace snuffbox
 
       glm::vec3 position_; //!< The position of this transform component
       glm::quat rotation_; //!< The rotation of this transform component
+      glm::vec3 euler_angles_; //!< Euler angles to avoid wrapping around
       glm::vec3 scale_; //!< The scale of this transform component
       glm::mat4x4 local_to_world_; //!< The local to world matrix
       glm::mat4x4 world_to_local_; //!< The world to local matrix

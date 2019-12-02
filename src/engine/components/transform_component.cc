@@ -30,6 +30,7 @@ namespace snuffbox
       parent_(nullptr),
       position_(glm::vec3{ 0.0f, 0.0f, 0.0f }),
       rotation_(glm::vec3{ 0.0f, 0.0f, 0.0f }),
+      euler_angles_(glm::vec3{ 0.0f, 0.0f, 0.0f }),
       scale_(glm::vec3{ 1.0f, 1.0f, 1.0f }),
       local_to_world_(glm::mat4x4(1.0f)),
       world_to_local_(glm::mat4x4(1.0f)),
@@ -219,6 +220,7 @@ namespace snuffbox
     void TransformComponent::SetRotation(const glm::quat& rotation)
     {
       rotation_ = rotation;
+      euler_angles_ = glm::degrees(glm::eulerAngles(rotation_));
       MarkDirty(DirtyFlags::kSelf);
     }
 
@@ -233,7 +235,8 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     void TransformComponent::SetRotationEuler(const glm::vec3& rotation)
     {
-      rotation_ = glm::quat(glm::radians(rotation));
+      euler_angles_ = rotation;
+      rotation_ = glm::quat(glm::radians(euler_angles_));
       MarkDirty(DirtyFlags::kSelf);
     }
 
@@ -241,6 +244,7 @@ namespace snuffbox
     void TransformComponent::RotateAxis(const glm::vec3& axis, float angle)
     {
       rotation_ *= glm::angleAxis(angle, axis);
+      euler_angles_ = glm::degrees(glm::eulerAngles(rotation_));
       MarkDirty(DirtyFlags::kSelf);
     }
 
@@ -253,17 +257,7 @@ namespace snuffbox
     //--------------------------------------------------------------------------
     glm::vec3 TransformComponent::GetRotationEuler() const
     {
-      glm::vec3 deg = glm::degrees(glm::eulerAngles(rotation_));
-
-      for (glm::length_t n = 0; n < deg.length(); ++n)
-      {
-        if (deg[n] < 0.0f)
-        {
-          deg[n] += 360.0f;
-        }
-      }
-
-      return deg;
+      return euler_angles_;
     }
 
     //--------------------------------------------------------------------------
