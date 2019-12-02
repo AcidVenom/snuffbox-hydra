@@ -236,6 +236,21 @@ namespace snuffbox
     void TransformComponent::SetRotationEuler(const glm::vec3& rotation)
     {
       euler_angles_ = rotation;
+
+      for (glm::length_t i = 0; i < euler_angles_.length(); ++i)
+      {
+        float& comp = euler_angles_[i];
+        while (comp < -360.0f)
+        {
+          comp += 360.0f;
+        }
+
+        while (comp > 360.0f)
+        {
+          comp -= 360.0f;
+        }
+      }
+
       rotation_ = glm::quat(glm::radians(euler_angles_));
       MarkDirty(DirtyFlags::kSelf);
     }
