@@ -62,8 +62,6 @@ namespace snuffbox
         return;
       }
 
-      child->entity()->set_sort_index(static_cast<int>(children_.size()));
-
       glm::vec3 old_position = child->GetPosition();
       glm::vec3 old_up = child->Up();
       glm::vec3 old_forward = child->Forward();
@@ -73,6 +71,8 @@ namespace snuffbox
       {
         child->parent_->Detach(child);
       }
+
+      child->entity()->set_sort_index(static_cast<int>(children_.size()));
 
       children_.push_back(child);
       child->SetParentRaw(this);
